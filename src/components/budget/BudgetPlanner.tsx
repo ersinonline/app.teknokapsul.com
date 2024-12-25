@@ -1,0 +1,91 @@
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useBudget } from '../../hooks/useBudget';
+import { LoadingSpinner } from '../common/LoadingSpinner';
+import { ErrorMessage } from '../common/ErrorMessage';
+import { Budget } from '../../types/budget';
+import { BudgetHeader } from './BudgetHeader';
+import { BudgetSummary } from './BudgetSummary';
+import { CategoryList } from './CategoryList';
+import { BudgetActions } from './BudgetActions';
+import { SpendingPieChart } from './SpendingPieChart';
+import { FinancialTips } from './FinancialTips';
+
+export const BudgetPlanner = () => {
+  const { user } = useAuth();
+  const { budget, loading: budgetLoading } = useBudget();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedBudget, setEditedBudget] = useState<Budget | null>(null);
+
+  useEffect(() => {
+    if (budget) {
+      setEditedBudget(budget);
+    }
+  }, [budget]);
+
+  if (budgetLoading) return <LoadingSpinner />;
+  if (!budget || !editedBudget) return null;
+
+  return (
+    <div className="space-y-6">
+      <BudgetHeader
+        isEditing={isEditing}
+        onEditToggle={() => setIsEditing(!isEditing)}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <BudgetSummary
+            budget={isEditing ? editedBudget : budget}
+            isEditing={isEditing}
+            onTotalBudgetChange={(value) => {
+              setEditedBudget({
+                ...editedBudget,
+                totalBudget: parseFloat(value) || 0,
+              });
+            }}
+          />
+        </div>
+        <div>
+          <FinancialTips budget={budget} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-medium mb-4"></h2>
+          <SpendingPieChart categories={editedBudget.categories} />
+        </div>
+
+        <CategoryList
+          budget={isEditing ? editedBudget : budget}
+          isEditing={isEditing}
+          onCategoryChange={(category, value) => {
+            setEditedBudget({
+              ...editedBudget,
+              categories: {
+                ...editedBudget.categories,
+                [category]: {
+                  ...editedBudget.categories[category],
+                  limit: parseFloat(value) || 0,
+                },
+              },
+            });
+          }}
+        />
+      </div>
+
+      {isEditing && (
+        <BudgetActions
+          editedBudget={editedBudget}
+          onCancel={() => {
+            setIsEditing(false);
+            setEditedBudget(budget);
+          }}
+          onSave={() => setIsEditing(false)}
+          userId={user.uid}
+        />
+      )}
+    </div>
+  );
+};
