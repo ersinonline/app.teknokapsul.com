@@ -6,7 +6,6 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { LoginPage } from './pages/auth/LoginPage';
 import { AppLayout } from './components/layout/AppLayout';
 import { AuthGuard } from './components/auth/AuthGuard';
-import { LiveChat } from './components/support/LiveChat';
 
 // Route components
 import { Dashboard } from './components/Dashboard';
@@ -50,7 +49,6 @@ function App() {
               <Route path="/budget" element={<ProtectedRoute element={<BudgetPlanner />} />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Routes>
-            <LiveChat />
           </Router>
         </FamilyProvider>
       </ThemeProvider>
