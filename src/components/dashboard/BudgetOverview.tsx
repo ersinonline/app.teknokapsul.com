@@ -11,7 +11,7 @@ export const BudgetOverview = () => {
 
   const totalBudget = budget.totalBudget;
   const totalSpent = Object.values(budget.categories).reduce(
-    (sum, cat) => sum + cat.spent,
+    (sum, cat) => sum + (cat.spent || 0),
     0
   );
   const remainingBudget = totalBudget - totalSpent;
@@ -29,11 +29,11 @@ export const BudgetOverview = () => {
 
   // En çok harcama yapılan kategoriyi bul
   const topSpendingCategory = Object.entries(budget.categories)
-    .sort(([, a], [, b]) => b.spent - a.spent)[0];
+    .sort(([, a], [, b]) => (b.spent || 0) - (a.spent || 0))[0];
 
   // Bütçe aşımı olan kategorileri bul
   const overBudgetCategories = Object.entries(budget.categories)
-    .filter(([, data]) => data.spent > data.limit)
+    .filter(([, data]) => (data.spent || 0) > (data.limit || 0))
     .map(([category]) => DEFAULT_CATEGORIES[category as CategoryType]);
 
   return (
