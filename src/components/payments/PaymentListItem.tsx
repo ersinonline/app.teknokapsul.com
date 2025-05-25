@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, Check, X, Clock, Tag, Edit, Trash2 } from 'lucide-react';
+import { CreditCard, Check, X, Clock, Tag, Edit2, Trash2 } from 'lucide-react';
 import { Payment } from '../../types/data';
 import { updatePaymentStatus, deletePayment } from '../../services/payments.service';
 import { formatCurrency } from '../../utils/currency';
@@ -10,9 +10,10 @@ import { DEFAULT_CATEGORIES } from '../../types/budget';
 interface PaymentListItemProps {
   payment: Payment;
   onStatusUpdate?: () => void;
+  onEdit?: (payment: Payment) => void;
 }
 
-export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onStatusUpdate }) => {
+export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onStatusUpdate, onEdit }) => {
   const { user } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(payment.status);
@@ -93,6 +94,15 @@ export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onSta
           {formatCurrency(payment.amount)}
         </span>
         <div className="flex items-center gap-2">
+          {onEdit && (
+            <button
+              onClick={() => onEdit(payment)}
+              className="p-2 text-gray-500 hover:bg-yellow-100 hover:text-yellow-600 rounded-lg transition-colors"
+              title="Düzenle"
+            >
+              <Edit2 className="w-5 h-5" />
+            </button>
+          )}
           <button
             onClick={handleDelete}
             className="p-2 text-gray-500 hover:bg-red-100 hover:text-red-600 rounded-lg transition-colors"
