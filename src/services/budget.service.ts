@@ -9,11 +9,12 @@ export const initializeBudget = async (userId: string, totalBudget: number) => {
     userId,
     totalBudget,
     categories: {
-      market: { limit: 0, spent: 0 },
-      akaryakit: { limit: 0, spent: 0 },
+      ev: { limit: 0, spent: 0 },
+      araba: { limit: 0, spent: 0 },
+      sigorta: { limit: 0, spent: 0 },
+      kredi: { limit: 0, spent: 0 },
       giyim: { limit: 0, spent: 0 },
-      yemek: { limit: 0, spent: 0 },
-      ev: { limit: 0, spent: 0 }
+      market: { limit: 0, spent: 0 }
     }
   };
 
