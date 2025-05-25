@@ -87,10 +87,7 @@ export const Payments = () => {
 
       {/* Payment List */}
       {filteredPayments.length > 0 ? (
-        <PaymentList 
-          payments={filteredPayments} 
-          onPaymentDelete={reload}
-        />
+        <PaymentList payments={filteredPayments} />
       ) : (
         <EmptyState
           icon={CreditCard}
