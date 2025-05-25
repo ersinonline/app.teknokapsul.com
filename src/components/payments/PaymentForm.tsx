@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { DEFAULT_CATEGORIES, CategoryType } from '../../types/budget';
 
 interface PaymentFormProps {
   onClose: () => void;
@@ -12,15 +13,14 @@ interface PaymentFormProps {
 export const PaymentForm: React.FC<PaymentFormProps> = ({ onClose, onSave }) => {
   const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const [isSharedExpense, setIsSharedExpense] = useState(false);
-  const [sharedWithEmail, setSharedWithEmail] = useState('');
   const [formData, setFormData] = useState({
+    title: '',
     amount: '',
-    bank: '',
     date: '',
     description: '',
-    installments: '',
-    category: ''
+    category: '' as CategoryType,
+    type: 'regular' as 'regular' | 'installment',
+    installmentCount: '1'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,18 +28,49 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ onClose, onSave }) => 
     if (!user) return;
 
     try {
-      const selectedDate = new Date(formData.date);
-      const payment = {
-        ...formData,
-        amount: `${parseFloat(formData.amount).toFixed(2)} TL`,
-        userId: user.uid,
-        status: 'Ödenmedi',
-        date: selectedDate.toISOString(),
-        isSharedExpense,
-        ...(isSharedExpense && { sharedWithEmail }),
-      };
+      const amount = parseFloat(formData.amount);
+      const installmentCount = parseInt(formData.installmentCount);
+      
+      if (formData.type === 'installment' && installmentCount > 1) {
+        // Create multiple payments for installments
+        const installmentAmount = amount / installmentCount;
+        const baseDate = new Date(formData.date);
+        
+        for (let i = 0; i < installmentCount; i++) {
+          const installmentDate = new Date(baseDate);
+          installmentDate.setMonth(baseDate.getMonth() + i);
+          
+          await addDoc(collection(db, 'payments'), {
+            userId: user.uid,
+            title: formData.title,
+            description: formData.description,
+            amount: installmentAmount,
+            date: installmentDate.toISOString(),
+            category: formData.category || undefined,
+            status: 'Ödenmedi',
+            type: 'installment',
+            installment: {
+              current: i + 1,
+              total: installmentCount
+            },
+            createdAt: new Date().toISOString()
+          });
+        }
+      } else {
+        // Create single payment
+        await addDoc(collection(db, 'payments'), {
+          userId: user.uid,
+          title: formData.title,
+          description: formData.description,
+          amount: amount,
+          date: formData.date,
+          category: formData.category || undefined,
+          status: 'Ödenmedi',
+          type: 'regular',
+          createdAt: new Date().toISOString()
+        });
+      }
 
-      await addDoc(collection(db, 'payments'), payment);
       onSave();
       onClose();
     } catch (err) {
@@ -49,37 +80,37 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ onClose, onSave }) => 
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-card text-card-foreground rounded-xl shadow-xl w-full max-w-md">
-        <div className="flex justify-between items-center p-6 border-b border-border">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+        <div className="flex justify-between items-center p-6 border-b">
           <h2 className="text-xl font-semibold">Yeni Borç Ekle</h2>
-          <button onClick={onClose} className="btn p-2 hover:bg-accent rounded-lg">
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
+            <div className="bg-red-50 text-red-600 p-4 rounded-lg">
               {error}
             </div>
           )}
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium mb-1">
-              Açıklama
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+              Başlık
             </label>
             <input
               type="text"
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring"
+              id="title"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="amount" className="block text-sm font-medium mb-1">
+            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
               Tutar (TL)
             </label>
             <input
@@ -89,13 +120,13 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ onClose, onSave }) => 
               step="0.01"
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-              className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="date" className="block text-sm font-medium mb-1">
+            <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
               Tarih
             </label>
             <input
@@ -103,84 +134,84 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ onClose, onSave }) => 
               id="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="bank" className="block text-sm font-medium mb-1">
-              Banka
-            </label>
-            <input
-              type="text"
-              id="bank"
-              value={formData.bank}
-              onChange={(e) => setFormData({ ...formData, bank: e.target.value })}
-              className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="category" className="block text-sm font-medium mb-1">
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
               Kategori
             </label>
             <select
               id="category"
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring"
-              required
+              onChange={(e) => setFormData({ ...formData, category: e.target.value as CategoryType })}
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
             >
               <option value="">Kategori Seçin</option>
-              <option value="market">Market</option>
-              <option value="akaryakit">Akaryakıt</option>
-              <option value="giyim">Giyim</option>
-              <option value="yemek">Yemek</option>
-              <option value="ev">Ev</option>
+              {Object.entries(DEFAULT_CATEGORIES).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
             </select>
           </div>
 
           <div>
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={isSharedExpense}
-                onChange={(e) => setIsSharedExpense(e.target.checked)}
-                className="rounded border-input"
-              />
-              <span className="text-sm font-medium">Ortak Harcama</span>
+            <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
+              Ödeme Türü
             </label>
+            <select
+              id="type"
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value as 'regular' | 'installment' })}
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            >
+              <option value="regular">Tek Seferlik</option>
+              <option value="installment">Taksitli</option>
+            </select>
           </div>
 
-          {isSharedExpense && (
+          {formData.type === 'installment' && (
             <div>
-              <label htmlFor="sharedWithEmail" className="block text-sm font-medium mb-1">
-                Ortak Harcama Yapılan Kişinin E-postası
+              <label htmlFor="installmentCount" className="block text-sm font-medium text-gray-700 mb-1">
+                Taksit Sayısı
               </label>
               <input
-                type="email"
-                id="sharedWithEmail"
-                value={sharedWithEmail}
-                onChange={(e) => setSharedWithEmail(e.target.value)}
-                className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring"
-                required={isSharedExpense}
+                type="number"
+                id="installmentCount"
+                min="2"
+                max="36"
+                value={formData.installmentCount}
+                onChange={(e) => setFormData({ ...formData, installmentCount: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               />
             </div>
           )}
+
+          <div>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+              Açıklama (İsteğe bağlı)
+            </label>
+            <textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={3}
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            />
+          </div>
 
           <div className="flex justify-end gap-4 mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="btn px-4 py-2 text-muted-foreground hover:bg-accent rounded-lg"
+              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
             >
               İptal
             </button>
             <button
               type="submit"
-              className="btn px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
             >
               Kaydet
             </button>

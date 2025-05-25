@@ -13,7 +13,6 @@ import Services from './pages/services/ServicesPage';
 import { Payments } from './components/Payments';
 import { SubscriptionsPage } from './pages/subscriptions/SubscriptionsPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
-import { AccountsPage } from './pages/Accounts/AccountsPage';
 import { NotesPage } from './pages/notes/NotesPage';
 import { CalendarPage } from './pages/calendar/CalendarPage';
 import { FAQPage } from './pages/faq/FAQPage';
@@ -39,7 +38,6 @@ function App() {
             <Route path="/payments" element={<ProtectedRoute element={<Payments />} />} />
             <Route path="/subscriptions" element={<ProtectedRoute element={<SubscriptionsPage />} />} />
             <Route path="/settings" element={<ProtectedRoute element={<SettingsPage />} />} />
-            <Route path="/accounts" element={<ProtectedRoute element={<AccountsPage />} />} />
             <Route path="/notes" element={<ProtectedRoute element={<NotesPage />} />} />
             <Route path="/calendar" element={<ProtectedRoute element={<CalendarPage />} />} />
             <Route path="/faq" element={<ProtectedRoute element={<FAQPage />} />} />

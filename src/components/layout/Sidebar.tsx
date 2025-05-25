@@ -1,14 +1,14 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, ShoppingBag, Apple as Apps, CreditCard, Key, Settings, Wallet, Calendar, StickyNote, HelpCircle, Clock, LogOut, X } from 'lucide-react';
+import { Home, ShoppingBag, Apple as Apps, CreditCard, Settings, Wallet, Calendar, StickyNote, HelpCircle, Clock, LogOut, X } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onSignOut: () => void;
+  onLogout?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onSignOut }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -18,7 +18,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onSignOut }) 
     { id: 'subscriptions', path: '/subscriptions', label: 'Abonelikler', icon: Clock },
     { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
     { id: 'payments', path: '/payments', label: 'Borçlar', icon: CreditCard },
-    { id: 'accounts', path: '/accounts', label: 'Hesaplar', icon: Key },
     { id: 'orders', path: '/orders', label: 'Siparişler', icon: ShoppingBag },
     { id: 'notes', path: '/notes', label: 'Notlar', icon: StickyNote },
     { id: 'calendar', path: '/calendar', label: 'Takvim', icon: Calendar },
@@ -48,7 +47,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onSignOut }) 
               <button
                 onClick={onClose}
                 className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
-                aria-label="Menüyü Kapat"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -85,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onSignOut }) 
 
           <div className="p-4 border-t">
             <button
-              onClick={onSignOut}
+              onClick={onLogout}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
             >
               <LogOut className="w-5 h-5" />
