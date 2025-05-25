@@ -27,7 +27,7 @@ export const Dashboard = () => {
       return payment.status === 'Ödenmedi' && daysRemaining > 0;
     })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .slice(0, 5);
+    .slice(0, 4);
 
   const expiringSubscriptions = subscriptions.filter(subscription => {
     const daysRemaining = calculateDaysRemaining(subscription.endDate);
