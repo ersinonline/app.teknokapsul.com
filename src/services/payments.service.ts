@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, doc, updateDoc, addDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Payment } from '../types/data';
 import { addLoyaltyPoints } from './loyalty.service';
@@ -28,11 +28,20 @@ export const updatePaymentStatus = async (paymentId: string, userId: string, new
 
     // Ödeme tamamlandığında puan ver
     if (newStatus === 'Ödendi') {
-      // Her ödeme için 10 puan ver
       await addLoyaltyPoints(userId, 'PAYMENT_COMPLETED', 'Borç ödemesi tamamlandı');
     }
   } catch (error) {
     console.error('Error updating payment status:', error);
+    throw error;
+  }
+};
+
+export const deletePayment = async (paymentId: string): Promise<void> => {
+  try {
+    const paymentRef = doc(db, 'payments', paymentId);
+    await deleteDoc(paymentRef);
+  } catch (error) {
+    console.error('Error deleting payment:', error);
     throw error;
   }
 };

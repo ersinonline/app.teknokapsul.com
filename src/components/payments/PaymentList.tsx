@@ -5,9 +5,10 @@ import { groupPaymentsByMonth, PaymentGroup } from '../../utils/payments';
 
 interface PaymentListProps {
   payments: Payment[];
+  onPaymentDelete?: () => void;
 }
 
-export const PaymentList: React.FC<PaymentListProps> = ({ payments }) => {
+export const PaymentList: React.FC<PaymentListProps> = ({ payments, onPaymentDelete }) => {
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
   
   // Memoize groups to prevent unnecessary recalculations
@@ -57,6 +58,7 @@ export const PaymentList: React.FC<PaymentListProps> = ({ payments }) => {
                 }
               }
             }}
+            onPaymentDelete={onPaymentDelete}
           />
         );
       })}

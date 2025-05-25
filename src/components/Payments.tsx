@@ -27,6 +27,7 @@ export const Payments = () => {
 
   const filteredPayments = payments.filter((payment) => {
     const matchesSearch = 
+      (payment.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       (payment.description?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       (payment.bank?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const matchesStatus =
@@ -86,7 +87,10 @@ export const Payments = () => {
 
       {/* Payment List */}
       {filteredPayments.length > 0 ? (
-        <PaymentList payments={filteredPayments} />
+        <PaymentList 
+          payments={filteredPayments} 
+          onPaymentDelete={reload}
+        />
       ) : (
         <EmptyState
           icon={CreditCard}

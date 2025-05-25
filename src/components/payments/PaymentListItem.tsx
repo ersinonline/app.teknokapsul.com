@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { CreditCard, Check, X, Clock } from 'lucide-react';
+import { CreditCard, Check, X, Clock, Trash2 } from 'lucide-react';
 import { Payment } from '../../types/data';
-import { updatePaymentStatus } from '../../services/payments.service';
+import { updatePaymentStatus, deletePayment } from '../../services/payments.service';
 import { formatCurrency } from '../../utils/currency';
 import { formatDate } from '../../utils/date';
 import { useAuth } from '../../contexts/AuthContext';
@@ -9,13 +9,15 @@ import { useAuth } from '../../contexts/AuthContext';
 interface PaymentListItemProps {
   payment: Payment;
   onStatusUpdate?: () => void;
+  onDelete?: () => void;
 }
 
-export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onStatusUpdate }) => {
+export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onStatusUpdate, onDelete }) => {
   const { user } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(payment.status);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleStatusUpdate = async () => {
     if (!user) return;
@@ -33,6 +35,24 @@ export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onSta
       setCurrentStatus(payment.status);
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Bu ödemeyi silmek istediğinize emin misiniz?')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setErrorMessage(null);
+
+    try {
+      await deletePayment(payment.id);
+      onDelete?.();
+    } catch (error) {
+      setErrorMessage('Ödeme silinemedi.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -76,24 +96,38 @@ export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onSta
         }`}>
           {formatCurrency(payment.amount)}
         </span>
-        <button
-          onClick={handleStatusUpdate}
-          disabled={isUpdating}
-          className={`p-2 rounded-lg transition-colors ${
-            isUnpaid
-              ? 'bg-red-100 text-red-600 hover:bg-red-200'
-              : 'bg-green-100 text-green-600 hover:bg-green-200'
-          }`}
-          title={isUnpaid ? 'Ödendi olarak işaretle' : 'Ödenmedi olarak işaretle'}
-        >
-          {isUpdating ? (
-            <Clock className="w-5 h-5 animate-spin" />
-          ) : isUnpaid ? (
-            <X className="w-5 h-5" />
-          ) : (
-            <Check className="w-5 h-5" />
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleStatusUpdate}
+            disabled={isUpdating || isDeleting}
+            className={`p-2 rounded-lg transition-colors ${
+              isUnpaid
+                ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                : 'bg-green-100 text-green-600 hover:bg-green-200'
+            }`}
+            title={isUnpaid ? 'Ödendi olarak işaretle' : 'Ödenmedi olarak işaretle'}
+          >
+            {isUpdating ? (
+              <Clock className="w-5 h-5 animate-spin" />
+            ) : isUnpaid ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Check className="w-5 h-5" />
+            )}
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={isUpdating || isDeleting}
+            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            title="Ödemeyi sil"
+          >
+            {isDeleting ? (
+              <Clock className="w-5 h-5 animate-spin" />
+            ) : (
+              <Trash2 className="w-5 h-5" />
+            )}
+          </button>
+        </div>
       </div>
 
       {errorMessage && (
