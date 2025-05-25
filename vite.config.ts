@@ -8,8 +8,9 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
-    port: 3002, // Changed from 3001 to avoid conflicts
-    strictPort: true, // Force the specified port
+    port: 3000,
+    strictPort: false, // Allow Vite to try other ports if 3000 is in use
+    host: true, // Listen on all network interfaces
     hmr: {
       timeout: 5000 // Increase HMR timeout for better stability
     }
