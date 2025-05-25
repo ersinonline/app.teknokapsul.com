@@ -4,23 +4,24 @@ import { useAuth } from '../../contexts/AuthContext';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { DEFAULT_CATEGORIES, CategoryType } from '../../types/budget';
+import { Payment } from '../../types/data';
 
 interface PaymentFormProps {
   onClose: () => void;
   onSave: () => void;
+  payment?: Payment;
 }
 
-export const PaymentForm: React.FC<PaymentFormProps> = ({ onClose, onSave }) => {
+export const PaymentForm: React.FC<PaymentFormProps> = ({ onClose, onSave, payment }) => {
   const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
-    amount: '',
-    date: '',
-    description: '',
-    category: '' as CategoryType,
-    type: 'regular' as 'regular' | 'installment',
-    installmentCount: '1'
+    title: payment?.title || '',
+    amount: payment ? payment.amount.toString() : '',
+    date: payment?.date.split('T')[0] || '',
+    category: payment?.category || '' as CategoryType,
+    type: payment?.type || 'regular' as 'regular' | 'installment',
+    installmentCount: payment?.installment?.total.toString() || '1'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +44,6 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ onClose, onSave }) => 
           await addDoc(collection(db, 'payments'), {
             userId: user.uid,
             title: formData.title,
-            description: formData.description,
             amount: installmentAmount,
             date: installmentDate.toISOString(),
             category: formData.category || undefined,
@@ -61,7 +61,6 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ onClose, onSave }) => 
         await addDoc(collection(db, 'payments'), {
           userId: user.uid,
           title: formData.title,
-          description: formData.description,
           amount: amount,
           date: formData.date,
           category: formData.category || undefined,
@@ -82,7 +81,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ onClose, onSave }) => 
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
         <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-xl font-semibold">Yeni Borç Ekle</h2>
+          <h2 className="text-xl font-semibold">{payment ? 'Borç Düzenle' : 'Yeni Borç Ekle'}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
             <X className="w-5 h-5" />
           </button>
@@ -156,50 +155,41 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ onClose, onSave }) => 
             </select>
           </div>
 
-          <div>
-            <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-              Ödeme Türü
-            </label>
-            <select
-              id="type"
-              value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value as 'regular' | 'installment' })}
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-            >
-              <option value="regular">Tek Seferlik</option>
-              <option value="installment">Taksitli</option>
-            </select>
-          </div>
+          {!payment && (
+            <>
+              <div>
+                <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
+                  Ödeme Türü
+                </label>
+                <select
+                  id="type"
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value as 'regular' | 'installment' })}
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                >
+                  <option value="regular">Tek Seferlik</option>
+                  <option value="installment">Taksitli</option>
+                </select>
+              </div>
 
-          {formData.type === 'installment' && (
-            <div>
-              <label htmlFor="installmentCount" className="block text-sm font-medium text-gray-700 mb-1">
-                Taksit Sayısı
-              </label>
-              <input
-                type="number"
-                id="installmentCount"
-                min="2"
-                max="36"
-                value={formData.installmentCount}
-                onChange={(e) => setFormData({ ...formData, installmentCount: e.target.value })}
-                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-              />
-            </div>
+              {formData.type === 'installment' && (
+                <div>
+                  <label htmlFor="installmentCount" className="block text-sm font-medium text-gray-700 mb-1">
+                    Taksit Sayısı
+                  </label>
+                  <input
+                    type="number"
+                    id="installmentCount"
+                    min="2"
+                    max="36"
+                    value={formData.installmentCount}
+                    onChange={(e) => setFormData({ ...formData, installmentCount: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  />
+                </div>
+              )}
+            </>
           )}
-
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Açıklama (İsteğe bağlı)
-            </label>
-            <textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3}
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-            />
-          </div>
 
           <div className="flex justify-end gap-4 mt-6">
             <button
@@ -213,7 +203,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ onClose, onSave }) => 
               type="submit"
               className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
             >
-              Kaydet
+              {payment ? 'Güncelle' : 'Kaydet'}
             </button>
           </div>
         </form>
