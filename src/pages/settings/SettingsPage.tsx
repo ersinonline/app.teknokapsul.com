@@ -3,7 +3,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { updateUserProfile, updateUserPassword } from '../../services/auth.service';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorMessage } from '../../components/common/ErrorMessage';
-import { ThemeSettings } from '../../components/settings/ThemeSettings';
 import { FeedbackForm } from '../../components/feedback/FeedbackForm';
 import { NotificationPreferences } from '../../components/notifications/NotificationPreferences';
 
@@ -160,9 +159,6 @@ export const SettingsPage = () => {
 
       {/* Bildirim Tercihleri */}
       <NotificationPreferences />
-
-      {/* Tema Ayarları */}
-      <ThemeSettings />
 
       {/* Geri Bildirim Formu */}
       <FeedbackForm />
