@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { CreditCard, Check, X, Clock, Tag, Edit2, Trash2 } from 'lucide-react';
+import { CreditCard, Check, X, Clock, Tag } from 'lucide-react';
 import { Payment } from '../../types/data';
-import { updatePaymentStatus, deletePayment } from '../../services/payments.service';
+import { updatePaymentStatus } from '../../services/payments.service';
 import { formatCurrency } from '../../utils/currency';
 import { formatDate } from '../../utils/date';
 import { useAuth } from '../../contexts/AuthContext';
@@ -38,19 +38,6 @@ export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onSta
     }
   };
 
-  const handleDelete = async () => {
-    if (!user) return;
-    
-    if (window.confirm('Bu borcu silmek istediğinize emin misiniz?')) {
-      try {
-        await deletePayment(payment.id);
-        onStatusUpdate?.();
-      } catch (error) {
-        setErrorMessage('Borç silinemedi.');
-      }
-    }
-  };
-
   const isUnpaid = currentStatus === 'Ödenmedi';
   const isPaid = currentStatus === 'Ödendi';
 
@@ -67,14 +54,21 @@ export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onSta
           }`} />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium text-gray-900 truncate">{payment.title}</h3>
-            {payment.category && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                <Tag className="w-3 h-3 mr-1" />
-                {DEFAULT_CATEGORIES[payment.category]}
-              </span>
-            )}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h3 className="font-medium text-gray-900 truncate">{payment.title}</h3>
+              {payment.category && (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  <Tag className="w-3 h-3 mr-1" />
+                  {DEFAULT_CATEGORIES[payment.category]}
+                </span>
+              )}
+            </div>
+            <span className={`text-base font-medium ${
+              isUnpaid ? 'text-red-600' : isPaid ? 'text-green-600' : 'text-gray-900'
+            }`}>
+              {formatCurrency(payment.amount)}
+            </span>
           </div>
           {payment.type === 'installment' && payment.installment && (
             <p className="text-sm text-gray-600">
@@ -87,48 +81,34 @@ export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onSta
         </div>
       </div>
 
-      <div className="flex items-center justify-between sm:justify-end gap-3 mt-2 sm:mt-0">
-        <span className={`text-base font-medium ${
-          isUnpaid ? 'text-red-600' : isPaid ? 'text-green-600' : 'text-gray-900'
-        }`}>
-          {formatCurrency(payment.amount)}
-        </span>
-        <div className="flex items-center gap-2">
-          {onEdit && (
-            <button
-              onClick={() => onEdit(payment)}
-              className="p-2 text-gray-500 hover:bg-yellow-100 hover:text-yellow-600 rounded-lg transition-colors"
-              title="Düzenle"
-            >
-              <Edit2 className="w-5 h-5" />
-            </button>
+      <div className="flex items-center justify-end gap-2">
+        {onEdit && (
+          <button
+            onClick={() => onEdit(payment)}
+            className="p-2 text-gray-500 hover:bg-yellow-100 hover:text-yellow-600 rounded-lg transition-colors"
+            title="Düzenle"
+          >
+            <Edit2 className="w-5 h-5" />
+          </button>
+        )}
+        <button
+          onClick={handleStatusUpdate}
+          disabled={isUpdating}
+          className={`p-2 rounded-lg transition-colors ${
+            isUnpaid
+              ? 'bg-red-100 text-red-600 hover:bg-red-200'
+              : 'bg-green-100 text-green-600 hover:bg-green-200'
+          }`}
+          title={isUnpaid ? 'Ödendi olarak işaretle' : 'Ödenmedi olarak işaretle'}
+        >
+          {isUpdating ? (
+            <Clock className="w-5 h-5 animate-spin" />
+          ) : isUnpaid ? (
+            <X className="w-5 h-5" />
+          ) : (
+            <Check className="w-5 h-5" />
           )}
-          <button
-            onClick={handleDelete}
-            className="p-2 text-gray-500 hover:bg-red-100 hover:text-red-600 rounded-lg transition-colors"
-            title="Sil"
-          >
-            <Trash2 className="w-5 h-5" />
-          </button>
-          <button
-            onClick={handleStatusUpdate}
-            disabled={isUpdating}
-            className={`p-2 rounded-lg transition-colors ${
-              isUnpaid
-                ? 'bg-red-100 text-red-600 hover:bg-red-200'
-                : 'bg-green-100 text-green-600 hover:bg-green-200'
-            }`}
-            title={isUnpaid ? 'Ödendi olarak işaretle' : 'Ödenmedi olarak işaretle'}
-          >
-            {isUpdating ? (
-              <Clock className="w-5 h-5 animate-spin" />
-            ) : isUnpaid ? (
-              <X className="w-5 h-5" />
-            ) : (
-              <Check className="w-5 h-5" />
-            )}
-          </button>
-        </div>
+        </button>
       </div>
 
       {errorMessage && (
