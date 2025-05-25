@@ -10,7 +10,7 @@ import { AuthGuard } from './components/auth/AuthGuard';
 // Route components
 import { Dashboard } from './components/Dashboard';
 import { Orders } from './components/Orders';
-import { Applications } from './components/Applications';
+import Services from './pages/services/ServicesPage';
 import { Payments } from './components/Payments';
 import { SubscriptionsPage } from './pages/subscriptions/SubscriptionsPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
@@ -37,7 +37,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
               <Route path="/orders" element={<ProtectedRoute element={<Orders />} />} />
-              <Route path="/applications" element={<ProtectedRoute element={<Applications />} />} />
+              <Route path="/services" element={<ProtectedRoute element={<Services />} />} />
               <Route path="/payments" element={<ProtectedRoute element={<Payments />} />} />
               <Route path="/subscriptions" element={<ProtectedRoute element={<SubscriptionsPage />} />} />
               <Route path="/settings" element={<ProtectedRoute element={<SettingsPage />} />} />
@@ -55,5 +55,3 @@ function App() {
     </AuthProvider>
   );
 }
-
-export default App;

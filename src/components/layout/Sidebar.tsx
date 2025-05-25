@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Home, ShoppingBag, FileText, CreditCard, Key, Settings,
+  Home, ShoppingBag, Apps, CreditCard, Key, Settings,
   Wallet, Calendar, StickyNote, HelpCircle, Clock, LogOut, X
 } from 'lucide-react';
 
@@ -19,7 +19,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onSignOut }) 
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
     { id: 'budget', path: '/budget', label: 'Bütçe ve Analiz', icon: Wallet },
     { id: 'subscriptions', path: '/subscriptions', label: 'Abonelikler', icon: Clock },
-    { id: 'applications', path: '/applications', label: 'Başvurular', icon: FileText },
+    { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
     { id: 'payments', path: '/payments', label: 'Borçlar', icon: CreditCard },
     { id: 'accounts', path: '/accounts', label: 'Hesaplar', icon: Key },
     { id: 'orders', path: '/orders', label: 'Siparişler', icon: ShoppingBag },
