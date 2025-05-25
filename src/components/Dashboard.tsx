@@ -6,12 +6,13 @@ import { ErrorMessage } from './common/ErrorMessage';
 import { StatCard } from './dashboard/StatCard';
 import { Alerts } from './dashboard/Alerts';
 import { SpendingTrends } from './analytics/SpendingTrends';
-import { BudgetOverview } from './dashboard/BudgetOverview';
 import { LoyaltyCard } from './loyalty/LoyaltyCard';
 import { useLoyalty } from '../hooks/useLoyalty';
 import { Payment } from '../types/data';
 import { Subscription } from '../types/subscription';
 import { calculateDaysRemaining } from '../utils/date';
+import { formatCurrency } from '../utils/currency';
+import { DEFAULT_CATEGORIES } from '../types/budget';
 
 export const Dashboard = () => {
   const { data: payments = [], loading: paymentsLoading } = useFirebaseData<Payment>('payments');
@@ -20,10 +21,13 @@ export const Dashboard = () => {
 
   const loading = paymentsLoading || subscriptionsLoading || loyaltyLoading;
 
-  const upcomingPayments = payments.filter(payment => {
-    const daysRemaining = calculateDaysRemaining(payment.date);
-    return payment.status === 'Ödenmedi' && daysRemaining <= 7 && daysRemaining > 0;
-  });
+  const upcomingPayments = payments
+    .filter(payment => {
+      const daysRemaining = calculateDaysRemaining(payment.date);
+      return payment.status === 'Ödenmedi' && daysRemaining > 0;
+    })
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(0, 5);
 
   const expiringSubscriptions = subscriptions.filter(subscription => {
     const daysRemaining = calculateDaysRemaining(subscription.endDate);
@@ -44,7 +48,7 @@ export const Dashboard = () => {
       paymentDate.getMonth() === currentDate.getMonth() &&
       paymentDate.getFullYear() === currentDate.getFullYear()
     ) {
-      return sum + (Number(payment.amount) || 0);
+      return sum + payment.amount;
     }
     return sum;
   }, 0);
@@ -64,7 +68,7 @@ export const Dashboard = () => {
     },
     {
       label: 'Aylık Ödenmeyen',
-      value: `${(Number(monthlyUnpaidAmount) || 0).toFixed(2)} TL`,
+      value: formatCurrency(monthlyUnpaidAmount),
       icon: CreditCard,
       color: 'bg-red-500'
     }
@@ -91,7 +95,39 @@ export const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SpendingTrends />
-        <BudgetOverview />
+        
+        {/* Yaklaşan Ödemeler */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-medium mb-4">Yaklaşan Ödemeler</h2>
+          <div className="space-y-4">
+            {upcomingPayments.length > 0 ? (
+              upcomingPayments.map((payment) => (
+                <div key={payment.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium">{payment.title}</h3>
+                      {payment.category && (
+                        <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
+                          {DEFAULT_CATEGORIES[payment.category]}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {new Date(payment.date).toLocaleDateString('tr-TR')}
+                    </p>
+                  </div>
+                  <span className="font-medium text-red-600">
+                    {formatCurrency(payment.amount)}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-gray-500 py-4">
+                Yaklaşan ödeme bulunmuyor
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
