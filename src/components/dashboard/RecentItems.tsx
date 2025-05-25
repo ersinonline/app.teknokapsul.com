@@ -19,8 +19,8 @@ export const RecentItems: React.FC<RecentItemsProps> = ({
   route,
   showItemDetails = true,
 }) => {
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusIcon = (status: string | undefined) => {
+    switch (status?.toLowerCase()) {
       case 'onaylandı':
       case 'approved':
       case 'ödendi':
@@ -38,8 +38,8 @@ export const RecentItems: React.FC<RecentItemsProps> = ({
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusColor = (status: string | undefined) => {
+    switch (status?.toLowerCase()) {
       case 'onaylandı':
       case 'approved':
       case 'ödendi':
@@ -57,8 +57,8 @@ export const RecentItems: React.FC<RecentItemsProps> = ({
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusText = (status: string | undefined) => {
+    switch (status?.toLowerCase()) {
       case 'pending':
         return 'Onay Bekliyor';
       case 'approved':
@@ -66,7 +66,7 @@ export const RecentItems: React.FC<RecentItemsProps> = ({
       case 'rejected':
         return 'Reddedildi';
       default:
-        return status;
+        return status || 'Unknown';
     }
   };
 
@@ -82,7 +82,7 @@ export const RecentItems: React.FC<RecentItemsProps> = ({
             <div className="flex items-center gap-2">
               <span className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${getStatusColor(item.orderStatus)}`}>
                 {getStatusIcon(item.orderStatus)}
-                {item.orderStatus}
+                {item.orderStatus || 'Unknown'}
               </span>
               <span className="font-medium">{item.total}</span>
             </div>
@@ -124,7 +124,7 @@ export const RecentItems: React.FC<RecentItemsProps> = ({
             <div className="flex items-center gap-2">
               <span className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${getStatusColor(item.status)}`}>
                 {getStatusIcon(item.status)}
-                {item.status}
+                {item.status || 'Unknown'}
               </span>
               <span className="font-medium">{formatCurrency(item.amount)}</span>
             </div>
