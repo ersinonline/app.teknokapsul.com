@@ -1,135 +1,122 @@
 import React from 'react';
+import { ShoppingBag, FileText, CreditCard, Clock } from 'lucide-react';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { LoadingSpinner } from './common/LoadingSpinner';
 import { ErrorMessage } from './common/ErrorMessage';
-import { Payment } from '../types/data';
-import { formatCurrency } from '../utils/currency';
+import { StatCard } from './dashboard/StatCard';
+import { RecentItems } from './dashboard/RecentItems';
+import { Alerts } from './dashboard/Alerts';
+import { SpendingTrends } from './analytics/SpendingTrends';
+import { BudgetOverview } from './dashboard/BudgetOverview';
+import { LoyaltyCard } from './loyalty/LoyaltyCard';
+import { useLoyalty } from '../hooks/useLoyalty';
+import { Order, Payment } from '../types/data';
+import { Subscription } from '../types/subscription';
 import { calculateDaysRemaining } from '../utils/date';
-import { Card } from './common/Card';
-import { Clock, AlertTriangle } from 'lucide-react';
 
 export const Dashboard = () => {
-  const { data: payments = [], loading, error } = useFirebaseData<Payment>('payments');
+  const { data: orders = [], loading: ordersLoading } = useFirebaseData<Order>('orders');
+  const { data: payments = [], loading: paymentsLoading } = useFirebaseData<Payment>('payments');
+  const { data: subscriptions = [], loading: subscriptionsLoading } = useFirebaseData<Subscription>('subscriptions');
+  const { loyalty, loading: loyaltyLoading } = useLoyalty();
 
-  if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message="Veriler yüklenirken bir hata oluştu." />;
+  const loading = ordersLoading || paymentsLoading || subscriptionsLoading || loyaltyLoading;
 
-  // Ödeme istatistiklerini hesapla
-  const stats = payments.reduce((acc, payment) => {
-    acc.totalAmount += payment.amount;
-    if (payment.status === 'Ödendi') {
-      acc.paidAmount += payment.amount;
-    } else {
-      acc.unpaidAmount += payment.amount;
-    }
-    return acc;
-  }, {
-    totalAmount: 0,
-    paidAmount: 0,
-    unpaidAmount: 0
+  const upcomingPayments = payments.filter(payment => {
+    const daysRemaining = calculateDaysRemaining(payment.date);
+    return payment.status === 'Ödenmedi' && daysRemaining <= 7 && daysRemaining > 0;
   });
 
-  // Yaklaşan ödemeleri filtrele
-  const upcomingPayments = payments
-    .filter(payment => {
-      const daysLeft = calculateDaysRemaining(payment.date);
-      return payment.status === 'Ödenmedi' && daysLeft > 0 && daysLeft <= 7;
-    })
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const expiringSubscriptions = subscriptions.filter(subscription => {
+    const daysRemaining = calculateDaysRemaining(subscription.endDate);
+    return daysRemaining <= 7 && daysRemaining > 0;
+  });
 
-  // Geciken ödemeleri filtrele
-  const overduePayments = payments
-    .filter(payment => {
-      const daysLeft = calculateDaysRemaining(payment.date);
-      return payment.status === 'Ödenmedi' && daysLeft <= 0;
-    })
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  if (loading) return <LoadingSpinner />;
+  if (!orders || !payments || !subscriptions) {
+    return <ErrorMessage message="Veriler yüklenirken bir hata oluştu." />;
+  }
+
+  const stats = [
+    {
+      label: 'Toplam Sipariş',
+      value: orders.length,
+      icon: ShoppingBag,
+      color: 'bg-blue-500'
+    },
+    {
+      label: 'Yaklaşan Ödeme',
+      value: upcomingPayments.length,
+      icon: CreditCard,
+      color: 'bg-yellow-500'
+    },
+    {
+      label: 'Aktif Abonelik',
+      value: subscriptions.filter(s => calculateDaysRemaining(s.endDate) > 0).length,
+      icon: Clock,
+      color: 'bg-purple-500'
+    }
+  ];
+
+  // Calculate total paid amount
+  const totalPaidAmount = payments.reduce((sum, payment) => {
+    if (payment.status === 'Ödendi') {
+      const amount = typeof payment.amount === 'string' 
+        ? parseFloat(payment.amount.replace(' TL', '').replace(',', '.'))
+        : typeof payment.amount === 'number' ? payment.amount : 0;
+      return sum + amount;
+    }
+    return sum;
+  }, 0);
+
+  // Calculate total subscription cost
+  const totalSubscriptionCost = subscriptions.reduce((sum, subscription) => {
+    const price = typeof subscription.price === 'string'
+      ? parseFloat(subscription.price.replace(' TL', '').replace(',', '.'))
+      : typeof subscription.price === 'number' ? subscription.price : 0;
+    // Assuming frequency is monthly for simplicity, adjust if needed
+    return sum + price; 
+  }, 0);
+
+  const additionalStats = [
+    {
+      label: 'Toplam Ödenen Borç',
+      value: totalPaidAmount,
+      icon: CreditCard,
+      color: 'bg-green-500'
+    },
+    {
+      label: 'Toplam Abonelik Maliyeti',
+      value: totalSubscriptionCost,
+      icon: Clock,
+      color: 'bg-indigo-500'
+    }
+  ];
+
+  const allStats = [...stats, ...additionalStats];
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Finansal Durum</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">
+        Hoş Geldiniz 👋
+      </h1>
 
-      {/* Ana İstatistikler */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-          <div>
-            <p className="text-sm opacity-90">Toplam Borç</p>
-            <p className="text-2xl font-semibold mt-1">{formatCurrency(stats.totalAmount)}</p>
-          </div>
-        </Card>
+      <Alerts 
+        upcomingPayments={upcomingPayments}
+        expiringSubscriptions={expiringSubscriptions}
+      />
 
-        <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
-          <div>
-            <p className="text-sm opacity-90">Ödenen</p>
-            <p className="text-2xl font-semibold mt-1">{formatCurrency(stats.paidAmount)}</p>
-          </div>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white">
-          <div>
-            <p className="text-sm opacity-90">Ödenmemiş</p>
-            <p className="text-2xl font-semibold mt-1">{formatCurrency(stats.unpaidAmount)}</p>
-          </div>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {allStats.map((stat, index) => (
+          <StatCard key={index} {...stat} />
+        ))}
       </div>
 
-      {/* Yaklaşan ve Geciken Ödemeler */}
+      {loyalty && <LoyaltyCard loyalty={loyalty} />}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Yaklaşan Ödemeler */}
-        <Card>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <Clock className="w-5 h-5 text-yellow-600" />
-            </div>
-            <h2 className="text-lg font-medium">Yaklaşan Ödemeler</h2>
-          </div>
-
-          {upcomingPayments.length > 0 ? (
-            <div className="space-y-3">
-              {upcomingPayments.map(payment => (
-                <div key={payment.id} className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
-                  <div>
-                    <p className="font-medium">{payment.title}</p>
-                    <p className="text-sm text-gray-600">
-                      {new Date(payment.date).toLocaleDateString('tr-TR')} ({calculateDaysRemaining(payment.date)} gün kaldı)
-                    </p>
-                  </div>
-                  <span className="font-medium">{formatCurrency(payment.amount)}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center py-4">Yaklaşan ödeme bulunmuyor.</p>
-          )}
-        </Card>
-
-        {/* Geciken Ödemeler */}
-        <Card>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
-            </div>
-            <h2 className="text-lg font-medium">Geciken Ödemeler</h2>
-          </div>
-
-          {overduePayments.length > 0 ? (
-            <div className="space-y-3">
-              {overduePayments.map(payment => (
-                <div key={payment.id} className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                  <div>
-                    <p className="font-medium">{payment.title}</p>
-                    <p className="text-sm text-gray-600">
-                      {new Date(payment.date).toLocaleDateString('tr-TR')} ({Math.abs(calculateDaysRemaining(payment.date))} gün gecikme)
-                    </p>
-                  </div>
-                  <span className="font-medium">{formatCurrency(payment.amount)}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center py-4">Geciken ödeme bulunmuyor.</p>
-          )}
-        </Card>
+        <SpendingTrends />
+        <BudgetOverview />
       </div>
     </div>
   );
