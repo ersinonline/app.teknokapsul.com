@@ -9,13 +9,15 @@ import { BudgetSummary } from './BudgetSummary';
 import { CategoryList } from './CategoryList';
 import { BudgetActions } from './BudgetActions';
 import { SpendingPieChart } from './SpendingPieChart';
-import { FinancialTips } from './FinancialTips';
+import { IncomeTracker } from './IncomeTracker';
+import { BudgetAnalytics } from './BudgetAnalytics';
 
 export const BudgetPlanner = () => {
   const { user } = useAuth();
   const { budget, loading: budgetLoading } = useBudget();
   const [isEditing, setIsEditing] = useState(false);
   const [editedBudget, setEditedBudget] = useState<Budget | null>(null);
+  const [monthlyIncome, setMonthlyIncome] = useState(0);
 
   useEffect(() => {
     if (budget) {
@@ -44,16 +46,20 @@ export const BudgetPlanner = () => {
                 totalBudget: parseFloat(value) || 0,
               });
             }}
+            monthlyIncome={monthlyIncome}
           />
         </div>
         <div>
-          <FinancialTips budget={budget} />
+          <IncomeTracker
+            monthlyIncome={monthlyIncome}
+            onIncomeChange={setMonthlyIncome}
+            isEditing={isEditing}
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-medium mb-4"></h2>
           <SpendingPieChart categories={editedBudget.categories} />
         </div>
 
@@ -74,6 +80,8 @@ export const BudgetPlanner = () => {
           }}
         />
       </div>
+
+      <BudgetAnalytics budget={budget} monthlyIncome={monthlyIncome} />
 
       {isEditing && (
         <BudgetActions
