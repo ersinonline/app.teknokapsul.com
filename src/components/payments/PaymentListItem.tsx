@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { CreditCard, Check, X, Clock } from 'lucide-react';
+import { CreditCard, Check, X, Clock, Tag } from 'lucide-react';
 import { Payment } from '../../types/data';
 import { updatePaymentStatus } from '../../services/payments.service';
 import { formatCurrency } from '../../utils/currency';
 import { formatDate } from '../../utils/date';
 import { useAuth } from '../../contexts/AuthContext';
+import { DEFAULT_CATEGORIES } from '../../types/budget';
 
 interface PaymentListItemProps {
   payment: Payment;
@@ -52,7 +53,15 @@ export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onSta
           }`} />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="font-medium text-gray-900 truncate">{payment.title}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium text-gray-900 truncate">{payment.title}</h3>
+            {payment.category && (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                <Tag className="w-3 h-3 mr-1" />
+                {DEFAULT_CATEGORIES[payment.category]}
+              </span>
+            )}
+          </div>
           {payment.type === 'installment' && payment.installment && (
             <p className="text-sm text-gray-600">
               Taksit: {payment.installment.current}/{payment.installment.total}

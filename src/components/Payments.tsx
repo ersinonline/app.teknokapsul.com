@@ -11,31 +11,49 @@ import { PaymentForm } from './payments/PaymentForm';
 import { Payment } from '../types/data';
 import { useAuth } from '../contexts/AuthContext';
 import { calculatePaymentStats } from '../utils/payments';
+import { DEFAULT_CATEGORIES, CategoryType } from '../types/budget';
 
 export const Payments = () => {
   const { user } = useAuth();
   const { data: payments = [], loading, error, reload } = useFirebaseData<Payment>('payments');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'paid' | 'pending'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryType | 'all'>('all');
   const [isPaymentFormOpen, setIsPaymentFormOpen] = useState(false);
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message="Borçlarınız yüklenirken bir hata oluştu." />;
   if (!user) return <ErrorMessage message="Lütfen giriş yapın." />;
 
-  const { totalAmount, pendingAmount, paidAmount } = calculatePaymentStats(payments);
-
   const filteredPayments = payments.filter((payment) => {
     const matchesSearch = 
       (payment.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       (payment.description?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       (payment.bank?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+    
     const matchesStatus =
       filterStatus === 'all' ||
       (filterStatus === 'paid' && payment.status === 'Ödendi') ||
       (filterStatus === 'pending' && payment.status === 'Ödenmedi');
-    return matchesSearch && matchesStatus;
+
+    const matchesCategory = 
+      selectedCategory === 'all' || payment.category === selectedCategory;
+
+    return matchesSearch && matchesStatus && matchesCategory;
   });
+
+  // Calculate category totals
+  const categoryTotals = payments.reduce((acc, payment) => {
+    if (payment.category) {
+      if (!acc[payment.category]) {
+        acc[payment.category] = 0;
+      }
+      acc[payment.category] += payment.amount;
+    }
+    return acc;
+  }, {} as Record<CategoryType, number>);
+
+  const { totalAmount, pendingAmount, paidAmount } = calculatePaymentStats(filteredPayments);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -51,7 +69,7 @@ export const Payments = () => {
         </button>
       </div>
 
-      {/* Search and Filter */}
+      {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
         <div className="relative flex-1">
           <input
@@ -64,14 +82,30 @@ export const Payments = () => {
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         </div>
+        
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value as 'all' | 'paid' | 'pending')}
           className="w-full sm:w-auto p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
         >
-          <option value="all">Tümü</option>
+          <option value="all">Tüm Ödemeler</option>
           <option value="paid">Ödenmiş</option>
           <option value="pending">Ödenmemiş</option>
+        </select>
+
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value as CategoryType | 'all')}
+          className="w-full sm:w-auto p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+        >
+          <option value="all">Tüm Kategoriler</option>
+          {Object.entries(DEFAULT_CATEGORIES).map(([key, label]) => (
+            <option key={key} value={key}>
+              {label} ({categoryTotals[key as CategoryType] ? 
+                `${categoryTotals[key as CategoryType].toLocaleString('tr-TR')} TL` : 
+                '0 TL'})
+            </option>
+          ))}
         </select>
       </div>
 
