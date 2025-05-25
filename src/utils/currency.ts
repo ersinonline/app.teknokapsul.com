@@ -49,6 +49,7 @@ export const parseCurrency = (amount: string | number | undefined | null): numbe
     const cleanAmount = amountStr
       .replace(' TL', '')
       .replace(',', '.');
+    
     const parsed = parseFloat(cleanAmount);
     return isNaN(parsed) ? 0 : parsed;
   } catch (error) {

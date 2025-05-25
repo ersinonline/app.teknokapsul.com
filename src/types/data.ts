@@ -1,3 +1,5 @@
+import { CategoryType } from './budget';
+
 export interface OrderProduct {
   amount: string;
   photoUrl: string;
@@ -28,16 +30,24 @@ export interface Application {
   email: string;
 }
 
+export interface PaymentInstallment {
+  current: number;
+  total: number;
+}
+
 export interface Payment {
   id: string;
-  amount: string;
-  bank: string;
+  amount: number;
   date: string;
-  description: string;
-  installments: string;
+  title: string;
+  description?: string;
+  bank?: string;
   status: string;
   userId: string;
+  type?: 'installment' | 'regular';
+  installment?: PaymentInstallment;
+  createdAt: string;
+  category?: CategoryType;
   isShared?: boolean;
   sharedWithEmails?: string[];
-  originalAmount?: string;
 }

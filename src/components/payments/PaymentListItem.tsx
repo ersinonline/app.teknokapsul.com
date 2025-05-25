@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, Check, X } from 'lucide-react';
+import { CreditCard, Check, X, Clock } from 'lucide-react';
 import { Payment } from '../../types/data';
 import { updatePaymentStatus } from '../../services/payments.service';
 import { formatCurrency } from '../../utils/currency';
@@ -52,15 +52,18 @@ export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onSta
           }`} />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="font-medium text-gray-900 truncate">{payment.description}</h3>
+          <h3 className="font-medium text-gray-900 truncate">{payment.title}</h3>
+          {payment.type === 'installment' && payment.installment && (
+            <p className="text-sm text-gray-600">
+              Taksit: {payment.installment.current}/{payment.installment.total}
+            </p>
+          )}
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1 text-sm text-gray-500">
             <span>{formatDate(payment.date)}</span>
-            <span className="hidden sm:block">•</span>
-            <span>{payment.bank}</span>
-            {payment.installments && (
+            {payment.bank && (
               <>
                 <span className="hidden sm:block">•</span>
-                <span>{payment.installments} Taksit</span>
+                <span>{payment.bank}</span>
               </>
             )}
           </div>
@@ -83,7 +86,9 @@ export const PaymentListItem: React.FC<PaymentListItemProps> = ({ payment, onSta
           }`}
           title={isUnpaid ? 'Ödendi olarak işaretle' : 'Ödenmedi olarak işaretle'}
         >
-          {isUnpaid ? (
+          {isUpdating ? (
+            <Clock className="w-5 h-5 animate-spin" />
+          ) : isUnpaid ? (
             <X className="w-5 h-5" />
           ) : (
             <Check className="w-5 h-5" />
