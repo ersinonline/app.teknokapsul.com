@@ -29,7 +29,11 @@ export const useBudget = () => {
 
         const spentByCategory = currentMonthPayments.reduce((acc, payment) => {
           if (payment.category) {
-            const amount = parseFloat(payment.amount.replace(' TL', '').replace(',', '.'));
+            // Handle both string and number amount types
+            const amount = typeof payment.amount === 'string' 
+              ? parseFloat(payment.amount.replace(' TL', '').replace(',', '.'))
+              : parseFloat(String(payment.amount));
+
             if (!acc[payment.category]) {
               acc[payment.category] = { total: 0, paid: 0, unpaid: 0 };
             }

@@ -8,7 +8,7 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
-    port: 3001, // Changed from 3000 to avoid potential conflicts
+    port: 3002, // Changed from 3001 to avoid conflicts
     strictPort: true, // Force the specified port
     hmr: {
       timeout: 5000 // Increase HMR timeout for better stability
