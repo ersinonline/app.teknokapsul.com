@@ -44,7 +44,7 @@ export const Dashboard = () => {
       paymentDate.getMonth() === currentDate.getMonth() &&
       paymentDate.getFullYear() === currentDate.getFullYear()
     ) {
-      return sum + payment.amount;
+      return sum + (Number(payment.amount) || 0);
     }
     return sum;
   }, 0);
@@ -64,7 +64,7 @@ export const Dashboard = () => {
     },
     {
       label: 'Aylık Ödenmeyen',
-      value: monthlyUnpaidAmount.toFixed(2) + ' TL',
+      value: `${(Number(monthlyUnpaidAmount) || 0).toFixed(2)} TL`,
       icon: CreditCard,
       color: 'bg-red-500'
     }
