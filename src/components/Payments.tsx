@@ -27,8 +27,8 @@ export const Payments = () => {
 
   const filteredPayments = payments.filter((payment) => {
     const matchesSearch = 
-      payment.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.bank.toLowerCase().includes(searchTerm.toLowerCase());
+      (payment.description?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (payment.bank?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const matchesStatus =
       filterStatus === 'all' ||
       (filterStatus === 'paid' && payment.status === 'Ödendi') ||

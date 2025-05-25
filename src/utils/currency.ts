@@ -2,7 +2,7 @@
  * Formats a number or string amount to currency format with TL
  * Safely handles undefined, null, and invalid values
  */
- export const formatCurrency = (amount: string | number | undefined | null): string => {
+export const formatCurrency = (amount: string | number | undefined | null): string => {
   // Handle undefined, null or empty values
   if (amount === undefined || amount === null || amount === '') {
     return '0.00 TL';
@@ -33,13 +33,20 @@
 
 /**
  * Parses a currency string to a number
- * Safely handles invalid values
+ * Safely handles invalid values and different types
  */
-export const parseCurrency = (amount: string | undefined | null): number => {
+export const parseCurrency = (amount: string | number | undefined | null): number => {
   if (!amount) return 0;
   
   try {
-    const cleanAmount = amount
+    // If amount is already a number, return it
+    if (typeof amount === 'number') {
+      return amount;
+    }
+    
+    // Convert to string and clean up
+    const amountStr = String(amount);
+    const cleanAmount = amountStr
       .replace(' TL', '')
       .replace(',', '.');
     const parsed = parseFloat(cleanAmount);
