@@ -3,6 +3,7 @@ export interface Subscription {
   name: string;
   endDate: string;
   userId: string;
+  price: number;
 }
 
 export interface SubscriptionFormData {
