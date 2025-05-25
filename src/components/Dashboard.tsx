@@ -6,7 +6,7 @@ import { Payment } from '../types/data';
 import { formatCurrency } from '../utils/currency';
 import { calculateDaysRemaining } from '../utils/date';
 import { Card } from './common/Card';
-import { AlertTriangle, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Clock, AlertTriangle } from 'lucide-react';
 
 export const Dashboard = () => {
   const { data: payments = [], loading, error } = useFirebaseData<Payment>('payments');
@@ -47,51 +47,33 @@ export const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Başlık */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">Finansal Durum</h1>
-      </div>
+      <h1 className="text-2xl font-semibold text-gray-900">Finansal Durum</h1>
 
       {/* Ana İstatistikler */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/10 rounded-lg">
-              <TrendingUp className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm opacity-90">Toplam Borç</p>
-              <p className="text-2xl font-semibold">{formatCurrency(stats.totalAmount)}</p>
-            </div>
+          <div>
+            <p className="text-sm opacity-90">Toplam Borç</p>
+            <p className="text-2xl font-semibold mt-1">{formatCurrency(stats.totalAmount)}</p>
           </div>
         </Card>
 
         <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/10 rounded-lg">
-              <CheckCircle className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm opacity-90">Ödenen</p>
-              <p className="text-2xl font-semibold">{formatCurrency(stats.paidAmount)}</p>
-            </div>
+          <div>
+            <p className="text-sm opacity-90">Ödenen</p>
+            <p className="text-2xl font-semibold mt-1">{formatCurrency(stats.paidAmount)}</p>
           </div>
         </Card>
 
         <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/10 rounded-lg">
-              <XCircle className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm opacity-90">Ödenmemiş</p>
-              <p className="text-2xl font-semibold">{formatCurrency(stats.unpaidAmount)}</p>
-            </div>
+          <div>
+            <p className="text-sm opacity-90">Ödenmemiş</p>
+            <p className="text-2xl font-semibold mt-1">{formatCurrency(stats.unpaidAmount)}</p>
           </div>
         </Card>
       </div>
 
-      {/* Uyarılar ve Yaklaşan Ödemeler */}
+      {/* Yaklaşan ve Geciken Ödemeler */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Yaklaşan Ödemeler */}
         <Card>
