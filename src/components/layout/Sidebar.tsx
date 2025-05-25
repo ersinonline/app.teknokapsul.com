@@ -1,9 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Home, ShoppingBag, Apps, CreditCard, Key, Settings,
-  Wallet, Calendar, StickyNote, HelpCircle, Clock, LogOut, X
-} from 'lucide-react';
+import { Home, ShoppingBag, Apple as Apps, CreditCard, Key, Settings, Wallet, Calendar, StickyNote, HelpCircle, Clock, LogOut, X } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
