@@ -5,6 +5,7 @@ import { Budget } from '../types/budget';
 import { useFirebaseData } from './useFirebaseData';
 import { Payment } from '../types/data';
 import { isCurrentMonth } from '../utils/date';
+import { parseCurrency } from '../utils/currency';
 
 export const useBudget = () => {
   const { user } = useAuth();
@@ -24,20 +25,18 @@ export const useBudget = () => {
           userBudget = await initializeBudget(user.uid, 0);
         }
 
-        // Tüm ödemeleri kategorilere göre hesapla (ödeme durumuna bakmaksızın)
+        // Filter current month payments
         const currentMonthPayments = payments.filter(payment => isCurrentMonth(payment.date));
 
+        // Calculate spent amounts by category
         const spentByCategory = currentMonthPayments.reduce((acc, payment) => {
           if (payment.category) {
-            // Handle both string and number amount types
-            const amount = typeof payment.amount === 'string' 
-              ? parseFloat(payment.amount.replace(' TL', '').replace(',', '.'))
-              : parseFloat(String(payment.amount));
-
             if (!acc[payment.category]) {
               acc[payment.category] = { total: 0, paid: 0, unpaid: 0 };
             }
+            const amount = parseCurrency(payment.amount);
             acc[payment.category].total += amount;
+            
             if (payment.status === 'Ödendi') {
               acc[payment.category].paid += amount;
             } else {
@@ -45,9 +44,9 @@ export const useBudget = () => {
             }
           }
           return acc;
-        }, {} as Record<string, { total: number; paid: number; unpaid: number; }>);
+        }, {} as Record<string, { total: number; paid: number; unpaid: number }>);
 
-        // Bütçeyi güncelle
+        // Update budget with calculated amounts
         const updatedBudget = {
           ...userBudget,
           categories: Object.keys(userBudget.categories).reduce((acc, category) => {
