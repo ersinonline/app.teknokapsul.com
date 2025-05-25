@@ -1,26 +1,28 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoginForm } from '../../components/auth/LoginForm';
 import { SocialLogin } from '../../components/auth/SocialLogin';
 import { Logo } from '../../components/common/Logo';
 
 export const LoginPage = () => {
-  const { user, loading, error } = useAuth();
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  const from = location.state?.from || '/dashboard';
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-500 mx-auto" />
-          <p className="mt-4 text-gray-700 text-sm">Lütfen bekleyin, giriş yapılıyor...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-yellow-500 mx-auto" />
+          <p className="mt-4 text-gray-700 text-sm">Lütfen bekleyin...</p>
         </div>
       </div>
     );
   }
 
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={from} replace />;
   }
 
   return (
@@ -34,12 +36,6 @@ export const LoginPage = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {error && (
-            <div className="mb-6 text-sm text-red-600">
-              Giriş sırasında bir hata oluştu: {error}
-            </div>
-          )}
-
           <LoginForm />
 
           <div className="mt-6">
