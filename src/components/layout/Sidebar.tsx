@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, ShoppingBag, Apple as Apps, CreditCard, Settings, Wallet, Calendar, StickyNote, HelpCircle, Clock, LogOut, X } from 'lucide-react';
+import { Home, Apple as Apps, CreditCard, Settings, Calendar, StickyNote, HelpCircle, Clock, LogOut, X } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -14,15 +14,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) =
 
   const menuItems = [
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
-    { id: 'budget', path: '/budget', label: 'Bütçe ve Analiz', icon: Wallet },
-    { id: 'subscriptions', path: '/subscriptions', label: 'Abonelikler', icon: Clock },
     { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
     { id: 'payments', path: '/payments', label: 'Borçlar', icon: CreditCard },
-    { id: 'orders', path: '/orders', label: 'Siparişler', icon: ShoppingBag },
+    { id: 'subscriptions', path: '/subscriptions', label: 'Abonelikler', icon: Clock },
     { id: 'notes', path: '/notes', label: 'Notlar', icon: StickyNote },
     { id: 'calendar', path: '/calendar', label: 'Takvim', icon: Calendar },
     { id: 'faq', path: '/faq', label: 'Yardım', icon: HelpCircle },
-    { id: 'settings', path: '/settings', label: 'Ayarlar', icon: Settings },
+    { id: 'settings', path: '/settings', label: 'Ayarlar', icon: Settings }
   ];
 
   return (
@@ -31,7 +29,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) =
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={onClose}
-          aria-hidden="true"
         />
       )}
 
