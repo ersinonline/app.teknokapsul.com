@@ -1,6 +1,6 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
-import { Budget } from '../../types/budget';
+import { Budget, DEFAULT_CATEGORIES } from '../../types/budget';
 import { formatCurrency } from '../../utils/currency';
 
 interface BudgetAnalyticsProps {
@@ -97,7 +97,7 @@ export const BudgetAnalytics: React.FC<BudgetAnalyticsProps> = ({ budget, monthl
             return (
               <div key={category}>
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-medium">{category}</span>
+                  <span className="text-sm font-medium">{DEFAULT_CATEGORIES[category]}</span>
                   <span className="text-sm text-gray-600">
                     {formatCurrency(data.spent)} ({percentage.toFixed(1)}%)
                   </span>
