@@ -2,8 +2,7 @@ import React from 'react';
 import { Wallet, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useBudget } from '../../hooks/useBudget';
 import { formatCurrency } from '../../utils/currency';
-import { DEFAULT_CATEGORIES } from '../../utils/constants';
-import { CategoryType } from '../../types/budget';
+import { DEFAULT_CATEGORIES, CategoryType } from '../../types/budget';
 
 export const BudgetOverview = () => {
   const { budget } = useBudget();

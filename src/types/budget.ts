@@ -1,5 +1,14 @@
 export type CategoryType = 'ev' | 'araba' | 'sigorta' | 'kredi' | 'giyim' | 'market';
 
+export const DEFAULT_CATEGORIES: Record<CategoryType, string> = {
+  ev: 'Ev Giderleri',
+  araba: 'Araç Giderleri',
+  sigorta: 'Sigorta Ödemeleri',
+  kredi: 'Kredi Ödemeleri',
+  giyim: 'Giyim Alışverişi',
+  market: 'Market Alışverişi'
+} as const;
+
 export interface Budget {
   id: string;
   userId: string;
