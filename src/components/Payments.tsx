@@ -20,6 +20,7 @@ export const Payments = () => {
   const [filterStatus, setFilterStatus] = useState<'all' | 'paid' | 'pending'>('all');
   const [selectedCategory, setSelectedCategory] = useState<CategoryType | 'all'>('all');
   const [isPaymentFormOpen, setIsPaymentFormOpen] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | undefined>(undefined);
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message="Borçlarınız yüklenirken bir hata oluştu." />;
@@ -55,13 +56,21 @@ export const Payments = () => {
 
   const { totalAmount, pendingAmount, paidAmount } = calculatePaymentStats(filteredPayments);
 
+  const handleEdit = (payment: Payment) => {
+    setSelectedPayment(payment);
+    setIsPaymentFormOpen(true);
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-semibold text-gray-900">Borçlarım</h1>
         <button
-          onClick={() => setIsPaymentFormOpen(true)}
+          onClick={() => {
+            setSelectedPayment(undefined);
+            setIsPaymentFormOpen(true);
+          }}
           className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
         >
           <Plus className="w-5 h-5 mr-2" />
@@ -77,7 +86,6 @@ export const Payments = () => {
             placeholder="Borç ara..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            aria-label="Borç ara"
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -121,7 +129,10 @@ export const Payments = () => {
 
       {/* Payment List */}
       {filteredPayments.length > 0 ? (
-        <PaymentList payments={filteredPayments} />
+        <PaymentList 
+          payments={filteredPayments} 
+          onEdit={handleEdit}
+        />
       ) : (
         <EmptyState
           icon={CreditCard}
@@ -133,8 +144,12 @@ export const Payments = () => {
       {/* Payment Form Modal */}
       {isPaymentFormOpen && (
         <PaymentForm
-          onClose={() => setIsPaymentFormOpen(false)}
+          onClose={() => {
+            setIsPaymentFormOpen(false);
+            setSelectedPayment(undefined);
+          }}
           onSave={reload}
+          payment={selectedPayment}
         />
       )}
     </div>
