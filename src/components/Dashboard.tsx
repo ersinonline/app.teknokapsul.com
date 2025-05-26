@@ -20,13 +20,16 @@ export const Dashboard = () => {
 
   const loading = paymentsLoading || subscriptionsLoading || loyaltyLoading;
 
-  const upcomingPayments = payments
+  // Tüm yaklaşan ödemeleri filtrele (15 gün içindekiler)
+  const allUpcomingPayments = payments
     .filter(payment => {
       const daysRemaining = calculateDaysRemaining(payment.date);
       return payment.status === 'Ödenmedi' && daysRemaining > 0 && daysRemaining <= 15;
     })
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .slice(0, 7);
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  // Dashboard'da gösterilecek en yakın 4 ödeme
+  const displayedPayments = allUpcomingPayments.slice(0, 4);
 
   if (loading) return <LoadingSpinner />;
   if (!payments || !subscriptions) {
@@ -49,7 +52,7 @@ export const Dashboard = () => {
   const stats = [
     {
       label: 'Yaklaşan Ödeme',
-      value: upcomingPayments.length,
+      value: allUpcomingPayments.length, // Tüm yaklaşan ödemelerin sayısı
       icon: CreditCard,
       color: 'bg-yellow-500'
     },
@@ -74,7 +77,7 @@ export const Dashboard = () => {
       </h1>
 
       <Alerts 
-        upcomingPayments={upcomingPayments}
+        upcomingPayments={allUpcomingPayments}
         expiringSubscriptions={subscriptions.filter(s => {
           const daysRemaining = calculateDaysRemaining(s.endDate);
           return daysRemaining <= 7 && daysRemaining > 0;
@@ -93,7 +96,7 @@ export const Dashboard = () => {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-medium mb-4">Yaklaşan Ödemeler</h2>
           <div className="space-y-4">
-            {upcomingPayments.map((payment) => (
+            {displayedPayments.map((payment) => (
               <div key={payment.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
                   <h3 className="font-medium">{payment.title}</h3>
