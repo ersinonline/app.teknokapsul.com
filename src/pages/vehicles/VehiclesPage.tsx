@@ -86,7 +86,7 @@ export const VehiclesPage = () => {
 
                     {/* Documents */}
                     <div className="flex gap-2 mt-4">
-                      {vehicle.documents.insurance && (
+                      {vehicle.documents?.insurance && (
                         <a
                           href={vehicle.documents.insurance}
                           target="_blank"
@@ -97,7 +97,7 @@ export const VehiclesPage = () => {
                           Sigorta
                         </a>
                       )}
-                      {vehicle.documents.inspection && (
+                      {vehicle.documents?.inspection && (
                         <a
                           href={vehicle.documents.inspection}
                           target="_blank"
