@@ -8,8 +8,14 @@ interface SubscriptionFormProps {
 }
 
 export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ onSubmit, isLoading }) => {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<SubscriptionFormData>();
+  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<SubscriptionFormData>({
+    defaultValues: {
+      autoRenew: false,
+      price: 0
+    }
+  });
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const autoRenew = watch('autoRenew');
 
   const onFormSubmit = async (data: SubscriptionFormData) => {
     setSubmissionError(null);
@@ -42,21 +48,72 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ onSubmit, is
       </div>
 
       <div>
-        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
-          Bitiş Tarihi
+        <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+          Aylık Ücret
         </label>
         <input
-          type="date"
-          id="endDate"
-          {...register('endDate', { required: 'Bitiş tarihi gerekli' })}
+          type="number"
+          id="price"
+          step="0.01"
+          {...register('price', { required: 'Ücret bilgisi gerekli', min: 0 })}
           className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 disabled:opacity-50"
-          min={new Date().toISOString().split('T')[0]} // Geçmiş tarihler engelleniyor
           disabled={isLoading}
         />
-        {errors.endDate && (
-          <p className="mt-1 text-sm text-red-600">{errors.endDate.message}</p>
-        )}
       </div>
+
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="autoRenew"
+          {...register('autoRenew')}
+          className="h-4 w-4 rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
+        />
+        <label htmlFor="autoRenew" className="text-sm font-medium text-gray-700">
+          Otomatik Yenileme
+        </label>
+      </div>
+
+      {autoRenew ? (
+        <div>
+          <label htmlFor="renewalDay" className="block text-sm font-medium text-gray-700">
+            Yenileme Günü
+          </label>
+          <input
+            type="number"
+            id="renewalDay"
+            min="1"
+            max="31"
+            {...register('renewalDay', {
+              required: 'Yenileme günü gerekli',
+              min: { value: 1, message: 'Gün 1-31 arasında olmalı' },
+              max: { value: 31, message: 'Gün 1-31 arasında olmalı' }
+            })}
+            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 disabled:opacity-50"
+            placeholder="Örn: 15"
+            disabled={isLoading}
+          />
+          {errors.renewalDay && (
+            <p className="mt-1 text-sm text-red-600">{errors.renewalDay.message}</p>
+          )}
+        </div>
+      ) : (
+        <div>
+          <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
+            Bitiş Tarihi
+          </label>
+          <input
+            type="date"
+            id="endDate"
+            {...register('endDate', { required: 'Bitiş tarihi gerekli' })}
+            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 disabled:opacity-50"
+            min={new Date().toISOString().split('T')[0]}
+            disabled={isLoading}
+          />
+          {errors.endDate && (
+            <p className="mt-1 text-sm text-red-600">{errors.endDate.message}</p>
+          )}
+        </div>
+      )}
 
       {submissionError && (
         <p className="mt-2 text-sm text-red-600">{submissionError}</p>
@@ -66,7 +123,6 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ onSubmit, is
         type="submit"
         disabled={isLoading}
         className="w-full rounded-lg bg-yellow-600 px-4 py-2 text-white shadow-sm hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:opacity-50"
-        aria-disabled={isLoading}
       >
         {isLoading ? 'Kaydediliyor...' : 'Kaydet'}
       </button>
