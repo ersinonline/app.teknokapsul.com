@@ -6,25 +6,31 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
     esbuildOptions: {
-      target: 'es2020',
+      target: 'esnext',
       supported: { 
         'top-level-await': true 
       },
       logLimit: 0,
+      tsconfigRaw: {
+        compilerOptions: {
+          experimentalDecorators: true,
+        },
+      },
     }
   },
   server: {
     port: 3000,
-    strictPort: false,
+    strictPort: true,
     host: true,
     hmr: {
-      timeout: 10000,
+      timeout: 30000,
       protocol: 'ws',
-      host: 'localhost'
+      host: 'localhost',
+      clientPort: 3000
     }
   },
   build: {
-    target: 'es2020',
+    target: 'esnext',
     rollupOptions: {
       onwarn(warning, warn) {
         if (warning.code === 'PLUGIN_WARNING') return;
