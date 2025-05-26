@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { AuthContextType } from '../types/auth';
-import { signOut as authSignOut } from '../services/auth.service';
+import { signOut as firebaseSignOut } from 'firebase/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -31,19 +31,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signOut = async () => {
     try {
-      setLoading(true);
-      await authSignOut();
+      await firebaseSignOut(auth);
       setUser(null);
     } catch (error) {
       console.error('Sign-out error:', error);
       setError('Error during sign-out');
-    } finally {
-      setLoading(false);
     }
   };
 
+  const value = {
+    user,
+    loading,
+    error,
+    signOut
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, error, signOut }}>
+    <AuthContext.Provider value={value}>
       {!loading ? children : <div>TeknoKapsül uygulaması yükleniyor...</div>}
     </AuthContext.Provider>
   );

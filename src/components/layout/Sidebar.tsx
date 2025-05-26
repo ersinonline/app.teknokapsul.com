@@ -1,16 +1,17 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Apple as Apps, CreditCard, Settings, Calendar, StickyNote, HelpCircle, Clock, LogOut, X } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onLogout?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { signOut } = useAuth();
 
   const menuItems = [
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
@@ -23,12 +24,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) =
     { id: 'settings', path: '/settings', label: 'Ayarlar', icon: Settings }
   ];
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   return (
     <>
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
 
@@ -44,6 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) =
               <button
                 onClick={onClose}
                 className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+                aria-label="Menüyü Kapat"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -68,6 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) =
                           ? 'bg-yellow-50 text-yellow-700'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
+                      aria-current={isActive ? 'page' : undefined}
                     >
                       <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-600' : ''}`} />
                       <span>{item.label}</span>
@@ -80,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) =
 
           <div className="p-4 border-t">
             <button
-              onClick={onLogout}
+              onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
             >
               <LogOut className="w-5 h-5" />
@@ -92,3 +105,5 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onLogout }) =
     </>
   );
 };
+
+export default Sidebar;
