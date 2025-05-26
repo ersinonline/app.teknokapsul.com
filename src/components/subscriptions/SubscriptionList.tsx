@@ -17,9 +17,15 @@ export const SubscriptionList: React.FC<SubscriptionListProps> = ({ subscription
     );
   }
 
-  const sortedSubscriptions = [...subscriptions].sort(
-    (a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
-  );
+  // Otomatik yenilenenler önce, sonra bitiş tarihine göre sıralama
+  const sortedSubscriptions = [...subscriptions].sort((a, b) => {
+    if (a.autoRenew && !b.autoRenew) return -1;
+    if (!a.autoRenew && b.autoRenew) return 1;
+    if (!a.autoRenew && !b.autoRenew) {
+      return new Date(a.endDate).getTime() - new Date(b.endDate).getTime();
+    }
+    return 0;
+  });
 
   return (
     <div className="space-y-4">
@@ -32,15 +38,22 @@ export const SubscriptionList: React.FC<SubscriptionListProps> = ({ subscription
           <div
             key={subscription.id}
             className={`bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow ${
-              isExpired ? 'border-l-4 border-red-600' : ''
+              isExpired ? 'border-l-4 border-red-600' : 
+              subscription.autoRenew ? 'border-l-4 border-green-600' : ''
             }`}
           >
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium text-gray-900">{subscription.name}</h3>
-                <p className="text-sm text-gray-500">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium text-gray-900">{subscription.name}</h3>
+                  <span className="text-sm font-medium text-gray-700">
+                    {formatCurrency(subscription.price)}
+                  </span>
+                </div>
+                
+                <p className="text-sm text-gray-500 mt-1">
                   {subscription.autoRenew ? (
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-green-600">
                       <RefreshCw className="w-4 h-4" />
                       Her ay {subscription.renewalDay}. günü yenilenir
                     </span>
@@ -50,11 +63,9 @@ export const SubscriptionList: React.FC<SubscriptionListProps> = ({ subscription
                     </span>
                   )}
                 </p>
-                <p className="text-sm font-medium text-gray-700 mt-1">
-                  {formatCurrency(subscription.price)}
-                </p>
               </div>
-              {!subscription.autoRenew && (
+
+              {!subscription.autoRenew && daysRemaining !== null && (
                 <div
                   className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
                     isExpired

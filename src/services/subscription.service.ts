@@ -12,7 +12,10 @@ export const getUserSubscriptions = async (userId: string): Promise<Subscription
       id: doc.id,
       name: doc.data().name,
       endDate: doc.data().subscriptionEndDate,
-      userId: doc.data().userId
+      userId: doc.data().userId,
+      autoRenew: doc.data().autoRenew || false,
+      renewalDay: doc.data().renewalDay,
+      price: doc.data().price || 0
     } as Subscription));
   } catch (error) {
     console.error('Error fetching subscriptions:', error);
@@ -24,8 +27,11 @@ export const addSubscription = async (userId: string, data: SubscriptionFormData
   try {
     await addDoc(collection(db, 'subscription-end'), {
       name: data.name,
-      subscriptionEndDate: data.endDate,
-      userId
+      subscriptionEndDate: data.autoRenew ? null : data.endDate,
+      userId,
+      autoRenew: data.autoRenew,
+      renewalDay: data.autoRenew ? data.renewalDay : null,
+      price: data.price || 0
     });
   } catch (error) {
     console.error('Error adding subscription:', error);
