@@ -1,6 +1,9 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, CreditCard, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut } from 'lucide-react';
+import { 
+  Home, Apple as Apps, CreditCard, Clock, StickyNote, 
+  Calendar, Settings, HelpCircle, LogOut, Car, Building2
+} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface SidebarProps {
@@ -18,6 +21,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
     { id: 'payments', path: '/payments', label: 'Borçlar', icon: CreditCard },
     { id: 'subscriptions', path: '/subscriptions', label: 'Abonelikler', icon: Clock },
+    { id: 'vehicles', path: '/vehicles', label: 'Araçlarım', icon: Car },
+    { id: 'homes', path: '/homes', label: 'Evlerim', icon: Building2 },
     { id: 'notes', path: '/notes', label: 'Notlar', icon: StickyNote },
     { id: 'calendar', path: '/calendar', label: 'Takvim', icon: Calendar },
     { id: 'settings', path: '/settings', label: 'Ayarlar', icon: Settings },

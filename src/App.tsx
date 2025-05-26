@@ -16,6 +16,8 @@ import { NotesPage } from './pages/notes/NotesPage';
 import { CalendarPage } from './pages/calendar/CalendarPage';
 import { FAQPage } from './pages/faq/FAQPage';
 import { OtherPage } from './pages/other/OtherPage';
+import { VehiclesPage } from './pages/vehicles/VehiclesPage';
+import { HomesPage } from './pages/homes/HomesPage';
 
 const ProtectedRoute = ({ children }) => (
   <AuthGuard>
@@ -43,6 +45,14 @@ const router = createBrowserRouter([
   {
     path: '/subscriptions',
     element: <ProtectedRoute><SubscriptionsPage /></ProtectedRoute>
+  },
+  {
+    path: '/vehicles',
+    element: <ProtectedRoute><VehiclesPage /></ProtectedRoute>
+  },
+  {
+    path: '/homes',
+    element: <ProtectedRoute><HomesPage /></ProtectedRoute>
   },
   {
     path: '/settings',

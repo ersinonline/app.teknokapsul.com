@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, CreditCard, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut } from 'lucide-react';
+import { 
+  Home, Apple as Apps, CreditCard, Clock, StickyNote, 
+  Calendar, Settings, HelpCircle, LogOut, Car, Building2 
+} from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -14,7 +17,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Scroll position management
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
@@ -27,8 +29,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const mobileMenuItems = [
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
     { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
-    { id: 'payments', path: '/payments', label: 'Borçlar', icon: CreditCard },
-    { id: 'subscriptions', path: '/subscriptions', label: 'Abonelikler', icon: Clock },
+    { id: 'vehicles', path: '/vehicles', label: 'Araçlarım', icon: Car },
+    { id: 'homes', path: '/homes', label: 'Evlerim', icon: Building2 },
     { id: 'other', path: '/other', label: 'Diğer', icon: Clock }
   ];
 
