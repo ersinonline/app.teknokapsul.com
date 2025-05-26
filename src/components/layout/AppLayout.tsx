@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, CreditCard, Apple as Apps, Clock, MoreHorizontal } from 'lucide-react';
-import { Sidebar } from './Sidebar';
+import { Home, CreditCard, Apple as Apps, Clock, MoreHorizontal, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface AppLayoutProps {
@@ -9,9 +8,8 @@ interface AppLayoutProps {
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -20,36 +18,37 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     { icon: Apps, label: 'Hizmetler', path: '/services' },
     { icon: CreditCard, label: 'Borçlar', path: '/payments' },
     { icon: Clock, label: 'Abonelikler', path: '/subscriptions' },
-    { icon: MoreHorizontal, label: 'Diğer', path: '#', isMore: true }
+    { icon: MoreHorizontal, label: 'Diğer', path: '/other' }
   ];
 
-  const handleNavigation = (item: typeof mainMenuItems[0]) => {
-    if (item.isMore) {
-      setIsMoreMenuOpen(!isMoreMenuOpen);
-    } else {
-      navigate(item.path);
-      setIsMoreMenuOpen(false);
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setIsMoreMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-        />
-      </div>
-
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b">
-        <div className="flex items-center space-x-4">
-          <span className="text-sm font-medium">{user?.displayName || 'Kullanıcı'}</span>
-        </div>
+        <span className="text-lg font-semibold">TeknoKapsül</span>
+        <button
+          onClick={handleLogout}
+          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+        >
+          <LogOut className="w-5 h-5" />
+        </button>
       </div>
 
-      <div className="lg:pl-64 flex-1">
+      <div className="pb-16 lg:pb-0">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           {children}
         </div>
@@ -61,7 +60,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           {mainMenuItems.map((item) => (
             <button
               key={item.path}
-              onClick={() => handleNavigation(item)}
+              onClick={() => handleNavigation(item.path)}
               className={`flex flex-col items-center justify-center py-2 ${
                 location.pathname === item.path ? 'text-yellow-600' : 'text-gray-600'
               } hover:bg-gray-50`}
@@ -72,53 +71,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           ))}
         </nav>
       </div>
-
-      {/* Mobile More Menu */}
-      {isMoreMenuOpen && (
-        <div className="lg:hidden fixed bottom-[4.5rem] left-0 right-0 bg-white border-t border-b shadow-lg">
-          <div className="grid grid-cols-2 gap-4 p-4">
-            <button
-              onClick={() => {
-                navigate('/notes');
-                setIsMoreMenuOpen(false);
-              }}
-              className="flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50"
-            >
-              <span className="text-sm">Notlar</span>
-            </button>
-            <button
-              onClick={() => {
-                navigate('/calendar');
-                setIsMoreMenuOpen(false);
-              }}
-              className="flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50"
-            >
-              <span className="text-sm">Takvim</span>
-            </button>
-            <button
-              onClick={() => {
-                navigate('/faq');
-                setIsMoreMenuOpen(false);
-              }}
-              className="flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50"
-            >
-              <span className="text-sm">Yardım</span>
-            </button>
-            <button
-              onClick={() => {
-                navigate('/settings');
-                setIsMoreMenuOpen(false);
-              }}
-              className="flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50"
-            >
-              <span className="text-sm">Ayarlar</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Add bottom padding for mobile to account for navigation */}
-      <div className="lg:hidden h-16" />
     </div>
   );
 };
