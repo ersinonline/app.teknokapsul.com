@@ -6,6 +6,7 @@ import { Vehicle } from '../../types/vehicle';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorMessage } from '../../components/common/ErrorMessage';
 import { calculateDaysRemaining } from '../../utils/date';
+import { VehicleForm } from '../../components/vehicles/VehicleForm';
 
 export const VehiclesPage = () => {
   const { user } = useAuth();
@@ -101,6 +102,16 @@ export const VehiclesPage = () => {
             );
           })}
         </div>
+      )}
+
+      {isAddingVehicle && (
+        <VehicleForm
+          onClose={() => setIsAddingVehicle(false)}
+          onSave={async () => {
+            await reload();
+            setIsAddingVehicle(false);
+          }}
+        />
       )}
 
       {/* Vehicle Detail Modal */}
