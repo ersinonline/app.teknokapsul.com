@@ -11,30 +11,36 @@ export default defineConfig({
       supported: { 
         'top-level-await': true 
       },
+      maxWorkers: 1, // Limit concurrent operations
     }
   },
   server: {
     port: 3000,
-    strictPort: false, // Allow Vite to try other ports if 3000 is in use
-    host: true, // Listen on all network interfaces
+    strictPort: false,
+    host: true,
     hmr: {
-      timeout: 10000 // Increased HMR timeout for better stability
+      timeout: 10000
     }
   },
   build: {
     rollupOptions: {
       onwarn(warning, warn) {
-        // Suppress certain warnings if needed
         if (warning.code === 'PLUGIN_WARNING') return;
         warn(warning);
       }
     },
     target: 'es2020',
     sourcemap: true,
-    minify: 'esbuild'
+    minify: 'esbuild',
+    chunkSizeWarningLimit: 1000, // Increase chunk size limit
   },
   esbuild: {
     logLevel: 'info',
-    target: 'es2020'
+    target: 'es2020',
+    treeShaking: true,
+    legalComments: 'none',
+    minifyIdentifiers: true,
+    minifySyntax: true,
+    minifyWhitespace: true,
   }
 });
