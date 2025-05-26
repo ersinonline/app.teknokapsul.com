@@ -6,13 +6,19 @@ export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
     exclude: ['lucide-react'],
+    esbuildOptions: {
+      target: 'es2020',
+      supported: { 
+        'top-level-await': true 
+      },
+    }
   },
   server: {
     port: 3000,
     strictPort: false, // Allow Vite to try other ports if 3000 is in use
     host: true, // Listen on all network interfaces
     hmr: {
-      timeout: 5000 // Increase HMR timeout for better stability
+      timeout: 10000 // Increased HMR timeout for better stability
     }
   },
   build: {
@@ -22,6 +28,13 @@ export default defineConfig({
         if (warning.code === 'PLUGIN_WARNING') return;
         warn(warning);
       }
-    }
+    },
+    target: 'es2020',
+    sourcemap: true,
+    minify: 'esbuild'
+  },
+  esbuild: {
+    logLevel: 'info',
+    target: 'es2020'
   }
 });
