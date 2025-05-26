@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { FamilyProvider } from './contexts/FamilyContext';
+import { FamilyProvider } from './contexts/FamilyProvider';
 import { LoginPage } from './pages/auth/LoginPage';
 import { AppLayout } from './components/layout/AppLayout';
 import { AuthGuard } from './components/auth/AuthGuard';
@@ -15,7 +15,7 @@ import { SettingsPage } from './pages/settings/SettingsPage';
 import { NotesPage } from './pages/notes/NotesPage';
 import { CalendarPage } from './pages/calendar/CalendarPage';
 import { FAQPage } from './pages/faq/FAQPage';
-import { FamilyManagement } from './components/family/FamilyManagement';
+import { OtherPage } from './pages/other/OtherPage';
 
 const ProtectedRoute = ({ element }) => (
   <AuthGuard>
@@ -38,7 +38,7 @@ function App() {
             <Route path="/notes" element={<ProtectedRoute element={<NotesPage />} />} />
             <Route path="/calendar" element={<ProtectedRoute element={<CalendarPage />} />} />
             <Route path="/faq" element={<ProtectedRoute element={<FAQPage />} />} />
-            <Route path="/family" element={<ProtectedRoute element={<FamilyManagement />} />} />
+            <Route path="/other" element={<ProtectedRoute element={<OtherPage />} />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
