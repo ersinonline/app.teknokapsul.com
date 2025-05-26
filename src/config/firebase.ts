@@ -14,13 +14,16 @@ const firebaseConfig = {
 };
 
 // Firebase'i başlat
-export const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
 // Firestore ve Auth servislerini başlat
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 // Analytics'i başlat (sadece tarayıcıda)
+let analytics = null;
 if (typeof window !== 'undefined') {
-  const analytics = getAnalytics(app);
-} 
+    analytics = getAnalytics(app);
+}
+
+export { app, db, auth, analytics }; 
