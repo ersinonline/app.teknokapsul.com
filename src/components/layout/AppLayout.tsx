@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, Home, CreditCard, Apps, Clock, MoreHorizontal } from 'lucide-react';
+import { Menu, X, Home, CreditCard, Apple as Apps, Clock, MoreHorizontal } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { useAuth } from '../../contexts/AuthContext';
 
