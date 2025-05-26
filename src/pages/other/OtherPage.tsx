@@ -16,6 +16,9 @@ export const OtherPage = () => {
   const { data: vehicles = [] } = useFirebaseData<Vehicle>('vehicles');
   const { data: homes = [] } = useFirebaseData<HomeType>('homes');
 
+  // Get the first two FAQs for preview
+  const commonFaqs = FAQ_DATA.slice(0, 2);
+
   // Get upcoming events
   const upcomingEvents = events
     .filter(event => new Date(event.date) > new Date())
