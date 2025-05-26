@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, ScrollRestoration } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { FamilyProvider } from './contexts/FamilyContext';
 import { LoginPage } from './pages/auth/LoginPage';
@@ -28,6 +28,7 @@ function App() {
     <AuthProvider>
       <FamilyProvider>
         <Router>
+          <ScrollRestoration />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
