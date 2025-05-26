@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Home, CreditCard, Apple as Apps, Clock, StickyNote, Calendar, HelpCircle, Settings } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Home, CreditCard, Apple as Apps, Clock, MoreHorizontal } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -10,24 +10,27 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/login');
-  };
-
-  const mobileMenuItems = [
+  const mainMenuItems = [
     { icon: Home, label: 'Ana Sayfa', path: '/dashboard' },
     { icon: Apps, label: 'Hizmetler', path: '/services' },
     { icon: CreditCard, label: 'Borçlar', path: '/payments' },
     { icon: Clock, label: 'Abonelikler', path: '/subscriptions' },
-    { icon: StickyNote, label: 'Notlar', path: '/notes' },
-    { icon: Calendar, label: 'Takvim', path: '/calendar' },
-    { icon: HelpCircle, label: 'Yardım', path: '/faq' },
-    { icon: Settings, label: 'Ayarlar', path: '/settings' }
+    { icon: MoreHorizontal, label: 'Diğer', path: '#', isMore: true }
   ];
+
+  const handleNavigation = (item: typeof mainMenuItems[0]) => {
+    if (item.isMore) {
+      setIsMoreMenuOpen(!isMoreMenuOpen);
+    } else {
+      navigate(item.path);
+      setIsMoreMenuOpen(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -54,35 +57,65 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       {/* Mobile Bottom Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t">
-        <div className="grid grid-cols-4 gap-1">
-          {mobileMenuItems.slice(0, 4).map((item) => (
+        <nav className="grid grid-cols-5 gap-1">
+          {mainMenuItems.map((item) => (
             <button
               key={item.path}
-              onClick={() => navigate(item.path)}
-              className="flex flex-col items-center justify-center py-2 hover:bg-gray-50"
+              onClick={() => handleNavigation(item)}
+              className={`flex flex-col items-center justify-center py-2 ${
+                location.pathname === item.path ? 'text-yellow-600' : 'text-gray-600'
+              } hover:bg-gray-50`}
             >
               <item.icon className="w-6 h-6" />
               <span className="text-xs mt-1">{item.label}</span>
             </button>
           ))}
-        </div>
+        </nav>
       </div>
 
       {/* Mobile More Menu */}
-      <div className="lg:hidden fixed bottom-16 left-0 right-0 bg-white border-t transform transition-transform duration-200 ease-in-out translate-y-full">
-        <div className="grid grid-cols-2 gap-4 p-4">
-          {mobileMenuItems.slice(4).map((item) => (
+      {isMoreMenuOpen && (
+        <div className="lg:hidden fixed bottom-[4.5rem] left-0 right-0 bg-white border-t border-b shadow-lg">
+          <div className="grid grid-cols-2 gap-4 p-4">
             <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
+              onClick={() => {
+                navigate('/notes');
+                setIsMoreMenuOpen(false);
+              }}
               className="flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50"
             >
-              <item.icon className="w-5 h-5" />
-              <span className="text-sm">{item.label}</span>
+              <span className="text-sm">Notlar</span>
             </button>
-          ))}
+            <button
+              onClick={() => {
+                navigate('/calendar');
+                setIsMoreMenuOpen(false);
+              }}
+              className="flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50"
+            >
+              <span className="text-sm">Takvim</span>
+            </button>
+            <button
+              onClick={() => {
+                navigate('/faq');
+                setIsMoreMenuOpen(false);
+              }}
+              className="flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50"
+            >
+              <span className="text-sm">Yardım</span>
+            </button>
+            <button
+              onClick={() => {
+                navigate('/settings');
+                setIsMoreMenuOpen(false);
+              }}
+              className="flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50"
+            >
+              <span className="text-sm">Ayarlar</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Add bottom padding for mobile to account for navigation */}
       <div className="lg:hidden h-16" />
