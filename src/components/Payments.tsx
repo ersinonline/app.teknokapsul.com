@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, Search, Filter, Plus } from 'lucide-react';
+import { CreditCard, Search, Plus } from 'lucide-react';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { LoadingSpinner } from './common/LoadingSpinner';
 import { ErrorMessage } from './common/ErrorMessage';
@@ -11,14 +11,12 @@ import { PaymentForm } from './payments/PaymentForm';
 import { Payment } from '../types/data';
 import { useAuth } from '../contexts/AuthContext';
 import { calculatePaymentStats } from '../utils/payments';
-import { DEFAULT_CATEGORIES, CategoryType } from '../types/budget';
 
 export const Payments = () => {
   const { user } = useAuth();
   const { data: payments = [], loading, error, reload } = useFirebaseData<Payment>('payments');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'paid' | 'pending'>('all');
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType | 'all'>('all');
   const [isPaymentFormOpen, setIsPaymentFormOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<Payment | undefined>(undefined);
 
@@ -37,22 +35,8 @@ export const Payments = () => {
       (filterStatus === 'paid' && payment.status === 'Ödendi') ||
       (filterStatus === 'pending' && payment.status === 'Ödenmedi');
 
-    const matchesCategory = 
-      selectedCategory === 'all' || payment.category === selectedCategory;
-
-    return matchesSearch && matchesStatus && matchesCategory;
+    return matchesSearch && matchesStatus;
   });
-
-  // Calculate category totals
-  const categoryTotals = payments.reduce((acc, payment) => {
-    if (payment.category) {
-      if (!acc[payment.category]) {
-        acc[payment.category] = 0;
-      }
-      acc[payment.category] += payment.amount;
-    }
-    return acc;
-  }, {} as Record<CategoryType, number>);
 
   const { totalAmount, pendingAmount, paidAmount } = calculatePaymentStats(filteredPayments);
 
@@ -100,29 +84,14 @@ export const Payments = () => {
           <option value="paid">Ödenmiş</option>
           <option value="pending">Ödenmemiş</option>
         </select>
-
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value as CategoryType | 'all')}
-          className="w-full sm:w-auto p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-        >
-          <option value="all">Tüm Kategoriler</option>
-          {Object.entries(DEFAULT_CATEGORIES).map(([key, label]) => (
-            <option key={key} value={key}>
-              {label} ({categoryTotals[key as CategoryType] ? 
-                `${categoryTotals[key as CategoryType].toLocaleString('tr-TR')} TL` : 
-                '0 TL'})
-            </option>
-          ))}
-        </select>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-2">
           <PaymentSummary totalAmount={totalAmount} />
         </div>
-        <div>
+        <div className="lg:col-span-2">
           <PaymentStats pendingAmount={pendingAmount} paidAmount={paidAmount} />
         </div>
       </div>

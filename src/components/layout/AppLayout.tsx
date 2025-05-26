@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, Home, CreditCard, Apple as Apps, Clock, MoreHorizontal } from 'lucide-react';
+import { Home, CreditCard, Apple as Apps, Clock, StickyNote, Calendar, HelpCircle, Settings } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -23,7 +23,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     { icon: Apps, label: 'Hizmetler', path: '/services' },
     { icon: CreditCard, label: 'Borçlar', path: '/payments' },
     { icon: Clock, label: 'Abonelikler', path: '/subscriptions' },
-    { icon: MoreHorizontal, label: 'Diğer', path: '/more' }
+    { icon: StickyNote, label: 'Notlar', path: '/notes' },
+    { icon: Calendar, label: 'Takvim', path: '/calendar' },
+    { icon: HelpCircle, label: 'Yardım', path: '/faq' },
+    { icon: Settings, label: 'Ayarlar', path: '/settings' }
   ];
 
   return (
@@ -38,13 +41,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       {/* Mobile Header */}
       <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b">
-        <button
-          onClick={() => setIsSidebarOpen(true)}
-          className="p-2 hover:bg-gray-100 rounded-lg"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
-
         <div className="flex items-center space-x-4">
           <span className="text-sm font-medium">{user?.displayName || 'Kullanıcı'}</span>
         </div>
@@ -58,8 +54,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       {/* Mobile Bottom Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t">
-        <div className="grid grid-cols-5 gap-1">
-          {mobileMenuItems.map((item) => (
+        <div className="grid grid-cols-4 gap-1">
+          {mobileMenuItems.slice(0, 4).map((item) => (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
@@ -67,6 +63,22 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             >
               <item.icon className="w-6 h-6" />
               <span className="text-xs mt-1">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Mobile More Menu */}
+      <div className="lg:hidden fixed bottom-16 left-0 right-0 bg-white border-t transform transition-transform duration-200 ease-in-out translate-y-full">
+        <div className="grid grid-cols-2 gap-4 p-4">
+          {mobileMenuItems.slice(4).map((item) => (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className="flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50"
+            >
+              <item.icon className="w-5 h-5" />
+              <span className="text-sm">{item.label}</span>
             </button>
           ))}
         </div>
