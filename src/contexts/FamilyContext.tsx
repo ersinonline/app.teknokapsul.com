@@ -1,156 +1,118 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-<<<<<<< HEAD
-import { collection, query, where, getDocs } from 'firebase/firestore';
-=======
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
-import { db } from '../lib/firebase';
+import { db } from '../config/firebase';
 import { useAuth } from './AuthContext';
 
-interface FamilyMember {
+interface Family {
   id: string;
   name: string;
-  email: string;
-  role: 'admin' | 'member';
-  permissions: string[];
+  members: string[];
+  createdBy: string;
 }
 
 interface FamilyContextType {
-  familyMembers: FamilyMember[];
-  inviteMember: (email: string) => Promise<void>;
-  removeMember: (memberId: string) => Promise<void>;
-  updateMemberRole: (memberId: string, role: 'admin' | 'member') => Promise<void>;
+  families: Family[];
   loading: boolean;
-  error: string | null;
+  error: Error | null;
+  addFamily: (name: string) => Promise<void>;
+  updateFamily: (id: string, name: string) => Promise<void>;
+  deleteFamily: (id: string) => Promise<void>;
+  refreshFamilies: () => Promise<void>;
 }
 
 const FamilyContext = createContext<FamilyContextType | undefined>(undefined);
 
 export const FamilyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+  const [families, setFamilies] = useState<Family[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    const loadFamilyMembers = async () => {
-      if (!user) return;
+  const loadFamilies = async () => {
+    if (!user) return;
 
-      try {
-        const familyRef = collection(db, 'family-members');
-        const q = query(familyRef, where('familyId', '==', user.uid));
-        const snapshot = await getDocs(q);
-        
-        const members = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as FamilyMember));
-        
-        setFamilyMembers(members);
-      } catch (err) {
-        setError('Failed to load family members');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadFamilyMembers();
-  }, [user]);
-
-  const inviteMember = async (email: string) => {
-<<<<<<< HEAD
-    // Implementation for inviting family members
-  };
-
-  const removeMember = async (memberId: string) => {
-    // Implementation for removing family members
-  };
-
-  const updateMemberRole = async (memberId: string, role: 'admin' | 'member') => {
-    // Implementation for updating member roles
-=======
-    if (!user) throw new Error('User must be logged in');
-    
     try {
-      await addDoc(collection(db, 'family-members'), {
-        email,
-        familyId: user.uid,
-        role: 'member',
-        permissions: ['view'],
-        createdAt: new Date().toISOString()
-      });
-      
-      // Reload family members
-      const familyRef = collection(db, 'family-members');
-      const q = query(familyRef, where('familyId', '==', user.uid));
-      const snapshot = await getDocs(q);
-      
-      const members = snapshot.docs.map(doc => ({
+      setLoading(true);
+      const q = query(
+        collection(db, 'families'),
+        where('members', 'array-contains', user.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      const loadedFamilies = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      } as FamilyMember));
-      
-      setFamilyMembers(members);
+      } as Family));
+      setFamilies(loadedFamilies);
+      setError(null);
     } catch (err) {
-      setError('Failed to invite family member');
-      console.error(err);
-      throw err;
+      console.error('Error loading families:', err);
+      setError(err instanceof Error ? err : new Error('Aileler yüklenirken bir hata oluştu.'));
+    } finally {
+      setLoading(false);
     }
   };
 
-  const removeMember = async (memberId: string) => {
-    if (!user) throw new Error('User must be logged in');
-    
+  useEffect(() => {
+    loadFamilies();
+  }, [user]);
+
+  const addFamily = async (name: string) => {
+    if (!user) throw new Error('Kullanıcı girişi gerekli');
+
     try {
-      await deleteDoc(doc(db, 'family-members', memberId));
-      
-      // Update local state
-      setFamilyMembers(prev => prev.filter(member => member.id !== memberId));
+      const familyData = {
+        name,
+        members: [user.uid],
+        createdBy: user.uid,
+        createdAt: new Date().toISOString()
+      };
+
+      await addDoc(collection(db, 'families'), familyData);
+      await loadFamilies();
     } catch (err) {
-      setError('Failed to remove family member');
-      console.error(err);
-      throw err;
+      console.error('Error adding family:', err);
+      throw err instanceof Error ? err : new Error('Aile eklenirken bir hata oluştu.');
     }
   };
 
-  const updateMemberRole = async (memberId: string, role: 'admin' | 'member') => {
-    if (!user) throw new Error('User must be logged in');
-    
+  const updateFamily = async (id: string, name: string) => {
+    if (!user) throw new Error('Kullanıcı girişi gerekli');
+
     try {
-      const memberRef = doc(db, 'family-members', memberId);
-      await updateDoc(memberRef, {
-        role,
-        permissions: role === 'admin' ? ['view', 'edit', 'delete'] : ['view']
-      });
-      
-      // Update local state
-      setFamilyMembers(prev => 
-        prev.map(member => 
-          member.id === memberId 
-            ? { ...member, role, permissions: role === 'admin' ? ['view', 'edit', 'delete'] : ['view'] }
-            : member
-        )
-      );
+      const familyRef = doc(db, 'families', id);
+      await updateDoc(familyRef, { name });
+      await loadFamilies();
     } catch (err) {
-      setError('Failed to update member role');
-      console.error(err);
-      throw err;
+      console.error('Error updating family:', err);
+      throw err instanceof Error ? err : new Error('Aile güncellenirken bir hata oluştu.');
     }
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
+  };
+
+  const deleteFamily = async (id: string) => {
+    if (!user) throw new Error('Kullanıcı girişi gerekli');
+
+    try {
+      const familyRef = doc(db, 'families', id);
+      await deleteDoc(familyRef);
+      await loadFamilies();
+    } catch (err) {
+      console.error('Error deleting family:', err);
+      throw err instanceof Error ? err : new Error('Aile silinirken bir hata oluştu.');
+    }
+  };
+
+  const value = {
+    families,
+    loading,
+    error,
+    addFamily,
+    updateFamily,
+    deleteFamily,
+    refreshFamilies: loadFamilies
   };
 
   return (
-    <FamilyContext.Provider
-      value={{
-        familyMembers,
-        inviteMember,
-        removeMember,
-        updateMemberRole,
-        loading,
-        error
-      }}
-    >
+    <FamilyContext.Provider value={value}>
       {children}
     </FamilyContext.Provider>
   );

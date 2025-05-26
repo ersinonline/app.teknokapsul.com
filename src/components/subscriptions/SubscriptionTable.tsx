@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import { Clock, AlertCircle, CheckCircle } from 'lucide-react';
-import { Subscription } from '../../types/subscription';
-import { calculateDaysRemaining } from '../../utils/date';
-
-interface SubscriptionTableProps {
-  subscriptions: Subscription[];
-}
-
-export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscriptions }) => {
-=======
 import React, { useState } from 'react';
 import { Clock, AlertCircle, CheckCircle, Edit2, Trash2, Power } from 'lucide-react';
 import { Subscription } from '../../types/subscription';
@@ -51,7 +39,6 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
     }
   };
 
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
   if (subscriptions.length === 0) {
     return (
       <div className="text-center text-gray-500 py-6">
@@ -64,9 +51,6 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
     (a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
   );
 
-<<<<<<< HEAD
-  const getStatusInfo = (daysRemaining: number) => {
-=======
   const getStatusInfo = (daysRemaining: number, isActive: boolean) => {
     if (!isActive) {
       return {
@@ -75,7 +59,6 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
         className: 'bg-gray-100 text-gray-800'
       };
     }
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
     if (daysRemaining <= 0) {
       return {
         icon: <AlertCircle className="w-4 h-4" />,
@@ -99,8 +82,6 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
 
   return (
     <div className="overflow-x-auto" aria-label="Abonelik Tablosu">
-<<<<<<< HEAD
-=======
       {editingSubscription && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-lg w-full">
@@ -128,7 +109,6 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
         </div>
       )}
 
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -150,37 +130,23 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
             >
               Durum
             </th>
-<<<<<<< HEAD
-=======
             <th
               scope="col"
               className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               İşlemler
             </th>
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {sortedSubscriptions.map((subscription) => {
             const daysRemaining = calculateDaysRemaining(subscription.endDate);
-<<<<<<< HEAD
-            const { icon, text, className } = getStatusInfo(daysRemaining);
-=======
             const { icon, text, className } = getStatusInfo(daysRemaining, subscription.isActive);
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
 
             return (
               <tr key={subscription.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">{subscription.name}</div>
-<<<<<<< HEAD
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">
-                    {new Date(subscription.endDate).toLocaleDateString('tr-TR')}
-                  </div>
-=======
                   <div className="text-sm text-gray-500">{subscription.price} TL/ay</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -192,7 +158,6 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
                       Otomatik yenileme: {subscription.renewalDay}. gün
                     </div>
                   )}
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
@@ -202,8 +167,6 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
                     {text}
                   </span>
                 </td>
-<<<<<<< HEAD
-=======
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end gap-2">
                     <button
@@ -230,7 +193,6 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
                     </button>
                   </div>
                 </td>
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
               </tr>
             );
           })}

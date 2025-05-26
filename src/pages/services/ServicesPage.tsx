@@ -1,17 +1,12 @@
 import React from 'react';
 import { 
-  Grid, Card, CardContent, Typography, Container, Box,
-  CardMedia, Button, CardActionArea, CardActions, Chip, Avatar
+  Grid, Card, Typography, Container, Box,
+  Chip, Avatar, Divider, useTheme
 } from '@mui/material';
 import { 
-  DirectionsCar, Home, LocalHospital, Pets, 
-  Security, FlightTakeoff, AccountBalance, Receipt,
-  LocalFireDepartment, AccountBalanceWallet,
-  SportsEsports, Tv, VideogameAsset, Shop, PhoneAndroid, Apple,
-  Games, MovieFilter, Phone, ElectricBolt, LocalGasStation, WaterDrop,
-  Payments, Wifi, Router, LiveTv, Speed, Cable,
-  CleaningServices, Business, Construction,
-  AlarmOn, Apps, LocalShipping
+  Security, Receipt, Router, PhoneAndroid,
+  Tv, SportsEsports, Shop, CleaningServices,
+  Business, LocalShipping
 } from '@mui/icons-material';
 
 const Services = () => {
@@ -214,7 +209,7 @@ const Services = () => {
     }
   ];
 
-  const handleServiceClick = (url) => {
+  const handleServiceClick = (url: string) => {
     window.open(url, '_blank');
   };
 
@@ -227,36 +222,94 @@ const Services = () => {
         px: { xs: 1, sm: 2 }
       }}
     >
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h5" fontWeight={600} gutterBottom>
+      <Box 
+        sx={{ 
+          mb: 6,
+          textAlign: 'center',
+          position: 'relative',
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: -16,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 60,
+            height: 4,
+            bgcolor: 'primary.main',
+            borderRadius: 2
+          }
+        }}
+      >
+        <Typography 
+          variant="h4" 
+          fontWeight={700} 
+          gutterBottom
+          sx={{
+            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+            backgroundClip: 'text',
+            textFillColor: 'transparent',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}
+        >
           Tüm Hizmetler
         </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Tüm hizmetlere tek yerden ulaşın
+        <Typography 
+          variant="body1" 
+          color="text.secondary"
+          sx={{ maxWidth: 600, mx: 'auto' }}
+        >
+          Tüm hizmetlere tek yerden ulaşın, ihtiyacınıza en uygun çözümü bulun
         </Typography>
       </Box>
 
       {serviceGroups.map((group, groupIndex) => (
-        <Box key={groupIndex} sx={{ mb: 6 }}>
+        <Box key={groupIndex} sx={{ mb: 8 }}>
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center', 
             gap: 2, 
-            mb: 3 
+            mb: 4,
+            position: 'relative'
           }}>
             <Avatar 
               sx={{ 
                 bgcolor: `${group.color}15`,
-                width: 56,
-                height: 56,
-                p: 1
+                width: 64,
+                height: 64,
+                p: 1.5,
+                boxShadow: `0 4px 20px ${group.color}40`
               }}
             >
-              {React.cloneElement(group.icon, { sx: { color: group.color } })}
+              {React.cloneElement(group.icon, { 
+                sx: { 
+                  color: group.color,
+                  fontSize: 32
+                } 
+              })}
             </Avatar>
-            <Typography variant="h5" fontWeight={600}>
-              {group.title}
-            </Typography>
+            <Box>
+              <Typography 
+                variant="h5" 
+                fontWeight={700}
+                sx={{
+                  background: `linear-gradient(45deg, ${group.color} 30%, ${group.color}90 90%)`,
+                  backgroundClip: 'text',
+                  textFillColor: 'transparent',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}
+              >
+                {group.title}
+              </Typography>
+              <Typography 
+                variant="body2" 
+                color="text.secondary"
+                sx={{ mt: 0.5 }}
+              >
+                {group.services.length} hizmet
+              </Typography>
+            </Box>
           </Box>
 
           <Grid container spacing={3}>
@@ -266,26 +319,34 @@ const Services = () => {
                   sx={{ 
                     height: '100%',
                     transition: 'all 0.3s ease',
+                    borderRadius: 2,
+                    border: '1px solid',
+                    borderColor: 'divider',
                     '&:hover': {
                       transform: 'translateY(-8px)',
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
+                      boxShadow: `0 12px 24px ${group.color}20`,
+                      borderColor: group.color
                     }
                   }}
                 >
                   <Box 
                     onClick={() => handleServiceClick(service.url)}
                     sx={{ 
-                      p: 2,
+                      p: 2.5,
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       cursor: 'pointer',
                       '&:hover': {
-                        bgcolor: 'action.hover'
+                        bgcolor: `${group.color}08`
                       }
                     }}
                   >
-                    <Typography variant="subtitle1">
+                    <Typography 
+                      variant="subtitle1" 
+                      fontWeight={500}
+                      sx={{ color: 'text.primary' }}
+                    >
                       {service.name}
                     </Typography>
                     {service.tag && (
@@ -295,7 +356,11 @@ const Services = () => {
                         sx={{
                           bgcolor: `${group.color}15`,
                           color: group.color,
-                          fontWeight: 500
+                          fontWeight: 600,
+                          height: 24,
+                          '& .MuiChip-label': {
+                            px: 1.5
+                          }
                         }}
                       />
                     )}
@@ -304,6 +369,10 @@ const Services = () => {
               </Grid>
             ))}
           </Grid>
+          
+          {groupIndex < serviceGroups.length - 1 && (
+            <Divider sx={{ mt: 6, mb: 2 }} />
+          )}
         </Box>
       ))}
     </Container>

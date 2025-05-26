@@ -1,15 +1,7 @@
-<<<<<<< HEAD
-import React, { useState } from 'react';
-import { Clock } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useFirebaseData } from '../../hooks/useFirebaseData';
-import { addSubscription } from '../../services/subscription.service';
-=======
 import React, { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { addSubscription, getUserSubscriptions } from '../../services/subscription.service';
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorMessage } from '../../components/common/ErrorMessage';
 import { EmptyState } from '../../components/common/EmptyState';
@@ -22,9 +14,6 @@ export const SubscriptionsPage = () => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-<<<<<<< HEAD
-  const { data: subscriptions = [], loading, error, reload } = useFirebaseData<Subscription>('subscriptions');
-=======
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -34,7 +23,9 @@ export const SubscriptionsPage = () => {
     
     try {
       setLoading(true);
+      console.log('Loading subscriptions for user:', user.uid);
       const userSubscriptions = await getUserSubscriptions(user.uid);
+      console.log('Loaded subscriptions:', userSubscriptions);
       setSubscriptions(userSubscriptions);
       setError(null);
     } catch (err) {
@@ -48,7 +39,6 @@ export const SubscriptionsPage = () => {
   useEffect(() => {
     loadSubscriptions();
   }, [user]);
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
 
   const handleSubmit = async (data: SubscriptionFormData) => {
     if (!user) return;
@@ -57,29 +47,20 @@ export const SubscriptionsPage = () => {
     setSuccessMessage(null);
 
     try {
+      console.log('Adding subscription:', data);
       await addSubscription(user.uid, data);
       setSuccessMessage('Abonelik başarıyla eklendi.');
-<<<<<<< HEAD
-      await reload(); // Veri yüklemesini yeniler
-    } catch (error) {
-      console.error('Error adding subscription:', error);
-=======
       await loadSubscriptions();
     } catch (error) {
       console.error('Error adding subscription:', error);
       setError(error instanceof Error ? error : new Error('Abonelik eklenirken bir hata oluştu.'));
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
     } finally {
       setIsSubmitting(false);
     }
   };
 
   if (loading) return <LoadingSpinner />;
-<<<<<<< HEAD
-  if (error) return <ErrorMessage message="Abonelikler yüklenirken bir hata oluştu." />;
-=======
   if (error) return <ErrorMessage message={error.message} />;
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
   if (!user) return <ErrorMessage message="Lütfen giriş yapın." />;
 
   const sortedSubscriptions = [...subscriptions].sort(
@@ -118,11 +99,7 @@ export const SubscriptionsPage = () => {
           <div className="p-6 border-b">
             <h2 className="text-lg font-medium">Aboneliklerim</h2>
           </div>
-<<<<<<< HEAD
-          <SubscriptionTable subscriptions={sortedSubscriptions} />
-=======
           <SubscriptionTable subscriptions={sortedSubscriptions} onUpdate={loadSubscriptions} />
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
         </div>
       )}
     </div>

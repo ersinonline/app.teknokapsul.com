@@ -1,15 +1,10 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-<<<<<<< HEAD
 import { SubscriptionFormData } from '../../types/subscription';
-=======
-import { SubscriptionFormData, Subscription } from '../../types/subscription';
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
 
 interface SubscriptionFormProps {
   onSubmit: (data: SubscriptionFormData) => Promise<void>;
   isLoading?: boolean;
-<<<<<<< HEAD
 }
 
 export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ onSubmit, isLoading }) => {
@@ -17,20 +12,6 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ onSubmit, is
     defaultValues: {
       autoRenew: false,
       price: 0
-=======
-  initialData?: Subscription;
-}
-
-export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ onSubmit, isLoading, initialData }) => {
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<SubscriptionFormData>({
-    defaultValues: {
-      name: initialData?.name || '',
-      price: initialData?.price || 0,
-      autoRenew: initialData?.autoRenew || false,
-      renewalDay: initialData?.renewalDay,
-      endDate: initialData?.endDate,
-      isActive: initialData?.isActive
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
     }
   });
   const [submissionError, setSubmissionError] = useState<string | null>(null);
@@ -39,8 +20,6 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ onSubmit, is
   const onFormSubmit = async (data: SubscriptionFormData) => {
     setSubmissionError(null);
     try {
-<<<<<<< HEAD
-=======
       // Form verilerini doğrula
       if (data.autoRenew && !data.renewalDay) {
         throw new Error('Yenileme günü seçilmedi');
@@ -49,16 +28,11 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ onSubmit, is
         throw new Error('Bitiş tarihi seçilmedi');
       }
 
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
       await onSubmit(data);
       reset();
     } catch (error) {
       console.error('Form submission error:', error);
-<<<<<<< HEAD
-      setSubmissionError('Form gönderilirken bir hata oluştu. Lütfen tekrar deneyin.');
-=======
       setSubmissionError(error instanceof Error ? error.message : 'Form gönderilirken bir hata oluştu. Lütfen tekrar deneyin.');
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
     }
   };
 
@@ -118,11 +92,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ onSubmit, is
             min="1"
             max="31"
             {...register('renewalDay', {
-<<<<<<< HEAD
-              required: 'Yenileme günü gerekli',
-=======
               required: autoRenew ? 'Yenileme günü gerekli' : false,
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
               min: { value: 1, message: 'Gün 1-31 arasında olmalı' },
               max: { value: 31, message: 'Gün 1-31 arasında olmalı' }
             })}
@@ -142,13 +112,9 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ onSubmit, is
           <input
             type="date"
             id="endDate"
-<<<<<<< HEAD
-            {...register('endDate', { required: 'Bitiş tarihi gerekli' })}
-=======
             {...register('endDate', {
               required: !autoRenew ? 'Bitiş tarihi gerekli' : false
             })}
->>>>>>> 8a8743f (Initial commit: Subscription management system with user-specific subscriptions and date handling improvements)
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-yellow-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 disabled:opacity-50"
             min={new Date().toISOString().split('T')[0]}
             disabled={isLoading}
