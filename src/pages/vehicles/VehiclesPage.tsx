@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Car, FileText, AlertTriangle } from 'lucide-react';
+import { Plus, Car, FileText, AlertTriangle, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFirebaseData } from '../../hooks/useFirebaseData';
 import { Vehicle } from '../../types/vehicle';
@@ -11,9 +11,14 @@ export const VehiclesPage = () => {
   const { user } = useAuth();
   const { data: vehicles = [], loading, error } = useFirebaseData<Vehicle>('vehicles');
   const [isAddingVehicle, setIsAddingVehicle] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message="Araçlar yüklenirken bir hata oluştu." />;
+
+  const handleVehicleClick = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
+  };
 
   return (
     <div className="space-y-6">
@@ -44,7 +49,11 @@ export const VehiclesPage = () => {
             const hasWarning = inspectionDays <= 30 || maintenanceDays <= 30 || insuranceDays <= 30;
 
             return (
-              <div key={vehicle.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div 
+                key={vehicle.id} 
+                className="bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => handleVehicleClick(vehicle)}
+              >
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -53,11 +62,14 @@ export const VehiclesPage = () => {
                       </div>
                       <h3 className="text-lg font-medium">{vehicle.plate}</h3>
                     </div>
-                    {hasWarning && (
-                      <div className="p-2 bg-yellow-100 rounded-lg">
-                        <AlertTriangle className="w-5 h-5 text-yellow-600" />
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {hasWarning && (
+                        <div className="p-2 bg-yellow-100 rounded-lg">
+                          <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                        </div>
+                      )}
+                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -83,32 +95,6 @@ export const VehiclesPage = () => {
                         </div>
                       )}
                     </div>
-
-                    {/* Documents */}
-                    <div className="flex gap-2 mt-4">
-                      {vehicle.documents?.insurance && (
-                        <a
-                          href={vehicle.documents.insurance}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm"
-                        >
-                          <FileText className="w-4 h-4 mr-1" />
-                          Sigorta
-                        </a>
-                      )}
-                      {vehicle.documents?.inspection && (
-                        <a
-                          href={vehicle.documents.inspection}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"
-                        >
-                          <FileText className="w-4 h-4 mr-1" />
-                          Muayene
-                        </a>
-                      )}
-                    </div>
                   </div>
                 </div>
               </div>
@@ -117,7 +103,101 @@ export const VehiclesPage = () => {
         </div>
       )}
 
-      {/* Add Vehicle Form Modal will be added here */}
+      {/* Vehicle Detail Modal */}
+      {selectedVehicle && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b sticky top-0 bg-white">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">{selectedVehicle.plate}</h2>
+                <button 
+                  onClick={() => setSelectedVehicle(null)}
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* Vehicle Info */}
+              <div>
+                <h3 className="text-lg font-medium mb-4">Araç Bilgileri</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500">Marka</p>
+                    <p className="font-medium">{selectedVehicle.brand}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Model</p>
+                    <p className="font-medium">{selectedVehicle.model}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Yıl</p>
+                    <p className="font-medium">{selectedVehicle.year}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Documents */}
+              <div>
+                <h3 className="text-lg font-medium mb-4">Belgeler</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Sigorta</p>
+                        <p className="text-sm text-gray-500">
+                          Bitiş: {new Date(selectedVehicle.insuranceEndDate).toLocaleDateString('tr-TR')}
+                        </p>
+                      </div>
+                      {selectedVehicle.documents?.insurance && (
+                        <a
+                          href={selectedVehicle.documents.insurance}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200"
+                        >
+                          <FileText className="w-5 h-5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Muayene</p>
+                        <p className="text-sm text-gray-500">
+                          Son: {new Date(selectedVehicle.lastInspectionDate).toLocaleDateString('tr-TR')}
+                        </p>
+                      </div>
+                      {selectedVehicle.documents?.inspection && (
+                        <a
+                          href={selectedVehicle.documents.inspection}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200"
+                        >
+                          <FileText className="w-5 h-5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes */}
+              {selectedVehicle.notes && (
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Notlar</h3>
+                  <p className="text-gray-600 whitespace-pre-wrap">{selectedVehicle.notes}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
