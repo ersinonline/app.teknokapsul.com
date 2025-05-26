@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, CreditCard, Settings, Calendar, StickyNote, HelpCircle, Clock, LogOut, X } from 'lucide-react';
+import { Home, Apple as Apps, CreditCard, Clock, MoreHorizontal, LogOut, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface SidebarProps {
@@ -18,10 +18,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
     { id: 'payments', path: '/payments', label: 'Borçlar', icon: CreditCard },
     { id: 'subscriptions', path: '/subscriptions', label: 'Abonelikler', icon: Clock },
-    { id: 'notes', path: '/notes', label: 'Notlar', icon: StickyNote },
-    { id: 'calendar', path: '/calendar', label: 'Takvim', icon: Calendar },
-    { id: 'faq', path: '/faq', label: 'Yardım', icon: HelpCircle },
-    { id: 'settings', path: '/settings', label: 'Ayarlar', icon: Settings }
+    { id: 'other', path: '/other', label: 'Diğer', icon: MoreHorizontal }
   ];
 
   const handleLogout = async () => {
@@ -49,17 +46,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         }`}
       >
         <div className="flex flex-col h-full">
-          <div className="p-4 border-b">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">TeknoKapsül</h2>
-              <button
-                onClick={onClose}
-                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
-                aria-label="Menüyü Kapat"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+          <div className="p-4 border-b flex items-center justify-between">
+            <h2 className="text-xl font-semibold">TeknoKapsül</h2>
+            <button
+              onClick={onClose}
+              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+              aria-label="Menüyü Kapat"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           <nav className="flex-1 overflow-y-auto p-4">
