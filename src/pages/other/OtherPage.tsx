@@ -27,7 +27,7 @@ export const OtherPage = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Diğer</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">Diğer İşlemler</h1>
 
       {/* Notes Section */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
