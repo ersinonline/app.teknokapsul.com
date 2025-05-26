@@ -1,17 +1,33 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  optimizeDeps: {
-    exclude: ['lucide-react'],
-    esbuildOptions: {
-      target: 'es2020',
-      supported: { 
-        'top-level-await': true 
+  build: {
+    target: 'esnext',
+    outDir: 'dist',
+    sourcemap: true,
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+          'ui-vendor': ['@mui/material', '@emotion/react', '@emotion/styled']
+        }
       }
     }
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'firebase/app',
+      'firebase/auth',
+      'firebase/firestore'
+    ],
+    exclude: ['lucide-react']
   },
   server: {
     port: 3000,
@@ -20,25 +36,5 @@ export default defineConfig({
     hmr: {
       timeout: 10000
     }
-  },
-  build: {
-    rollupOptions: {
-      onwarn(warning, warn) {
-        if (warning.code === 'PLUGIN_WARNING') return;
-        warn(warning);
-      }
-    },
-    target: 'es2020',
-    sourcemap: true,
-    minify: 'esbuild'
-  },
-  esbuild: {
-    logLevel: 'info',
-    target: 'es2020',
-    treeShaking: true,
-    legalComments: 'none',
-    minifyIdentifiers: true,
-    minifySyntax: true,
-    minifyWhitespace: true
   }
 });
