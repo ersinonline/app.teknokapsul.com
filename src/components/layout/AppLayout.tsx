@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, CreditCard, Clock, MoreHorizontal } from 'lucide-react';
+import { Home, Apple as Apps, CreditCard, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -10,20 +10,39 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   const mobileMenuItems = [
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
     { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
     { id: 'payments', path: '/payments', label: 'Borçlar', icon: CreditCard },
     { id: 'subscriptions', path: '/subscriptions', label: 'Abonelikler', icon: Clock },
-    { id: 'other', path: '/other', label: 'Diğer', icon: MoreHorizontal }
+    { id: 'other', path: '/other', label: 'Diğer', icon: Clock }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobil Header */}
+      <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b">
+        <h1 className="text-lg font-semibold">TeknoKapsül</h1>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600">{user?.displayName || user?.email}</span>
+          <button
+            onClick={handleSignOut}
+            className="text-sm text-red-600 hover:text-red-700"
+          >
+            Çıkış
+          </button>
+        </div>
+      </div>
+
       {/* Sidebar - Sadece masaüstünde görünür */}
       <Sidebar
         isOpen={isSidebarOpen}

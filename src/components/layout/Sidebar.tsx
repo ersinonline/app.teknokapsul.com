@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, CreditCard, Clock, MoreHorizontal, LogOut } from 'lucide-react';
+import { Home, Apple as Apps, CreditCard, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface SidebarProps {
@@ -18,7 +18,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
     { id: 'payments', path: '/payments', label: 'Borçlar', icon: CreditCard },
     { id: 'subscriptions', path: '/subscriptions', label: 'Abonelikler', icon: Clock },
-    { id: 'other', path: '/other', label: 'Diğer', icon: MoreHorizontal }
+    { id: 'notes', path: '/notes', label: 'Notlar', icon: StickyNote },
+    { id: 'calendar', path: '/calendar', label: 'Takvim', icon: Calendar },
+    { id: 'settings', path: '/settings', label: 'Ayarlar', icon: Settings },
+    { id: 'faq', path: '/faq', label: 'Yardım', icon: HelpCircle }
   ];
 
   const handleLogout = async () => {
