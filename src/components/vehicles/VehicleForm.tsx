@@ -1,4 +1,3 @@
-```tsx
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { addVehicle, uploadVehicleDocument } from '../../services/vehicle.service';
@@ -236,4 +235,3 @@ export const VehicleForm: React.FC<VehicleFormProps> = ({ onClose, onSave }) => 
     </div>
   );
 };
-```
