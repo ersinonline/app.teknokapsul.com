@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorMessage } from '../../components/common/ErrorMessage';
 import { calculateDaysRemaining } from '../../utils/date';
 import { formatCurrency } from '../../utils/currency';
+import { HomeForm } from '../../components/homes/HomeForm';
 
 export const HomesPage = () => {
   const { user } = useAuth();
@@ -96,6 +97,16 @@ export const HomesPage = () => {
             );
           })}
         </div>
+      )}
+
+      {isAddingHome && (
+        <HomeForm
+          onClose={() => setIsAddingHome(false)}
+          onSave={async () => {
+            await reload();
+            setIsAddingHome(false);
+          }}
+        />
       )}
 
       {/* Home Detail Modal */}
