@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, ScrollRestoration } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { FamilyProvider } from './contexts/FamilyContext';
 import { LoginPage } from './pages/auth/LoginPage';
@@ -17,32 +17,64 @@ import { CalendarPage } from './pages/calendar/CalendarPage';
 import { FAQPage } from './pages/faq/FAQPage';
 import { OtherPage } from './pages/other/OtherPage';
 
-const ProtectedRoute = ({ element }) => (
+const ProtectedRoute = ({ children }) => (
   <AuthGuard>
-    <AppLayout>{element}</AppLayout>
+    <AppLayout>{children}</AppLayout>
   </AuthGuard>
 );
+
+const router = createBrowserRouter([
+  {
+    path: '/login',
+    element: <LoginPage />
+  },
+  {
+    path: '/dashboard',
+    element: <ProtectedRoute><Dashboard /></ProtectedRoute>
+  },
+  {
+    path: '/services',
+    element: <ProtectedRoute><Services /></ProtectedRoute>
+  },
+  {
+    path: '/payments',
+    element: <ProtectedRoute><Payments /></ProtectedRoute>
+  },
+  {
+    path: '/subscriptions',
+    element: <ProtectedRoute><SubscriptionsPage /></ProtectedRoute>
+  },
+  {
+    path: '/settings',
+    element: <ProtectedRoute><SettingsPage /></ProtectedRoute>
+  },
+  {
+    path: '/notes',
+    element: <ProtectedRoute><NotesPage /></ProtectedRoute>
+  },
+  {
+    path: '/calendar',
+    element: <ProtectedRoute><CalendarPage /></ProtectedRoute>
+  },
+  {
+    path: '/faq',
+    element: <ProtectedRoute><FAQPage /></ProtectedRoute>
+  },
+  {
+    path: '/other',
+    element: <ProtectedRoute><OtherPage /></ProtectedRoute>
+  },
+  {
+    path: '/',
+    element: <Navigate to="/dashboard" replace />
+  }
+]);
 
 function App() {
   return (
     <AuthProvider>
       <FamilyProvider>
-        <Router>
-          <ScrollRestoration />
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
-            <Route path="/services" element={<ProtectedRoute element={<Services />} />} />
-            <Route path="/payments" element={<ProtectedRoute element={<Payments />} />} />
-            <Route path="/subscriptions" element={<ProtectedRoute element={<SubscriptionsPage />} />} />
-            <Route path="/settings" element={<ProtectedRoute element={<SettingsPage />} />} />
-            <Route path="/notes" element={<ProtectedRoute element={<NotesPage />} />} />
-            <Route path="/calendar" element={<ProtectedRoute element={<CalendarPage />} />} />
-            <Route path="/faq" element={<ProtectedRoute element={<FAQPage />} />} />
-            <Route path="/other" element={<ProtectedRoute element={<OtherPage />} />} />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </Router>
+        <RouterProvider router={router} />
       </FamilyProvider>
     </AuthProvider>
   );
