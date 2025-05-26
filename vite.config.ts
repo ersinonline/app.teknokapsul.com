@@ -10,8 +10,7 @@ export default defineConfig({
       target: 'es2020',
       supported: { 
         'top-level-await': true 
-      },
-      maxWorkers: 1, // Limit concurrent operations
+      }
     }
   },
   server: {
@@ -31,8 +30,7 @@ export default defineConfig({
     },
     target: 'es2020',
     sourcemap: true,
-    minify: 'esbuild',
-    chunkSizeWarningLimit: 1000, // Increase chunk size limit
+    minify: 'esbuild'
   },
   esbuild: {
     logLevel: 'info',
@@ -41,6 +39,6 @@ export default defineConfig({
     legalComments: 'none',
     minifyIdentifiers: true,
     minifySyntax: true,
-    minifyWhitespace: true,
+    minifyWhitespace: true
   }
 });
