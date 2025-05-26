@@ -16,7 +16,7 @@
     "@mui/icons-material": "^5.15.13",
     "@mui/material": "^5.15.13",
     "clsx": "^2.1.0",
-    "firebase": "^10.8.1",
+    "firebase": "^11.8.1",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
