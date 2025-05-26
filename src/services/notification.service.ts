@@ -1,15 +1,16 @@
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { doc, setDoc, updateDoc, addDoc, collection } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db } from '../config/firebase';
 import { Event } from '../types/calendar';
+import { app } from '../config/firebase';
 
-const messaging = getMessaging();
+const messaging = typeof window !== 'undefined' ? getMessaging(app) : null;
 
 const VAPID_KEY = 'BHgpQFYt4eS5sYmxVvzxOUPgUZLj7Y4q9Y5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q';
 
 export const initializeNotifications = async (userId: string) => {
   try {
-    if (!('Notification' in window)) {
+    if (!messaging || !('Notification' in window)) {
       console.log('This browser does not support notifications');
       return;
     }
@@ -38,6 +39,8 @@ export const initializeNotifications = async (userId: string) => {
 };
 
 export const setupNotificationListener = (callback: (payload: any) => void) => {
+  if (!messaging) return;
+  
   onMessage(messaging, (payload) => {
     if (Notification.permission === 'granted') {
       const { title, body } = payload.notification || {};
@@ -78,3 +81,26 @@ export const scheduleEventNotification = async (event: Event & { id: string }) =
     throw error;
   }
 };
+
+export const requestNotificationPermission = async () => {
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            const token = await getToken(messaging, {
+                vapidKey: 'YOUR_VAPID_KEY' // Firebase Console'dan alınacak
+            });
+            return token;
+        }
+        throw new Error('Notification permission denied');
+    } catch (error) {
+        console.error('Notification permission error:', error);
+        throw error;
+    }
+};
+
+export const onMessageListener = () =>
+    new Promise((resolve) => {
+        onMessage(messaging, (payload) => {
+            resolve(payload);
+        });
+    });

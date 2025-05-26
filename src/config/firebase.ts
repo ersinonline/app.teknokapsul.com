@@ -13,17 +13,12 @@ const firebaseConfig = {
     measurementId: "G-SJY3Z4VDPE"
 };
 
-// Firebase'i başlat
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Firestore ve Auth servislerini başlat
+// Initialize services
+const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Analytics'i başlat (sadece tarayıcıda)
-let analytics = null;
-if (typeof window !== 'undefined') {
-    analytics = getAnalytics(app);
-}
-
-export { app, db, auth, analytics }; 
+export { app, analytics, db, auth };
