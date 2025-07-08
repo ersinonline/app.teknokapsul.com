@@ -2,6 +2,7 @@ import React from 'react';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { FamilyProvider } from './contexts/FamilyContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { LoginPage } from './pages/auth/LoginPage';
 import { AppLayout } from './components/layout/AppLayout';
 import { AuthGuard } from './components/auth/AuthGuard';
@@ -9,17 +10,26 @@ import { AuthGuard } from './components/auth/AuthGuard';
 // Route components
 import { Dashboard } from './components/Dashboard';
 import Services from './pages/services/ServicesPage';
-import { Payments } from './components/Payments';
+
 import { SubscriptionsPage } from './pages/subscriptions/SubscriptionsPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { NotesPage } from './pages/notes/NotesPage';
 import { CalendarPage } from './pages/calendar/CalendarPage';
 import { FAQPage } from './pages/faq/FAQPage';
 import { OtherPage } from './pages/other/OtherPage';
+import { FinancialAnalytics } from './components/analytics/FinancialAnalytics';
+import { MobileNavigation } from './components/navigation/MobileNavigation';
 
-const ProtectedRoute = ({ children }) => (
+import { IncomePage } from './pages/income/IncomePage';
+import { ExpensePage } from './pages/expense/ExpensePage';
+import { FinancialDataPage } from './pages/financial/FinancialDataPage';
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
   <AuthGuard>
-    <AppLayout>{children}</AppLayout>
+    <AppLayout>
+      <MobileNavigation />
+      {children}
+    </AppLayout>
   </AuthGuard>
 );
 
@@ -36,13 +46,27 @@ const router = createBrowserRouter([
     path: '/services',
     element: <ProtectedRoute><Services /></ProtectedRoute>
   },
-  {
-    path: '/payments',
-    element: <ProtectedRoute><Payments /></ProtectedRoute>
-  },
+
   {
     path: '/subscriptions',
     element: <ProtectedRoute><SubscriptionsPage /></ProtectedRoute>
+  },
+  {
+    path: '/analytics',
+    element: <ProtectedRoute><FinancialAnalytics /></ProtectedRoute>
+  },
+
+  {
+    path: '/income',
+    element: <ProtectedRoute><IncomePage /></ProtectedRoute>
+  },
+  {
+    path: '/expenses',
+    element: <ProtectedRoute><ExpensePage /></ProtectedRoute>
+  },
+  {
+    path: '/financial-data',
+    element: <ProtectedRoute><FinancialDataPage /></ProtectedRoute>
   },
   {
     path: '/settings',
@@ -72,11 +96,15 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <AuthProvider>
-      <FamilyProvider>
-        <RouterProvider router={router} />
-      </FamilyProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <FamilyProvider>
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+            <RouterProvider router={router} />
+          </div>
+        </FamilyProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

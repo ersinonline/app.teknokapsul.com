@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://app.teknokapsul.com/</loc>
+    <lastmod>2024-01-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://app.teknokapsul.com/" />
+  </url>
+  <url>
+    <loc>https://app.teknokapsul.com/ai-assistant</loc>
+    <lastmod>2024-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://app.teknokapsul.com/ai-assistant" />
+  </url>
+  <url>
+    <loc>https://app.teknokapsul.com/analytics</loc>
+    <lastmod>2024-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://app.teknokapsul.com/analytics" />
+  </url>
+  <url>
+    <loc>https://app.teknokapsul.com/settings</loc>
+    <lastmod>2024-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://app.teknokapsul.com/settings" />
+  </url>
+  <url>
+    <loc>https://app.teknokapsul.com/subscriptions</loc>
+    <lastmod>2024-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://app.teknokapsul.com/subscriptions" />
+  </url>
+  <url>
+    <loc>https://app.teknokapsul.com/faq</loc>
+    <lastmod>2024-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://app.teknokapsul.com/faq" />
+  </url>
+</urlset>

@@ -69,4 +69,39 @@ export const startChat = async () => {
     console.error("AI sohbet başlatma hatası:", error);
     throw error;
   }
-}; 
+};
+
+export const getAIRecommendations = async (financialData: any): Promise<string[]> => {
+  try {
+    const prompt = `Finansal verilerime göre 3 kısa ve net öneri ver. Her öneri tek satırda olsun ve şu formatı kullan:
+    
+    * [Öneri metni]
+    
+    Örnek:
+    * Yüksek kredi yükü: Çok sayıda kredi ve kredi kartı borcunuz var. Bu, finansal durumunuz üzerinde ciddi bir baskı oluşturuyor.
+    * Market kategorisinde harcamalarınızı azaltmaya odaklanın.
+    * Günü geçmiş ödemelerinize dikkat edin ve öncelikle bunları kapatın.
+    
+    Finansal veriler: ${JSON.stringify(financialData)}`;
+    
+    const result = await generateText(prompt);
+    const recommendations = result
+      .split('\n')
+      .filter(line => line.trim().startsWith('*'))
+      .map(line => line.trim().substring(1).trim())
+      .slice(0, 3);
+    
+    return recommendations.length > 0 ? recommendations : [
+      "Yüksek kredi yükü: Çok sayıda kredi ve kredi kartı borcunuz var. Bu, finansal durumunuz üzerinde ciddi bir baskı oluşturuyor.",
+      "Market kategorisinde harcamalarınızı azaltmaya odaklanın.",
+      "Günü geçmiş ödemelerinize dikkat edin ve öncelikle bunları kapatın."
+    ];
+  } catch (error) {
+    console.error("AI önerileri alma hatası:", error);
+    return [
+      "Yüksek kredi yükü: Çok sayıda kredi ve kredi kartı borcunuz var. Bu, finansal durumunuz üzerinde ciddi bir baskı oluşturuyor.",
+      "Market kategorisinde harcamalarınızı azaltmaya odaklanın.",
+      "Günü geçmiş ödemelerinize dikkat edin ve öncelikle bunları kapatın."
+    ];
+  }
+};

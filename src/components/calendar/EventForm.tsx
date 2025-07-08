@@ -17,7 +17,7 @@ export const EventForm: React.FC<EventFormProps> = ({ onClose, onSave, selectedD
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    date: selectedDate.toISOString().split('T')[0],
+    date: `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`,
     time: '12:00',
     type: 'event' as 'event' | 'birthday' | 'reminder'
   });
@@ -75,7 +75,10 @@ export const EventForm: React.FC<EventFormProps> = ({ onClose, onSave, selectedD
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+              style={{ '--tw-ring-color': '#ffb700' } as React.CSSProperties}
+              onFocus={(e) => e.target.style.borderColor = '#ffb700'}
+              onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
               required
             />
           </div>
@@ -88,7 +91,10 @@ export const EventForm: React.FC<EventFormProps> = ({ onClose, onSave, selectedD
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+              style={{ '--tw-ring-color': '#ffb700' } as React.CSSProperties}
+              onFocus={(e) => e.target.style.borderColor = '#ffb700'}
+              onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
               rows={3}
             />
           </div>
@@ -103,7 +109,10 @@ export const EventForm: React.FC<EventFormProps> = ({ onClose, onSave, selectedD
                 id="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                style={{ '--tw-ring-color': '#ffb700' } as React.CSSProperties}
+                onFocus={(e) => e.target.style.borderColor = '#ffb700'}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                 required
               />
             </div>
@@ -117,7 +126,10 @@ export const EventForm: React.FC<EventFormProps> = ({ onClose, onSave, selectedD
                 id="time"
                 value={formData.time}
                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                style={{ '--tw-ring-color': '#ffb700' } as React.CSSProperties}
+                onFocus={(e) => e.target.style.borderColor = '#ffb700'}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                 required
               />
             </div>
@@ -131,7 +143,10 @@ export const EventForm: React.FC<EventFormProps> = ({ onClose, onSave, selectedD
               id="type"
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value as 'event' | 'birthday' | 'reminder' })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+              style={{ '--tw-ring-color': '#ffb700' } as React.CSSProperties}
+              onFocus={(e) => e.target.style.borderColor = '#ffb700'}
+              onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
               required
             >
               <option value="event">Etkinlik</option>
@@ -150,7 +165,10 @@ export const EventForm: React.FC<EventFormProps> = ({ onClose, onSave, selectedD
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+              className="px-4 py-2 text-white rounded-lg transition-colors"
+              style={{ backgroundColor: '#ffb700' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
             >
               Kaydet
             </button>

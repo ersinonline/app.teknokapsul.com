@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+
+# Google AdSense
+User-agent: Mediapartners-Google
+Allow: /
+
+# Sitemap
+Sitemap: https://app.teknokapsul.com/sitemap.xml
+
+# Disallow admin areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /.env
+Disallow: /config/
+
+# Allow important pages for SEO
+Allow: /
+Allow: /ai-assistant
+Allow: /analytics
+Allow: /settings
+Allow: /subscriptions
+Allow: /faq
+
+# Crawl delay
+Crawl-delay: 1

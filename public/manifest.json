@@ -1,0 +1,86 @@
+{
+  "name": "TeknoKapsül",
+  "short_name": "TeknoKapsül",
+  "description": "Kişisel finans yönetimi ve teknoloji takip uygulaması",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffb700",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "tr",
+  "dir": "ltr",
+  "categories": ["finance", "productivity", "business"],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512x512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ana Sayfa",
+      "short_name": "Dashboard",
+      "description": "Ana sayfa ve genel bakış",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.svg",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Giderlerim",
+      "short_name": "Giderler",
+      "description": "Gider takibi ve yönetimi",
+      "url": "/expenses",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.svg",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Gelirlerim",
+      "short_name": "Gelirler",
+      "description": "Gelir takibi ve yönetimi",
+      "url": "/income",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.svg",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Aboneliklerim",
+      "short_name": "Abonelikler",
+      "description": "Abonelik yönetimi",
+      "url": "/subscriptions",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.svg",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
+}

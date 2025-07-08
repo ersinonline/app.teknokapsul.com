@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Subscription, SubscriptionFormData } from '../types/subscription';
 
@@ -17,9 +17,8 @@ const calculateEndDate = (renewalDay: number): Date => {
 export const getUserSubscriptions = async (userId: string): Promise<Subscription[]> => {
   try {
     console.log('Fetching subscriptions for user:', userId);
-    const subscriptionsRef = collection(db, 'subscription-end');
-    const q = query(subscriptionsRef, where('userId', '==', userId));
-    const querySnapshot = await getDocs(q);
+    const subscriptionsRef = collection(db, 'teknokapsul', userId, 'subscriptions');
+    const querySnapshot = await getDocs(subscriptionsRef);
     
     console.log('Query snapshot size:', querySnapshot.size);
     const subscriptions = querySnapshot.docs.map(doc => {
@@ -55,10 +54,9 @@ export const addSubscription = async (userId: string, data: SubscriptionFormData
       ? calculateEndDate(data.renewalDay).toISOString()
       : new Date(data.endDate!).toISOString();
 
-    await addDoc(collection(db, 'subscription-end'), {
+    await addDoc(collection(db, 'teknokapsul', userId, 'subscriptions'), {
       name: data.name,
       subscriptionEndDate: endDate,
-      userId,
       autoRenew: data.autoRenew,
       renewalDay: data.autoRenew ? data.renewalDay : null,
       price: data.price || 0,
@@ -74,10 +72,11 @@ export const addSubscription = async (userId: string, data: SubscriptionFormData
 
 export const updateSubscription = async (
   subscriptionId: string,
+  userId: string,
   data: Partial<SubscriptionFormData>
 ): Promise<void> => {
   try {
-    const subscriptionRef = doc(db, 'subscription-end', subscriptionId);
+    const subscriptionRef = doc(db, 'teknokapsul', userId, 'subscriptions', subscriptionId);
     const updateData: any = {};
 
     if (data.name) updateData.name = data.name;
@@ -100,18 +99,18 @@ export const updateSubscription = async (
   }
 };
 
-export const deleteSubscription = async (subscriptionId: string): Promise<void> => {
+export const deleteSubscription = async (subscriptionId: string, userId: string): Promise<void> => {
   try {
-    await deleteDoc(doc(db, 'subscription-end', subscriptionId));
+    await deleteDoc(doc(db, 'teknokapsul', userId, 'subscriptions', subscriptionId));
   } catch (error) {
     console.error('Error deleting subscription:', error);
     throw error;
   }
 };
 
-export const toggleSubscriptionStatus = async (subscriptionId: string, isActive: boolean): Promise<void> => {
+export const toggleSubscriptionStatus = async (subscriptionId: string, userId: string, isActive: boolean): Promise<void> => {
   try {
-    const subscriptionRef = doc(db, 'subscription-end', subscriptionId);
+    const subscriptionRef = doc(db, 'teknokapsul', userId, 'subscriptions', subscriptionId);
     await updateDoc(subscriptionRef, { isActive });
   } catch (error) {
     console.error('Error toggling subscription status:', error);

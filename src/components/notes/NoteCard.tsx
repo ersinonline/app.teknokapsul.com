@@ -8,6 +8,7 @@ interface NoteCardProps {
   note: Note;
   onEdit: () => void;
   onDelete: () => void;
+  onView?: () => void;
 }
 
 export const NoteCard: React.FC<NoteCardProps> = ({ note, onEdit, onDelete }) => {

@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, CreditCard, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut } from 'lucide-react';
+import { Home, Clock, TrendingUp, TrendingDown } from 'lucide-react';
 import { Sidebar } from './Sidebar';
+import { ChatButton } from '../chat/ChatButton';
+import { MaintenanceBanner } from '../common/MaintenanceBanner';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface AppLayoutProps {
@@ -9,7 +11,6 @@ interface AppLayoutProps {
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,14 +27,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   const mobileMenuItems = [
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
-    { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
-    { id: 'payments', path: '/payments', label: 'Borçlar', icon: CreditCard },
-    { id: 'subscriptions', path: '/subscriptions', label: 'Abonelikler', icon: Clock },
-    { id: 'other', path: '/other', label: 'Diğer', icon: Clock }
+    { id: 'income', path: '/income', label: 'Gelirlerim', icon: TrendingUp },
+    { id: 'expenses', path: '/expenses', label: 'Giderlerim', icon: TrendingDown },
+    { id: 'subscriptions', path: '/subscriptions', label: 'Aboneliklerim', icon: Clock }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Maintenance Banner */}
+      <MaintenanceBanner />
+      
       {/* Mobil Header - Fixed */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-20 bg-white border-b">
         <div className="flex items-center justify-between p-4">
@@ -51,13 +54,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       </div>
 
       {/* Sidebar - Sadece masaüstünde görünür */}
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-      />
+      <Sidebar />
 
       {/* Ana İçerik - Mobile header için padding eklendi */}
-      <div className="lg:pl-64 pb-16 lg:pb-0 mt-16 lg:mt-0">
+      <div className="lg:pl-64 pb-16 lg:pb-0 pt-16 lg:pt-0">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           {children}
         </div>
@@ -65,7 +65,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       {/* Mobil Alt Menü - Fixed */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t lg:hidden z-20">
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-4">
           {mobileMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -74,17 +74,20 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               <button
                 key={item.id}
                 onClick={() => navigate(item.path)}
-                className={`flex flex-col items-center justify-center py-2 ${
-                  isActive ? 'text-yellow-600' : 'text-gray-600'
-                }`}
+                className={`flex flex-col items-center justify-center py-3 px-2 ${
+                  isActive ? 'text-yellow-600 bg-yellow-50' : 'text-gray-600'
+                } hover:bg-gray-50 transition-colors`}
               >
-                <Icon className="w-6 h-6" />
-                <span className="text-xs mt-1">{item.label}</span>
+                <Icon className="w-5 h-5" />
+                <span className="text-xs mt-1 font-medium">{item.label}</span>
               </button>
             );
           })}
         </div>
       </div>
+      
+      {/* Chat Button */}
+      <ChatButton />
     </div>
   );
 };

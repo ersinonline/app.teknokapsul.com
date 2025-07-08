@@ -1,14 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/ico" href="/logo.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TeknoKapsül</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="description" content="TeknoKapsül - Akıllı finansal yönetim ve analiz platformu" />
+    <meta name="keywords" content="finansal yönetim, bütçe, harcama takibi, AI analiz" />
+    <meta name="author" content="TeknoKapsül" />
+    
+    <!-- Google AdSense Meta Tags -->
+    <meta name="google-adsense-account" content="ca-pub-XXXXXXXXXXXXXXXX">
+    <meta name="google-site-verification" content="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="TeknoKapsül - Akıllı Finansal Yönetim" />
+    <meta property="og:description" content="AI destekli kişisel finans yönetimi ve analiz uygulaması" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://app.teknokapsul.com" />
+    <meta property="og:image" content="https://app.teknokapsul.com/icons/icon-512x512.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TeknoKapsül - Akıllı Finansal Yönetim" />
+    <meta name="twitter:description" content="AI destekli kişisel finans yönetimi ve analiz uygulaması" />
+    <meta name="twitter:image" content="https://app.teknokapsul.com/icons/icon-512x512.svg" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="TeknoKapsül" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    
+    <!-- Microsoft PWA Meta Tags -->
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
+    <meta name="msapplication-TileColor" content="#3b82f6" />
+    
+    <title>TeknoKapsül - Akıllı Finansal Yönetim</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+            crossorigin="anonymous"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
 
 <script>
   if (window.location.pathname === "/faq") {

@@ -3,11 +3,12 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { Order, Application, Payment } from '../types/data';
+import { Expense } from '../types/expense';
 import { Subscription } from '../types/subscription';
 import { Note } from '../types/notes';
 import { Event } from '../types/calendar';
 
-type DataType = Order | Application | Payment | Subscription | Note | Event;
+type DataType = Order | Application | Payment | Expense | Subscription | Note | Event;
 
 interface UseFirebaseDataReturn<T> {
   data: T[];
@@ -52,6 +53,7 @@ export const useFirebaseData = <T extends DataType>(
             q = query(collectionRef, where('email', '==', user.email));
             break;
           case 'payments':
+          case 'expenses':
           case 'notes':
           case 'events':
           case 'subscriptions':

@@ -1,17 +1,26 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { SubscriptionFormData } from '../../types/subscription';
+import { SubscriptionFormData, Subscription } from '../../types/subscription';
 
 interface SubscriptionFormProps {
   onSubmit: (data: SubscriptionFormData) => Promise<void>;
   isLoading?: boolean;
+  initialData?: Subscription;
 }
 
-export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ onSubmit, isLoading }) => {
+export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ onSubmit, isLoading, initialData }) => {
   const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<SubscriptionFormData>({
-    defaultValues: {
+    defaultValues: initialData ? {
+      name: initialData.name,
+      endDate: initialData.endDate,
+      autoRenew: initialData.autoRenew,
+      renewalDay: initialData.renewalDay,
+      price: initialData.price,
+      isActive: initialData.isActive
+    } : {
       autoRenew: false,
-      price: 0
+      price: 0,
+      isActive: true
     }
   });
   const [submissionError, setSubmissionError] = useState<string | null>(null);

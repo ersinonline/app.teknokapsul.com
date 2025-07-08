@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoginForm } from '../../components/auth/LoginForm';
 import { SocialLogin } from '../../components/auth/SocialLogin';
-import { Logo } from '../../components/common/Logo';
-import { Package } from 'lucide-react';
+import { Package, Mail, Smartphone } from 'lucide-react';
 
 export const LoginPage = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
   const from = location.state?.from || '/dashboard';
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState<'google' | 'apple' | 'sms' | 'email' | null>(null);
 
   if (loading) {
     return (
@@ -82,42 +81,92 @@ export const LoginPage = () => {
           <div className="w-full max-w-md">
             <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 backdrop-blur-sm">
               <div className="text-center mb-6 sm:mb-8">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {isSignUp ? 'Hesap Oluştur' : 'Hoş Geldiniz'}
+                <div className="flex justify-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <span className="text-2xl font-bold text-white">TK</span>
+                  </div>
+                </div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                  Hoş Geldiniz
                 </h2>
-                <p className="text-gray-600 mt-2">
-                  {isSignUp
-                    ? 'Hemen ücretsiz hesabınızı oluşturun'
-                    : 'Hesabınıza giriş yapın'}
+                <p className="text-gray-600 mb-8">
+                  TeknoKapsül hesabınıza giriş yapın
                 </p>
               </div>
 
-              <LoginForm />
-
-              <div className="mt-6">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200" />
+              <div className="space-y-6">
+                {!selectedMethod ? (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900 text-center mb-6">
+                      Giriş yönteminizi seçin
+                    </h3>
+                    
+                    <div className="space-y-3">
+                      <SocialLogin method="google" />
+                      <SocialLogin method="apple" />
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          onClick={() => setSelectedMethod('sms')}
+                          className="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-xl hover:border-green-300 hover:bg-green-50 transition-all duration-200 group"
+                        >
+                          <Smartphone className="h-8 w-8 mb-2 text-gray-700 group-hover:text-green-600" />
+                          <span className="text-sm font-medium text-gray-700 group-hover:text-green-600">SMS</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => setSelectedMethod('email')}
+                          className="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-xl hover:border-yellow-300 hover:bg-yellow-50 transition-all duration-200 group"
+                        >
+                          <Mail className="h-8 w-8 mb-2 text-gray-700 group-hover:text-yellow-600" />
+                          <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-600">E-posta</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">veya</span>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {selectedMethod === 'google' && 'Google ile Giriş'}
+                        {selectedMethod === 'apple' && 'Apple ile Giriş'}
+                        {selectedMethod === 'sms' && 'SMS ile Giriş'}
+                        {selectedMethod === 'email' && 'E-posta ile Giriş'}
+                      </h3>
+                      <button
+                        onClick={() => setSelectedMethod(null)}
+                        className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                      >
+                        Geri
+                      </button>
+                    </div>
+                    
+                    {selectedMethod === 'google' && (
+                       <SocialLogin method="google" />
+                     )}
+                     
+                     {selectedMethod === 'apple' && (
+                       <SocialLogin method="apple" />
+                     )}
+                     
+                     {selectedMethod === 'sms' && (
+                       <SocialLogin method="sms" />
+                     )}
+                    
+                    {selectedMethod === 'email' && (
+                      <LoginForm />
+                    )}
                   </div>
+                )}
+                
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">
+                    Henüz hesabınız yok mu?{' '}
+                    <span className="font-semibold text-yellow-600 hover:text-yellow-500 cursor-pointer transition-colors">
+                      Hemen kayıt olun
+                    </span>
+                  </p>
                 </div>
-
-                <div className="mt-6">
-                  <SocialLogin />
-                </div>
-              </div>
-
-              <div className="mt-6 text-center">
-                <button
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-sm text-yellow-600 hover:text-yellow-700 transition-colors"
-                >
-                  {isSignUp
-                    ? 'Zaten hesabınız var mı? Giriş yapın'
-                    : 'Hesabınız yok mu? Kaydolun'}
-                </button>
               </div>
             </div>
           </div>

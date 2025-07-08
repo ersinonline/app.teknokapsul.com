@@ -1,4 +1,5 @@
 import { CategoryType } from './budget';
+export type { Expense, ExpenseFormData } from './expense';
 
 export interface OrderProduct {
   amount: string;

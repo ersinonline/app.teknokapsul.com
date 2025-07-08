@@ -1,8 +1,37 @@
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
-import { doc, setDoc, updateDoc, addDoc, collection, Firestore } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, addDoc, collection } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Event } from '../types/calendar';
 import { app } from '../config/firebase';
+
+export interface NotificationData {
+  id?: string;
+  title: string;
+  message: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  category: 'payment' | 'subscription' | 'budget' | 'ai' | 'system';
+  userId: string;
+  read: boolean;
+  actionUrl?: string;
+  actionText?: string;
+  data?: any;
+  createdAt: Date;
+  expiresAt?: Date;
+}
+
+export interface PushNotificationPayload {
+  title: string;
+  body: string;
+  icon?: string;
+  badge?: string;
+  image?: string;
+  data?: any;
+  actions?: Array<{
+    action: string;
+    title: string;
+    icon?: string;
+  }>;
+}
 
 let messaging = null;
 

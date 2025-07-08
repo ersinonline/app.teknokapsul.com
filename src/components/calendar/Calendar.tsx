@@ -77,11 +77,14 @@ export const Calendar: React.FC<CalendarProps> = ({
           <span
             className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${
               isToday
-                ? 'bg-yellow-600 text-white'
+                ? 'text-white'
                 : isSelected
-                ? 'bg-yellow-100 text-yellow-800'
+                ? 'text-[#ffb700]'
                 : ''
             }`}
+            style={{
+              backgroundColor: isToday ? '#ffb700' : isSelected ? '#ffb700' + '20' : 'transparent'
+            }}
           >
             {day}
           </span>
@@ -91,7 +94,8 @@ export const Calendar: React.FC<CalendarProps> = ({
                 {dayEvents.slice(0, 3).map((_, index) => (
                   <div
                     key={index}
-                    className="w-1 h-1 rounded-full bg-yellow-600"
+                    className="w-1 h-1 rounded-full"
+                    style={{ backgroundColor: '#ffb700' }}
                   />
                 ))}
               </div>

@@ -1,24 +1,23 @@
-import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useFirebaseData } from '../../hooks/useFirebaseData';
-import { Payment } from '../../types/data';
+import { Expense } from '../../types/expense';
 import { formatCurrency } from '../../utils/currency';
-import { groupPaymentsByMonth } from '../../utils/payments';
+import { groupExpensesByMonth, ExpenseGroup } from '../../utils/expenses';
 
 export const SpendingTrends = () => {
-  const { data: payments = [] } = useFirebaseData<Payment>('payments');
+  const { data: expenses = [] } = useFirebaseData<Expense>('expenses');
 
-  const monthlyData = groupPaymentsByMonth(payments);
-  const chartData = monthlyData.map(({ month, year, totalAmount, paidAmount }) => ({
+  const monthlyData = groupExpensesByMonth(expenses);
+  const chartData = monthlyData.map(({ month, year, totalAmount, paidAmount }: ExpenseGroup) => ({
     date: `${month} ${year}`,
     amount: totalAmount,
     paidAmount: paidAmount
   }));
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-lg font-medium mb-6">Harcama Trendleri</h2>
-      <div className="h-80">
+    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+      <h2 className="text-base sm:text-lg font-medium mb-4 sm:mb-6">Harcama Trendleri</h2>
+      <div className="h-64 sm:h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />

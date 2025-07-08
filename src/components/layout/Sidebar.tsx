@@ -1,23 +1,23 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, CreditCard, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut } from 'lucide-react';
+import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
-interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuth();
 
-  const menuItems = [
+  const mainMenuItems = [
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
+    { id: 'income', path: '/income', label: 'Gelirlerim', icon: TrendingUp },
+    { id: 'expenses', path: '/expenses', label: 'Giderlerim', icon: TrendingDown },
+    { id: 'subscriptions', path: '/subscriptions', label: 'Aboneliklerim', icon: Clock },
+    { id: 'financial-data', path: '/financial-data', label: 'Finansal Verilerim', icon: CreditCard }
+  ];
+
+  const otherMenuItems = [
     { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
-    { id: 'payments', path: '/payments', label: 'Borçlar', icon: CreditCard },
-    { id: 'subscriptions', path: '/subscriptions', label: 'Abonelikler', icon: Clock },
     { id: 'notes', path: '/notes', label: 'Notlar', icon: StickyNote },
     { id: 'calendar', path: '/calendar', label: 'Takvim', icon: Calendar },
     { id: 'settings', path: '/settings', label: 'Ayarlar', icon: Settings },
@@ -41,28 +41,63 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4">
-          <ul className="space-y-2">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              
-              return (
-                <li key={item.id}>
-                  <button
-                    onClick={() => navigate(item.path)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      isActive 
-                        ? 'bg-yellow-50 text-yellow-700'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-600' : ''}`} />
-                    <span>{item.label}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          {/* Ana Menü */}
+          <div className="mb-6">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+              Ana Menü
+            </h3>
+            <ul className="space-y-1">
+              {mainMenuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => navigate(item.path)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-600' : ''}`} />
+                      <span className="font-medium">{item.label}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          {/* Diğer Hizmetler */}
+          <div>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+              Diğer Hizmetler
+            </h3>
+            <ul className="space-y-1">
+              {otherMenuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => navigate(item.path)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-600' : ''}`} />
+                      <span>{item.label}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </nav>
 
         <div className="p-4 border-t">

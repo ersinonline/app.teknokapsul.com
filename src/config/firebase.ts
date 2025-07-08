@@ -1,7 +1,8 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getAnalytics, isSupported } from 'firebase/analytics';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
     apiKey: "AIzaSyBUTqMQPaWvSEYq-kVR198Zgvp_ZZUX3So",
@@ -18,26 +19,27 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize services
 let analytics = null;
-let db = null;
-let auth = null;
+
+// Initialize Firestore
+const db = getFirestore(app);
+
+// Initialize Auth
+const auth = getAuth(app);
+
+// Initialize Storage
+const storage = getStorage(app);
 
 if (typeof window !== 'undefined') {
     try {
-        // Initialize Firestore with persistent cache
-        db = getFirestore(app);
-        
         // Initialize analytics only if supported
         isSupported().then(yes => {
             if (yes) {
                 analytics = getAnalytics(app);
             }
         });
-
-        // Initialize Auth
-        auth = getAuth(app);
     } catch (error) {
         console.error('Error initializing Firebase services:', error);
     }
 }
 
-export { app, analytics, db, auth };
+export { app, analytics, db, auth, storage };

@@ -1,0 +1,8 @@
+# ads.txt file for TeknoKapsül
+# This file is used by Google AdSense to verify authorized sellers
+
+# Google AdSense
+google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+
+# Replace pub-XXXXXXXXXXXXXXXX with your actual AdSense publisher ID
+# The f08c47fec0942fa0 is Google's seller ID and should remain unchanged

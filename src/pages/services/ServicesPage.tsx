@@ -1,13 +1,8 @@
-import React from 'react';
 import { 
-  Grid, Card, Typography, Container, Box,
-  Chip, Avatar, Divider, useTheme
-} from '@mui/material';
-import { 
-  Security, Receipt, Router, PhoneAndroid,
-  Tv, SportsEsports, Shop, CleaningServices,
-  Business, LocalShipping
-} from '@mui/icons-material';
+  Shield, Receipt, Wifi, Smartphone, 
+  Tv, Gamepad2, Wrench,
+  Truck, Building, ExternalLink
+} from 'lucide-react';
 
 const Services = () => {
   const RESELLER_ID = "123456";
@@ -18,8 +13,11 @@ const Services = () => {
     // 1. Sigortalar (En önemli finansal hizmetler)
     {
       title: 'Sigortalar',
-      icon: <Security fontSize="large" />,
-      color: '#4CAF50',
+      icon: <Shield className="w-8 h-8" />,
+      color: 'bg-green-500',
+      bgColor: 'bg-green-50',
+      borderColor: 'border-green-200',
+      textColor: 'text-green-700',
       services: [
         { name: 'Trafik Sigortası', tag: 'Zorunlu', url: `https://gelsinteklif.sigortayeri.com/trafik-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
         { name: 'Kasko', tag: 'Popüler', url: `https://gelsinteklif.sigortayeri.com/kasko-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
@@ -41,8 +39,11 @@ const Services = () => {
     // 2. Fatura Ödemeleri (Temel ödemeler)
     {
       title: 'Fatura Ödemeleri',
-      icon: <Receipt fontSize="large" />,
-      color: '#1976D2',
+      icon: <Receipt className="w-8 h-8" />,
+      color: 'bg-blue-500',
+      bgColor: 'bg-blue-50',
+      borderColor: 'border-blue-200',
+      textColor: 'text-blue-700',
       services: [
         { name: 'EnerjiSA', tag: 'Elektrik', url: `https://www.faturago.com.tr/elektrik-faturasi-odeme.html?bayiid=${BAYI_ID}` },
         { name: 'CK Enerji', tag: 'Elektrik', url: `https://www.faturago.com.tr/elektrik-faturasi-odeme.html?bayiid=${BAYI_ID}` },
@@ -56,83 +57,69 @@ const Services = () => {
       ]
     },
 
-    // 3. İnternet & TV (Abonelik hizmetleri bir arada)
+    // 3. İnternet & TV
     {
       title: 'İnternet & TV',
-      icon: <Router fontSize="large" />,
-      color: '#3F51B5',
-      services: [
-        { name: 'KabloTV + İnternet', tag: 'Combo', url: 'https://www.tumhizmetler.com/turksat-internet-kampanyalari.html' },
-        { name: 'D-Smart + İnternet', tag: 'Combo', url: 'https://www.smartabonelik.com.tr/d_smart_kampanyalari.html' },
-        { name: 'Digiturk + İnternet', tag: 'Combo', url: 'https://www.digiturkburada.com.tr/digiturk_kampanyalari.html' }
-      ]
-    },
-
-    // 4. TV & İnternet Başvuru (Abonelik başvuruları bir arada)
-    {
-      title: 'İnternet Başvuru',
-      icon: <Router fontSize="large" />,
-      color: '#3F51B5',
+      icon: <Wifi className="w-8 h-8" />,
+      color: 'bg-indigo-500',
+      bgColor: 'bg-indigo-50',
+      borderColor: 'border-indigo-200',
+      textColor: 'text-indigo-700',
       services: [
         { name: 'Superonline', tag: 'Fiber', url: 'https://www.superonlineinternet.com/superonline_kampanyalari.html' },
         { name: 'Millenicom', tag: 'Taahhütsüz', url: 'http://www.onlineabonelik.com/millenicom-kampanyalari.html' },
         { name: 'KabloNET', tag: 'Avantajlı', url: 'https://www.tumhizmetler.com/turksat-internet-kampanyalari.html' },
         { name: 'Extranet', tag: 'Ekonomik', url: 'https://www.tumhizmetler.com/extranet-internet-kampanyalari.html' },
         { name: 'Şoknet', tag: 'Taahhütsüz', url: 'https://www.tumhizmetler.com/soknet-kampanyalari.html' },
-        { name: 'D-Smart', tag: 'İnternet', url: `https://www.smartabonelik.com.tr/bayi_online_basvuru.asp?urun=Dsmart&bayiid=${BAYI_ID}` },
-        { name: 'Digitürk', tag: 'İnternet', url: `https://www.digiturkburada.com.tr/basvuru?refid=${REFID}` },
-        { name: 'Superonline', tag: 'Fiber', url: `https://www.superonlineinternet.com/bayi_online_basvuru.asp?urun=Superonline&bayiid=${BAYI_ID}` },
-        { name: 'Millenicom', tag: 'Taahhütsüz', url: `https://www.tumhizmetler.com/bayi/bayi_online_basvuru.asp?urun=Doping&bayiid=${BAYI_ID}` },
-        { name: 'Göknet', tag: 'Ekonomik', url: `https://www.tumhizmetler.com/bayi/bayi_online_basvuru.asp?urun=Goknet&bayiid=${BAYI_ID}` }
+        { name: 'D-Smart', tag: 'TV+İnternet', url: `https://www.smartabonelik.com.tr/bayi_online_basvuru.asp?urun=Dsmart&bayiid=${BAYI_ID}` },
+        { name: 'Digitürk', tag: 'TV+İnternet', url: `https://www.digiturkburada.com.tr/basvuru?refid=${REFID}` }
       ]
     },
 
-    // 5. GSM Operatörleri (Telefon hizmetleri)
+    // 4. GSM Operatörleri
     {
       title: 'GSM Operatörleri',
-      icon: <PhoneAndroid fontSize="large" />,
-      color: '#F44336',
+      icon: <Smartphone className="w-8 h-8" />,
+      color: 'bg-red-500',
+      bgColor: 'bg-red-50',
+      borderColor: 'border-red-200',
+      textColor: 'text-red-700',
       services: [
-        { name: 'Numara Taşıma', tag: 'Vodafone', url: 'https://basvuru.teknokapsul.com/apply/vodafone' },
-        { name: 'Yeni Hat', tag: 'Vodafone', url: 'https://basvuru.teknokapsul.com/apply/vodafone' },
-        { name: 'Numara Taşıma', tag: 'Turkcell', url: 'https://basvuru.teknokapsul.com/apply/turkcell' },
-        { name: 'Yeni Hat', tag: 'Turkcell', url: 'https://basvuru.teknokapsul.com/apply/turkcell' },
-        { name: 'Numara Taşıma', tag: 'Türk Telekom', url: 'https://basvuru.teknokapsul.com/apply/turktelekom' },
-        { name: 'Yeni Hat', tag: 'Türk Telekom', url: 'https://basvuru.teknokapsul.com/apply/turktelekom' },
+        { name: 'Vodafone Numara Taşıma', tag: 'Popüler', url: 'https://basvuru.teknokapsul.com/apply/vodafone' },
+        { name: 'Vodafone Yeni Hat', tag: 'Yeni', url: 'https://basvuru.teknokapsul.com/apply/vodafone' },
+        { name: 'Turkcell Numara Taşıma', tag: 'Güvenilir', url: 'https://basvuru.teknokapsul.com/apply/turkcell' },
+        { name: 'Turkcell Yeni Hat', tag: 'Yeni', url: 'https://basvuru.teknokapsul.com/apply/turkcell' },
+        { name: 'Türk Telekom Numara Taşıma', tag: 'Ekonomik', url: 'https://basvuru.teknokapsul.com/apply/turktelekom' },
+        { name: 'Türk Telekom Yeni Hat', tag: 'Yeni', url: 'https://basvuru.teknokapsul.com/apply/turktelekom' }
       ]
     },
 
-    // 6. Dijital Hizmetler (Tüm dijital içerikler bir arada)
+    // 5. Dijital Hizmetler
     {
       title: 'Dijital Hizmetler',
-      icon: <Tv fontSize="large" />,
-      color: '#2196F3',
+      icon: <Tv className="w-8 h-8" />,
+      color: 'bg-purple-500',
+      bgColor: 'bg-purple-50',
+      borderColor: 'border-purple-200',
+      textColor: 'text-purple-700',
       services: [
         { name: 'TOD TV', tag: 'Popüler', url: `https://www.kodmarketim.com/tod-paketleri-mid-1?refid=${REFID}` },
         { name: 'D-Smart GO', tag: 'Yeni', url: `https://www.kodmarketim.com/d-smart-go-paketleri-mid-2?refid=${REFID}` },
         { name: 'GAIN', tag: 'Trend', url: `https://www.kodmarketim.com/gain-paketleri-mid-11?refid=${REFID}` },
         { name: 'S Sport Plus', tag: 'Spor', url: `https://www.kodmarketim.com/s-sport-plus-paketleri-mid-33?refid=${REFID}` },
-        { name: 'Valorant', tag: 'En Çok Satan', url: `https://www.kodmarketim.com/valorant-point-paketleri-mid-22?refid=${REFID}` },
-        { name: 'League of Legends', tag: 'Popüler', url: `https://www.kodmarketim.com/league-of-legends-paketleri-mid-6?refid=${REFID}` },
-        { name: 'PUBG Mobile', tag: 'Trend', url: `https://www.kodmarketim.com/pubg-mobile-paketleri-mid-10?refid=${REFID}` },
-        { name: 'Point Blank', tag: 'FPS', url: `https://www.kodmarketim.com/point-blank-paketleri-mid-8?refid=${REFID}` },
-        { name: 'Zula', tag: 'Yerli', url: `https://www.kodmarketim.com/zula-paketleri-mid-7?refid=${REFID}` },
-        { name: 'Wolfteam', tag: 'MMO', url: `https://www.kodmarketim.com/wolfteam-paketleri-mid-37?refid=${REFID}` },
         { name: 'Google Play', tag: 'Android', url: `https://www.kodmarketim.com/google-play-paketleri-mid-4?refid=${REFID}` },
-        { name: 'App Store', tag: 'iOS', url: `https://www.kodmarketim.com/apple-store-paketleri-mid-5?refid=${REFID}` },
-        { name: 'Razer Gold', tag: 'Oyun', url: `https://www.kodmarketim.com/razer-paketleri-mid-18?refid=${REFID}` },
-        { name: 'Gameforge', tag: 'MMO', url: `https://www.kodmarketim.com/gameforge-paketleri-mid-30?refid=${REFID}` },
-        { name: 'Garena', tag: 'Çevrimiçi', url: `https://www.kodmarketim.com/garena-paketleri-mid-26?refid=${REFID}` },
-        { name: 'Roblox', tag: 'Sandbox', url: `https://www.kodmarketim.com/roblox-paketleri-mid-24?refid=${REFID}` },
-        { name: 'BomBom', tag: 'Casual', url: `https://www.kodmarketim.com/bombom-paketleri-mid-35?refid=${REFID}` }
+        { name: 'App Store', tag: 'iOS', url: `https://www.kodmarketim.com/apple-store-paketleri-mid-5?refid=${REFID}` }
       ]
     },
 
-    // 7. Dijital Oyunlar (Oyun hizmetleri)
+    // 6. Dijital Oyunlar
     {
       title: 'Dijital Oyunlar',
-      icon: <SportsEsports fontSize="large" />,
-      color: '#7B1FA2',
+      icon: <Gamepad2 className="w-8 h-8" />,
+      color: 'bg-pink-500',
+      bgColor: 'bg-pink-50',
+      borderColor: 'border-pink-200',
+      textColor: 'text-pink-700',
       services: [
         { name: 'Valorant', tag: 'En Çok Satan', url: `https://www.kodmarketim.com/valorant-point-paketleri-mid-22?refid=${REFID}` },
         { name: 'League of Legends', tag: 'Popüler', url: `https://www.kodmarketim.com/league-of-legends-paketleri-mid-6?refid=${REFID}` },
@@ -143,23 +130,14 @@ const Services = () => {
       ]
     },
 
-    // 8. Dijital Marketler (Dijital mağazalar)
-    {
-      title: 'Dijital Marketler',
-      icon: <Shop fontSize="large" />,
-      color: '#00796B',
-      services: [
-        { name: 'Google Play', tag: 'Android', url: `https://www.kodmarketim.com/google-play-paketleri-mid-4?refid=${REFID}` },
-        { name: 'App Store', tag: 'iOS', url: `https://www.kodmarketim.com/apple-store-paketleri-mid-5?refid=${REFID}` },
-        { name: 'Razer Gold', tag: 'Oyun', url: `https://www.kodmarketim.com/razer-paketleri-mid-18?refid=${REFID}` }
-      ]
-    },
-
-    // 9. Teknik Servis (Cihaz tamir hizmetleri)
+    // 7. Teknik Servis
     {
       title: 'Teknik Servis',
-      icon: <PhoneAndroid fontSize="large" />,
-      color: '#1E88E5',
+      icon: <Wrench className="w-8 h-8" />,
+      color: 'bg-orange-500',
+      bgColor: 'bg-orange-50',
+      borderColor: 'border-orange-200',
+      textColor: 'text-orange-700',
       services: [
         { name: 'iPhone Tamiri', tag: 'Apple', url: 'https://basvuru.teknokapsul.com/apply/apple_repair' },
         { name: 'iPad Tamiri', tag: 'Apple', url: 'https://basvuru.teknokapsul.com/apply/apple_repair' },
@@ -172,35 +150,30 @@ const Services = () => {
       ]
     },
 
-    // 10. Temizlik & Bakım (Ev/ofis hizmetleri)
-    {
-      title: 'Temizlik & Bakım',
-      icon: <CleaningServices fontSize="large" />,
-      color: '#00BCD4',
-      services: [
-        { name: 'Ev Temizliği', tag: 'Standart', url: `https://www.tumhizmetler.com/bayi/bayi_online_basvuru.asp?urun=Temizlik&bayiid=${BAYI_ID}` },
-        { name: 'Ofis Temizliği', tag: 'Kurumsal', url: `https://www.tumhizmetler.com/bayi/bayi_online_basvuru.asp?urun=Temizlik&bayiid=${BAYI_ID}` },
-        { name: 'İnşaat Sonrası Temizlik', tag: 'Özel', url: `https://www.tumhizmetler.com/bayi/bayi_online_basvuru.asp?urun=Temizlik&bayiid=${BAYI_ID}` },
-        { name: 'Böcek İlaçlama', tag: 'İlaçlama', url: 'https://basvuru.teknokapsul.com/apply/pest_control' }
-      ]
-    },
-
-    // 11. Nakliyat Hizmetleri (Taşıma hizmetleri)
+    // 8. Nakliyat Hizmetleri
     {
       title: 'Nakliyat Hizmetleri',
-      icon: <LocalShipping fontSize="large" />,
-      color: '#009688',
+      icon: <Truck className="w-8 h-8" />,
+      color: 'bg-teal-500',
+      bgColor: 'bg-teal-50',
+      borderColor: 'border-teal-200',
+      textColor: 'text-teal-700',
       services: [
         { name: 'Şehirler Arası Nakliyat', tag: 'Ev Taşıma', url: 'https://basvuru.teknokapsul.com/apply/moving' },
-        { name: 'Parça Eşya Taşıma', tag: 'Parça Eşya', url: 'https://basvuru.teknokapsul.com/apply/moving' }
+        { name: 'Parça Eşya Taşıma', tag: 'Parça Eşya', url: 'https://basvuru.teknokapsul.com/apply/moving' },
+        { name: 'Ev Temizliği', tag: 'Standart', url: `https://www.tumhizmetler.com/bayi/bayi_online_basvuru.asp?urun=Temizlik&bayiid=${BAYI_ID}` },
+        { name: 'Ofis Temizliği', tag: 'Kurumsal', url: `https://www.tumhizmetler.com/bayi/bayi_online_basvuru.asp?urun=Temizlik&bayiid=${BAYI_ID}` }
       ]
     },
 
-    // 12. E-Hizmetler (Kurumsal dijital hizmetler)
+    // 9. E-Hizmetler
     {
       title: 'E-Hizmetler',
-      icon: <Business fontSize="large" />,
-      color: '#673AB7',
+      icon: <Building className="w-8 h-8" />,
+      color: 'bg-cyan-500',
+      bgColor: 'bg-cyan-50',
+      borderColor: 'border-cyan-200',
+      textColor: 'text-cyan-700',
       services: [
         { name: 'E-İmza Başvurusu', tag: 'Kurumsal', url: 'https://basvuru.teknokapsul.com/apply/e_services' },
         { name: 'KEP Adresi', tag: 'Resmi', url: 'https://basvuru.teknokapsul.com/apply/e_services' },
@@ -214,169 +187,83 @@ const Services = () => {
   };
 
   return (
-    <Container 
-      maxWidth="xl" 
-      sx={{ 
-        mt: { xs: 2, sm: 3 }, 
-        mb: { xs: 2, sm: 3 },
-        px: { xs: 1, sm: 2 }
-      }}
-    >
-      <Box 
-        sx={{ 
-          mb: 6,
-          textAlign: 'center',
-          position: 'relative',
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: -16,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 60,
-            height: 4,
-            bgcolor: 'primary.main',
-            borderRadius: 2
-          }
-        }}
-      >
-        <Typography 
-          variant="h4" 
-          fontWeight={700} 
-          gutterBottom
-          sx={{
-            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-            backgroundClip: 'text',
-            textFillColor: 'transparent',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}
-        >
-          Tüm Hizmetler
-        </Typography>
-        <Typography 
-          variant="body1" 
-          color="text.secondary"
-          sx={{ maxWidth: 600, mx: 'auto' }}
-        >
-          Tüm hizmetlere tek yerden ulaşın, ihtiyacınıza en uygun çözümü bulun
-        </Typography>
-      </Box>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Tüm Hizmetler
+          </h1>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            Tüm hizmetlere tek yerden ulaşın, ihtiyacınıza en uygun çözümü bulun
+          </p>
+          <div className="w-20 h-1 bg-primary mx-auto mt-4 rounded-full"></div>
+        </div>
 
-      {serviceGroups.map((group, groupIndex) => (
-        <Box key={groupIndex} sx={{ mb: 8 }}>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 2, 
-            mb: 4,
-            position: 'relative'
-          }}>
-            <Avatar 
-              sx={{ 
-                bgcolor: `${group.color}15`,
-                width: 64,
-                height: 64,
-                p: 1.5,
-                boxShadow: `0 4px 20px ${group.color}40`
-              }}
-            >
-              {React.cloneElement(group.icon, { 
-                sx: { 
-                  color: group.color,
-                  fontSize: 32
-                } 
-              })}
-            </Avatar>
-            <Box>
-              <Typography 
-                variant="h5" 
-                fontWeight={700}
-                sx={{
-                  background: `linear-gradient(45deg, ${group.color} 30%, ${group.color}90 90%)`,
-                  backgroundClip: 'text',
-                  textFillColor: 'transparent',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}
-              >
-                {group.title}
-              </Typography>
-              <Typography 
-                variant="body2" 
-                color="text.secondary"
-                sx={{ mt: 0.5 }}
-              >
-                {group.services.length} hizmet
-              </Typography>
-            </Box>
-          </Box>
+        {/* Service Groups */}
+        <div className="space-y-12">
+          {serviceGroups.map((group, groupIndex) => (
+            <div key={groupIndex} className="">
+              {/* Group Header */}
+              <div className="flex items-center gap-4 mb-6">
+                <div className={`${group.bgColor} ${group.borderColor} border-2 rounded-xl p-3 shadow-sm`}>
+                  <div className={`${group.textColor}`}>
+                    {group.icon}
+                  </div>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">{group.title}</h2>
+                  <p className="text-gray-500">{group.services.length} hizmet</p>
+                </div>
+              </div>
 
-          <Grid container spacing={3}>
-            {group.services && group.services.map((service, serviceIndex) => (
-              <Grid item xs={12} md={6} lg={4} key={serviceIndex}>
-                <Card 
-                  sx={{ 
-                    height: '100%',
-                    transition: 'all 0.3s ease',
-                    borderRadius: 2,
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                      boxShadow: `0 12px 24px ${group.color}20`,
-                      borderColor: group.color
-                    }
-                  }}
-                >
-                  <Box 
+              {/* Services Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {group.services.map((service, serviceIndex) => (
+                  <div
+                    key={serviceIndex}
                     onClick={() => handleServiceClick(service.url)}
-                    sx={{ 
-                      p: 2.5,
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        bgcolor: `${group.color}08`
-                      }
-                    }}
+                    className={`${group.bgColor} ${group.borderColor} border rounded-xl p-4 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 hover:border-opacity-60 group`}
                   >
-                    <Typography 
-                      variant="subtitle1" 
-                      fontWeight={500}
-                      sx={{ color: 'text.primary' }}
-                    >
-                      {service.name}
-                    </Typography>
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-gray-900 text-sm leading-tight flex-1 pr-2">
+                        {service.name}
+                      </h3>
+                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" />
+                    </div>
+                    
                     {service.tag && (
-                      <Chip 
-                        label={service.tag}
-                        size="small"
-                        sx={{
-                          bgcolor: `${group.color}15`,
-                          color: group.color,
-                          fontWeight: 600,
-                          height: 24,
-                          '& .MuiChip-label': {
-                            px: 1.5
-                          }
-                        }}
-                      />
+                      <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${group.color} text-white`}>
+                        {service.tag}
+                      </span>
                     )}
-                  </Box>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-          
-          {groupIndex < serviceGroups.length - 1 && (
-            <Divider sx={{ mt: 6, mb: 2 }} />
-          )}
-        </Box>
-      ))}
-    </Container>
+                  </div>
+                ))}
+              </div>
+
+              {/* Divider */}
+              {groupIndex < serviceGroups.length - 1 && (
+                <div className="border-t border-gray-200 mt-8"></div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-12 p-6 bg-white rounded-xl shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Aradığınız hizmeti bulamadınız mı?
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Bizimle iletişime geçin, size en uygun çözümü bulalım.
+          </p>
+          <button className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors">
+            İletişime Geç
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default Services; 
+export default Services;

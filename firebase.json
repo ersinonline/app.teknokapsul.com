@@ -23,14 +23,5 @@
         ]
       }
     ]
-  },
-  "apphosting": {
-    "source": ".",
-    "runConfig": {
-      "runtime": "nodejs18",
-      "env": {
-        "NODE_ENV": "production"
-      }
-    }
   }
 }
