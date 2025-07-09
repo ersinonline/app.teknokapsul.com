@@ -117,8 +117,8 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
     <div className="overflow-x-auto">
       {editingExpense && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">Gideri Düzenle</h3>
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <h3 className="text-lg font-medium mb-4 text-gray-900">Gideri Düzenle</h3>
             <ExpenseForm
               onSubmit={async (data) => {
                 try {
@@ -134,7 +134,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
             />
             <button
               onClick={() => setEditingExpense(null)}
-              className="mt-4 w-full rounded-lg bg-gray-200 dark:bg-gray-600 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+              className="mt-4 w-full rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 transition-colors"
             >
               İptal
             </button>
@@ -142,10 +142,10 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
         </div>
       )}
 
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50 dark:bg-gray-800">
+      <table className="min-w-full divide-y divide-gray-200">
+      <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Gider
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -165,18 +165,18 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+        <tbody className="bg-white divide-y divide-gray-200">
           {sortedExpenses.map((expense) => {
             const statusInfo = getStatusInfo(expense);
             const paymentInfo = getPaymentInfo(expense);
 
             return (
-              <tr key={expense.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+              <tr key={expense.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">{expense.title}</div>
+                  <div className="text-sm font-medium text-gray-900">{expense.title}</div>
                   <div className="text-sm text-red-600 font-semibold">{formatCurrency(expense.amount)}</div>
                   {expense.description && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{expense.description}</div>
+                    <div className="text-xs text-gray-500 mt-1">{expense.description}</div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -185,7 +185,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                  <div className="text-sm text-gray-500">
                     {formatDate(expense.date)}
                   </div>
                 </td>
@@ -209,7 +209,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
                   <div className="flex justify-end gap-2">
                     <button
                       onClick={() => setEditingExpense(expense)}
-                      className="text-yellow-600 hover:text-yellow-900 dark:hover:text-yellow-400 transition-colors"
+                      className="text-yellow-600 hover:text-yellow-900 transition-colors"
                       title="Düzenle"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -224,7 +224,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
                     </button>
                     <button
                       onClick={() => handleDelete(expense.id)}
-                      className="text-red-600 hover:text-red-900 dark:hover:text-red-400 disabled:opacity-50 transition-colors"
+                      className="text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors"
                       disabled={isDeleting === expense.id}
                       title="Sil"
                     >

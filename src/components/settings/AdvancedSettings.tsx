@@ -8,7 +8,6 @@ import {
   Upload,
   Trash2,
   RefreshCw,
-  Moon,
   Sun,
   Monitor,
   Check,
@@ -195,7 +194,7 @@ export const AdvancedSettings: React.FC = () => {
         <div className="grid grid-cols-3 gap-3">
           {[
             { value: 'light', label: 'Açık', icon: <Sun className="w-4 h-4" /> },
-            { value: 'dark', label: 'Koyu', icon: <Moon className="w-4 h-4" /> },
+            
             { value: 'auto', label: 'Otomatik', icon: <Monitor className="w-4 h-4" /> }
           ].map((theme) => (
             <button
@@ -418,10 +417,10 @@ export const AdvancedSettings: React.FC = () => {
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Gelişmiş Ayarlar
         </h1>
-        <p className="text-gray-600 dark:text-gray-300">
+        <p className="text-gray-600">
           Uygulamanızı kişiselleştirin ve tercihlerinizi yönetin
         </p>
       </div>
@@ -449,7 +448,7 @@ export const AdvancedSettings: React.FC = () => {
                 className={`w-full p-4 rounded-lg text-left transition-colors ${
                   activeSection === section.id
                     ? 'bg-primary text-white'
-                    : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
+                    : 'bg-white hover:bg-gray-50 text-gray-900'
                 }`}
               >
                 <div className="flex items-center space-x-3">
@@ -459,7 +458,7 @@ export const AdvancedSettings: React.FC = () => {
                     <div className={`text-sm ${
                       activeSection === section.id
                         ? 'text-white/80'
-                        : 'text-gray-500 dark:text-gray-400'
+                        : 'text-gray-500'
                     }`}>
                       {section.description}
                     </div>
@@ -472,11 +471,11 @@ export const AdvancedSettings: React.FC = () => {
 
         {/* Content */}
         <div className="lg:col-span-3">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+          <div className="bg-white rounded-lg p-6">
             {loading && (
               <div className="flex items-center justify-center py-8">
                 <div className="loading-spinner w-8 h-8" />
-                <span className="ml-3 text-gray-600 dark:text-gray-300">İşleniyor...</span>
+                <span className="ml-3 text-gray-600">İşleniyor...</span>
               </div>
             )}
             {!loading && renderSectionContent()}

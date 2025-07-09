@@ -1,4 +1,4 @@
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, isSupported, Messaging } from 'firebase/messaging';
 import { doc, setDoc, updateDoc, addDoc, collection } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Event } from '../types/calendar';
@@ -33,21 +33,31 @@ export interface PushNotificationPayload {
   }>;
 }
 
-let messaging = null;
+let messaging: Messaging | null = null;
 
 if (typeof window !== 'undefined') {
-    try {
-        messaging = getMessaging(app);
-    } catch (error) {
-        console.warn('Firebase Messaging is not supported:', error);
-    }
+    isSupported().then(supported => {
+        if (supported) {
+            try {
+                messaging = getMessaging(app);
+                console.log('Firebase Messaging is supported.');
+            } catch (error) {
+                console.warn('Firebase Messaging initialization error:', error);
+            }
+        } else {
+            console.warn('Firebase Messaging is not supported in this browser.');
+        }
+    }).catch(error => {
+        console.warn('Error checking Firebase Messaging support:', error);
+    });
 }
 
 const VAPID_KEY = 'BHgpQFYt4eS5sYmxVvzxOUPgUZLj7Y4q9Y5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q';
 
 export const initializeNotifications = async (userId: string) => {
     try {
-        if (!messaging || !('Notification' in window)) {
+        const supported = await isSupported();
+        if (!supported || !messaging || !('Notification' in window)) {
             console.log('This browser does not support notifications');
             return;
         }
@@ -132,7 +142,8 @@ export const scheduleEventNotification = async (event: Event & { id: string }) =
 
 export const requestNotificationPermission = async () => {
     try {
-        if (!messaging) {
+        const supported = await isSupported();
+        if (!supported || !messaging) {
             throw new Error('Firebase Messaging is not supported');
         }
 

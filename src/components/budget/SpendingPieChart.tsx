@@ -17,7 +17,7 @@ export const SpendingPieChart: React.FC<SpendingPieChartProps> = ({ categories }
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg dark:shadow-2xl dark:shadow-black/10 transition-all duration-200 hover:shadow-xl p-6">
+    <div className="bg-white rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl p-6">
       <h2 className="text-lg font-medium mb-4">Harcama Dağılımı</h2>
       <div className="flex flex-col items-center">
         <div className="relative w-64 h-64">

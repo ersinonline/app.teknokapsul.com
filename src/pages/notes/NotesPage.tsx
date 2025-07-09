@@ -39,12 +39,12 @@ export const NotesPage = () => {
   if (error) return <ErrorMessage message="Notlar yüklenirken bir hata oluştu." />;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       <div className="p-4 lg:p-6 space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <FileText className="w-6 h-6" style={{ color: '#ffb700' }} />
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">Notlarım</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Notlarım</h1>
           </div>
           <button
             onClick={() => {
@@ -61,10 +61,10 @@ export const NotesPage = () => {
           </button>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-4">
             <Filter className="w-5 h-5" style={{ color: '#ffb700' }} />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Arama ve Filtreleme</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Arama ve Filtreleme</h2>
           </div>
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -74,7 +74,7 @@ export const NotesPage = () => {
                 placeholder="Notlarda ara..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent bg-white text-gray-900"
                 style={{ '--tw-ring-color': '#ffb700' } as React.CSSProperties}
                 onFocus={(e) => e.target.style.borderColor = '#ffb700'}
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -85,7 +85,7 @@ export const NotesPage = () => {
               <select
                 value={selectedTag || ''}
                 onChange={(e) => setSelectedTag(e.target.value || null)}
-                className="pl-10 pr-8 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:border-transparent appearance-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white min-w-[150px]"
+                className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent appearance-none bg-white text-gray-900 min-w-[150px]"
                 style={{ '--tw-ring-color': '#ffb700' } as React.CSSProperties}
                 onFocus={(e) => e.target.style.borderColor = '#ffb700'}
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -100,13 +100,13 @@ export const NotesPage = () => {
         </div>
 
         {filteredNotes.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-12">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12">
             <div className="text-center">
               <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 {searchTerm || selectedTag ? 'Arama kriterlerinize uygun not bulunamadı' : 'Henüz not yok'}
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-6">
+              <p className="text-gray-500 mb-6">
                 {searchTerm || selectedTag 
                   ? 'Farklı arama terimleri veya filtreler deneyebilirsiniz.'
                   : 'İlk notunuzu oluşturmak için yukarıdaki "Yeni Not Ekle" butonunu kullanın.'
@@ -129,11 +129,11 @@ export const NotesPage = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            <div className="p-6 border-b border-gray-200">
               <div className="flex items-center gap-3">
                 <Grid className="w-5 h-5" style={{ color: '#ffb700' }} />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Notlarım</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Notlarım</h2>
                 <span className="px-2 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#ffb700' + '20', color: '#ffb700' }}>
                   {filteredNotes.length} not
                 </span>

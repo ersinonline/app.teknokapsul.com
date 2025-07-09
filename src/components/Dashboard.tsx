@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CreditCard, Clock, TrendingUp, Target, Calendar, Banknote, PiggyBank, AlertCircle, CheckCircle, Brain } from 'lucide-react';
+import { CreditCard, Clock, TrendingUp, Target, Calendar, Banknote, PiggyBank, AlertCircle, CheckCircle, Brain, Package, Truck, ExternalLink, DollarSign } from 'lucide-react';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { LoadingSpinner } from './common/LoadingSpinner';
 import { ErrorMessage } from './common/ErrorMessage';
@@ -9,6 +9,7 @@ import { Subscription } from '../types/subscription';
 import { Expense } from '../types/expense';
 import { Income } from '../types/income';
 import { CreditCard as CreditCardType, CashAdvanceAccount, Loan } from '../types/financial';
+import { PortfolioItem, PortfolioSummary } from '../types/portfolio';
 import { calculateDaysRemaining } from '../utils/date';
 import { formatCurrency } from '../utils/currency';
 
@@ -17,10 +18,15 @@ import { getUserIncomes } from '../services/income.service';
 import { getUserSubscriptions } from '../services/subscription.service';
 import { getCreditCards, getCashAdvanceAccounts, getLoans } from '../services/financial.service';
 import { getAIRecommendations } from '../services/ai.service';
+import { getUserCargoTrackings } from '../services/cargo.service';
+import { CargoTracking, CARGO_COMPANIES } from '../types/cargo';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { portfolioService } from '../services/portfolio.service';
 
 export const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { data: payments = [], loading: paymentsLoading } = useFirebaseData<Payment>('payments');
 
   
@@ -30,10 +36,14 @@ export const Dashboard = () => {
   const [creditCards, setCreditCards] = useState<CreditCardType[]>([]);
   const [cashAdvanceAccounts, setCashAdvanceAccounts] = useState<CashAdvanceAccount[]>([]);
   const [loans, setLoans] = useState<Loan[]>([]);
+  const [cargoList, setCargoList] = useState<CargoTracking[]>([]);
   const [aiRecommendations, setAiRecommendations] = useState<string[]>([]);
   const [expensesLoading, setExpensesLoading] = useState(true);
   const [incomesLoading, setIncomesLoading] = useState(true);
   const [subscriptionsLoading, setSubscriptionsLoading] = useState(true);
+  const [cargoLoading, setCargoLoading] = useState(true);
+  const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
+  const [portfolioSummary, setPortfolioSummary] = useState<PortfolioSummary | null>(null);
 
   const [aiLoading, setAiLoading] = useState(true);
   
@@ -43,7 +53,7 @@ export const Dashboard = () => {
   
 
 
-  const loading = paymentsLoading || subscriptionsLoading || expensesLoading || incomesLoading;
+  const loading = paymentsLoading || subscriptionsLoading || expensesLoading || incomesLoading || cargoLoading;
   
   // Gider, gelir ve abonelik verilerini yükle
   useEffect(() => {
@@ -54,14 +64,16 @@ export const Dashboard = () => {
         setExpensesLoading(true);
         setIncomesLoading(true);
         setSubscriptionsLoading(true);
+        setCargoLoading(true);
         
-        const [userExpenses, userIncomes, userSubscriptions, userCreditCards, userCashAdvanceAccounts, userLoans] = await Promise.all([
+        const [userExpenses, userIncomes, userSubscriptions, userCreditCards, userCashAdvanceAccounts, userLoans, userCargos] = await Promise.all([
           getUserExpenses(user.uid, currentYear, currentMonth),
           getUserIncomes(user.uid, currentYear, currentMonth),
           getUserSubscriptions(user.uid),
           getCreditCards(user.uid),
           getCashAdvanceAccounts(user.uid),
-          getLoans(user.uid)
+          getLoans(user.uid),
+          getUserCargoTrackings(user.uid)
         ]);
         
         setExpenses(userExpenses);
@@ -70,6 +82,7 @@ export const Dashboard = () => {
         setCreditCards(userCreditCards);
         setCashAdvanceAccounts(userCashAdvanceAccounts);
         setLoans(userLoans);
+        setCargoList(userCargos);
         
         // AI önerilerini yükle
         try {
@@ -92,6 +105,7 @@ export const Dashboard = () => {
         setExpensesLoading(false);
         setIncomesLoading(false);
         setSubscriptionsLoading(false);
+        setCargoLoading(false);
 
         setAiLoading(false);
       }
@@ -99,6 +113,24 @@ export const Dashboard = () => {
     
     loadData();
   }, [user, currentYear, currentMonth]);
+
+  useEffect(() => {
+    const loadPortfolioData = async () => {
+      if (!user?.uid) return;
+      
+      try {
+        const items = await portfolioService.getPortfolioItems(user.uid);
+        setPortfolioItems(items);
+        
+        const summary = portfolioService.calculatePortfolioSummary(items);
+        setPortfolioSummary(summary);
+      } catch (error) {
+        console.error('Portföy verileri yüklenirken hata:', error);
+      }
+    };
+
+    loadPortfolioData();
+  }, [user?.uid]);
 
 
 
@@ -142,9 +174,8 @@ export const Dashboard = () => {
   const totalCreditCardLimit = creditCards.reduce((sum, card) => sum + card.limit, 0);
   const totalCashAdvanceDebt = cashAdvanceAccounts.reduce((sum, account) => sum + account.currentDebt, 0);
   const totalCashAdvanceLimit = cashAdvanceAccounts.reduce((sum, account) => sum + account.limit, 0);
-  const totalLoanDebt = loans.reduce((sum, loan) => sum + loan.remainingAmount, 0);
+  // const totalLoanDebt = loans.reduce((sum, loan) => sum + loan.remainingAmount, 0);
   
-  const totalDebt = totalCreditCardDebt + totalCashAdvanceDebt + totalLoanDebt;
   const totalLimit = totalCreditCardLimit + totalCashAdvanceLimit;
   
   // Kredi kartlarını sırala: en düşük kullanılabilir orana göre
@@ -163,13 +194,24 @@ export const Dashboard = () => {
       return availableRatioA - availableRatioB; // En düşük kullanılabilir oran önce
     });
   
-  // Yaklaşan abonelik ödemeleri
+  // Yaklaşan abonelik ödemeleri - süre sınırlaması olmadan en düşükten en yükseğe
   const upcomingSubscriptions = subscriptions
-    .filter(sub => {
-      const daysRemaining = calculateDaysRemaining(sub.endDate);
-      return daysRemaining <= 7 && daysRemaining > 0;
-    })
+    .filter(sub => sub.isActive !== false) // Sadece aktif abonelikleri al
+    .map(sub => ({
+      ...sub,
+      daysRemaining: calculateDaysRemaining(sub.endDate)
+    }))
+    .filter(sub => sub.daysRemaining > 0) // Sadece gelecekteki abonelikleri al
+    .sort((a, b) => a.daysRemaining - b.daysRemaining) // En düşük gün sayısı önce
     .slice(0, 3);
+    
+  // Kargo hesaplamaları
+  const recentCargos = cargoList
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3);
+    
+  const pendingCargos = cargoList.filter(cargo => !cargo.isDelivered);
+  const deliveredCargos = cargoList.filter(cargo => cargo.isDelivered);
     
   // const monthlyUnpaidAmount = payments.reduce((sum, payment) => {
   //   const paymentDate = new Date(payment.date);
@@ -210,18 +252,18 @@ export const Dashboard = () => {
       trend: `${expenses.filter(e => e.isActive).length} kalem`
     },
     {
-      label: 'Toplam Borç',
-      value: formatCurrency(totalDebt),
-      icon: AlertCircle,
-      color: 'bg-orange-500',
-      trend: `${creditCards.length + cashAdvanceAccounts.length + loans.length} hesap`
-    },
-    {
       label: 'Kullanılabilir Limit',
       value: formatCurrency(totalLimit - totalCreditCardDebt - totalCashAdvanceDebt),
       icon: PiggyBank,
       color: 'bg-orange-500',
       trend: `${creditCards.length + cashAdvanceAccounts.length} kart/hesap`
+    },
+    {
+      label: 'Portföy Değeri',
+      value: portfolioSummary ? formatCurrency(portfolioSummary.totalValue) : '₺0',
+      icon: DollarSign,
+      color: portfolioSummary && portfolioSummary.totalGainLoss >= 0 ? 'bg-green-600' : 'bg-red-600',
+      trend: portfolioSummary ? `${portfolioItems.length} yatırım` : 'Yatırım yok'
     },
     {
       label: 'Net Durum',
@@ -247,7 +289,7 @@ export const Dashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-            Hoş Geldiniz 👋
+            Hoş Geldiniz {user?.displayName?.split(' ')[0] || 'Ersin'} 👋
           </h1>
           <p className="text-sm text-gray-600 mt-1">
             Finansal durumunuzun özeti
@@ -286,13 +328,158 @@ export const Dashboard = () => {
 
 
 
+      {/* Portföy - Tam Genişlik */}
+      <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/portfolio')}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-medium">Portföy</h2>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate('/portfolio');
+              }}
+              className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+            >
+              Tümünü Gör <ExternalLink className="w-3 h-3" />
+            </button>
+            <DollarSign className="w-5 h-5" style={{ color: '#ffb700' }} />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {portfolioItems.length > 0 ? (
+            <>
+              {/* Toplam TL Değeri */}
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-center">
+                  <h3 className="font-medium text-sm text-blue-800 mb-2">Toplam TL</h3>
+                  <div className="text-lg font-bold text-blue-900">
+                    {portfolioSummary ? formatCurrency(portfolioSummary.totalValue) : '₺0'}
+                  </div>
+                  <div className="text-xs text-blue-600 mt-1">
+                    {portfolioItems.length} yatırım
+                  </div>
+                </div>
+              </div>
+              
+              {/* ABD Doları */}
+              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="text-center">
+                  <h3 className="font-medium text-sm text-green-800 mb-2">ABD Doları</h3>
+                  <div className="text-lg font-bold text-green-900">
+                    {formatCurrency(portfolioItems.filter(item => item.type === 'usd').reduce((sum, item) => sum + item.totalValue, 0))}
+                  </div>
+                  <div className="text-xs text-green-600 mt-1">
+                    {portfolioItems.filter(item => item.type === 'usd').length} adet
+                  </div>
+                </div>
+              </div>
+              
+              {/* Euro */}
+              <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <div className="text-center">
+                  <h3 className="font-medium text-sm text-purple-800 mb-2">Euro</h3>
+                  <div className="text-lg font-bold text-purple-900">
+                    {formatCurrency(portfolioItems.filter(item => item.type === 'eur').reduce((sum, item) => sum + item.totalValue, 0))}
+                  </div>
+                  <div className="text-xs text-purple-600 mt-1">
+                    {portfolioItems.filter(item => item.type === 'eur').length} adet
+                  </div>
+                </div>
+              </div>
+              
+              {/* Altın */}
+              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="text-center">
+                  <h3 className="font-medium text-sm text-yellow-800 mb-2">Altın</h3>
+                  <div className="text-lg font-bold text-yellow-900">
+                    {formatCurrency(portfolioItems.filter(item => item.type === 'gold').reduce((sum, item) => sum + item.totalValue, 0))}
+                  </div>
+                  <div className="text-xs text-yellow-600 mt-1">
+                    {portfolioItems.filter(item => item.type === 'gold').length} adet
+                  </div>
+                </div>
+              </div>
+              
+              {/* Fon */}
+              <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                <div className="text-center">
+                  <h3 className="font-medium text-sm text-indigo-800 mb-2">Fon</h3>
+                  <div className="text-lg font-bold text-indigo-900">
+                    {formatCurrency(portfolioItems.filter(item => item.type === 'fund').reduce((sum, item) => sum + item.totalValue, 0))}
+                  </div>
+                  <div className="text-xs text-indigo-600 mt-1">
+                    {portfolioItems.filter(item => item.type === 'fund').length} adet
+                  </div>
+                </div>
+              </div>
+              
+              {/* Hisse Senedi */}
+              <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                <div className="text-center">
+                  <h3 className="font-medium text-sm text-red-800 mb-2">Hisse</h3>
+                  <div className="text-lg font-bold text-red-900">
+                    {formatCurrency(portfolioItems.filter(item => item.type === 'stock').reduce((sum, item) => sum + item.totalValue, 0))}
+                  </div>
+                  <div className="text-xs text-red-600 mt-1">
+                    {portfolioItems.filter(item => item.type === 'stock').length} adet
+                  </div>
+                </div>
+              </div>
+              
+              {/* Vadeli Hesap */}
+              <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
+                <div className="text-center">
+                  <h3 className="font-medium text-sm text-teal-800 mb-2">Vadeli Hesap</h3>
+                  <div className="text-lg font-bold text-teal-900">
+                    {formatCurrency(portfolioItems.filter(item => item.type === 'deposit').reduce((sum, item) => sum + item.totalValue, 0))}
+                  </div>
+                  <div className="text-xs text-teal-600 mt-1">
+                    {portfolioItems.filter(item => item.type === 'deposit').length} adet
+                  </div>
+                </div>
+              </div>
+              
+              {/* Kripto Para */}
+              <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <div className="text-center">
+                  <h3 className="font-medium text-sm text-orange-800 mb-2">Kripto Para</h3>
+                  <div className="text-lg font-bold text-orange-900">
+                    {formatCurrency(portfolioItems.filter(item => item.type === 'crypto').reduce((sum, item) => sum + item.totalValue, 0))}
+                  </div>
+                  <div className="text-xs text-orange-600 mt-1">
+                    {portfolioItems.filter(item => item.type === 'crypto').length} adet
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="col-span-full text-center py-12 text-muted-foreground">
+              <DollarSign className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p className="text-base">Portföy öğesi bulunmuyor</p>
+              <p className="text-sm mt-2">İlk yatırımınızı ekleyerek başlayın</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Kredi Kartları */}
-        <div className="card p-4 sm:p-6">
+        <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/financial')}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium">Kredi Kartları</h2>
-            <CreditCard className="w-5 h-5" style={{ color: '#ffb700' }} />
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/financial');
+                }}
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              >
+                Tümünü Gör <ExternalLink className="w-3 h-3" />
+              </button>
+              <CreditCard className="w-5 h-5" style={{ color: '#ffb700' }} />
+            </div>
           </div>
           <div className="space-y-3">
              {sortedCreditCards.length > 0 ? sortedCreditCards.slice(0, 3).map((card) => {
@@ -343,10 +530,21 @@ export const Dashboard = () => {
         </div>
 
         {/* Avans Hesapları */}
-        <div className="card p-4 sm:p-6">
+        <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/financial')}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium">Avans Hesapları</h2>
-            <Banknote className="w-5 h-5" style={{ color: '#ffb700' }} />
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/financial');
+                }}
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              >
+                Tümünü Gör <ExternalLink className="w-3 h-3" />
+              </button>
+              <Banknote className="w-5 h-5" style={{ color: '#ffb700' }} />
+            </div>
           </div>
           <div className="space-y-3">
              {sortedCashAdvanceAccounts.length > 0 ? sortedCashAdvanceAccounts.slice(0, 3).map((account) => {
@@ -391,10 +589,21 @@ export const Dashboard = () => {
         </div>
 
         {/* Krediler */}
-        <div className="card p-4 sm:p-6">
+        <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/financial')}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium">Krediler</h2>
-            <PiggyBank className="w-5 h-5" style={{ color: '#ffb700' }} />
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/financial');
+                }}
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              >
+                Tümünü Gör <ExternalLink className="w-3 h-3" />
+              </button>
+              <PiggyBank className="w-5 h-5" style={{ color: '#ffb700' }} />
+            </div>
           </div>
           <div className="space-y-3">
             {loans.length > 0 ? loans.slice(0, 3).map((loan) => {
@@ -434,45 +643,66 @@ export const Dashboard = () => {
             )}
           </div>
         </div>
+
+
+
       </div>
 
-      {/* AI Önerileri */}
-       <div className="card p-4 sm:p-6">
-         <div className="flex items-center justify-between mb-4">
-           <h2 className="text-lg font-medium">AI Önerileri</h2>
-           <Brain className="w-5 h-5" style={{ color: '#ffb700' }} />
-         </div>
-         <div className="space-y-3">
-           {aiLoading ? (
-             <div className="text-center py-4">
-               <div className="animate-spin rounded-full h-6 w-6 border-b-2 mx-auto" style={{ borderBottomColor: '#ffb700' }}></div>
-               <p className="text-xs text-muted-foreground mt-2">AI önerileri hazırlanıyor...</p>
-             </div>
-           ) : aiRecommendations.length > 0 ? (
-             aiRecommendations.slice(0, 3).map((recommendation, index) => (
-               <div key={index} className="p-3 rounded-lg" style={{ backgroundColor: '#fff8e1', border: '1px solid #ffb700' }}>
-                 <p className="text-sm" style={{ color: '#e65100' }}>{recommendation}</p>
-               </div>
-             ))
-           ) : (
-             <div className="text-center py-8 text-muted-foreground">
-               <Brain className="w-8 h-8 mx-auto mb-2 opacity-50" />
-               <p className="text-sm">AI önerileri şu anda mevcut değil</p>
-             </div>
-           )}
-         </div>
-       </div>
+      {/* AI Önerileri - Tam Genişlik */}
+      <div className="card p-4 sm:p-6 min-h-[300px]">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-medium">AI Önerileri</h2>
+          <Brain className="w-5 h-5" style={{ color: '#ffb700' }} />
+        </div>
+        <div className="space-y-4 min-h-[200px]">
+          {aiLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{ borderBottomColor: '#ffb700' }}></div>
+              <p className="text-sm text-muted-foreground mt-4">AI önerileri hazırlanıyor...</p>
+            </div>
+          ) : aiRecommendations.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {aiRecommendations.slice(0, 6).map((recommendation, index) => (
+                <div key={index} className="p-4 rounded-lg min-h-[80px] flex items-center" style={{ backgroundColor: '#fff8e1', border: '1px solid #ffb700' }}>
+                  <p className="text-sm leading-relaxed" style={{ color: '#e65100' }}>{recommendation}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <Brain className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p className="text-base">AI önerileri şu anda mevcut değil</p>
+              <p className="text-sm mt-2">Portföyünüze yatırım ekleyerek AI önerilerini görüntüleyebilirsiniz</p>
+            </div>
+          )}
+        </div>
+      </div>
 
-       {/* Yaklaşan Ödemeler */}
-       <div className="card p-4 sm:p-6">
-         <div className="flex items-center justify-between mb-4">
-           <h2 className="text-lg font-medium">Yaklaşan Ödemeler</h2>
-           <AlertCircle className="w-5 h-5" style={{ color: '#ef4444' }} />
-         </div>
+
+
+      {/* Yaklaşan Ödemeler ve Abonelikler */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Yaklaşan Ödemeler */}
+        <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/expenses')}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium">Yaklaşan Ödemeler</h2>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/expenses');
+                }}
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              >
+                Tümünü Gör <ExternalLink className="w-3 h-3" />
+              </button>
+              <AlertCircle className="w-5 h-5" style={{ color: '#ef4444' }} />
+            </div>
+          </div>
          
          <div className="space-y-3">
            {upcomingExpenses.length > 0 ? (
-             upcomingExpenses.slice(0, 3).map((expense) => (
+             upcomingExpenses.map((expense) => (
                <div key={expense.id} className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
                  <div className="flex-1 min-w-0">
                    <h4 className="font-medium text-sm truncate text-red-800">{expense.title}</h4>
@@ -495,30 +725,40 @@ export const Dashboard = () => {
          </div>
        </div>
 
-       {/* Yaklaşan Abonelikler */}
-       <div className="card p-4 sm:p-6">
-         <div className="flex items-center justify-between mb-4">
-           <h2 className="text-lg font-medium">Yaklaşan Abonelikler</h2>
-           <Calendar className="w-5 h-5" style={{ color: '#8b5cf6' }} />
-         </div>
+        {/* Yaklaşan Abonelikler */}
+        <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/subscriptions')}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium">Yaklaşan Abonelikler</h2>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/subscriptions');
+                }}
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              >
+                Tümünü Gör <ExternalLink className="w-3 h-3" />
+              </button>
+              <Calendar className="w-5 h-5" style={{ color: '#8b5cf6' }} />
+            </div>
+          </div>
          
          <div className="space-y-3">
            {upcomingSubscriptions.length > 0 ? (
-             upcomingSubscriptions.slice(0, 3).map((subscription) => {
-               const daysRemaining = calculateDaysRemaining(subscription.endDate);
+             upcomingSubscriptions.map((subscription) => {
                return (
                  <div key={subscription.id} className="flex items-center justify-between p-3 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors">
                    <div className="flex-1 min-w-0">
                      <h4 className="font-medium text-sm truncate text-purple-800">{subscription.name}</h4>
                      <p className="text-xs text-purple-600">
-                       {daysRemaining} gün kaldı • {new Date(subscription.endDate).toLocaleDateString('tr-TR')}
+                       {subscription.daysRemaining} gün kaldı • {new Date(subscription.endDate).toLocaleDateString('tr-TR')}
                      </p>
                      <span className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${
-                       daysRemaining <= 3 ? 'bg-red-100 text-red-800' :
-                       daysRemaining <= 7 ? 'bg-orange-100 text-orange-800' :
+                       subscription.daysRemaining <= 3 ? 'bg-red-100 text-red-800' :
+                       subscription.daysRemaining <= 7 ? 'bg-orange-100 text-orange-800' :
                        'bg-green-100 text-green-800'
                      }`}>
-                       {daysRemaining <= 3 ? 'Acil' : daysRemaining <= 7 ? 'Yakında' : 'Normal'}
+                       {subscription.daysRemaining <= 3 ? 'Acil' : subscription.daysRemaining <= 7 ? 'Yakında' : 'Normal'}
                      </span>
                    </div>
                    <span className="font-medium text-purple-700 text-sm">
@@ -534,8 +774,131 @@ export const Dashboard = () => {
                <p className="text-xs mt-1">Tüm abonelikleriniz güncel!</p>
              </div>
            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Son Kargolar ve Kargo Durumu */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Son Kargolarınız */}
+        <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/cargo-tracking')}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium">Son Kargolarınız</h2>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/cargo-tracking');
+                }}
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              >
+                Tümünü Gör <ExternalLink className="w-3 h-3" />
+              </button>
+              <Package className="w-5 h-5" style={{ color: '#ffb700' }} />
+            </div>
+          </div>
+         
+         <div className="space-y-3">
+           {recentCargos.length > 0 ? (
+             recentCargos.slice(0, 3).map((cargo) => {
+               const company = CARGO_COMPANIES[cargo.company];
+               return (
+                 <div key={cargo.id} className="flex items-center justify-between p-3 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors">
+                   <div className="flex items-center gap-3 flex-1 min-w-0">
+                     {company?.logo ? (
+                       <img 
+                         src={company.logo} 
+                         alt={company.name}
+                         className="w-6 h-6 object-contain rounded flex-shrink-0"
+                         onError={(e) => {
+                           e.currentTarget.style.display = 'none';
+                           e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                         }}
+                       />
+                     ) : null}
+                     <Truck className={`w-5 h-5 text-orange-600 flex-shrink-0 ${company?.logo ? 'hidden' : ''}`} />
+                     <div className="flex-1 min-w-0">
+                       <h4 className="font-medium text-sm truncate text-orange-800">{cargo.name}</h4>
+                       <p className="text-xs text-orange-600 truncate">
+                         {cargo.trackingNumber} • {company?.name || cargo.company}
+                       </p>
+                     </div>
+                   </div>
+                   <div className="flex items-center gap-2 flex-shrink-0">
+                     {cargo.isDelivered ? (
+                       <span className="inline-block px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                         Teslim Edildi
+                       </span>
+                     ) : (
+                       <span className="inline-block px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                         Bekliyor
+                       </span>
+                     )}
+                   </div>
+                 </div>
+               );
+             })
+           ) : (
+             <div className="text-center py-8 text-muted-foreground">
+               <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
+               <p className="text-sm">Henüz kargo eklenmemiş</p>
+               <p className="text-xs mt-1">İlk kargonuzu ekleyerek başlayın!</p>
+             </div>
+           )}
          </div>
        </div>
+
+        {/* Kargo Durumu */}
+        <div className="card p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium">Kargo Durumu</h2>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => navigate('/cargo-tracking')}
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              >
+                Tümünü Gör <ExternalLink className="w-3 h-3" />
+              </button>
+              <Truck className="w-5 h-5" style={{ color: '#10b981' }} />
+            </div>
+          </div>
+         
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg cursor-pointer hover:bg-green-100 transition-colors" onClick={() => navigate('/cargo-tracking')}>
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <div>
+                  <p className="font-medium text-sm text-green-800">Teslim Edilen</p>
+                  <p className="text-xs text-green-600">Başarıyla ulaştı</p>
+                </div>
+              </div>
+              <span className="font-bold text-lg text-green-700">{deliveredCargos.length}</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg cursor-pointer hover:bg-yellow-100 transition-colors" onClick={() => navigate('/cargo-tracking')}>
+              <div className="flex items-center gap-3">
+                <Clock className="w-5 h-5 text-yellow-600" />
+                <div>
+                  <p className="font-medium text-sm text-yellow-800">Bekleyen</p>
+                  <p className="text-xs text-yellow-600">Yolda olan kargolar</p>
+                </div>
+              </div>
+              <span className="font-bold text-lg text-yellow-700">{pendingCargos.length}</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors" onClick={() => navigate('/cargo-tracking')}>
+              <div className="flex items-center gap-3">
+                <Package className="w-5 h-5 text-blue-600" />
+                <div>
+                  <p className="font-medium text-sm text-blue-800">Toplam Kargo</p>
+                  <p className="text-xs text-blue-600">Tüm takipleriniz</p>
+                </div>
+              </div>
+              <span className="font-bold text-lg text-blue-700">{cargoList.length}</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
 
 

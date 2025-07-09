@@ -9,18 +9,38 @@ import {
   reauthenticateWithCredential,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { loginTrackingService } from './login-tracking.service';
 
 export const signInWithEmail = async (email: string, password: string) => {
-  return signInWithEmailAndPassword(auth, email, password);
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    await loginTrackingService.recordLogin('email', true);
+    return result;
+  } catch (error) {
+    await loginTrackingService.recordFailedLogin(email, 'email');
+    throw error;
+  }
 };
 
 export const signInWithGoogle = async () => {
-  const provider = new GoogleAuthProvider();
-  return signInWithPopup(auth, provider);
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    await loginTrackingService.recordLogin('google', true);
+    return result;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const signOut = async () => {
-  return firebaseSignOut(auth);
+  try {
+    await loginTrackingService.recordLogout();
+    return firebaseSignOut(auth);
+  } catch (error) {
+    console.error('Error during logout:', error);
+    return firebaseSignOut(auth);
+  }
 };
 
 export const updateUserProfile = async (displayName: string) => {

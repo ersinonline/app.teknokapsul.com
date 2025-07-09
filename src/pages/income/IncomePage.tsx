@@ -77,17 +77,17 @@ export const IncomePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
         {/* Header */}
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-3">
                 <TrendingUp className="w-6 h-6 lg:w-8 lg:h-8 text-green-500" />
                 Gelirlerim
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm lg:text-base">
+              <p className="text-gray-600 mt-1 text-sm lg:text-base">
                 Düzenli ve tek seferlik gelirlerinizi yönetin
               </p>
             </div>
@@ -102,23 +102,23 @@ export const IncomePage: React.FC = () => {
           
           {/* Ay Navigasyonu */}
           <div className="flex items-center justify-center mt-4">
-            <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-1 lg:p-2">
+            <div className="flex items-center bg-white rounded-lg shadow-lg border border-gray-200 p-1 lg:p-2">
               <button
                 onClick={() => navigateMonth('prev')}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600 dark:text-gray-400" />
+                <ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600" />
               </button>
               <div className="px-4 lg:px-6 py-2 text-center min-w-[160px] lg:min-w-[200px]">
-                <h2 className="text-base lg:text-lg font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-base lg:text-lg font-semibold text-gray-900">
                   {monthNames[currentMonth - 1]} {currentYear}
                 </h2>
               </div>
               <button
                 onClick={() => navigateMonth('next')}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600 dark:text-gray-400" />
+                <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600" />
               </button>
             </div>
           </div>
@@ -126,49 +126,49 @@ export const IncomePage: React.FC = () => {
 
         {/* İstatistikler */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="bg-white rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1">
-                <p className="text-xs lg:text-sm font-medium text-gray-600 dark:text-gray-400">Toplam Gelir</p>
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Toplam Gelir</p>
                 <p className="text-lg lg:text-2xl font-bold text-green-600">{incomes.length}</p>
               </div>
-              <div className="p-2 lg:p-3 bg-green-100 dark:bg-green-900/30 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
+              <div className="p-2 lg:p-3 bg-green-100 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
                 <TrendingUp className="w-4 h-4 lg:w-6 lg:h-6 text-green-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="bg-white rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1">
-                <p className="text-xs lg:text-sm font-medium text-gray-600 dark:text-gray-400">Düzenli Gelirler</p>
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Düzenli Gelirler</p>
                 <p className="text-lg lg:text-2xl font-bold text-blue-600">{recurringIncomeCount}</p>
               </div>
-              <div className="p-2 lg:p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
+              <div className="p-2 lg:p-3 bg-blue-100 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
                 <Calendar className="w-4 h-4 lg:w-6 lg:h-6 text-blue-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200 dark:border-gray-700 col-span-2 lg:col-span-1">
+          <div className="bg-white rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200 col-span-2 lg:col-span-1">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1">
-                <p className="text-xs lg:text-sm font-medium text-gray-600 dark:text-gray-400">Aylık Gelir</p>
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Aylık Gelir</p>
                 <p className="text-lg lg:text-2xl font-bold text-green-600">{formatCurrency(totalMonthlyIncome)}</p>
               </div>
-              <div className="p-2 lg:p-3 bg-green-100 dark:bg-green-900/30 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
+              <div className="p-2 lg:p-3 bg-green-100 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
                 <DollarSign className="w-4 h-4 lg:w-6 lg:h-6 text-green-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200 dark:border-gray-700 col-span-2 lg:col-span-1">
+          <div className="bg-white rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200 col-span-2 lg:col-span-1">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1">
-                <p className="text-xs lg:text-sm font-medium text-gray-600 dark:text-gray-400">Tek Seferlik</p>
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Tek Seferlik</p>
                 <p className="text-lg lg:text-2xl font-bold text-purple-600">{formatCurrency(totalOneTimeIncome)}</p>
               </div>
-              <div className="p-2 lg:p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
+              <div className="p-2 lg:p-3 bg-purple-100 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
                 <DollarSign className="w-4 h-4 lg:w-6 lg:h-6 text-purple-600" />
               </div>
             </div>
@@ -176,9 +176,9 @@ export const IncomePage: React.FC = () => {
         </div>
 
         {/* Gelirler Tablosu */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-          <div className="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-base lg:text-lg font-semibold text-gray-900 dark:text-white">Gelir Listesi</h2>
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200">
+          <div className="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-200">
+            <h2 className="text-base lg:text-lg font-semibold text-gray-900">Gelir Listesi</h2>
           </div>
           <div className="p-3 lg:p-6">
             <IncomeTable incomes={incomes} onUpdate={loadIncomes} />
@@ -190,8 +190,8 @@ export const IncomePage: React.FC = () => {
         {/* Form Modal */}
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 lg:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-              <h3 className="text-base lg:text-lg font-medium mb-4 text-gray-900 dark:text-white">Yeni Gelir Ekle</h3>
+            <div className="bg-white rounded-lg p-4 lg:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+              <h3 className="text-base lg:text-lg font-medium mb-4 text-gray-900">Yeni Gelir Ekle</h3>
               <IncomeForm onSubmit={async (data) => {
                 try {
                   await addIncome(user!.uid, data);
@@ -203,7 +203,7 @@ export const IncomePage: React.FC = () => {
               }} />
               <button
                 onClick={() => setShowForm(false)}
-                className="mt-4 w-full rounded-lg bg-gray-200 dark:bg-gray-600 px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                className="mt-4 w-full rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 transition-colors"
               >
                 İptal
               </button>

@@ -19,7 +19,7 @@ export const CategoryList: React.FC<CategoryListProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg dark:shadow-2xl dark:shadow-black/10 transition-all duration-200 hover:shadow-xl p-6">
+    <div className="bg-white rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl p-6">
       <h2 className="text-lg font-medium mb-6">Kategori Bazlı Bütçeler</h2>
       <div className="space-y-6">
         {Object.entries(budget.categories).map(([category, data]) => (

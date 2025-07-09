@@ -4,6 +4,8 @@ import { Home, Clock, TrendingUp, TrendingDown } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { ChatButton } from '../chat/ChatButton';
 import { MaintenanceBanner } from '../common/MaintenanceBanner';
+import { OfflineIndicator } from '../common/OfflineIndicator';
+
 import { useAuth } from '../../contexts/AuthContext';
 
 interface AppLayoutProps {
@@ -88,6 +90,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       
       {/* Chat Button */}
       <ChatButton />
+      
+      {/* Offline Indicator */}
+      <OfflineIndicator />
+      
+
     </div>
   );
 };

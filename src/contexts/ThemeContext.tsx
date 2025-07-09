@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Theme = 'light' | 'dark' | 'auto';
+type Theme = 'light';
 type ColorScheme = 'blue' | 'green' | 'purple' | 'orange' | 'pink';
 
 interface ThemeSettings {
@@ -23,7 +23,7 @@ interface ThemeContextType {
 }
 
 const defaultSettings: ThemeSettings = {
-  theme: 'auto',
+  theme: 'light',
   colorScheme: 'blue',
   fontSize: 'medium',
   reducedMotion: false,
@@ -71,38 +71,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
   });
 
-  const [isDark, setIsDark] = useState(false);
-
-  // Detect system theme preference
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    const updateSystemTheme = () => {
-      if (settings.theme === 'auto') {
-        setIsDark(mediaQuery.matches);
-      }
-    };
-
-    updateSystemTheme();
-    mediaQuery.addEventListener('change', updateSystemTheme);
-
-    return () => mediaQuery.removeEventListener('change', updateSystemTheme);
-  }, [settings.theme]);
-
-  // Update theme when settings change
-  useEffect(() => {
-    switch (settings.theme) {
-      case 'light':
-        setIsDark(false);
-        break;
-      case 'dark':
-        setIsDark(true);
-        break;
-      case 'auto':
-        setIsDark(window.matchMedia('(prefers-color-scheme: dark)').matches);
-        break;
-    }
-  }, [settings.theme]);
+  const [isDark] = useState(false);
 
   // Apply theme to document
   useEffect(() => {
@@ -115,12 +84,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.style.setProperty('--color-secondary', colors.secondary);
     root.style.setProperty('--color-accent', colors.accent);
 
-    // Apply dark/light theme
-    if (isDark) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    // Always use light theme
+    root.classList.remove('dark');
 
     // Apply font size
     root.classList.remove('text-sm', 'text-base', 'text-lg');
@@ -152,7 +117,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Save to localStorage
     localStorage.setItem('theme-settings', JSON.stringify(settings));
-  }, [settings, isDark]);
+  }, [settings]);
 
   const updateTheme = (theme: Theme) => {
     setSettings(prev => ({ ...prev, theme }));

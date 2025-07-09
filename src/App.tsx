@@ -17,17 +17,23 @@ import { NotesPage } from './pages/notes/NotesPage';
 import { CalendarPage } from './pages/calendar/CalendarPage';
 import { FAQPage } from './pages/faq/FAQPage';
 import { OtherPage } from './pages/other/OtherPage';
+import { CargoTrackingPage } from './pages/other/CargoTrackingPage';
 import { FinancialAnalytics } from './components/analytics/FinancialAnalytics';
 import { MobileNavigation } from './components/navigation/MobileNavigation';
+import { OfflineIndicator } from './components/offline/OfflineIndicator';
+import { AIAssistantPage } from './pages/ai/AIAssistantPage';
 
 import { IncomePage } from './pages/income/IncomePage';
 import { ExpensePage } from './pages/expense/ExpensePage';
 import { FinancialDataPage } from './pages/financial/FinancialDataPage';
+import { PortfolioPage } from './pages/portfolio/PortfolioPage';
+import { MobileFinancePage } from './pages/mobile/MobileFinancePage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
   <AuthGuard>
     <AppLayout>
       <MobileNavigation />
+      <OfflineIndicator />
       {children}
     </AppLayout>
   </AuthGuard>
@@ -89,6 +95,30 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><OtherPage /></ProtectedRoute>
   },
   {
+    path: '/cargo-tracking',
+    element: <ProtectedRoute><CargoTrackingPage /></ProtectedRoute>
+  },
+  {
+    path: '/ai-assistant',
+    element: <ProtectedRoute><AIAssistantPage /></ProtectedRoute>
+  },
+  {
+    path: '/financial',
+    element: <ProtectedRoute><FinancialDataPage /></ProtectedRoute>
+  },
+  {
+    path: '/budget',
+    element: <ProtectedRoute><FinancialAnalytics /></ProtectedRoute>
+  },
+  {
+    path: '/portfolio',
+    element: <ProtectedRoute><PortfolioPage /></ProtectedRoute>
+  },
+  {
+    path: '/mobile-finance',
+    element: <ProtectedRoute><MobileFinancePage /></ProtectedRoute>
+  },
+  {
     path: '/',
     element: <Navigate to="/dashboard" replace />
   }
@@ -99,7 +129,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <FamilyProvider>
-          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+          <div className="min-h-screen bg-gray-50 transition-colors duration-300">
             <RouterProvider router={router} />
           </div>
         </FamilyProvider>

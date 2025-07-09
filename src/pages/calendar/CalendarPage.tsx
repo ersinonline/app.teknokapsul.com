@@ -22,13 +22,13 @@ export const CalendarPage = () => {
   if (error) return <ErrorMessage message="Etkinlikler yüklenirken bir hata oluştu." />;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       <div className="p-4 lg:p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <CalendarIcon className="w-6 h-6" style={{ color: '#ffb700' }} />
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">Takvim</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Takvim</h1>
           </div>
           <button
             onClick={() => setIsEventFormOpen(true)}
@@ -46,26 +46,26 @@ export const CalendarPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar Section */}
           <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <Clock className="w-5 h-5" style={{ color: '#ffb700' }} />
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h2 className="text-lg font-semibold text-gray-900">
                     {selectedDate.toLocaleString('tr-TR', { month: 'long', year: 'numeric' })}
                   </h2>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => changeMonth(-1)}
-                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                   >
-                    <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                    <ChevronLeft className="w-5 h-5 text-gray-600" />
                   </button>
                   <button
                     onClick={() => changeMonth(1)}
                     className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                   >
-                    <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                    <ChevronRight className="w-5 h-5 text-gray-600" />
                   </button>
                 </div>
               </div>
@@ -78,11 +78,11 @@ export const CalendarPage = () => {
           </div>
 
           {/* Event List Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-200">
               <div className="flex items-center gap-3">
                 <MapPin className="w-5 h-5" style={{ color: '#ffb700' }} />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Etkinlikler</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Etkinlikler</h2>
               </div>
             </div>
             <EventList

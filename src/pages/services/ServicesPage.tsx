@@ -1,7 +1,7 @@
 import { 
   Shield, Receipt, Wifi, Smartphone, 
   Tv, Gamepad2, Wrench,
-  Truck, Building, ExternalLink
+  Truck, Building, ExternalLink, Calculator, CreditCard
 } from 'lucide-react';
 
 const Services = () => {
@@ -10,7 +10,59 @@ const Services = () => {
   const BAYI_ID = "54108";
   
   const serviceGroups = [
-    // 1. Sigortalar (En önemli finansal hizmetler)
+    // 1. TeknoKapsül Hizmetleri
+    {
+      title: 'TeknoKapsül Hizmetleri',
+      icon: <Building className="w-8 h-8" />,
+      color: 'bg-yellow-500',
+      bgColor: 'bg-yellow-50',
+      borderColor: 'border-yellow-200',
+      textColor: 'text-yellow-700',
+      services: [
+        { name: 'Kargo Takip', tag: 'Ücretsiz', url: '/kargo-takip' },
+        { name: 'Not Hatırlatıcı', tag: 'Ücretsiz', url: '/notlar' },
+        { name: 'Takvim', tag: 'Ücretsiz', url: '/takvim' },
+        { name: 'Bütçe Yönetimi', tag: 'Ücretsiz', url: '/butce' },
+        { name: 'Portföy Takibi', tag: 'Ücretsiz', url: '/portfoy' },
+        { name: 'AI Asistan', tag: 'Yeni', url: '/ai' }
+      ]
+    },
+
+    // 2. Hesaplama Araçları
+    {
+      title: 'Hesaplama Araçları',
+      icon: <Calculator className="w-8 h-8" />,
+      color: 'bg-emerald-500',
+      bgColor: 'bg-emerald-50',
+      borderColor: 'border-emerald-200',
+      textColor: 'text-emerald-700',
+      services: [
+        { name: 'Gecikme Zammı Hesaplama', tag: 'GİB', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.gib.gov.tr/hesaplama-araclari/gecikme-zammi-hesaplama' },
+        { name: 'Vergi Hesaplama', tag: 'GİB', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.gib.gov.tr/hesaplama-araclari' },
+        { name: 'SGK Prim Hesaplama', tag: 'SGK', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.sgk.gov.tr/hesaplama' },
+        { name: 'Kıdem Tazminatı Hesaplama', tag: 'Çalışma', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.calisma.gov.tr/hesaplama' },
+        { name: 'MTV Ödeme', tag: 'Taşıt', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.turkiye.gov.tr/mtv-odeme' }
+      ]
+    },
+
+    // 2. Borç Sorgulama
+    {
+      title: 'Borç Sorgulama',
+      icon: <CreditCard className="w-8 h-8" />,
+      color: 'bg-amber-500',
+      bgColor: 'bg-amber-50',
+      borderColor: 'border-amber-200',
+      textColor: 'text-amber-700',
+      services: [
+        { name: 'Vergi Borcu Sorgulama', tag: 'GİB', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://ivd.gib.gov.tr/tvd_server/VergiDairesi' },
+        { name: 'SGK Borcu Sorgulama', tag: 'SGK', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.sgk.gov.tr/wps/portal/sgk/tr/calisan/sgk_hizmetleri' },
+        { name: 'İcra Borcu Sorgulama', tag: 'UYAP', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://uyap.gov.tr/icra' },
+        { name: 'Trafik Cezası Sorgulama', tag: 'EGM', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.turkiye.gov.tr/trafik-cezasi-sorgulama' },
+        { name: 'KYK Borcu Öde', tag: 'KYK', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://kyk.ziraatbank.com.tr' }
+      ]
+    },
+
+    // 3. Sigortalar (En önemli finansal hizmetler)
     {
       title: 'Sigortalar',
       icon: <Shield className="w-8 h-8" />,
@@ -108,7 +160,11 @@ const Services = () => {
         { name: 'GAIN', tag: 'Trend', url: `https://www.kodmarketim.com/gain-paketleri-mid-11?refid=${REFID}` },
         { name: 'S Sport Plus', tag: 'Spor', url: `https://www.kodmarketim.com/s-sport-plus-paketleri-mid-33?refid=${REFID}` },
         { name: 'Google Play', tag: 'Android', url: `https://www.kodmarketim.com/google-play-paketleri-mid-4?refid=${REFID}` },
-        { name: 'App Store', tag: 'iOS', url: `https://www.kodmarketim.com/apple-store-paketleri-mid-5?refid=${REFID}` }
+        { name: 'App Store', tag: 'iOS', url: `https://www.kodmarketim.com/apple-store-paketleri-mid-5?refid=${REFID}` },
+        { name: 'BluTV', tag: 'Dizi', url: `https://www.kodmarketim.com/blutv-paketleri-mid-3?refid=${REFID}` },
+        { name: 'Exxen', tag: 'Spor', url: `https://www.kodmarketim.com/exxen-paketleri-mid-12?refid=${REFID}` },
+        { name: 'Netflix', tag: 'Film', url: `https://www.kodmarketim.com/netflix-paketleri-mid-13?refid=${REFID}` },
+        { name: 'Spotify', tag: 'Müzik', url: `https://www.kodmarketim.com/spotify-paketleri-mid-14?refid=${REFID}` }
       ]
     },
 
@@ -126,7 +182,11 @@ const Services = () => {
         { name: 'PUBG Mobile', tag: 'Trend', url: `https://www.kodmarketim.com/pubg-mobile-paketleri-mid-10?refid=${REFID}` },
         { name: 'Point Blank', tag: 'FPS', url: `https://www.kodmarketim.com/point-blank-paketleri-mid-8?refid=${REFID}` },
         { name: 'Zula', tag: 'Yerli', url: `https://www.kodmarketim.com/zula-paketleri-mid-7?refid=${REFID}` },
-        { name: 'Wolfteam', tag: 'MMO', url: `https://www.kodmarketim.com/wolfteam-paketleri-mid-37?refid=${REFID}` }
+        { name: 'Wolfteam', tag: 'MMO', url: `https://www.kodmarketim.com/wolfteam-paketleri-mid-37?refid=${REFID}` },
+        { name: 'Bombom', tag: 'Sosyal', url: `https://www.kodmarketim.com/bombom-paketleri-mid-15?refid=${REFID}` },
+        { name: 'Brawl Stars', tag: 'Mobil', url: `https://www.kodmarketim.com/brawl-stars-paketleri-mid-16?refid=${REFID}` },
+        { name: 'Silkroad Online', tag: 'MMORPG', url: `https://www.kodmarketim.com/silkroad-paketleri-mid-17?refid=${REFID}` },
+        { name: 'Steam Wallet', tag: 'PC', url: `https://www.kodmarketim.com/steam-paketleri-mid-18?refid=${REFID}` }
       ]
     },
 
@@ -150,7 +210,23 @@ const Services = () => {
       ]
     },
 
-    // 8. Nakliyat Hizmetleri
+    // 8. Taşıt Hizmetleri
+    {
+      title: 'Taşıt Hizmetleri',
+      icon: <Truck className="w-8 h-8" />,
+      color: 'bg-slate-500',
+      bgColor: 'bg-slate-50',
+      borderColor: 'border-slate-200',
+      textColor: 'text-slate-700',
+      services: [
+        { name: 'İSPARK Ödeme', tag: 'Park', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.ispark.istanbul/odeme' },
+        { name: 'Trafik Cezası Ödeme', tag: 'Ceza', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.turkiye.gov.tr/trafik-cezasi-odeme' },
+        { name: 'HGS Bakiye Yükleme', tag: 'Geçiş', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.hgs.com.tr/bakiye-yukleme' },
+        { name: 'OGS Bakiye Yükleme', tag: 'Geçiş', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.ogs.com.tr/bakiye-yukleme' }
+      ]
+    },
+
+    // 9. Nakliyat Hizmetleri
     {
       title: 'Nakliyat Hizmetleri',
       icon: <Truck className="w-8 h-8" />,
@@ -166,7 +242,7 @@ const Services = () => {
       ]
     },
 
-    // 9. E-Hizmetler
+    // 10. E-Hizmetler
     {
       title: 'E-Hizmetler',
       icon: <Building className="w-8 h-8" />,

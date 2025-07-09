@@ -6,6 +6,7 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 
 import { FeedbackForm } from '../../components/feedback/FeedbackForm';
 import { NotificationPreferences } from '../../components/notifications/NotificationPreferences';
+import { ProfileManagement } from '../../components/profile/ProfileManagement';
 
 export const SettingsPage = () => {
   const { user } = useAuth();
@@ -62,17 +63,17 @@ export const SettingsPage = () => {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       <div className="p-4 lg:p-6">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
             <Settings className="w-6 h-6" style={{ color: '#ffb700' }} />
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">Ayarlar</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Ayarlar</h1>
           </div>
 
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg">
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
                 {error}
@@ -80,7 +81,7 @@ export const SettingsPage = () => {
             </div>
           )}
           {success && (
-            <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-600 dark:text-green-400 px-4 py-3 rounded-lg">
+            <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4" />
                 {success}
@@ -89,14 +90,14 @@ export const SettingsPage = () => {
           )}
 
           {/* Profil Ayarları */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
             <div className="flex items-center gap-3 mb-6">
               <User className="w-5 h-5" style={{ color: '#ffb700' }} />
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profil Bilgileri</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Profil Bilgileri</h2>
             </div>
             <form onSubmit={handleProfileUpdate} className="space-y-6">
               <div>
-                <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-2">
                   Ad Soyad
                 </label>
                 <input
@@ -104,12 +105,12 @@ export const SettingsPage = () => {
                   id="displayName"
                   value={formData.displayName}
                   onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Adınızı ve soyadınızı girin"
                 />
               </div>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                   E-posta
                 </label>
                 <div className="relative">
@@ -119,10 +120,10 @@ export const SettingsPage = () => {
                     id="email"
                     value={formData.email}
                     disabled
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-500"
                   />
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">E-posta adresi değiştirilemez</p>
+                <p className="text-xs text-gray-500 mt-1">E-posta adresi değiştirilemez</p>
               </div>
               <button
                 type="submit"
@@ -139,14 +140,14 @@ export const SettingsPage = () => {
           </div>
 
           {/* Şifre Değiştirme */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
             <div className="flex items-center gap-3 mb-6">
               <Lock className="w-5 h-5" style={{ color: '#ffb700' }} />
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Şifre Değiştirme</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Şifre Değiştirme</h2>
             </div>
             <form onSubmit={handlePasswordUpdate} className="space-y-6">
               <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-2">
                   Mevcut Şifre
                 </label>
                 <input
@@ -154,12 +155,12 @@ export const SettingsPage = () => {
                   id="currentPassword"
                   value={formData.currentPassword}
                   onChange={(e) => setFormData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Mevcut şifrenizi girin"
                 />
               </div>
               <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
                   Yeni Şifre
                 </label>
                 <input
@@ -167,12 +168,12 @@ export const SettingsPage = () => {
                   id="newPassword"
                   value={formData.newPassword}
                   onChange={(e) => setFormData(prev => ({ ...prev, newPassword: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Yeni şifrenizi girin"
                 />
               </div>
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
                   Yeni Şifre (Tekrar)
                 </label>
                 <input
@@ -180,7 +181,7 @@ export const SettingsPage = () => {
                   id="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Yeni şifrenizi tekrar girin"
                 />
               </div>
@@ -199,19 +200,25 @@ export const SettingsPage = () => {
           </div>
 
           {/* Bildirim Tercihleri */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
             <div className="flex items-center gap-3 mb-6">
               <Bell className="w-5 h-5" style={{ color: '#ffb700' }} />
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Bildirim Tercihleri</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Bildirim Tercihleri</h2>
             </div>
             <NotificationPreferences />
           </div>
 
+          {/* Profil Yönetimi */}
+          <ProfileManagement 
+            onSuccess={(message) => setSuccess(message)}
+            onError={(message) => setError(message)}
+          />
+
           {/* Geri Bildirim Formu */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
             <div className="flex items-center gap-3 mb-6">
               <MessageSquare className="w-5 h-5 text-blue-500" />
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Geri Bildirim</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Geri Bildirim</h2>
             </div>
             <FeedbackForm />
           </div>

@@ -48,7 +48,7 @@ export const EventForm: React.FC<EventFormProps> = ({ onClose, onSave, selectedD
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-lg dark:shadow-2xl dark:shadow-black/10 w-full max-w-md">
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-md">
         <div className="flex justify-between items-center p-6 border-b">
           <h2 className="text-xl font-semibold">Yeni Etkinlik</h2>
           <button

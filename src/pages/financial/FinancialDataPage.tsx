@@ -525,22 +525,12 @@ export const FinancialDataPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {loans.map((loan) => {
                   const progress = calculateLoanProgress(loan.totalInstallments, loan.remainingInstallments);
-                  const isFullyPaid = loan.remainingAmount === 0 && loan.remainingInstallments === 0;
                   
                   return (
-                    <div key={loan.id} className={`bg-white border rounded-lg p-6 hover:shadow-md transition-shadow ${
-                      isFullyPaid ? 'border-green-200 bg-green-50' : 'border-gray-200'
-                    }`}>
+                    <div key={loan.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-gray-900">{loan.name}</h3>
-                            {isFullyPaid && (
-                              <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                                Ödendi
-                              </span>
-                            )}
-                          </div>
+                          <h3 className="font-semibold text-gray-900">{loan.name}</h3>
                           <p className="text-sm text-gray-600">{loan.bank}</p>
                           <p className="text-xs text-gray-500">{LOAN_TYPES[loan.loanType]}</p>
                         </div>
@@ -571,11 +561,7 @@ export const FinancialDataPage = () => {
                         
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600">Kalan Borç</span>
-                          <span className={`font-medium ${
-                            isFullyPaid ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {isFullyPaid ? 'Ödendi' : formatCurrency(loan.remainingAmount)}
-                          </span>
+                          <span className="font-medium text-red-600">{formatCurrency(loan.remainingAmount)}</span>
                         </div>
                         
                         <div className="flex justify-between items-center">
@@ -586,29 +572,19 @@ export const FinancialDataPage = () => {
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-600">İlerleme</span>
-                            <span className={`font-medium ${
-                              isFullyPaid ? 'text-green-600' : 'text-blue-600'
-                            }`}>
-                              %{isFullyPaid ? 100 : progress}
-                            </span>
+                            <span className="font-medium text-blue-600">%{progress}</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div 
-                              className={`h-2 rounded-full ${
-                                isFullyPaid ? 'bg-green-500' : 'bg-blue-500'
-                              }`}
-                              style={{ width: `${isFullyPaid ? 100 : progress}%` }}
+                              className="h-2 rounded-full bg-blue-500"
+                              style={{ width: `${progress}%` }}
                             ></div>
                           </div>
                         </div>
 
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600">Kalan Taksit</span>
-                          <span className={`font-medium ${
-                            isFullyPaid ? 'text-green-600' : ''
-                          }`}>
-                            {isFullyPaid ? 'Tamamlandı' : `${loan.remainingInstallments}/${loan.totalInstallments}`}
-                          </span>
+                          <span className="font-medium">{loan.remainingInstallments}/{loan.totalInstallments}</span>
                         </div>
 
                         <div className="flex justify-between items-center pt-2 border-t">
@@ -742,7 +718,17 @@ export const FinancialDataPage = () => {
               };
               const startDate = new Date(formData.get('startDate') as string);
               const totalInstallments = Number(formData.get('totalInstallments'));
-              const remainingInstallments = Number(formData.get('remainingInstallments')) || totalInstallments;
+              const remainingAmount = parseNumber(formData.get('remainingAmount') as string);
+              const remainingInstallmentsInput = formData.get('remainingInstallments') as string;
+              let remainingInstallments;
+              
+              // Eğer kalan borç 0 ise, kalan taksit sayısı da 0 olmalı
+              if (remainingAmount === 0) {
+                remainingInstallments = 0;
+              } else {
+                // Kalan taksit sayısı girilmişse onu kullan, yoksa toplam taksit sayısını kullan
+                remainingInstallments = remainingInstallmentsInput ? Number(remainingInstallmentsInput) : totalInstallments;
+              }
               const endDate = new Date(startDate);
               endDate.setMonth(endDate.getMonth() + totalInstallments);
               const nextPaymentDate = new Date(startDate);
@@ -776,7 +762,25 @@ export const FinancialDataPage = () => {
                   <option value="other">Diğer</option>
                 </select>
                 <input name="totalAmount" type="text" placeholder="Toplam Tutar" defaultValue={editingLoan?.totalAmount || ''} className="w-full p-2 border rounded" required />
-                <input name="remainingAmount" type="text" placeholder="Kalan Borç" defaultValue={editingLoan?.remainingAmount || ''} className="w-full p-2 border rounded" required />
+                <input 
+                  name="remainingAmount" 
+                  type="text" 
+                  placeholder="Kalan Borç" 
+                  defaultValue={editingLoan?.remainingAmount || ''} 
+                  className="w-full p-2 border rounded" 
+                  required 
+                  onChange={(e) => {
+                    const remainingAmountInput = e.target;
+                    const remainingInstallmentsInput = remainingAmountInput.form?.querySelector('input[name="remainingInstallments"]') as HTMLInputElement;
+                    if (remainingInstallmentsInput) {
+                      const value = remainingAmountInput.value.replace(',', '.');
+                      const amount = parseFloat(value) || 0;
+                      if (amount === 0) {
+                        remainingInstallmentsInput.value = '0';
+                      }
+                    }
+                  }}
+                />
                 <input name="monthlyPayment" type="text" placeholder="Aylık Ödeme" defaultValue={editingLoan?.monthlyPayment || ''} className="w-full p-2 border rounded" required />
                 <input name="totalInstallments" type="number" placeholder="Toplam Taksit Sayısı" defaultValue={editingLoan?.totalInstallments || ''} className="w-full p-2 border rounded" required />
                 <input name="remainingInstallments" type="number" placeholder="Kalan Taksit Sayısı" defaultValue={editingLoan?.remainingInstallments || ''} className="w-full p-2 border rounded" required />

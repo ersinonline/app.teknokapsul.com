@@ -15,15 +15,17 @@ export const FinancialTips: React.FC<FinancialTipsProps> = ({ budget }) => {
   const remainingBudget = totalBudget - totalSpent;
 
   const highestSpendingCategory = Object.entries(budget.categories).reduce(
-    (max, [category, data]) =>
-      data.spent > (max ? max.spent : 0)
-        ? { category, spent: data.spent }
-        : max,
-    null
+    (max, [category, data]) => {
+      if (!max || data.spent > max.spent) {
+        return { category, spent: data.spent };
+      }
+      return max;
+    },
+    null as { category: string; spent: number } | null
   );
 
   return (
-    <div className="bg-white rounded-xl shadow-lg dark:shadow-2xl dark:shadow-black/10 transition-all duration-200 hover:shadow-xl p-6">
+    <div className="bg-white rounded-xl shadow-lg transition-all duration-200 hover:shadow-xl p-6">
       <h2 className="text-lg font-medium mb-4">Harcama Analizi</h2>
 
       <div className="space-y-4">

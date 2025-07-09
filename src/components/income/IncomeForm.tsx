@@ -32,7 +32,7 @@ export const IncomeForm: React.FC<IncomeFormProps> = ({ onSubmit, initialData, i
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           Gelir Adı *
         </label>
         <input
@@ -46,7 +46,7 @@ export const IncomeForm: React.FC<IncomeFormProps> = ({ onSubmit, initialData, i
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           Tutar (TL) *
         </label>
         <input
@@ -62,7 +62,7 @@ export const IncomeForm: React.FC<IncomeFormProps> = ({ onSubmit, initialData, i
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           Kategori *
         </label>
         <select
@@ -85,7 +85,7 @@ export const IncomeForm: React.FC<IncomeFormProps> = ({ onSubmit, initialData, i
           onChange={(e) => handleChange('isRecurring', e.target.checked)}
           className="rounded border-gray-300 text-primary focus:ring-primary"
         />
-        <label htmlFor="isRecurring" className="text-sm text-gray-700 dark:text-gray-300">
+        <label htmlFor="isRecurring" className="text-sm text-gray-700">
           Düzenli gelir (aylık)
         </label>
       </div>
@@ -93,7 +93,7 @@ export const IncomeForm: React.FC<IncomeFormProps> = ({ onSubmit, initialData, i
       {formData.isRecurring ? (
         <>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Başlangıç Tarihi *
             </label>
             <input
@@ -105,7 +105,7 @@ export const IncomeForm: React.FC<IncomeFormProps> = ({ onSubmit, initialData, i
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Ayın Kaçında Alınacak
             </label>
             <input
@@ -121,7 +121,7 @@ export const IncomeForm: React.FC<IncomeFormProps> = ({ onSubmit, initialData, i
         </>
       ) : (
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Tarih
           </label>
           <input
