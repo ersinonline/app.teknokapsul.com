@@ -37,11 +37,7 @@ const Services = () => {
       borderColor: 'border-emerald-200',
       textColor: 'text-emerald-700',
       services: [
-        { name: 'Gecikme Zammı Hesaplama', tag: 'GİB', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.gib.gov.tr/hesaplama-araclari/gecikme-zammi-hesaplama' },
-        { name: 'Vergi Hesaplama', tag: 'GİB', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.gib.gov.tr/hesaplama-araclari' },
-        { name: 'SGK Prim Hesaplama', tag: 'SGK', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.sgk.gov.tr/hesaplama' },
-        { name: 'Kıdem Tazminatı Hesaplama', tag: 'Çalışma', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.calisma.gov.tr/hesaplama' },
-        { name: 'MTV Ödeme', tag: 'Taşıt', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.turkiye.gov.tr/mtv-odeme' }
+
       ]
     },
 
@@ -55,8 +51,6 @@ const Services = () => {
       textColor: 'text-amber-700',
       services: [
         { name: 'Vergi Borcu Sorgulama', tag: 'GİB', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://ivd.gib.gov.tr/tvd_server/VergiDairesi' },
-        { name: 'SGK Borcu Sorgulama', tag: 'SGK', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.sgk.gov.tr/wps/portal/sgk/tr/calisan/sgk_hizmetleri' },
-        { name: 'İcra Borcu Sorgulama', tag: 'UYAP', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://uyap.gov.tr/icra' },
         { name: 'Trafik Cezası Sorgulama', tag: 'EGM', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.turkiye.gov.tr/trafik-cezasi-sorgulama' },
         { name: 'KYK Borcu Öde', tag: 'KYK', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://kyk.ziraatbank.com.tr' }
       ]
