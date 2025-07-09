@@ -71,20 +71,20 @@ const Services = () => {
       borderColor: 'border-green-200',
       textColor: 'text-green-700',
       services: [
-        { name: 'Trafik Sigortası', tag: 'Zorunlu', url: `https://gelsinteklif.sigortayeri.com/trafik-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
-        { name: 'Kasko', tag: 'Popüler', url: `https://gelsinteklif.sigortayeri.com/kasko-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
-        { name: 'DASK', tag: 'Zorunlu', url: `https://gelsinteklif.sigortayeri.com/dask-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
-        { name: 'Konut Sigortası', tag: 'Önerilen', url: `https://gelsinteklif.sigortayeri.com/konut-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
-        { name: 'Eşyam Güvende', tag: 'Yeni', url: `https://gelsinteklif.sigortayeri.com/esyam-guvende-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
-        { name: 'Tamamlayıcı Sağlık', tag: 'Avantajlı', url: `https://gelsinteklif.sigortayeri.com/tamamlayici-saglik-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
-        { name: 'Yabancı Sağlık', tag: 'Özel', url: `https://gelsinteklif.sigortayeri.com/yabanci-saglik-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
-        { name: 'Ferdi Kaza', tag: 'Önerilen', url: `https://gelsinteklif.sigortayeri.com/ferdi-kaza-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
-        { name: 'Güvenli Cüzdan', tag: 'Yeni', url: `https://gelsinteklif.sigortayeri.com/guvenli-cuzdan-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
-        { name: 'Fatura Koruma', tag: 'Avantajlı', url: `https://gelsinteklif.sigortayeri.com/fatura-koruma-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
-        { name: 'Evcil Hayvan', tag: 'Popüler', url: `https://gelsinteklif.sigortayeri.com/evcil-hayvan-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
-        { name: 'İlk Ateş', tag: 'Özel', url: `https://gelsinteklif.sigortayeri.com/teklif-al/ilk-ates-sigortasi?reseller=${RESELLER_ID}` },
-        { name: 'Seyahat Sağlık', tag: 'Gerekli', url: `https://gelsinteklif.sigortayeri.com/seyahat-saglik-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
-        { name: 'IMM Sigortası', tag: 'Özel', url: `https://gelsinteklif.sigortayeri.com/imm-sigortasi-teklif-al?reseller=${RESELLER_ID}` }
+        { name: 'Trafik Sigortası', tag: 'Zorunlu', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/trafik-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
+        { name: 'Kasko', tag: 'Popüler', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/kasko-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
+        { name: 'DASK', tag: 'Zorunlu', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/dask-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
+        { name: 'Konut Sigortası', tag: 'Önerilen', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/konut-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
+        { name: 'Eşyam Güvende', tag: 'Yeni', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/esyam-guvende-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
+        { name: 'Tamamlayıcı Sağlık', tag: 'Avantajlı', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/tamamlayici-saglik-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
+        { name: 'Yabancı Sağlık', tag: 'Özel', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/yabanci-saglik-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
+        { name: 'Ferdi Kaza', tag: 'Önerilen', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/ferdi-kaza-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
+        { name: 'Güvenli Cüzdan', tag: 'Yeni', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/guvenli-cuzdan-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
+        { name: 'Fatura Koruma', tag: 'Avantajlı', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/fatura-koruma-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
+        { name: 'Evcil Hayvan', tag: 'Popüler', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/evcil-hayvan-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
+        { name: 'İlk Ateş', tag: 'Özel', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/teklif-al/ilk-ates-sigortasi?reseller=${RESELLER_ID}` },
+        { name: 'Seyahat Sağlık', tag: 'Gerekli', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/seyahat-saglik-sigortasi-teklif-al?reseller=${RESELLER_ID}` },
+        { name: 'IMM Sigortası', tag: 'Özel', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://gelsinteklif.sigortayeri.com/imm-sigortasi-teklif-al?reseller=${RESELLER_ID}` }
       ]
     },
 
@@ -97,15 +97,15 @@ const Services = () => {
       borderColor: 'border-blue-200',
       textColor: 'text-blue-700',
       services: [
-        { name: 'EnerjiSA', tag: 'Elektrik', url: `https://www.faturago.com.tr/elektrik-faturasi-odeme.html?bayiid=${BAYI_ID}` },
-        { name: 'CK Enerji', tag: 'Elektrik', url: `https://www.faturago.com.tr/elektrik-faturasi-odeme.html?bayiid=${BAYI_ID}` },
-        { name: 'İGDAŞ', tag: 'Doğalgaz', url: `https://www.faturago.com.tr/dogalgaz-faturasi-odeme.html?bayiid=${BAYI_ID}` },
-        { name: 'BAŞKENTGAZ', tag: 'Doğalgaz', url: `https://www.faturago.com.tr/dogalgaz-faturasi-odeme.html?bayiid=${BAYI_ID}` },
-        { name: 'İSKİ', tag: 'Su', url: `https://www.faturago.com.tr/su-faturasi-odeme.html?bayiid=${BAYI_ID}` },
-        { name: 'ASKİ', tag: 'Su', url: `https://www.faturago.com.tr/su-faturasi-odeme.html?bayiid=${BAYI_ID}` },
-        { name: 'Diğer Elektrik', tag: 'Tüm Şehirler', url: `https://www.faturago.com.tr/elektrik-faturasi-odeme.html?bayiid=${BAYI_ID}` },
-        { name: 'Diğer Doğalgaz', tag: 'Tüm Şehirler', url: `https://www.faturago.com.tr/dogalgaz-faturasi-odeme.html?bayiid=${BAYI_ID}` },
-        { name: 'Diğer Su', tag: 'Tüm Şehirler', url: `https://www.faturago.com.tr/su-faturasi-odeme.html?bayiid=${BAYI_ID}` }
+        { name: 'EnerjiSA', tag: 'Elektrik', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/elektrik-faturasi-odeme.html?bayiid=${BAYI_ID}` },
+        { name: 'CK Enerji', tag: 'Elektrik', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/elektrik-faturasi-odeme.html?bayiid=${BAYI_ID}` },
+        { name: 'İGDAŞ', tag: 'Doğalgaz', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/dogalgaz-faturasi-odeme.html?bayiid=${BAYI_ID}` },
+        { name: 'BAŞKENTGAZ', tag: 'Doğalgaz', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/dogalgaz-faturasi-odeme.html?bayiid=${BAYI_ID}` },
+        { name: 'İSKİ', tag: 'Su', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/su-faturasi-odeme.html?bayiid=${BAYI_ID}` },
+        { name: 'ASKİ', tag: 'Su', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/su-faturasi-odeme.html?bayiid=${BAYI_ID}` },
+        { name: 'Diğer Elektrik', tag: 'Tüm Şehirler', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/elektrik-faturasi-odeme.html?bayiid=${BAYI_ID}` },
+        { name: 'Diğer Doğalgaz', tag: 'Tüm Şehirler', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/dogalgaz-faturasi-odeme.html?bayiid=${BAYI_ID}` },
+        { name: 'Diğer Su', tag: 'Tüm Şehirler', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/su-faturasi-odeme.html?bayiid=${BAYI_ID}` }
       ]
     },
 
@@ -118,13 +118,13 @@ const Services = () => {
       borderColor: 'border-indigo-200',
       textColor: 'text-indigo-700',
       services: [
-        { name: 'Superonline', tag: 'Fiber', url: 'https://www.superonlineinternet.com/superonline_kampanyalari.html' },
-        { name: 'Millenicom', tag: 'Taahhütsüz', url: 'http://www.onlineabonelik.com/millenicom-kampanyalari.html' },
-        { name: 'KabloNET', tag: 'Avantajlı', url: 'https://www.tumhizmetler.com/turksat-internet-kampanyalari.html' },
-        { name: 'Extranet', tag: 'Ekonomik', url: 'https://www.tumhizmetler.com/extranet-internet-kampanyalari.html' },
-        { name: 'Şoknet', tag: 'Taahhütsüz', url: 'https://www.tumhizmetler.com/soknet-kampanyalari.html' },
-        { name: 'D-Smart', tag: 'TV+İnternet', url: `https://www.smartabonelik.com.tr/bayi_online_basvuru.asp?urun=Dsmart&bayiid=${BAYI_ID}` },
-        { name: 'Digitürk', tag: 'TV+İnternet', url: `https://www.digiturkburada.com.tr/basvuru?refid=${REFID}` }
+        { name: 'Superonline', tag: 'Fiber', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.superonlineinternet.com/superonline_kampanyalari.html' },
+        { name: 'Millenicom', tag: 'Taahhütsüz', url: 'https://app.teknokapsul.info/yonlendirme.html?target=http://www.onlineabonelik.com/millenicom-kampanyalari.html' },
+        { name: 'KabloNET', tag: 'Avantajlı', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.tumhizmetler.com/turksat-internet-kampanyalari.html' },
+        { name: 'Extranet', tag: 'Ekonomik', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.tumhizmetler.com/extranet-internet-kampanyalari.html' },
+        { name: 'Şoknet', tag: 'Taahhütsüz', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.tumhizmetler.com/soknet-kampanyalari.html' },
+        { name: 'D-Smart', tag: 'TV+İnternet', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.smartabonelik.com.tr/bayi_online_basvuru.asp?urun=Dsmart&bayiid=${BAYI_ID}` },
+        { name: 'Digitürk', tag: 'TV+İnternet', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.digiturkburada.com.tr/basvuru?refid=${REFID}` }
       ]
     },
 
@@ -155,16 +155,16 @@ const Services = () => {
       borderColor: 'border-purple-200',
       textColor: 'text-purple-700',
       services: [
-        { name: 'TOD TV', tag: 'Popüler', url: `https://www.kodmarketim.com/tod-paketleri-mid-1?refid=${REFID}` },
-        { name: 'D-Smart GO', tag: 'Yeni', url: `https://www.kodmarketim.com/d-smart-go-paketleri-mid-2?refid=${REFID}` },
-        { name: 'GAIN', tag: 'Trend', url: `https://www.kodmarketim.com/gain-paketleri-mid-11?refid=${REFID}` },
-        { name: 'S Sport Plus', tag: 'Spor', url: `https://www.kodmarketim.com/s-sport-plus-paketleri-mid-33?refid=${REFID}` },
-        { name: 'Google Play', tag: 'Android', url: `https://www.kodmarketim.com/google-play-paketleri-mid-4?refid=${REFID}` },
-        { name: 'App Store', tag: 'iOS', url: `https://www.kodmarketim.com/apple-store-paketleri-mid-5?refid=${REFID}` },
-        { name: 'BluTV', tag: 'Dizi', url: `https://www.kodmarketim.com/blutv-paketleri-mid-3?refid=${REFID}` },
-        { name: 'Exxen', tag: 'Spor', url: `https://www.kodmarketim.com/exxen-paketleri-mid-12?refid=${REFID}` },
-        { name: 'Netflix', tag: 'Film', url: `https://www.kodmarketim.com/netflix-paketleri-mid-13?refid=${REFID}` },
-        { name: 'Spotify', tag: 'Müzik', url: `https://www.kodmarketim.com/spotify-paketleri-mid-14?refid=${REFID}` }
+        { name: 'TOD TV', tag: 'Popüler', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/tod-paketleri-mid-1?refid=${REFID}` },
+        { name: 'D-Smart GO', tag: 'Yeni', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/d-smart-go-paketleri-mid-2?refid=${REFID}` },
+        { name: 'GAIN', tag: 'Trend', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/gain-paketleri-mid-11?refid=${REFID}` },
+        { name: 'S Sport Plus', tag: 'Spor', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/s-sport-plus-paketleri-mid-33?refid=${REFID}` },
+        { name: 'Google Play', tag: 'Android', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/google-play-paketleri-mid-4?refid=${REFID}` },
+        { name: 'App Store', tag: 'iOS', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/apple-store-paketleri-mid-5?refid=${REFID}` },
+        { name: 'BluTV', tag: 'Dizi', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/blutv-paketleri-mid-3?refid=${REFID}` },
+        { name: 'Exxen', tag: 'Spor', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/exxen-paketleri-mid-12?refid=${REFID}` },
+        { name: 'Netflix', tag: 'Film', url: `https://app.teknokapsul.info/yonlendirme.html?target=ttps://www.kodmarketim.com/netflix-paketleri-mid-13?refid=${REFID}` },
+        { name: 'Spotify', tag: 'Müzik', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/spotify-paketleri-mid-14?refid=${REFID}` }
       ]
     },
 
@@ -177,16 +177,16 @@ const Services = () => {
       borderColor: 'border-pink-200',
       textColor: 'text-pink-700',
       services: [
-        { name: 'Valorant', tag: 'En Çok Satan', url: `https://www.kodmarketim.com/valorant-point-paketleri-mid-22?refid=${REFID}` },
-        { name: 'League of Legends', tag: 'Popüler', url: `https://www.kodmarketim.com/league-of-legends-paketleri-mid-6?refid=${REFID}` },
-        { name: 'PUBG Mobile', tag: 'Trend', url: `https://www.kodmarketim.com/pubg-mobile-paketleri-mid-10?refid=${REFID}` },
-        { name: 'Point Blank', tag: 'FPS', url: `https://www.kodmarketim.com/point-blank-paketleri-mid-8?refid=${REFID}` },
-        { name: 'Zula', tag: 'Yerli', url: `https://www.kodmarketim.com/zula-paketleri-mid-7?refid=${REFID}` },
-        { name: 'Wolfteam', tag: 'MMO', url: `https://www.kodmarketim.com/wolfteam-paketleri-mid-37?refid=${REFID}` },
-        { name: 'Bombom', tag: 'Sosyal', url: `https://www.kodmarketim.com/bombom-paketleri-mid-15?refid=${REFID}` },
-        { name: 'Brawl Stars', tag: 'Mobil', url: `https://www.kodmarketim.com/brawl-stars-paketleri-mid-16?refid=${REFID}` },
-        { name: 'Silkroad Online', tag: 'MMORPG', url: `https://www.kodmarketim.com/silkroad-paketleri-mid-17?refid=${REFID}` },
-        { name: 'Steam Wallet', tag: 'PC', url: `https://www.kodmarketim.com/steam-paketleri-mid-18?refid=${REFID}` }
+        { name: 'Valorant', tag: 'En Çok Satan', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/valorant-point-paketleri-mid-22?refid=${REFID}` },
+        { name: 'League of Legends', tag: 'Popüler', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/league-of-legends-paketleri-mid-6?refid=${REFID}` },
+        { name: 'PUBG Mobile', tag: 'Trend', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/pubg-mobile-paketleri-mid-10?refid=${REFID}` },
+        { name: 'Point Blank', tag: 'FPS', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/point-blank-paketleri-mid-8?refid=${REFID}` },
+        { name: 'Zula', tag: 'Yerli', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/zula-paketleri-mid-7?refid=${REFID}` },
+        { name: 'Wolfteam', tag: 'MMO', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/wolfteam-paketleri-mid-37?refid=${REFID}` },
+        { name: 'Bombom', tag: 'Sosyal', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/bombom-paketleri-mid-15?refid=${REFID}` },
+        { name: 'Brawl Stars', tag: 'Mobil', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/brawl-stars-paketleri-mid-16?refid=${REFID}` },
+        { name: 'Silkroad Online', tag: 'MMORPG', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/silkroad-paketleri-mid-17?refid=${REFID}` },
+        { name: 'Steam Wallet', tag: 'PC', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/steam-paketleri-mid-18?refid=${REFID}` }
       ]
     },
 
@@ -219,10 +219,9 @@ const Services = () => {
       borderColor: 'border-slate-200',
       textColor: 'text-slate-700',
       services: [
-        { name: 'İSPARK Ödeme', tag: 'Park', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.ispark.istanbul/odeme' },
-        { name: 'Trafik Cezası Ödeme', tag: 'Ceza', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.turkiye.gov.tr/trafik-cezasi-odeme' },
-        { name: 'HGS Bakiye Yükleme', tag: 'Geçiş', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.hgs.com.tr/bakiye-yukleme' },
-        { name: 'OGS Bakiye Yükleme', tag: 'Geçiş', url: 'https://app.teknokapsul.com/yonlendirme.html?target=https://www.ogs.com.tr/bakiye-yukleme' }
+        { name: 'İSPARK Ödeme', tag: 'Park', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.ispark.istanbul/odeme' },
+        { name: 'Trafik Cezası Ödeme', tag: 'Ceza', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.turkiye.gov.tr/trafik-cezasi-odeme' },
+        { name: 'HGS Bakiye Yükleme', tag: 'Geçiş', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.hgs.com.tr/bakiye-yukleme' },
       ]
     },
 
@@ -237,8 +236,8 @@ const Services = () => {
       services: [
         { name: 'Şehirler Arası Nakliyat', tag: 'Ev Taşıma', url: 'https://basvuru.teknokapsul.com/apply/moving' },
         { name: 'Parça Eşya Taşıma', tag: 'Parça Eşya', url: 'https://basvuru.teknokapsul.com/apply/moving' },
-        { name: 'Ev Temizliği', tag: 'Standart', url: `https://www.tumhizmetler.com/bayi/bayi_online_basvuru.asp?urun=Temizlik&bayiid=${BAYI_ID}` },
-        { name: 'Ofis Temizliği', tag: 'Kurumsal', url: `https://www.tumhizmetler.com/bayi/bayi_online_basvuru.asp?urun=Temizlik&bayiid=${BAYI_ID}` }
+        { name: 'Ev Temizliği', tag: 'Standart', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.tumhizmetler.com/bayi/bayi_online_basvuru.asp?urun=Temizlik&bayiid=${BAYI_ID}` },
+        { name: 'Ofis Temizliği', tag: 'Kurumsal', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.tumhizmetler.com/bayi/bayi_online_basvuru.asp?urun=Temizlik&bayiid=${BAYI_ID}` }
       ]
     },
 

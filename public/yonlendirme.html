@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yönlendiriliyor - TeknokapsÜl</title>
+    <title>Yönlendiriliyor - TeknoKapsül</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ffb700;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -35,7 +35,7 @@
         .logo {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ffb700;
             border-radius: 50%;
             margin: 0 auto 1.5rem;
             display: flex;
@@ -80,7 +80,7 @@
         .countdown {
             font-size: 3rem;
             font-weight: bold;
-            color: #667eea;
+            color: #ffb700;
             margin: 1rem 0;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
@@ -96,7 +96,7 @@
         
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            background: #ffb700;
             border-radius: 3px;
             transition: width 1s linear;
         }
@@ -122,13 +122,13 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ffb700;
             color: white;
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(255, 183, 0, 0.4);
         }
         
         .btn-secondary {
@@ -181,12 +181,12 @@
         <div class="warning">
             <div class="warning-icon">⚠️</div>
             <strong>Güvenlik Uyarısı:</strong><br>
-            TeknokapsÜl dışındaki bir siteye yönlendiriliyorsunuz. Bu sitenin içeriğinden TeknokapsÜl sorumlu değildir.
+            TeknoKapsül dışındaki bir siteye yönlendiriliyorsunuz. Bu sitenin içeriğinden TeknoKapsül sorumlu değildir.
         </div>
         
         <div class="target-url" id="targetUrl">Yükleniyor...</div>
         
-        <div class="countdown" id="countdown">5</div>
+        <div class="countdown" id="countdown">10</div>
         
         <div class="progress-bar">
             <div class="progress-fill" id="progressFill" style="width: 100%;"></div>
@@ -196,11 +196,11 @@
         
         <div class="buttons">
             <button class="btn btn-primary" onclick="redirectNow()">Şimdi Git</button>
-            <a href="https://teknokapsul.com" class="btn btn-secondary">Ana Sayfaya Dön</a>
+            <a href="https://teknokapsul.info" class="btn btn-secondary">Ana Sayfaya Dön</a>
         </div>
         
         <div class="footer">
-            © 2024 TeknokapsÜl - Güvenli yönlendirme hizmeti
+            © <span id="currentYear"></span> TeknoKapsül Güvenlik Ekibi - Güvenli yönlendirme hizmeti: Dış bağlantıları güvenli bir şekilde açmanızı sağlar
         </div>
     </div>
     
@@ -218,24 +218,25 @@
             document.querySelector('.progress-bar').style.display = 'none';
             document.querySelector('p').textContent = 'Geçersiz veya eksik URL parametresi!';
             document.querySelector('.btn-primary').style.display = 'none';
-            return;
+        } else {
+            // Geri sayım başlat
+            let timeLeft = 10;
+            const countdownElement = document.getElementById('countdown');
+            const progressElement = document.getElementById('progressFill');
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                countdownElement.textContent = timeLeft;
+                progressElement.style.width = (timeLeft / 10 * 100) + '%';
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    redirectNow();
+                }
+            }, 1000);
         }
         
-        // Geri sayım başlat
-        let timeLeft = 5;
-        const countdownElement = document.getElementById('countdown');
-        const progressElement = document.getElementById('progressFill');
-        
-        const timer = setInterval(() => {
-            timeLeft--;
-            countdownElement.textContent = timeLeft;
-            progressElement.style.width = (timeLeft / 5 * 100) + '%';
-            
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                redirectNow();
-            }
-        }, 1000);
+
         
         // Anında yönlendirme fonksiyonu
         function redirectNow() {
@@ -254,11 +255,14 @@
             }
         }
         
-        // Sayfa yüklendiğinde progress bar animasyonunu başlat
+        // Sayfa yüklendiğinde progress bar animasyonunu başlat ve güncel yılı ayarla
         window.addEventListener('load', () => {
             setTimeout(() => {
                 document.getElementById('progressFill').style.width = '0%';
             }, 100);
+            
+            // Güncel yılı ayarla
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
         });
     </script>
 </body>
