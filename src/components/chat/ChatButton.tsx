@@ -1,19 +1,27 @@
 import React, { useState } from 'react';
 import { MessageCircle, X } from 'lucide-react';
-import { AIAssistant } from '../ai/AIAssistant';
+import { useNavigate } from 'react-router-dom';
+import { EnhancedAIAssistant } from '../ai/EnhancedAIAssistant';
 
 export const ChatButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
+  const handleChatClick = () => {
+    // Mobil cihazlarda AI asistan sayfasına yönlendir
+    if (window.innerWidth < 1024) {
+      navigate('/ai-assistant');
+    } else {
+      // Masaüstünde chat modal'ını aç
+      setIsOpen(!isOpen);
+    }
   };
 
   return (
     <>
       {/* Chat Button */}
       <button
-        onClick={toggleChat}
+        onClick={handleChatClick}
         className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50 bg-primary text-white p-4 rounded-full shadow-lg hover:bg-primary-dark transition-all duration-300 hover:scale-110"
         aria-label="AI Sohbet"
       >
@@ -30,7 +38,7 @@ export const ChatButton: React.FC = () => {
           {/* Backdrop for mobile */}
           <div 
             className="absolute inset-0 bg-black bg-opacity-50 lg:hidden" 
-            onClick={toggleChat}
+            onClick={() => setIsOpen(false)}
           />
           
           {/* Chat Container */}
@@ -39,7 +47,7 @@ export const ChatButton: React.FC = () => {
             <div className="flex items-center justify-between p-4 border-b bg-primary text-white rounded-t-2xl lg:rounded-t-2xl">
               <h3 className="font-semibold">AI Asistan</h3>
               <button
-                onClick={toggleChat}
+                onClick={() => setIsOpen(false)}
                 className="p-1 hover:bg-primary-dark rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -48,7 +56,7 @@ export const ChatButton: React.FC = () => {
             
             {/* Chat Content */}
             <div className="flex-1 overflow-hidden">
-              <AIAssistant />
+              <EnhancedAIAssistant />
             </div>
           </div>
         </div>

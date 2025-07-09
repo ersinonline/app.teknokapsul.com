@@ -5,7 +5,7 @@ import {
   CreditCard,
   Bell,
   User,
-  Package,
+  Grid3X3,
   PieChart
 } from 'lucide-react';
 
@@ -20,7 +20,7 @@ const bottomNavigationItems: NavigationItem[] = [
   { path: '/dashboard', label: 'Ana Sayfa', icon: Home },
   { path: '/mobile-finance', label: 'Finans', icon: PieChart },
   { path: '/subscriptions', label: 'Abonelikler', icon: CreditCard },
-  { path: '/cargo-tracking', label: 'Kargo Takip', icon: Package },
+  { path: '/services', label: 'Hizmetler', icon: Grid3X3 },
 ];
 
 export const MobileNavigation: React.FC = () => {

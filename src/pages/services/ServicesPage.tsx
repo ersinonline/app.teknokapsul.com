@@ -19,12 +19,12 @@ const Services = () => {
       borderColor: 'border-yellow-200',
       textColor: 'text-yellow-700',
       services: [
-        { name: 'Kargo Takip', tag: 'Ücretsiz', url: '/kargo-takip' },
-        { name: 'Not Hatırlatıcı', tag: 'Ücretsiz', url: '/notlar' },
-        { name: 'Takvim', tag: 'Ücretsiz', url: '/takvim' },
-        { name: 'Bütçe Yönetimi', tag: 'Ücretsiz', url: '/butce' },
-        { name: 'Portföy Takibi', tag: 'Ücretsiz', url: '/portfoy' },
-        { name: 'AI Asistan', tag: 'Yeni', url: '/ai' }
+        { name: 'Kargo Takip', tag: 'Ücretsiz', url: '/cargo-tracking' },
+        { name: 'Not Hatırlatıcı', tag: 'Ücretsiz', url: '/notes' },
+        { name: 'Takvim', tag: 'Ücretsiz', url: '/calendar' },
+        { name: 'Bütçe Yönetimi', tag: 'Ücretsiz', url: '/expenses' },
+        { name: 'Portföy Takibi', tag: 'Ücretsiz', url: '/portfolio' },
+        { name: 'AI Asistan', tag: 'Yeni', url: '/ai-assistant' }
       ]
     },
 

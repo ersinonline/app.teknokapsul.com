@@ -40,11 +40,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "src/pages/**/*.tsx": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  }
+  ]
 }

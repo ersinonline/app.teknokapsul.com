@@ -50,7 +50,6 @@ export const ProfileManagement: React.FC<ProfileManagementProps> = ({ onSuccess,
   const [verificationId, setVerificationId] = useState('');
   const [emailAddress, setEmailAddress] = useState('');
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'profile' | 'records' | 'delete'>('profile');
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showPhoneForm, setShowPhoneForm] = useState(false);
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -259,320 +258,78 @@ export const ProfileManagement: React.FC<ProfileManagementProps> = ({ onSuccess,
         <h2 className="text-lg font-semibold text-gray-900">Hesap Yönetimi</h2>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200">
-        {[
-          { id: 'profile', label: 'Profil Bilgileri', icon: Mail },
-          { id: 'records', label: 'Giriş Kayıtları', icon: Clock },
-          { id: 'delete', label: 'Hesabı Sil', icon: Trash2 }
-        ].map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setActiveTab(id as any)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              activeTab === id
-                ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                : 'text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            <Icon className="w-4 h-4" />
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {/* Profile Info Tab */}
-      {activeTab === 'profile' && (
-        <div className="space-y-6">
-          <h3 className="text-md font-medium text-gray-900 mb-4">İletişim Bilgileri</h3>
-          
-          {/* Email Section */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-3">
+      {/* Profil Bilgileri - Sabit Bölüm */}
+      <div className="bg-gray-50 rounded-lg p-4 mb-6">
+        <h3 className="text-md font-medium text-gray-900 mb-4">İletişim Bilgileri</h3>
+        
+        {/* Email Section */}
+        <div className="bg-white rounded-lg p-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-gray-600" />
+              <span className="font-medium text-gray-900">E-posta Adresi</span>
+            </div>
+            {!auth.currentUser?.email && (
+              <button
+                onClick={() => setShowEmailForm(true)}
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+              >
+                <Plus className="w-3 h-3" />
+                Ekle
+              </button>
+            )}
+          </div>
+          {auth.currentUser?.email ? (
+            <div className="flex items-center justify-between">
+              <span className="text-gray-700">{auth.currentUser.email}</span>
               <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-gray-600" />
-                <span className="font-medium text-gray-900">E-posta Adresi</span>
-              </div>
-              {!auth.currentUser?.email && (
+                {auth.currentUser.emailVerified ? (
+                  <span className="flex items-center gap-1 text-green-600 text-sm">
+                    <CheckCircle className="w-3 h-3" />
+                    Doğrulandı
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-orange-600 text-sm">
+                    <AlertTriangle className="w-3 h-3" />
+                    Doğrulanmadı
+                  </span>
+                )}
                 <button
                   onClick={() => setShowEmailForm(true)}
-                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+                  className="text-blue-600 hover:text-blue-700 text-sm"
                 >
-                  <Plus className="w-3 h-3" />
-                  Ekle
+                  <Edit className="w-3 h-3" />
                 </button>
-              )}
+              </div>
             </div>
-            {auth.currentUser?.email ? (
-              <div className="flex items-center justify-between">
-                <span className="text-gray-700">{auth.currentUser.email}</span>
-                <div className="flex items-center gap-2">
-                  {auth.currentUser.emailVerified ? (
-                    <span className="flex items-center gap-1 text-green-600 text-sm">
-                      <CheckCircle className="w-3 h-3" />
-                      Doğrulandı
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 text-orange-600 text-sm">
-                      <AlertTriangle className="w-3 h-3" />
-                      Doğrulanmadı
-                    </span>
-                  )}
-                  <button
-                    onClick={() => setShowEmailForm(true)}
-                    className="text-blue-600 hover:text-blue-700 text-sm"
-                  >
-                    <Edit className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <p className="text-gray-500 text-sm">E-posta adresi eklenmemiş</p>
-            )}
-            
-            {showEmailForm && (
-              <div className="mt-4 space-y-3 border-t pt-4">
-                <input
-                  type="email"
-                  value={emailAddress}
-                  onChange={(e) => setEmailAddress(e.target.value)}
-                  placeholder="yeni@email.com"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={sendEmailVerificationCode}
-                    disabled={loading || !emailAddress}
-                    className="flex items-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
-                  >
-                    <Send className="w-3 h-3" />
-                    {loading ? 'Gönderiliyor...' : 'Doğrula'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowEmailForm(false);
-                      setEmailAddress('');
-                    }}
-                    className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
-                  >
-                    İptal
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Phone Section */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-gray-600" />
-                <span className="font-medium text-gray-900">Telefon Numarası</span>
-              </div>
-              {!userProfile?.phoneNumber && (
-                <button
-                  onClick={() => setShowPhoneForm(true)}
-                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
-                >
-                  <Plus className="w-3 h-3" />
-                  Ekle
-                </button>
-              )}
-            </div>
-            {userProfile?.phoneNumber ? (
-              <div className="flex items-center justify-between">
-                <span className="text-gray-700">{userProfile.phoneNumber}</span>
-                <div className="flex items-center gap-2">
-                  {userProfile.phoneVerified ? (
-                    <span className="flex items-center gap-1 text-green-600 text-sm">
-                      <CheckCircle className="w-3 h-3" />
-                      Doğrulandı
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 text-orange-600 text-sm">
-                      <AlertTriangle className="w-3 h-3" />
-                      Doğrulanmadı
-                    </span>
-                  )}
-                  <button
-                    onClick={() => setShowPhoneForm(true)}
-                    className="text-blue-600 hover:text-blue-700 text-sm"
-                  >
-                    <Edit className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <p className="text-gray-500 text-sm">Telefon numarası eklenmemiş</p>
-            )}
-            
-            {showPhoneForm && (
-              <div className="mt-4 space-y-3 border-t pt-4">
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="+90 5XX XXX XX XX"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                
-                <div id="recaptcha-container"></div>
-                
-                {!verificationId ? (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={sendPhoneVerification}
-                      disabled={loading || !phoneNumber}
-                      className="flex items-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
-                    >
-                      <Send className="w-3 h-3" />
-                      {loading ? 'Gönderiliyor...' : 'SMS Kodu Gönder'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowPhoneForm(false);
-                        setPhoneNumber('');
-                      }}
-                      className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
-                    >
-                      İptal
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <input
-                      type="text"
-                      value={verificationCode}
-                      onChange={(e) => setVerificationCode(e.target.value)}
-                      placeholder="6 haneli kod"
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={verifyPhoneNumber}
-                        disabled={loading || !verificationCode}
-                        className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm"
-                      >
-                        <CheckCircle className="w-3 h-3" />
-                        {loading ? 'Doğrulanıyor...' : 'Doğrula'}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowPhoneForm(false);
-                          setPhoneNumber('');
-                          setVerificationCode('');
-                          setVerificationId('');
-                        }}
-                        className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
-                      >
-                        İptal
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Login Records Tab */}
-      {activeTab === 'records' && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Son Giriş Kayıtları</h3>
-          {loginRecords.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">Henüz giriş kaydı bulunmuyor.</p>
           ) : (
-            <div className="space-y-3">
-              {loginRecords.map((record) => (
-                <div key={record.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{getDeviceIcon(record.userAgent)}</span>
-                    <div>
-                      <p className="font-medium text-gray-900">{record.device}</p>
-                      <p className="text-sm text-gray-500">{record.ipAddress}</p>
-                      {record.location && (
-                        <p className="text-sm text-gray-500">{record.location}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">
-                      {formatDate(record.timestamp)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p className="text-gray-500 text-sm">E-posta adresi eklenmemiş</p>
           )}
-        </div>
-      )}
-
-
-
-      {/* Delete Account Tab */}
-      {activeTab === 'delete' && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Hesap Silme</h3>
           
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
-              <div className="text-sm text-red-700">
-                <p className="font-medium">Dikkat!</p>
-                <p>Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz kalıcı olarak silinecektir.</p>
-              </div>
-            </div>
-          </div>
-
-          {!showDeleteConfirm ? (
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            >
-              <Trash2 className="w-4 h-4" />
-              Hesabımı Sil
-            </button>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Şifrenizi girin (onay için)
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={deletePassword}
-                    onChange={(e) => setDeletePassword(e.target.value)}
-                    placeholder="Mevcut şifreniz"
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-              
-              <div className="flex gap-3">
+          {showEmailForm && (
+            <div className="mt-4 space-y-3 border-t pt-4">
+              <input
+                type="email"
+                value={emailAddress}
+                onChange={(e) => setEmailAddress(e.target.value)}
+                placeholder="yeni@email.com"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <div className="flex gap-2">
                 <button
-                  onClick={deleteAccount}
-                  disabled={loading || !deletePassword}
-                  className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={sendEmailVerificationCode}
+                  disabled={loading || !emailAddress}
+                  className="flex items-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
                 >
-                  <Trash2 className="w-4 h-4" />
-                  {loading ? 'Siliniyor...' : 'Hesabı Kalıcı Olarak Sil'}
+                  <Send className="w-3 h-3" />
+                  {loading ? 'Gönderiliyor...' : 'Doğrula'}
                 </button>
-                
                 <button
                   onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setDeletePassword('');
+                    setShowEmailForm(false);
+                    setEmailAddress('');
                   }}
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                  className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
                 >
                   İptal
                 </button>
@@ -580,7 +337,225 @@ export const ProfileManagement: React.FC<ProfileManagementProps> = ({ onSuccess,
             </div>
           )}
         </div>
-      )}
+
+        {/* Phone Section */}
+        <div className="bg-white rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Phone className="w-4 h-4 text-gray-600" />
+              <span className="font-medium text-gray-900">Telefon Numarası</span>
+            </div>
+            {!userProfile?.phoneNumber && !auth.currentUser?.phoneNumber && (
+              <button
+                onClick={() => setShowPhoneForm(true)}
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+              >
+                <Plus className="w-3 h-3" />
+                Ekle
+              </button>
+            )}
+          </div>
+          {userProfile?.phoneNumber || auth.currentUser?.phoneNumber ? (
+            <div className="flex items-center justify-between">
+              <span className="text-gray-700">{userProfile?.phoneNumber || auth.currentUser?.phoneNumber}</span>
+              <div className="flex items-center gap-2">
+                {userProfile?.phoneVerified || auth.currentUser?.phoneNumber ? (
+                  <span className="flex items-center gap-1 text-green-600 text-sm">
+                    <CheckCircle className="w-3 h-3" />
+                    Doğrulandı
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-orange-600 text-sm">
+                    <AlertTriangle className="w-3 h-3" />
+                    Doğrulanmadı
+                  </span>
+                )}
+                <button
+                  onClick={() => setShowPhoneForm(true)}
+                  className="text-blue-600 hover:text-blue-700 text-sm"
+                >
+                  <Edit className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">Telefon numarası eklenmemiş</p>
+          )}
+          
+          {showPhoneForm && (
+            <div className="mt-4 space-y-3 border-t pt-4">
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="+90 5XX XXX XX XX"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              
+              <div id="recaptcha-container"></div>
+              
+              {!verificationId ? (
+                <div className="flex gap-2">
+                  <button
+                    onClick={sendPhoneVerification}
+                    disabled={loading || !phoneNumber}
+                    className="flex items-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
+                  >
+                    <Send className="w-3 h-3" />
+                    {loading ? 'Gönderiliyor...' : 'SMS Kodu Gönder'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowPhoneForm(false);
+                      setPhoneNumber('');
+                    }}
+                    className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
+                  >
+                    İptal
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    placeholder="6 haneli kod"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={verifyPhoneNumber}
+                      disabled={loading || !verificationCode}
+                      className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm"
+                    >
+                      <CheckCircle className="w-3 h-3" />
+                      {loading ? 'Doğrulanıyor...' : 'Doğrula'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowPhoneForm(false);
+                        setPhoneNumber('');
+                        setVerificationCode('');
+                        setVerificationId('');
+                      }}
+                      className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
+                    >
+                      İptal
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Login Records - Ayrı Kutu */}
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Clock className="w-5 h-5" style={{ color: '#ffb700' }} />
+          <h3 className="text-lg font-medium text-gray-900">Son Giriş Kayıtları</h3>
+        </div>
+        {loginRecords.length === 0 ? (
+          <p className="text-gray-500 text-center py-8">Henüz giriş kaydı bulunmuyor.</p>
+        ) : (
+          <div className="space-y-3">
+            {loginRecords.map((record) => (
+              <div key={record.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{getDeviceIcon(record.userAgent)}</span>
+                  <div>
+                    <p className="font-medium text-gray-900">{record.device}</p>
+                    <p className="text-sm text-gray-500">{record.ipAddress}</p>
+                    {record.location && (
+                      <p className="text-sm text-gray-500">{record.location}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-gray-900">
+                    {formatDate(record.timestamp)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Delete Account - Ayrı Kutu */}
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Trash2 className="w-5 h-5" style={{ color: '#ffb700' }} />
+          <h3 className="text-lg font-medium text-gray-900">Hesap Silme</h3>
+        </div>
+        
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+            <div className="text-sm text-red-700">
+              <p className="font-medium">Dikkat!</p>
+              <p>Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz kalıcı olarak silinecektir.</p>
+            </div>
+          </div>
+        </div>
+
+        {!showDeleteConfirm ? (
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            <Trash2 className="w-4 h-4" />
+            Hesabımı Sil
+          </button>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Şifrenizi girin (onay için)
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="Mevcut şifreniz"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={deleteAccount}
+                disabled={loading || !deletePassword}
+                className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="w-4 h-4" />
+                {loading ? 'Siliniyor...' : 'Hesabı Kalıcı Olarak Sil'}
+              </button>
+              
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeletePassword('');
+                }}
+                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                İptal
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
