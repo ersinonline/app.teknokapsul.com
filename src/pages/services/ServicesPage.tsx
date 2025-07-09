@@ -37,8 +37,7 @@ const Services = () => {
       borderColor: 'border-emerald-200',
       textColor: 'text-emerald-700',
       services: [
-
-      ]
+]
     },
 
     // 2. Borç Sorgulama
