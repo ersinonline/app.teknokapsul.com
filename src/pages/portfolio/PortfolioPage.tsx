@@ -80,8 +80,9 @@ export const PortfolioPage: React.FC = () => {
   };
 
   const handleUpdateItem = async (id: string, updates: Partial<PortfolioItem>) => {
+    if (!user) return;
     try {
-      await portfolioService.updatePortfolioItem(id, updates);
+      await portfolioService.updatePortfolioItem(user.uid, id, updates);
       await loadPortfolioData();
     } catch (error) {
       console.error('Error updating portfolio item:', error);
@@ -89,8 +90,9 @@ export const PortfolioPage: React.FC = () => {
   };
 
   const handleDeleteItem = async (id: string) => {
+    if (!user) return;
     try {
-      await portfolioService.deletePortfolioItem(id);
+      await portfolioService.deletePortfolioItem(user.uid, id);
       await loadPortfolioData();
     } catch (error) {
       console.error('Error deleting portfolio item:', error);

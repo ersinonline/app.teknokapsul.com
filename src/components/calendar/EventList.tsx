@@ -1,7 +1,8 @@
 import React from 'react';
-import { Calendar, Clock, Trash2 } from 'lucide-react';
+import { Clock, Trash2 } from 'lucide-react';
 import { Event } from '../../types/calendar';
 import { deleteEvent } from '../../services/calendar.service';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface EventListProps {
   events: Event[];
@@ -14,6 +15,7 @@ export const EventList: React.FC<EventListProps> = ({
   selectedDate,
   onEventDelete,
 }) => {
+  const { user } = useAuth();
   const filteredEvents = events.filter(event => {
     const eventDate = new Date(event.date);
     return (
@@ -24,8 +26,9 @@ export const EventList: React.FC<EventListProps> = ({
   });
 
   const handleDelete = async (eventId: string) => {
+    if (!user) return;
     try {
-      await deleteEvent(eventId);
+      await deleteEvent(eventId, user.uid);
       onEventDelete();
     } catch (error) {
       console.error('Error deleting event:', error);

@@ -49,7 +49,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onClose, onSave })
           title,
           content,
           tags,
-        });
+        }, user.uid);
       } else {
         // Add new note
         await addNote({
@@ -58,7 +58,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onClose, onSave })
           content,
           tags,
           createdAt: new Date().toISOString(),
-        });
+        }, user.uid);
       }
       onSave();
       onClose();

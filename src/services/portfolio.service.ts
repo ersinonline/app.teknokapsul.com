@@ -51,7 +51,7 @@ class PortfolioService {
         lastUpdated: new Date()
       };
 
-      const docRef = await addDoc(collection(db, 'portfolio'), portfolioItem);
+      const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'portfolio'), portfolioItem);
       return docRef.id;
     } catch (error) {
       console.error('Error adding portfolio item:', error);
@@ -62,8 +62,7 @@ class PortfolioService {
   async getPortfolioItems(userId: string): Promise<PortfolioItem[]> {
     try {
       const q = query(
-        collection(db, 'portfolio'),
-        where('userId', '==', userId),
+        collection(db, 'teknokapsul', userId, 'portfolio'),
         orderBy('createdAt', 'desc')
       );
       
@@ -102,9 +101,9 @@ class PortfolioService {
     }
   }
 
-  async updatePortfolioItem(id: string, updates: Partial<PortfolioItem>): Promise<void> {
+  async updatePortfolioItem(id: string, userId: string, updates: Partial<PortfolioItem>): Promise<void> {
     try {
-      const docRef = doc(db, 'portfolio', id);
+      const docRef = doc(db, 'teknokapsul', userId, 'portfolio', id);
       await updateDoc(docRef, {
         ...updates,
         updatedAt: new Date()
@@ -115,9 +114,9 @@ class PortfolioService {
     }
   }
 
-  async deletePortfolioItem(id: string): Promise<void> {
+  async deletePortfolioItem(id: string, userId: string): Promise<void> {
     try {
-      await deleteDoc(doc(db, 'portfolio', id));
+      await deleteDoc(doc(db, 'teknokapsul', userId, 'portfolio', id));
     } catch (error) {
       console.error('Error deleting portfolio item:', error);
       throw error;
@@ -128,8 +127,7 @@ class PortfolioService {
   async updatePortfolioItemsBySymbol(userId: string, symbol: string, newPrice: number): Promise<void> {
     try {
       const q = query(
-        collection(db, 'portfolio'),
-        where('userId', '==', userId),
+        collection(db, 'teknokapsul', userId, 'portfolio'),
         where('symbol', '==', symbol)
       );
       
@@ -146,7 +144,7 @@ class PortfolioService {
         const totalReturn = totalValue - totalInvestment;
         const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
         
-        const updatePromise = updateDoc(doc(db, 'portfolio', docSnap.id), {
+        const updatePromise = updateDoc(doc(db, 'teknokapsul', userId, 'portfolio', docSnap.id), {
           currentPrice: newPrice,
           totalValue,
           totalReturn,

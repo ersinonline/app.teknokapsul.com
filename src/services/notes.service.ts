@@ -1,12 +1,11 @@
-import { collection, query, where, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Note } from '../types/notes';
 
 export const getUserNotes = async (userId: string): Promise<Note[]> => {
   try {
-    const notesRef = collection(db, 'notes');
-    const q = query(notesRef, where('userId', '==', userId));
-    const querySnapshot = await getDocs(q);
+    const notesRef = collection(db, 'teknokapsul', userId, 'notes');
+    const querySnapshot = await getDocs(notesRef);
     
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
@@ -18,9 +17,9 @@ export const getUserNotes = async (userId: string): Promise<Note[]> => {
   }
 };
 
-export const addNote = async (note: Omit<Note, 'id'>) => {
+export const addNote = async (note: Omit<Note, 'id'>, userId: string) => {
   try {
-    const docRef = await addDoc(collection(db, 'notes'), note);
+    const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'notes'), note);
     return docRef.id;
   } catch (error) {
     console.error('Error adding note:', error);
@@ -28,9 +27,9 @@ export const addNote = async (note: Omit<Note, 'id'>) => {
   }
 };
 
-export const updateNote = async (note: Note) => {
+export const updateNote = async (note: Note, userId: string) => {
   try {
-    const noteRef = doc(db, 'notes', note.id);
+    const noteRef = doc(db, 'teknokapsul', userId, 'notes', note.id);
     const { id, ...updateData } = note;
     await updateDoc(noteRef, updateData);
   } catch (error) {
@@ -39,9 +38,9 @@ export const updateNote = async (note: Note) => {
   }
 };
 
-export const deleteNote = async (noteId: string) => {
+export const deleteNote = async (noteId: string, userId: string) => {
   try {
-    await deleteDoc(doc(db, 'notes', noteId));
+    await deleteDoc(doc(db, 'teknokapsul', userId, 'notes', noteId));
   } catch (error) {
     console.error('Error deleting note:', error);
     throw error;

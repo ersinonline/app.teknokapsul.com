@@ -9,7 +9,7 @@ export interface NotificationData {
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
-  category: 'payment' | 'subscription' | 'budget' | 'ai' | 'system';
+  category: 'payment' | 'subscription' | 'ai' | 'system';
   userId: string;
   read: boolean;
   actionUrl?: string;
@@ -73,7 +73,7 @@ export const initializeNotifications = async (userId: string) => {
         });
 
         if (db) {
-            await setDoc(doc(db, 'user-notifications', userId), {
+            await setDoc(doc(db, 'teknokapsul', userId, 'notifications', 'settings'), {
                 fcmToken: token,
                 notificationEnabled: true,
                 updatedAt: new Date().toISOString()
@@ -107,7 +107,7 @@ export const updateNotificationSettings = async (userId: string, enabled: boolea
     try {
         if (!db) throw new Error('Firestore is not initialized');
         
-        const userNotificationsRef = doc(db, 'user-notifications', userId);
+        const userNotificationsRef = doc(db, 'teknokapsul', userId, 'notifications', 'settings');
         await updateDoc(userNotificationsRef, {
             notificationEnabled: enabled,
             updatedAt: new Date().toISOString()
@@ -125,10 +125,9 @@ export const scheduleEventNotification = async (event: Event & { id: string }) =
         const eventDate = new Date(event.date);
         const reminderDate = new Date(eventDate.getTime() - 30 * 60000); // 30 dakika önce
 
-        await addDoc(collection(db, 'scheduled-notifications'), {
+        await addDoc(collection(db, 'teknokapsul', event.userId, 'notifications'), {
             type: 'event',
             eventId: event.id,
-            userId: event.userId,
             scheduledFor: reminderDate.toISOString(),
             title: 'Etkinlik Hatırlatması',
             body: `"${event.title}" etkinliğiniz 30 dakika sonra başlayacak.`,

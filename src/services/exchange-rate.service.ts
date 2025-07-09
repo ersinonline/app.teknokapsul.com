@@ -31,7 +31,7 @@ class ExchangeRateService {
         updatedAt: new Date()
       };
 
-      const docRef = await addDoc(collection(db, 'exchangeRates'), rateData);
+      const docRef = await addDoc(collection(db, 'teknokapsul', 'system', 'exchangeRates'), rateData);
       return docRef.id;
     } catch (error) {
       console.error('Error adding exchange rate:', error);
@@ -43,7 +43,7 @@ class ExchangeRateService {
   async getCurrentRate(symbol: string): Promise<number> {
     try {
       const q = query(
-        collection(db, 'exchangeRates'),
+        collection(db, 'teknokapsul', 'system', 'exchangeRates'),
         where('symbol', '==', symbol),
         orderBy('date', 'desc'),
         limit(1)
@@ -73,7 +73,7 @@ class ExchangeRateService {
       
       for (const symbol of symbols) {
         const q = query(
-          collection(db, 'exchangeRates'),
+          collection(db, 'teknokapsul', 'system', 'exchangeRates'),
           where('symbol', '==', symbol),
           orderBy('date', 'desc'),
           limit(1)
@@ -105,7 +105,7 @@ class ExchangeRateService {
   async getRateHistory(symbol: string, startDate: Date, endDate: Date): Promise<ExchangeRate[]> {
     try {
       const q = query(
-        collection(db, 'exchangeRates'),
+        collection(db, 'teknokapsul', 'system', 'exchangeRates'),
         where('symbol', '==', symbol),
         where('date', '>=', startDate),
         where('date', '<=', endDate),
@@ -136,7 +136,7 @@ class ExchangeRateService {
   // Kur güncelleme
   async updateExchangeRate(id: string, updates: Partial<ExchangeRate>): Promise<void> {
     try {
-      const docRef = doc(db, 'exchangeRates', id);
+      const docRef = doc(db, 'teknokapsul', 'system', 'exchangeRates', id);
       await updateDoc(docRef, {
         ...updates,
         updatedAt: new Date()
@@ -156,7 +156,7 @@ class ExchangeRateService {
       tomorrow.setDate(tomorrow.getDate() + 1);
       
       const q = query(
-        collection(db, 'exchangeRates'),
+        collection(db, 'teknokapsul', 'system', 'exchangeRates'),
         where('symbol', '==', symbol),
         where('date', '>=', today),
         where('date', '<', tomorrow)

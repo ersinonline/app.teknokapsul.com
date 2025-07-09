@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { addDoc, collection } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { addEvent } from '../../services/calendar.service';
 import { scheduleEventNotification } from '../../services/notification.service';
 
 interface EventFormProps {
@@ -36,8 +35,8 @@ export const EventForm: React.FC<EventFormProps> = ({ onClose, onSave, selectedD
         createdAt: new Date().toISOString()
       };
 
-      const docRef = await addDoc(collection(db, 'events'), event);
-      await scheduleEventNotification({ ...event, id: docRef.id });
+      const eventId = await addEvent(event, user.uid);
+      await scheduleEventNotification({ ...event, id: eventId });
       
       onSave();
       onClose();

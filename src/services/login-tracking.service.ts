@@ -61,7 +61,7 @@ class LoginTrackingService {
       };
 
       // Create a new document with auto-generated ID
-      const docRef = doc(collection(db, 'loginRecords'));
+      const docRef = doc(collection(db, 'teknokapsul', user.uid, 'loginRecords'));
       await setDoc(docRef, loginRecord);
       
       console.log('Login recorded successfully');
@@ -82,7 +82,7 @@ class LoginTrackingService {
         ...clientInfo
       };
 
-      const docRef = doc(collection(db, 'failedLoginAttempts'));
+      const docRef = doc(collection(db, 'teknokapsul', 'system', 'failedLoginAttempts'));
       await setDoc(docRef, loginRecord);
       
       console.log('Failed login recorded successfully');
@@ -106,7 +106,7 @@ class LoginTrackingService {
         ...clientInfo
       };
 
-      const docRef = doc(collection(db, 'loginRecords'));
+      const docRef = doc(collection(db, 'teknokapsul', user.uid, 'loginRecords'));
       await setDoc(docRef, logoutRecord);
       
       console.log('Logout recorded successfully');

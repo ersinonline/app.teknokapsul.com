@@ -1,7 +1,6 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { FamilyProvider } from './contexts/FamilyContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LoginPage } from './pages/auth/LoginPage';
 import { AppLayout } from './components/layout/AppLayout';
@@ -106,10 +105,7 @@ const router = createBrowserRouter([
     path: '/financial',
     element: <ProtectedRoute><FinancialDataPage /></ProtectedRoute>
   },
-  {
-    path: '/budget',
-    element: <ProtectedRoute><FinancialAnalytics /></ProtectedRoute>
-  },
+
   {
     path: '/portfolio',
     element: <ProtectedRoute><PortfolioPage /></ProtectedRoute>
@@ -128,11 +124,9 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <FamilyProvider>
-          <div className="min-h-screen bg-gray-50 transition-colors duration-300">
-            <RouterProvider router={router} />
-          </div>
-        </FamilyProvider>
+        <div className="min-h-screen bg-gray-50 transition-colors duration-300">
+          <RouterProvider router={router} />
+        </div>
       </AuthProvider>
     </ThemeProvider>
   );

@@ -10,10 +10,11 @@ export interface PaymentReminder {
   status: 'active' | 'completed';
 }
 
-export const createPaymentReminder = async (reminder: Omit<PaymentReminder, 'status'>) => {
+export const createPaymentReminder = async (userId: string, reminder: Omit<PaymentReminder, 'status' | 'userId'>) => {
   try {
-    await addDoc(collection(db, 'payment-reminders'), {
+    await addDoc(collection(db, 'teknokapsul', userId, 'reminders'), {
       ...reminder,
+      userId,
       status: 'active',
       createdAt: new Date().toISOString()
     });

@@ -12,7 +12,7 @@ export interface AutoPayment {
 
 export const scheduleAutoPayment = async (payment: Omit<AutoPayment, 'status'>) => {
   try {
-    await addDoc(collection(db, 'auto-payments'), {
+    await addDoc(collection(db, 'teknokapsul', payment.userId, 'auto-payments'), {
       ...payment,
       status: 'scheduled',
       createdAt: new Date().toISOString()

@@ -28,11 +28,7 @@ export const NotesPage = () => {
   });
 
   const handleDelete = async () => {
-    if (window.confirm('Bu notu silmek istediğinize emin misiniz?')) {
-      // Firebase'den notu silme işlemi yapılmalı.
-      // await deleteNote(noteId);
-      await reload();
-    }
+    await reload();
   };
 
   if (loading) return <LoadingSpinner />;

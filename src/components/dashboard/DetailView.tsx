@@ -6,7 +6,7 @@ import { ErrorMessage } from '../common/ErrorMessage';
 import { useFirebaseData } from '../../hooks/useFirebaseData';
 
 interface DetailViewProps {
-  type: 'orders' | 'applications' | 'payments' | 'subscriptions';
+  type: 'payments' | 'subscriptions';
   renderContent: (data: any) => React.ReactNode;
 }
 

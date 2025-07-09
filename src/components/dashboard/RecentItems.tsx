@@ -7,9 +7,8 @@ import { formatCurrency } from '../../utils/currency';
 interface RecentItemsProps {
   title: string;
   items: any[];
-  type: 'orders' | 'applications' | 'payments' | 'subscriptions';
+  type: 'payments' | 'subscriptions';
   route: string;
-  showItemDetails?: boolean;
 }
 
 export const RecentItems: React.FC<RecentItemsProps> = ({
@@ -17,7 +16,6 @@ export const RecentItems: React.FC<RecentItemsProps> = ({
   items,
   type,
   route,
-  showItemDetails = true,
 }) => {
   const getStatusIcon = (status: string | undefined) => {
     switch (status?.toLowerCase()) {
@@ -57,63 +55,10 @@ export const RecentItems: React.FC<RecentItemsProps> = ({
     }
   };
 
-  const getStatusText = (status: string | undefined) => {
-    switch (status?.toLowerCase()) {
-      case 'pending':
-        return 'Onay Bekliyor';
-      case 'approved':
-        return 'Onaylandı';
-      case 'rejected':
-        return 'Reddedildi';
-      default:
-        return status || 'Unknown';
-    }
-  };
+
 
   const renderItem = (item: any) => {
     switch (type) {
-      case 'orders':
-        return (
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">{item.orderNumber}</p>
-              <p className="text-sm text-gray-500">{formatDate(item.orderDate)}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${getStatusColor(item.orderStatus)}`}>
-                {getStatusIcon(item.orderStatus)}
-                {item.orderStatus || 'Unknown'}
-              </span>
-              <span className="font-medium">{item.total}</span>
-            </div>
-          </div>
-        );
-
-      case 'applications':
-        return (
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-medium text-gray-900">
-                  {item.category && item.brand ? (
-                    <span>{item.category} / {item.brand}</span>
-                  ) : (
-                    <span>{item.type}</span>
-                  )}
-                </h3>
-              </div>
-              {item.details && (
-                <p className="text-sm text-gray-500">{item.details}</p>
-              )}
-              <p className="text-sm text-gray-500">{formatDate(item.date)}</p>
-            </div>
-            <span className={`px-2 py-1 text-xs rounded-full flex items-center gap-1 ${getStatusColor(item.status)}`}>
-              {getStatusIcon(item.status)}
-              {getStatusText(item.status)}
-            </span>
-          </div>
-        );
-
       case 'payments':
         return (
           <div className="flex items-center justify-between">

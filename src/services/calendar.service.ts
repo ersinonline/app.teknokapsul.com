@@ -1,12 +1,11 @@
-import { collection, query, where, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Event } from '../types/calendar';
 
 export const getUserEvents = async (userId: string): Promise<Event[]> => {
   try {
-    const eventsRef = collection(db, 'events');
-    const q = query(eventsRef, where('userId', '==', userId));
-    const querySnapshot = await getDocs(q);
+    const eventsRef = collection(db, 'teknokapsul', userId, 'events');
+    const querySnapshot = await getDocs(eventsRef);
     
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
@@ -18,18 +17,19 @@ export const getUserEvents = async (userId: string): Promise<Event[]> => {
   }
 };
 
-export const addEvent = async (event: Omit<Event, 'id'>) => {
+export const addEvent = async (event: Omit<Event, 'id'>, userId: string) => {
   try {
-    await addDoc(collection(db, 'events'), event);
+    const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'events'), event);
+    return docRef.id;
   } catch (error) {
     console.error('Error adding event:', error);
     throw error;
   }
 };
 
-export const deleteEvent = async (eventId: string) => {
+export const deleteEvent = async (eventId: string, userId: string) => {
   try {
-    await deleteDoc(doc(db, 'events', eventId));
+    await deleteDoc(doc(db, 'teknokapsul', userId, 'events', eventId));
   } catch (error) {
     console.error('Error deleting event:', error);
     throw error;

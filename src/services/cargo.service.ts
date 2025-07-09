@@ -6,18 +6,17 @@ import {
   doc,
   updateDoc,
   query,
-  where,
   orderBy,
   Timestamp
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { CargoTracking } from '../types/cargo';
 
-const COLLECTION_NAME = 'cargoTracking';
 
-export const addCargoTracking = async (cargoData: Omit<CargoTracking, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+
+export const addCargoTracking = async (userId: string, cargoData: Omit<CargoTracking, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<string> => {
   try {
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+    const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'cargo'), {
       ...cargoData,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
@@ -32,8 +31,7 @@ export const addCargoTracking = async (cargoData: Omit<CargoTracking, 'id' | 'cr
 export const getUserCargoTrackings = async (userId: string): Promise<CargoTracking[]> => {
   try {
     const q = query(
-      collection(db, COLLECTION_NAME),
-      where('userId', '==', userId),
+      collection(db, 'teknokapsul', userId, 'cargo'),
       orderBy('createdAt', 'desc')
     );
     
@@ -50,9 +48,9 @@ export const getUserCargoTrackings = async (userId: string): Promise<CargoTracki
   }
 };
 
-export const updateCargoTracking = async (id: string, updates: Partial<Omit<CargoTracking, 'id' | 'createdAt' | 'userId'>>): Promise<void> => {
+export const updateCargoTracking = async (userId: string, id: string, updates: Partial<Omit<CargoTracking, 'id' | 'createdAt' | 'userId'>>): Promise<void> => {
   try {
-    const docRef = doc(db, COLLECTION_NAME, id);
+    const docRef = doc(db, 'teknokapsul', userId, 'cargo', id);
     await updateDoc(docRef, {
       ...updates,
       updatedAt: Timestamp.now()
@@ -63,9 +61,9 @@ export const updateCargoTracking = async (id: string, updates: Partial<Omit<Carg
   }
 };
 
-export const deleteCargoTracking = async (id: string): Promise<void> => {
+export const deleteCargoTracking = async (userId: string, id: string): Promise<void> => {
   try {
-    await deleteDoc(doc(db, COLLECTION_NAME, id));
+    await deleteDoc(doc(db, 'teknokapsul', userId, 'cargo', id));
   } catch (error) {
     console.error('Error deleting cargo tracking:', error);
     throw error;

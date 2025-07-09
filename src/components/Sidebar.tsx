@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import {
   Home,
-  ShoppingBag,
-  FileText,
   CreditCard,
   Key,
   X,
@@ -26,10 +24,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Ana Sayfa', icon: Home },
-    { id: 'orders', label: 'Siparişlerim', icon: ShoppingBag },
-    { id: 'applications', label: 'Başvurularım', icon: FileText },
     { id: 'payments', label: 'Ödemelerim', icon: CreditCard },
-    { id: 'accounts', label: 'Hesaplarım', icon: Key }, // Yeni Hesaplarım menü öğesi
+    { id: 'accounts', label: 'Hesaplarım', icon: Key },
   ];
 
   const sidebarClasses = `

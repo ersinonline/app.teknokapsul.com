@@ -73,7 +73,7 @@ export const ProfileManagement: React.FC<ProfileManagementProps> = ({ onSuccess,
       // Firebase Auth'dan telefon numarasını al
       const firebasePhoneNumber = user.phoneNumber;
       
-      const profileSnap = await getDocs(query(collection(db, 'userProfiles'), where('userId', '==', user.uid)));
+      const profileSnap = await getDocs(query(collection(db, 'teknokapsul', user.uid, 'userProfiles')));
       
       if (!profileSnap.empty) {
         const profileData = profileSnap.docs[0].data();
@@ -161,7 +161,7 @@ export const ProfileManagement: React.FC<ProfileManagementProps> = ({ onSuccess,
       await updatePhoneNumber(user, credential);
       
       // Save phone number to user profile
-      await setDoc(doc(db, 'userProfiles', user.uid), {
+      await setDoc(doc(db, 'teknokapsul', user.uid, 'userProfiles', 'profile'), {
         phoneNumber: phoneNumber,
         phoneVerified: true,
         updatedAt: new Date()
@@ -213,7 +213,7 @@ export const ProfileManagement: React.FC<ProfileManagementProps> = ({ onSuccess,
       await reauthenticateWithCredential(user, credential);
 
       // Delete user data from Firestore
-      const collections = ['payments', 'subscriptions', 'userProfiles', 'loginRecords', 'userPreferences'];
+      const collections = ['loginRecords'];
       for (const collectionName of collections) {
         const q = query(collection(db, collectionName), where('userId', '==', user.uid));
         const querySnapshot = await getDocs(q);

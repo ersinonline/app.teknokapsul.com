@@ -17,7 +17,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onEdit, onDelete }) =>
   const handleDelete = async () => {
     if (window.confirm('Bu notu silmek istediğinize emin misiniz?')) {
       try {
-        await deleteNote(note.id);
+        await deleteNote(note.id, note.userId);
         onDelete();
       } catch (error) {
         console.error('Error deleting note:', error);

@@ -14,10 +14,10 @@ import { db } from '../config/firebase';
 import { CreditCard, CashAdvanceAccount, Loan, LoanPayment } from '../types/financial';
 
 // Kredi Kartı İşlemleri
-export const addCreditCard = async (creditCard: Omit<CreditCard, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+export const addCreditCard = async (userId: string, creditCard: Omit<CreditCard, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<string> => {
   try {
     const now = new Date();
-    const docRef = await addDoc(collection(db, 'teknokapsul'), {
+    const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'financial'), {
       ...creditCard,
       type: 'creditCard',
       createdAt: Timestamp.fromDate(now),
@@ -33,8 +33,7 @@ export const addCreditCard = async (creditCard: Omit<CreditCard, 'id' | 'created
 export const getCreditCards = async (userId: string): Promise<CreditCard[]> => {
   try {
     const q = query(
-      collection(db, 'teknokapsul'),
-      where('userId', '==', userId),
+      collection(db, 'teknokapsul', userId, 'financial'),
       where('type', '==', 'creditCard'),
       orderBy('createdAt', 'desc')
     );
@@ -51,9 +50,9 @@ export const getCreditCards = async (userId: string): Promise<CreditCard[]> => {
   }
 };
 
-export const updateCreditCard = async (id: string, updates: Partial<CreditCard>): Promise<void> => {
+export const updateCreditCard = async (userId: string, id: string, updates: Partial<CreditCard>): Promise<void> => {
   try {
-    const docRef = doc(db, 'teknokapsul', id);
+    const docRef = doc(db, 'teknokapsul', userId, 'financial', id);
     await updateDoc(docRef, {
       ...updates,
       updatedAt: Timestamp.fromDate(new Date())
@@ -64,9 +63,9 @@ export const updateCreditCard = async (id: string, updates: Partial<CreditCard>)
   }
 };
 
-export const deleteCreditCard = async (id: string): Promise<void> => {
+export const deleteCreditCard = async (userId: string, id: string): Promise<void> => {
   try {
-    await deleteDoc(doc(db, 'teknokapsul', id));
+    await deleteDoc(doc(db, 'teknokapsul', userId, 'financial', id));
   } catch (error) {
     console.error('Error deleting credit card:', error);
     throw error;
@@ -74,10 +73,10 @@ export const deleteCreditCard = async (id: string): Promise<void> => {
 };
 
 // Avans Hesabı İşlemleri
-export const addCashAdvanceAccount = async (account: Omit<CashAdvanceAccount, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+export const addCashAdvanceAccount = async (userId: string, account: Omit<CashAdvanceAccount, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<string> => {
   try {
     const now = new Date();
-    const docRef = await addDoc(collection(db, 'teknokapsul'), {
+    const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'financial'), {
       ...account,
       type: 'cashAdvance',
       createdAt: Timestamp.fromDate(now),
@@ -93,8 +92,7 @@ export const addCashAdvanceAccount = async (account: Omit<CashAdvanceAccount, 'i
 export const getCashAdvanceAccounts = async (userId: string): Promise<CashAdvanceAccount[]> => {
   try {
     const q = query(
-      collection(db, 'teknokapsul'),
-      where('userId', '==', userId),
+      collection(db, 'teknokapsul', userId, 'financial'),
       where('type', '==', 'cashAdvance'),
       orderBy('createdAt', 'desc')
     );
@@ -114,9 +112,9 @@ export const getCashAdvanceAccounts = async (userId: string): Promise<CashAdvanc
   }
 };
 
-export const updateCashAdvanceAccount = async (id: string, updates: Partial<CashAdvanceAccount>): Promise<void> => {
+export const updateCashAdvanceAccount = async (userId: string, id: string, updates: Partial<CashAdvanceAccount>): Promise<void> => {
   try {
-    const docRef = doc(db, 'teknokapsul', id);
+    const docRef = doc(db, 'teknokapsul', userId, 'financial', id);
     await updateDoc(docRef, {
       ...updates,
       updatedAt: Timestamp.fromDate(new Date())
@@ -127,9 +125,9 @@ export const updateCashAdvanceAccount = async (id: string, updates: Partial<Cash
   }
 };
 
-export const deleteCashAdvanceAccount = async (id: string): Promise<void> => {
+export const deleteCashAdvanceAccount = async (userId: string, id: string): Promise<void> => {
   try {
-    await deleteDoc(doc(db, 'teknokapsul', id));
+    await deleteDoc(doc(db, 'teknokapsul', userId, 'financial', id));
   } catch (error) {
     console.error('Error deleting cash advance account:', error);
     throw error;
@@ -137,10 +135,10 @@ export const deleteCashAdvanceAccount = async (id: string): Promise<void> => {
 };
 
 // Kredi İşlemleri
-export const addLoan = async (loan: Omit<Loan, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+export const addLoan = async (userId: string, loan: Omit<Loan, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<string> => {
   try {
     const now = new Date();
-    const docRef = await addDoc(collection(db, 'teknokapsul'), {
+    const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'financial'), {
       ...loan,
       type: 'loan',
       startDate: Timestamp.fromDate(loan.startDate),
@@ -159,8 +157,7 @@ export const addLoan = async (loan: Omit<Loan, 'id' | 'createdAt' | 'updatedAt'>
 export const getLoans = async (userId: string): Promise<Loan[]> => {
   try {
     const q = query(
-      collection(db, 'teknokapsul'),
-      where('userId', '==', userId),
+      collection(db, 'teknokapsul', userId, 'financial'),
       where('type', '==', 'loan'),
       orderBy('createdAt', 'desc')
     );
@@ -183,9 +180,9 @@ export const getLoans = async (userId: string): Promise<Loan[]> => {
   }
 };
 
-export const updateLoan = async (id: string, updates: Partial<Loan>): Promise<void> => {
+export const updateLoan = async (userId: string, id: string, updates: Partial<Loan>): Promise<void> => {
   try {
-    const docRef = doc(db, 'teknokapsul', id);
+    const docRef = doc(db, 'teknokapsul', userId, 'financial', id);
     const updateData: any = {
       ...updates,
       updatedAt: Timestamp.fromDate(new Date())
@@ -203,9 +200,9 @@ export const updateLoan = async (id: string, updates: Partial<Loan>): Promise<vo
   }
 };
 
-export const deleteLoan = async (id: string): Promise<void> => {
+export const deleteLoan = async (userId: string, id: string): Promise<void> => {
   try {
-    await deleteDoc(doc(db, 'teknokapsul', id));
+    await deleteDoc(doc(db, 'teknokapsul', userId, 'financial', id));
   } catch (error) {
     console.error('Error deleting loan:', error);
     throw error;
@@ -213,9 +210,9 @@ export const deleteLoan = async (id: string): Promise<void> => {
 };
 
 // Kredi Ödeme İşlemleri
-export const addLoanPayment = async (payment: Omit<LoanPayment, 'id' | 'createdAt'>): Promise<string> => {
+export const addLoanPayment = async (userId: string, payment: Omit<LoanPayment, 'id' | 'createdAt' | 'userId'>): Promise<string> => {
   try {
-    const docRef = await addDoc(collection(db, 'teknokapsul'), {
+    const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'financial'), {
       ...payment,
       type: 'loanPayment',
       paymentDate: Timestamp.fromDate(payment.paymentDate),
@@ -228,14 +225,22 @@ export const addLoanPayment = async (payment: Omit<LoanPayment, 'id' | 'createdA
   }
 };
 
-export const getLoanPayments = async (loanId: string): Promise<LoanPayment[]> => {
+export const getLoanPayments = async (userId: string, loanId?: string): Promise<LoanPayment[]> => {
   try {
-    const q = query(
-      collection(db, 'teknokapsul'),
+    let q = query(
+      collection(db, 'teknokapsul', userId, 'financial'),
       where('type', '==', 'loanPayment'),
-      where('loanId', '==', loanId),
-      orderBy('paymentDate', 'desc')
+      orderBy('createdAt', 'desc')
     );
+
+    if (loanId) {
+      q = query(
+        collection(db, 'teknokapsul', userId, 'financial'),
+        where('type', '==', 'loanPayment'),
+        where('loanId', '==', loanId),
+        orderBy('createdAt', 'desc')
+      );
+    }
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => {
       const data = doc.data();

@@ -71,12 +71,11 @@ export const CargoTrackingPage = () => {
     if (!user || !formData.name || !formData.trackingNumber || !formData.company) return;
 
     try {
-      await addCargoTracking({
+      await addCargoTracking(user.uid, {
         name: formData.name,
         trackingNumber: formData.trackingNumber,
         company: formData.company,
-        isDelivered: formData.isDelivered,
-        userId: user.uid
+        isDelivered: formData.isDelivered
       });
       
       setFormData({ name: '', trackingNumber: '', company: '', isDelivered: false });
@@ -88,13 +87,13 @@ export const CargoTrackingPage = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Bu kargo takibini silmek istediğinizden emin misiniz?')) {
-      try {
-        await deleteCargoTracking(id);
-        loadCargoList();
-      } catch (error) {
-        console.error('Error deleting cargo:', error);
-      }
+    if (!user || !window.confirm('Bu kargo takibini silmek istediğinizden emin misiniz?')) return;
+    
+    try {
+      await deleteCargoTracking(user!.uid, id);
+      loadCargoList();
+    } catch (error) {
+      console.error('Error deleting cargo:', error);
     }
   };
 
@@ -122,8 +121,10 @@ export const CargoTrackingPage = () => {
   };
 
   const toggleDeliveryStatus = async (cargo: CargoTracking) => {
+    if (!user) return;
+    
     try {
-      await updateCargoTracking(cargo.id, {
+      await updateCargoTracking(user!.uid, cargo.id, {
         isDelivered: !cargo.isDelivered
       });
       loadCargoList();

@@ -73,7 +73,6 @@ export const AdvancedSettings: React.FC = () => {
     emailEnabled: true,
     paymentReminders: true,
     subscriptionAlerts: true,
-    budgetWarnings: true,
     aiInsights: true
   });
 
@@ -93,7 +92,6 @@ export const AdvancedSettings: React.FC = () => {
       const userData = {
         payments: [],
         subscriptions: [],
-        budgets: [],
         goals: [],
         preferences: [],
         exportDate: new Date().toISOString(),
@@ -322,7 +320,6 @@ export const AdvancedSettings: React.FC = () => {
         emailEnabled: 'E-posta Bildirimleri',
         paymentReminders: 'Ödeme Hatırlatmaları',
         subscriptionAlerts: 'Abonelik Uyarıları',
-        budgetWarnings: 'Bütçe Uyarıları',
         aiInsights: 'AI İçgörüleri'
       }).map(([key, label]) => (
         <div key={key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">

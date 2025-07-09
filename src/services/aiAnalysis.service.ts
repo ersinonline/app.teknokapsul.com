@@ -1,4 +1,5 @@
 import { generateStructuredOutput, generateText } from './ai.service';
+import { ObjectSchemaInterface, SchemaType } from '@firebase/ai';
 import { Payment } from '../types/data';
 import { Subscription } from '../types/subscription';
 
@@ -48,8 +49,8 @@ class AIAnalysisService {
       Türkçe yanıt ver.
     `;
 
-    const schema = {
-      type: 'object',
+    const schema: ObjectSchemaInterface = {
+      type: SchemaType.OBJECT,
       properties: {
         patterns: {
           type: 'array',
@@ -89,8 +90,8 @@ class AIAnalysisService {
       Türkçe yanıt ver.
     `;
 
-    const schema = {
-      type: 'object',
+    const schema: ObjectSchemaInterface = {
+      type: SchemaType.OBJECT,
       properties: {
         insights: {
           type: 'array',
@@ -130,8 +131,8 @@ class AIAnalysisService {
       Türkçe yanıt ver.
     `;
 
-    const schema = {
-      type: 'object',
+    const schema: ObjectSchemaInterface = {
+      type: SchemaType.OBJECT,
       properties: {
         currentSpending: { type: 'number' },
         recommendedBudget: { type: 'number' },
@@ -226,8 +227,8 @@ class AIAnalysisService {
       Türkçe yanıt ver.
     `;
 
-    const schema = {
-      type: 'object',
+    const schema: ObjectSchemaInterface = {
+      type: SchemaType.OBJECT,
       properties: {
         alerts: {
           type: 'array',
@@ -292,8 +293,8 @@ class AIAnalysisService {
       Türkçe yanıt ver.
     `;
 
-    const schema = {
-      type: 'object',
+    const schema: ObjectSchemaInterface = {
+      type: SchemaType.OBJECT,
       properties: {
         predictions: {
           type: 'array',

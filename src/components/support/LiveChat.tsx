@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Send, X, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { addDoc, collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { addDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
 interface Message {
@@ -25,8 +25,7 @@ export const LiveChat = () => {
 
     // Create a single query with proper index
     const q = query(
-      collection(db, 'chat-messages'),
-      where('userId', '==', user.uid),
+      collection(db, 'teknokapsul', user.uid, 'chat-messages'),
       orderBy('createdAt', 'asc')
     );
 
@@ -54,9 +53,8 @@ export const LiveChat = () => {
 
     setLoading(true);
     try {
-      await addDoc(collection(db, 'chat-messages'), {
+      await addDoc(collection(db, 'teknokapsul', user.uid, 'chat-messages'), {
         text: message,
-        userId: user.uid,
         createdAt: new Date().toISOString(),
         isAdmin: false
       });

@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy } from 'firebase/firestore';
+import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { PortfolioItem, PortfolioSummary } from '../types/portfolio';
 
@@ -6,8 +6,7 @@ export const portfolioService = {
   async getPortfolioItems(userId: string): Promise<PortfolioItem[]> {
     try {
       const q = query(
-        collection(db, 'portfolioItems'),
-        where('userId', '==', userId),
+        collection(db, `teknokapsul/${userId}/portfolioItems`),
         orderBy('purchaseDate', 'desc')
       );
       const querySnapshot = await getDocs(q);
@@ -79,9 +78,8 @@ export const portfolioService = {
 
   async addPortfolioItem(userId: string, item: Omit<PortfolioItem, 'id'>): Promise<string> {
     try {
-      const docRef = await addDoc(collection(db, 'portfolioItems'), {
+      const docRef = await addDoc(collection(db, `teknokapsul/${userId}/portfolioItems`), {
         ...item,
-        userId,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       });
@@ -92,9 +90,9 @@ export const portfolioService = {
     }
   },
 
-  async updatePortfolioItem(id: string, updates: Partial<PortfolioItem>): Promise<void> {
+  async updatePortfolioItem(userId: string, id: string, updates: Partial<PortfolioItem>): Promise<void> {
     try {
-      const docRef = doc(db, 'portfolioItems', id);
+      const docRef = doc(db, `teknokapsul/${userId}/portfolioItems`, id);
       await updateDoc(docRef, {
         ...updates,
         updatedAt: new Date().toISOString()
@@ -105,9 +103,9 @@ export const portfolioService = {
     }
   },
 
-  async deletePortfolioItem(id: string): Promise<void> {
+  async deletePortfolioItem(userId: string, id: string): Promise<void> {
     try {
-      const docRef = doc(db, 'portfolioItems', id);
+      const docRef = doc(db, `teknokapsul/${userId}/portfolioItems`, id);
       await deleteDoc(docRef);
     } catch (error) {
       console.error('Portföy öğesi silinirken hata:', error);

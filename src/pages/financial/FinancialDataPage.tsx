@@ -77,7 +77,7 @@ export const FinancialDataPage = () => {
   const handleDeleteCreditCard = async (id: string) => {
     if (window.confirm('Bu kredi kartını silmek istediğinizden emin misiniz?')) {
       try {
-        await deleteCreditCard(id);
+        await deleteCreditCard(user!.uid, id);
         setCreditCards(prev => prev.filter(card => card.id !== id));
       } catch (error) {
         console.error('Error deleting credit card:', error);
@@ -88,7 +88,7 @@ export const FinancialDataPage = () => {
   const handleDeleteCashAdvance = async (id: string) => {
     if (window.confirm('Bu avans hesabını silmek istediğinizden emin misiniz?')) {
       try {
-        await deleteCashAdvanceAccount(id);
+        await deleteCashAdvanceAccount(user!.uid, id);
         setCashAdvanceAccounts(prev => prev.filter(account => account.id !== id));
       } catch (error) {
         console.error('Error deleting cash advance account:', error);
@@ -99,7 +99,7 @@ export const FinancialDataPage = () => {
   const handleDeleteLoan = async (id: string) => {
     if (window.confirm('Bu krediyi silmek istediğinizden emin misiniz?')) {
       try {
-        await deleteLoan(id);
+        await deleteLoan(user!.uid, id);
         setLoans(prev => prev.filter(loan => loan.id !== id));
       } catch (error) {
         console.error('Error deleting loan:', error);
@@ -110,10 +110,10 @@ export const FinancialDataPage = () => {
   const handleAddCreditCard = async (formData: any) => {
     try {
       if (editingCreditCard) {
-        await updateCreditCard(editingCreditCard.id, formData);
+        await updateCreditCard(user!.uid, editingCreditCard.id, formData);
         setEditingCreditCard(null);
       } else {
-        await addCreditCard({ ...formData, userId: user!.uid });
+        await addCreditCard(user!.uid, formData);
       }
       setShowCreditCardForm(false);
       loadData();
@@ -126,10 +126,10 @@ export const FinancialDataPage = () => {
   const handleAddCashAdvance = async (formData: any) => {
     try {
       if (editingCashAdvance) {
-        await updateCashAdvanceAccount(editingCashAdvance.id, formData);
+        await updateCashAdvanceAccount(user!.uid, editingCashAdvance.id, formData);
         setEditingCashAdvance(null);
       } else {
-        await addCashAdvanceAccount({ ...formData, userId: user!.uid });
+        await addCashAdvanceAccount(user!.uid, formData);
       }
       setShowCashAdvanceForm(false);
       loadData();
@@ -142,10 +142,10 @@ export const FinancialDataPage = () => {
   const handleAddLoan = async (formData: any) => {
     try {
       if (editingLoan) {
-        await updateLoan(editingLoan.id, formData);
+        await updateLoan(user!.uid, editingLoan.id, formData);
         setEditingLoan(null);
       } else {
-        await addLoan({ ...formData, userId: user!.uid });
+        await addLoan(user!.uid, formData);
       }
       setShowLoanForm(false);
       loadData();

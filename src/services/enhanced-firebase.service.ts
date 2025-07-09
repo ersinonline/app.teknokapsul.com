@@ -6,12 +6,12 @@ import {
   deleteDoc, 
   getDocs, 
   getDoc, 
+  setDoc, 
   query, 
   where, 
   orderBy, 
   limit, 
   onSnapshot, 
-  writeBatch,
   serverTimestamp,
   Timestamp
 } from 'firebase/firestore';
@@ -22,8 +22,6 @@ import {
   deleteObject 
 } from 'firebase/storage';
 import { db, storage } from '../config/firebase';
-import { Payment } from '../types/data';
-import { Subscription } from '../types/subscription';
 
 export interface UserPreferences {
   id?: string;
@@ -63,24 +61,10 @@ export interface FinancialGoal {
   updatedAt?: Timestamp;
 }
 
-export interface BudgetCategory {
-  id?: string;
-  userId: string;
-  name: string;
-  monthlyLimit: number;
-  currentSpent: number;
-  color: string;
-  icon: string;
-  alertThreshold: number; // percentage
-  isActive: boolean;
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
-}
-
 export interface AIInsight {
   id?: string;
   userId: string;
-  type: 'spending_pattern' | 'saving_opportunity' | 'budget_alert' | 'prediction' | 'recommendation';
+  type: 'spending_pattern' | 'saving_opportunity' | 'prediction' | 'recommendation';
   title: string;
   description: string;
   category: 'warning' | 'opportunity' | 'saving' | 'info';
@@ -97,7 +81,7 @@ class EnhancedFirebaseService {
   // User Preferences
   async getUserPreferences(userId: string): Promise<UserPreferences | null> {
     try {
-      const docRef = doc(db, 'userPreferences', userId);
+      const docRef = doc(db, 'teknokapsul', userId, 'settings', 'preferences');
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
@@ -112,7 +96,7 @@ class EnhancedFirebaseService {
 
   async updateUserPreferences(userId: string, preferences: Partial<UserPreferences>): Promise<void> {
     try {
-      const docRef = doc(db, 'userPreferences', userId);
+      const docRef = doc(db, 'teknokapsul', userId, 'settings', 'preferences');
       await updateDoc(docRef, {
         ...preferences,
         updatedAt: serverTimestamp()
@@ -123,10 +107,12 @@ class EnhancedFirebaseService {
     }
   }
 
-  async createUserPreferences(preferences: Omit<UserPreferences, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  async createUserPreferences(userId: string, preferences: Omit<UserPreferences, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<string> {
     try {
-      const docRef = await addDoc(collection(db, 'userPreferences'), {
+      const docRef = doc(db, 'teknokapsul', userId, 'settings', 'preferences');
+      await setDoc(docRef, {
         ...preferences,
+        userId,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
@@ -137,116 +123,20 @@ class EnhancedFirebaseService {
     }
   }
 
-  // Financial Goals
-  async getFinancialGoals(userId: string): Promise<FinancialGoal[]> {
-    try {
-      const q = query(
-        collection(db, 'financialGoals'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as FinancialGoal));
-    } catch (error) {
-      console.error('Error getting financial goals:', error);
-      throw error;
-    }
-  }
 
-  async createFinancialGoal(goal: Omit<FinancialGoal, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    try {
-      const docRef = await addDoc(collection(db, 'financialGoals'), {
-        ...goal,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      return docRef.id;
-    } catch (error) {
-      console.error('Error creating financial goal:', error);
-      throw error;
-    }
-  }
-
-  async updateFinancialGoal(goalId: string, updates: Partial<FinancialGoal>): Promise<void> {
-    try {
-      const docRef = doc(db, 'financialGoals', goalId);
-      await updateDoc(docRef, {
-        ...updates,
-        updatedAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error('Error updating financial goal:', error);
-      throw error;
-    }
-  }
-
-  async deleteFinancialGoal(goalId: string): Promise<void> {
-    try {
-      await deleteDoc(doc(db, 'financialGoals', goalId));
-    } catch (error) {
-      console.error('Error deleting financial goal:', error);
-      throw error;
-    }
-  }
-
-  // Budget Categories
-  async getBudgetCategories(userId: string): Promise<BudgetCategory[]> {
-    try {
-      const q = query(
-        collection(db, 'budgetCategories'),
-        where('userId', '==', userId),
-        where('isActive', '==', true),
-        orderBy('name')
-      );
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BudgetCategory));
-    } catch (error) {
-      console.error('Error getting budget categories:', error);
-      throw error;
-    }
-  }
-
-  async createBudgetCategory(category: Omit<BudgetCategory, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    try {
-      const docRef = await addDoc(collection(db, 'budgetCategories'), {
-        ...category,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      return docRef.id;
-    } catch (error) {
-      console.error('Error creating budget category:', error);
-      throw error;
-    }
-  }
-
-  async updateBudgetCategory(categoryId: string, updates: Partial<BudgetCategory>): Promise<void> {
-    try {
-      const docRef = doc(db, 'budgetCategories', categoryId);
-      await updateDoc(docRef, {
-        ...updates,
-        updatedAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error('Error updating budget category:', error);
-      throw error;
-    }
-  }
 
   // AI Insights
   async getAIInsights(userId: string, unreadOnly: boolean = false): Promise<AIInsight[]> {
     try {
       let q = query(
-        collection(db, 'aiInsights'),
-        where('userId', '==', userId),
+        collection(db, 'teknokapsul', userId, 'insights'),
         orderBy('createdAt', 'desc'),
         limit(50)
       );
 
       if (unreadOnly) {
         q = query(
-          collection(db, 'aiInsights'),
-          where('userId', '==', userId),
+          collection(db, 'teknokapsul', userId, 'insights'),
           where('isRead', '==', false),
           orderBy('createdAt', 'desc')
         );
@@ -260,10 +150,11 @@ class EnhancedFirebaseService {
     }
   }
 
-  async createAIInsight(insight: Omit<AIInsight, 'id' | 'createdAt'>): Promise<string> {
+  async createAIInsight(userId: string, insight: Omit<AIInsight, 'id' | 'createdAt' | 'userId'>): Promise<string> {
     try {
-      const docRef = await addDoc(collection(db, 'aiInsights'), {
+      const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'insights'), {
         ...insight,
+        userId,
         createdAt: serverTimestamp()
       });
       return docRef.id;
@@ -273,9 +164,9 @@ class EnhancedFirebaseService {
     }
   }
 
-  async markInsightAsRead(insightId: string): Promise<void> {
+  async markInsightAsRead(userId: string, insightId: string): Promise<void> {
     try {
-      const docRef = doc(db, 'aiInsights', insightId);
+      const docRef = doc(db, 'teknokapsul', userId, 'insights', insightId);
       await updateDoc(docRef, { isRead: true });
     } catch (error) {
       console.error('Error marking insight as read:', error);
@@ -283,25 +174,7 @@ class EnhancedFirebaseService {
     }
   }
 
-  // Batch Operations
-  async batchUpdatePayments(updates: { id: string; data: Partial<Payment> }[]): Promise<void> {
-    try {
-      const batch = writeBatch(db);
-      
-      updates.forEach(({ id, data }) => {
-        const docRef = doc(db, 'payments', id);
-        batch.update(docRef, {
-          ...data,
-          updatedAt: serverTimestamp()
-        });
-      });
 
-      await batch.commit();
-    } catch (error) {
-      console.error('Error batch updating payments:', error);
-      throw error;
-    }
-  }
 
   // File Upload
   async uploadFile(file: File, path: string): Promise<string> {
@@ -327,36 +200,10 @@ class EnhancedFirebaseService {
   }
 
   // Real-time Subscriptions
-  subscribeToPayments(userId: string, callback: (payments: Payment[]) => void): () => void {
-    const q = query(
-      collection(db, 'payments'),
-      where('userId', '==', userId),
-      orderBy('date', 'desc')
-    );
-
-    return onSnapshot(q, (querySnapshot) => {
-      const payments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payment));
-      callback(payments);
-    });
-  }
-
-  subscribeToSubscriptions(userId: string, callback: (subscriptions: Subscription[]) => void): () => void {
-    const q = query(
-      collection(db, 'subscriptions'),
-      where('userId', '==', userId),
-      orderBy('startDate', 'desc')
-    );
-
-    return onSnapshot(q, (querySnapshot) => {
-      const subscriptions = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subscription));
-      callback(subscriptions);
-    });
-  }
 
   subscribeToAIInsights(userId: string, callback: (insights: AIInsight[]) => void): () => void {
     const q = query(
-      collection(db, 'aiInsights'),
-      where('userId', '==', userId),
+      collection(db, 'teknokapsul', userId, 'insights'),
       where('isRead', '==', false),
       orderBy('createdAt', 'desc')
     );
@@ -420,36 +267,7 @@ class EnhancedFirebaseService {
     }
   }
 
-  // Analytics
-  async getSpendingAnalytics(userId: string, startDate: Date, endDate: Date): Promise<any> {
-    try {
-      const q = query(
-        collection(db, 'payments'),
-        where('userId', '==', userId),
-        where('date', '>=', startDate),
-        where('date', '<=', endDate),
-        orderBy('date')
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const payments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payment));
-      
-      // Process analytics data
-      const analytics = {
-        totalSpent: payments.reduce((sum, payment) => sum + payment.amount, 0),
-        transactionCount: payments.length,
-        averageTransaction: payments.length > 0 ? payments.reduce((sum, payment) => sum + payment.amount, 0) / payments.length : 0,
-        categoryBreakdown: {},
-        dailySpending: {},
-        trends: []
-      };
-      
-      return analytics;
-    } catch (error) {
-      console.error('Error getting spending analytics:', error);
-      throw error;
-    }
-  }
+
 }
 
 export const enhancedFirebaseService = new EnhancedFirebaseService();

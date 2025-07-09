@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { Order, Application, Payment } from '../types/data';
+import { Payment } from '../types/data';
 import { Expense } from '../types/expense';
 import { Subscription } from '../types/subscription';
 import { Note } from '../types/notes';
 import { Event } from '../types/calendar';
 
-type DataType = Order | Application | Payment | Expense | Subscription | Note | Event;
+type DataType = Payment | Expense | Subscription | Note | Event;
 
 interface UseFirebaseDataReturn<T> {
   data: T[];
@@ -44,19 +44,27 @@ export const useFirebaseData = <T extends DataType>(
           setData([]);
         }
       } else {
-        const collectionRef = collection(db, collectionName === 'subscriptions' ? 'subscription-end' : collectionName);
-        let q = query(collectionRef);
+        let collectionRef;
+        let q;
 
         switch (collectionName) {
-          case 'orders':
-          case 'applications':
-            q = query(collectionRef, where('email', '==', user.email));
-            break;
-          case 'payments':
-          case 'expenses':
           case 'notes':
           case 'events':
+          case 'financial':
+            collectionRef = collection(db, 'teknokapsul', user.uid, collectionName);
+            q = query(collectionRef);
+            break;
+          case 'expenses':
           case 'subscriptions':
+            collectionRef = collection(db, collectionName === 'subscriptions' ? 'subscription-end' : collectionName);
+            q = query(collectionRef, where('userId', '==', user.uid));
+            break;
+          case 'payments':
+            collectionRef = collection(db, 'teknokapsul', user.uid, collectionName);
+            q = query(collectionRef);
+            break;
+          default:
+            collectionRef = collection(db, collectionName);
             q = query(collectionRef, where('userId', '==', user.uid));
             break;
         }

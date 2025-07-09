@@ -1,4 +1,4 @@
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 export interface PlatformCredential {
@@ -8,13 +8,12 @@ export interface PlatformCredential {
   password: string;
 }
 
-export const getPlatformCredentialsByEmail = async (
-  userEmail: string
+export const getPlatformCredentialsByUserId = async (
+  userId: string
 ): Promise<PlatformCredential[]> => {
   try {
-    const credentialsRef = collection(db, 'platform-credentials');
-    // `userEmail` alanına göre filtreleme
-    const q = query(credentialsRef, where('userEmail', '==', userEmail));
+    const credentialsRef = collection(db, 'teknokapsul', userId, 'credentials');
+    const q = query(credentialsRef);
     const snapshot = await getDocs(q);
 
     return snapshot.docs.map((doc) => ({
