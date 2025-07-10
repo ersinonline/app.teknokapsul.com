@@ -61,7 +61,7 @@ Proje, gider ödemelerinin 3 gün öncesinden email hatırlatması gönderen bir
 
 - **Vercel Cron**: Her gün saat 16:34'te çalışır
 - **API Route**: `/api/expense-reminders` endpoint'i
-- **Zapier Entegrasyonu**: `/api/zapier-webhook` ile Zapier entegrasyonu mümkün
+- **Google Sheets Entegrasyonu**: `/api/google-sheets-sync` ile Google Sheets entegrasyonu mümkün
 
 ### Gerekli Environment Variables
 
@@ -77,7 +77,9 @@ GMAIL_PASSWORD=your_gmail_app_password
 
 # Security
 CRON_SECRET=your_random_secret_key
-ZAPIER_API_KEY=your_zapier_api_key
+
+# Google Sheets Integration (Optional)
+GOOGLE_SHEETS_WEBHOOK_URL=your_google_apps_script_webhook_url
 ```
 
 ## 🚀 Deployment
@@ -99,7 +101,7 @@ ZAPIER_API_KEY=your_zapier_api_key
    - `GMAIL_USER`
    - `GMAIL_PASSWORD`
    - `CRON_SECRET`
-   - `ZAPIER_API_KEY`
+   - `GOOGLE_SHEETS_WEBHOOK_URL`
 
 4. Deploy butonuna tıklayın
 

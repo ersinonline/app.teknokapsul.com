@@ -1,4 +1,4 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
+// Vercel Edge Runtime için basit HTTP handler
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import nodemailer from 'nodemailer';
@@ -25,18 +25,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // GET ve POST isteklerini kabul et
-  if (req.method !== 'GET' && req.method !== 'POST') {
+export default async function handler(req: any, res: any) {
+  // Sadece POST isteklerini kabul et
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Güvenlik için secret kontrolü (query parameter veya header)
-  const secretFromQuery = req.query.secret as string;
+  // Güvenlik için authorization header kontrolü
   const authHeader = req.headers.authorization;
-  const secretFromHeader = authHeader?.replace('Bearer ', '');
-  
-  if (secretFromQuery !== process.env.CRON_SECRET && secretFromHeader !== process.env.CRON_SECRET) {
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
