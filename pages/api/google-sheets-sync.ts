@@ -5,7 +5,28 @@ import { getUpcomingExpensesForSheets, sendToGoogleSheets } from '../../src/serv
  * Bu endpoint Firebase'den yaklaşan giderleri alır ve Google Sheets'e gönderir
  */
 export default async function handler(req: any, res: any) {
-  // Sadece POST isteklerini kabul et
+  // GET endpoint - Sadece veri görüntüleme için
+  if (req.method === 'GET') {
+    try {
+      const expenses = await getUpcomingExpensesForSheets();
+      
+      return res.status(200).json({
+        success: true,
+        expenseCount: expenses.length,
+        expenses: expenses,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('Error fetching expenses:', error);
+      return res.status(500).json({
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // POST endpoint - Google Sheets'e senkronizasyon için
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -62,30 +83,6 @@ export default async function handler(req: any, res: any) {
 
   } catch (error) {
     console.error('Error in Google Sheets sync:', error);
-    return res.status(500).json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-}
-
-/**
- * GET endpoint - Sadece veri görüntüleme için
- * Bu endpoint Google Sheets'e göndermeden sadece yaklaşan giderleri döndürür
- */
-export async function GET(req: any, res: any) {
-  try {
-    const expenses = await getUpcomingExpensesForSheets();
-    
-    return res.status(200).json({
-      success: true,
-      expenseCount: expenses.length,
-      expenses: expenses,
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error('Error fetching expenses:', error);
     return res.status(500).json({
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
