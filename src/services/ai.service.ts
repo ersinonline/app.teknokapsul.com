@@ -1,5 +1,7 @@
 import { getAI, getGenerativeModel, GoogleAIBackend, FunctionDeclaration, ObjectSchemaInterface } from "@firebase/ai";
-import { app } from "../config/firebase";
+import { app, db } from "../config/firebase";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { getAllSupportTickets } from "./support.service";
 
 // AI servisini başlat
 const ai = getAI(app, { backend: new GoogleAIBackend() });
@@ -68,6 +70,58 @@ export const startChat = async () => {
   } catch (error) {
     console.error("AI sohbet başlatma hatası:", error);
     throw error;
+  }
+};
+
+// Kullanıcının başvurularını getir
+export const getUserApplications = async (userId: string) => {
+  try {
+    const applicationsRef = collection(db, 'teknokapsul-application');
+    const q = query(applicationsRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Kullanıcı başvuruları alınırken hata:', error);
+    return [];
+  }
+};
+
+// Kullanıcının destek taleplerini getir
+export const getUserSupportTickets = async (userId: string) => {
+  try {
+    const tickets = await getAllSupportTickets();
+    return tickets.filter(ticket => ticket.userId === userId);
+  } catch (error) {
+    console.error('Kullanıcı destek talepleri alınırken hata:', error);
+    return [];
+  }
+};
+
+// AI ile başvuru/destek durumu sorgulama
+export const queryUserStatus = async (userId: string, userQuery: string): Promise<string> => {
+  try {
+    const applications = await getUserApplications(userId);
+    const supportTickets = await getUserSupportTickets(userId);
+    
+    const prompt = `Kullanıcının sorusu: "${userQuery}"
+
+Kullanıcının başvuruları:
+${JSON.stringify(applications, null, 2)}
+
+Kullanıcının destek talepleri:
+${JSON.stringify(supportTickets, null, 2)}
+
+Lütfen kullanıcının sorusuna göre başvuru ve destek taleplerinin durumunu açıklayın. Türkçe ve samimi bir dille yanıtlayın. Başvuru numaralarını ve durumları belirtin.`;
+    
+    const result = await generateText(prompt);
+    return result;
+  } catch (error) {
+    console.error('AI durum sorgulama hatası:', error);
+    return 'Üzgünüm, şu anda başvuru ve destek taleplerini sorgulayamıyorum. Lütfen daha sonra tekrar deneyin.';
   }
 };
 

@@ -53,35 +53,6 @@ VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id_here
 npm run dev
 ```
 
-## 📧 Email Reminder Sistemi
-
-### Vercel Cron ile Otomatik Email Hatırlatmaları
-
-Proje, gider ödemelerinin 3 gün öncesinden email hatırlatması gönderen bir sistem içerir:
-
-- **Vercel Cron**: Her gün saat 16:34'te çalışır
-- **API Route**: `/api/expense-reminders` endpoint'i
-- **Google Sheets Entegrasyonu**: `/api/google-sheets-sync` ile Google Sheets entegrasyonu mümkün
-
-### Gerekli Environment Variables
-
-```bash
-# Firebase Admin SDK
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_CLIENT_EMAIL=your_service_account_email
-FIREBASE_PRIVATE_KEY=your_private_key
-
-# Email Configuration
-GMAIL_USER=your_gmail_address
-GMAIL_PASSWORD=your_gmail_app_password
-
-# Security
-CRON_SECRET=your_random_secret_key
-
-# Google Sheets Integration (Optional)
-GOOGLE_SHEETS_WEBHOOK_URL=your_google_apps_script_webhook_url
-```
-
 ## 🚀 Deployment
 ### Vercel'e Deploy Etme
 
@@ -95,13 +66,6 @@ GOOGLE_SHEETS_WEBHOOK_URL=your_google_apps_script_webhook_url
    - `VITE_FIREBASE_MESSAGING_SENDER_ID`
    - `VITE_FIREBASE_APP_ID`
    - `VITE_FIREBASE_MEASUREMENT_ID`
-   - `FIREBASE_PROJECT_ID`
-   - `FIREBASE_CLIENT_EMAIL`
-   - `FIREBASE_PRIVATE_KEY`
-   - `GMAIL_USER`
-   - `GMAIL_PASSWORD`
-   - `CRON_SECRET`
-   - `GOOGLE_SHEETS_WEBHOOK_URL`
 
 4. Deploy butonuna tıklayın
 

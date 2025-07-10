@@ -1,10 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/expense-reminders",
-      "schedule": "34 16 * * *"
-    }
-  ],
   "rewrites": [
     {
       "source": "/(.*)",

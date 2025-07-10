@@ -1,12 +1,22 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Paper, Typography, CircularProgress } from '@mui/material';
-import { generateText } from '../../services/ai.service';
+import { Box, TextField, Button, Paper, Typography, CircularProgress, Chip } from '@mui/material';
+import { generateText, queryUserStatus } from '../../services/ai.service';
+import { useAuth } from '../../contexts/AuthContext';
 
 const AIChat: React.FC = () => {
+  const { user } = useAuth();
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Başvuru/destek durumu ile ilgili anahtar kelimeler
+  const statusKeywords = ['başvuru', 'durum', 'destek', 'talep', 'başvurum', 'durumu', 'nerede', 'ne zaman', 'onaylandı', 'reddedildi', 'beklemede'];
+
+  const isStatusQuery = (text: string) => {
+    const lowerText = text.toLowerCase();
+    return statusKeywords.some(keyword => lowerText.includes(keyword));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,7 +26,15 @@ const AIChat: React.FC = () => {
     setError(null);
 
     try {
-      const result = await generateText(prompt);
+      let result: string;
+      
+      // Eğer kullanıcı giriş yapmış ve durum sorgusu yapıyorsa
+      if (user && isStatusQuery(prompt)) {
+        result = await queryUserStatus(user.uid, prompt);
+      } else {
+        result = await generateText(prompt);
+      }
+      
       setResponse(result);
     } catch (err) {
       setError('Bir hata oluştu. Lütfen tekrar deneyin.');
@@ -24,6 +42,10 @@ const AIChat: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleQuickQuery = (query: string) => {
+    setPrompt(query);
   };
 
   return (
@@ -47,6 +69,37 @@ const AIChat: React.FC = () => {
         >
           AI Asistan
         </Typography>
+
+        {user && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Hızlı Sorgular:
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Chip 
+                label="Başvurularımın durumu nedir?"
+                onClick={() => handleQuickQuery('Başvurularımın durumu nedir?')}
+                variant="outlined"
+                size="small"
+                sx={{ cursor: 'pointer' }}
+              />
+              <Chip 
+                label="Destek taleplerimi göster"
+                onClick={() => handleQuickQuery('Destek taleplerimi göster')}
+                variant="outlined"
+                size="small"
+                sx={{ cursor: 'pointer' }}
+              />
+              <Chip 
+                label="Bekleyen işlemlerim var mı?"
+                onClick={() => handleQuickQuery('Bekleyen işlemlerim var mı?')}
+                variant="outlined"
+                size="small"
+                sx={{ cursor: 'pointer' }}
+              />
+            </Box>
+          </Box>
+        )}
 
         <form onSubmit={handleSubmit}>
           <TextField
@@ -114,4 +167,4 @@ const AIChat: React.FC = () => {
   );
 };
 
-export default AIChat; 
+export default AIChat;

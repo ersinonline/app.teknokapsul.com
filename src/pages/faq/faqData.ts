@@ -106,11 +106,7 @@ export const FAQ_DATA = [
         question: 'Destek ekibiniz hangi saatlerde çalışıyor?',
         answer: 'Destek ekibimiz hafta içi 09:00 - 18:00 saatleri arasında hizmet vermektedir.'
       },
-      {
-        id: 'live-chat',
-        question: 'Canlı destek özelliğiniz var mı?',
-        answer: 'Evet, uygulama içindeki canlı destek seçeneği ile bizimle anında iletişime geçebilirsiniz.'
-      }
+
     ]
   }
 ];

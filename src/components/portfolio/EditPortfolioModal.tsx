@@ -22,6 +22,7 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
     type: item.type,
     quantity: item.quantity,
     purchasePrice: item.purchasePrice,
+    currentPrice: item.currentPrice,
     purchaseDate: item.purchaseDate
   });
   const [loading, setLoading] = useState(false);
@@ -35,6 +36,7 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
         type: item.type,
         quantity: item.quantity,
         purchasePrice: item.purchasePrice,
+        currentPrice: item.currentPrice,
         purchaseDate: item.purchaseDate
       });
       setErrors({});
@@ -77,13 +79,25 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
 
     setLoading(true);
     try {
+      // Güncel fiyatı hesapla
+      const currentPrice = formData.currentPrice || formData.purchasePrice;
+      const totalValue = formData.quantity * currentPrice;
+      const totalInvestment = formData.quantity * formData.purchasePrice;
+      const totalReturn = totalValue - totalInvestment;
+      const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
+      
       await onUpdate(item.id, {
         name: formData.name,
         symbol: formData.symbol,
         type: formData.type,
         quantity: formData.quantity,
         purchasePrice: formData.purchasePrice,
-        purchaseDate: formData.purchaseDate
+        purchaseDate: formData.purchaseDate,
+        currentPrice,
+        totalValue,
+        totalReturn,
+        returnPercentage,
+        lastUpdated: new Date()
       });
       onClose();
     } catch (error) {
@@ -241,6 +255,26 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
               required
             />
             {errors.purchasePrice && <p className="text-red-500 text-sm mt-1">{errors.purchasePrice}</p>}
+          </div>
+
+          {/* Güncel Fiyat */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Güncel Fiyat (TL)
+            </label>
+            <input
+              type="number"
+              value={formData.currentPrice}
+              onChange={(e) => {
+                setFormData({ ...formData, currentPrice: parseFloat(e.target.value) || 0 });
+                setErrors({ ...errors, currentPrice: '' });
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+            />
+            {errors.currentPrice && <p className="text-red-500 text-sm mt-1">{errors.currentPrice}</p>}
           </div>
 
           {/* Alış Tarihi */}

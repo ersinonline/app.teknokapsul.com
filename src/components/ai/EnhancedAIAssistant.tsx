@@ -1,9 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { Send, Bot, User, Volume2, VolumeX, Trash2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { portfolioService } from '../../services/portfolio.service';
 import { PortfolioItem } from '../../types/portfolio';
 import { formatCurrency } from '../../utils/currency';
+import { queryUserStatus } from '../../services/ai.service';
+import { applicationService } from '../../services/application.service';
+import { createSupportTicket } from '../../services/support.service';
+
 
 interface Message {
   id: string;
@@ -15,21 +19,35 @@ interface Message {
 
 export const EnhancedAIAssistant: React.FC = () => {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: `Merhaba ${user?.displayName?.split(' ')[0] || 'Ersin'}! Size nasıl yardımcı olabilirim? Portföy durumunuz, finansal analiz, bütçe önerileri veya yatırım tavsiyeleri hakkında sorular sorabilirsiniz.`,
-      sender: 'ai',
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
+  const [showQuickQuestions, setShowQuickQuestions] = useState(true);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [showSupportForm, setShowSupportForm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
+
+  // Hazır sorular listesi
+  const quickQuestions = [
+    "Portföy durumum?",
+    "En iyi yatırımım?",
+    "Portföy dağılımım?",
+    "Bütçe önerileri",
+    "Tasarruf ipuçları",
+    "Başvuru durumu?",
+    "Yatırım tavsiyeleri",
+    "Risk analizi"
+  ];
+
+  // Hızlı işlemler
+  const quickActions = [
+    { text: "📝 Başvuru Yap", action: () => handleShowApplicationForm() },
+    { text: "🎫 Destek Talebi", action: () => handleShowSupportForm() },
+    { text: "📊 Portföy Analizi", action: () => handlePortfolioAnalysis() },
+    { text: "💡 Yatırım Önerileri", action: () => handleInvestmentSuggestions() }
+  ];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -43,7 +61,26 @@ export const EnhancedAIAssistant: React.FC = () => {
     if (user) {
       loadPortfolioData();
     }
+    // Hoş geldin mesajı göster
+    setMessages([{
+      id: 'welcome',
+      text: `Merhaba ${user?.displayName?.split(' ')[0] || 'Kullanıcı'}! Ben TeknoBOT, size finansal konularda yardımcı olacağım. Portföy analizi, başvuru işlemleri, destek talepleri ve daha fazlası için buradayım!`,
+      sender: 'ai',
+      timestamp: new Date()
+    }]);
+    setShowQuickQuestions(true);
   }, [user]);
+
+  // Chat geçmişini temizle
+  const clearChatHistory = () => {
+    setMessages([{
+      id: 'welcome',
+      text: `Merhaba ${user?.displayName?.split(' ')[0] || 'Kullanıcı'}! Ben TeknoBOT, size finansal konularda yardımcı olacağım. Portföy analizi, başvuru işlemleri, destek talepleri ve daha fazlası için buradayım!`,
+      sender: 'ai',
+      timestamp: new Date()
+    }]);
+    setShowQuickQuestions(true);
+  };
 
   const loadPortfolioData = async () => {
     if (!user) return;
@@ -55,43 +92,7 @@ export const EnhancedAIAssistant: React.FC = () => {
     }
   };
 
-  // Ses tanıma özelliği
-  const startListening = () => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'tr-TR';
 
-      recognitionRef.current.onstart = () => {
-        setIsListening(true);
-      };
-
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setInputText(transcript);
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current.start();
-    }
-  };
-
-  const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    setIsListening(false);
-  };
 
   // Metin okuma özelliği
   const speakText = (text: string) => {
@@ -117,6 +118,19 @@ export const EnhancedAIAssistant: React.FC = () => {
 
   const generateAIResponse = async (userMessage: string): Promise<string> => {
     const lowerMessage = userMessage.toLowerCase();
+    
+    // Başvuru/destek durumu sorgulama
+    const statusKeywords = ['başvuru', 'durum', 'destek', 'talep', 'başvurum', 'durumu', 'nerede', 'ne zaman', 'onaylandı', 'reddedildi', 'beklemede'];
+    const isStatusQuery = statusKeywords.some(keyword => lowerMessage.includes(keyword));
+    
+    if (user && isStatusQuery) {
+      try {
+        return await queryUserStatus(user.uid, userMessage);
+      } catch (error) {
+        console.error('Durum sorgulama hatası:', error);
+        return 'Üzgünüm, şu anda başvuru ve destek taleplerini sorgulayamıyorum. Lütfen daha sonra tekrar deneyin.';
+      }
+    }
     
     // Portföy analizi
     if (lowerMessage.includes('portföy') || lowerMessage.includes('portfolio') || lowerMessage.includes('yatırım') || lowerMessage.includes('invest')) {
@@ -181,25 +195,29 @@ export const EnhancedAIAssistant: React.FC = () => {
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!inputText.trim() || isLoading) return;
+  const handleSendMessage = async (messageText?: string) => {
+    const textToSend = messageText || inputText;
+    if (!textToSend.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputText,
+      text: textToSend,
       sender: 'user',
       timestamp: new Date()
     };
 
+    // Kullanıcı mesajını state'e ekle
     setMessages(prev => [...prev, userMessage]);
+    
     setInputText('');
     setIsLoading(true);
+    setShowQuickQuestions(false);
 
     try {
       // Simüle edilmiş gecikme
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const aiResponse = await generateAIResponse(inputText);
+      const aiResponse = await generateAIResponse(textToSend);
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -208,11 +226,126 @@ export const EnhancedAIAssistant: React.FC = () => {
         timestamp: new Date()
       };
 
+      // AI mesajını state'e ekle
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('AI response error:', error);
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: 'Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.',
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleQuickQuestion = (question: string) => {
+    handleSendMessage(question);
+    setShowQuickQuestions(false);
+  };
+
+  const handleShowApplicationForm = () => {
+    setShowApplicationForm(true);
+    setShowQuickQuestions(false);
+  };
+
+  const handleShowSupportForm = () => {
+    setShowSupportForm(true);
+    setShowQuickQuestions(false);
+  };
+
+  const handlePortfolioAnalysis = () => {
+    handleSendMessage('Portföy analizi yap');
+  };
+
+  const handleInvestmentSuggestions = () => {
+    handleSendMessage('Yatırım önerileri ver');
+  };
+
+  const submitApplication = async (formData: any) => {
+    setShowApplicationForm(false);
+    
+    try {
+      if (!user) {
+        throw new Error('Kullanıcı oturumu bulunamadı');
+      }
+
+      await applicationService.createApplication(user.uid, {
+        serviceType: formData.applicationType,
+        serviceName: formData.applicationType,
+        serviceCategory: formData.applicationType,
+        applicantInfo: {
+          fullName: `${formData.firstName} ${formData.lastName}`,
+          phone: formData.phone,
+          email: formData.email,
+          address: '',
+          identityNumber: ''
+        },
+        status: 'pending',
+        notes: formData.message
+      });
+
+      const successMessage: Message = {
+        id: Date.now().toString(),
+        text: '✅ Başvurunuz başarıyla gönderildi! Başvuru numaranız ile durumunu takip edebilirsiniz.',
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, successMessage]);
+    } catch (error) {
+      console.error('Başvuru gönderilirken hata:', error);
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        text: '❌ Başvurunuz gönderilirken bir hata oluştu. Lütfen tekrar deneyin.',
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    }
+  };
+
+  const submitSupportRequest = async (formData: any) => {
+    setShowSupportForm(false);
+    
+    try {
+      if (!user) {
+        throw new Error('Kullanıcı oturumu bulunamadı');
+      }
+
+      await createSupportTicket({
+        title: formData.subject,
+        category: formData.category,
+        priority: formData.priority,
+        description: formData.description,
+        email: user.email || '',
+        name: user.displayName || 'Kullanıcı'
+      });
+
+      const successMessage: Message = {
+        id: Date.now().toString(),
+        text: '🎫 Destek talebiniz başarıyla oluşturuldu! En kısa sürede size dönüş yapacağız.',
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, successMessage]);
+    } catch (error) {
+      console.error('Destek talebi gönderilirken hata:', error);
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        text: '❌ Destek talebiniz gönderilirken bir hata oluştu. Lütfen tekrar deneyin.',
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
     }
   };
 
@@ -223,24 +356,222 @@ export const EnhancedAIAssistant: React.FC = () => {
     }
   };
 
+  // Başvuru Formu Bileşeni
+  const ApplicationForm = () => {
+    const [formData, setFormData] = useState({
+      firstName: '',
+      lastName: '',
+      email: user?.email || '',
+      phone: '',
+      applicationType: '',
+      message: ''
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      submitApplication(formData);
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">📝 Başvuru Formu</h3>
+            <button
+              onClick={() => setShowApplicationForm(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder="Ad"
+                value={formData.firstName}
+                onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                className="p-2 border rounded-lg"
+                required
+              />
+              <input
+                type="text"
+                placeholder="Soyad"
+                value={formData.lastName}
+                onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                className="p-2 border rounded-lg"
+                required
+              />
+            </div>
+            <input
+              type="email"
+              placeholder="E-posta"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              className="w-full p-2 border rounded-lg"
+              required
+            />
+            <input
+              type="tel"
+              placeholder="Telefon"
+              value={formData.phone}
+              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              className="w-full p-2 border rounded-lg"
+              required
+            />
+            <select
+              value={formData.applicationType}
+              onChange={(e) => setFormData({...formData, applicationType: e.target.value})}
+              className="w-full p-2 border rounded-lg"
+              required
+            >
+              <option value="">Başvuru Türü Seçin</option>
+              <option value="investment">İnternet Aboneliği</option>
+              <option value="portfolio">TV Aboneliği</option>
+              <option value="consultation">Tarife Değişikliği</option>
+              <option value="other">Diğer</option>
+            </select>
+            <textarea
+              placeholder="Mesajınız"
+              value={formData.message}
+              onChange={(e) => setFormData({...formData, message: e.target.value})}
+              className="w-full p-2 border rounded-lg h-24 resize-none"
+              required
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowApplicationForm(false)}
+                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                İptal
+              </button>
+              <button
+                type="submit"
+                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Gönder
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
+
+  // Destek Formu Bileşeni
+  const SupportForm = () => {
+    const [formData, setFormData] = useState({
+      subject: '',
+      category: '',
+      priority: 'medium',
+      description: ''
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      submitSupportRequest(formData);
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">🎫 Destek Talebi</h3>
+            <button
+              onClick={() => setShowSupportForm(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              placeholder="Konu"
+              value={formData.subject}
+              onChange={(e) => setFormData({...formData, subject: e.target.value})}
+              className="w-full p-2 border rounded-lg"
+              required
+            />
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({...formData, category: e.target.value})}
+              className="w-full p-2 border rounded-lg"
+              required
+            >
+              <option value="">Kategori Seçin</option>
+              <option value="technical">Teknik Sorun</option>
+              <option value="account">Hesap Sorunu</option>
+              <option value="portfolio">Portföy Sorunu</option>
+              <option value="general">Genel Soru</option>
+              <option value="other">Diğer</option>
+            </select>
+            <select
+              value={formData.priority}
+              onChange={(e) => setFormData({...formData, priority: e.target.value})}
+              className="w-full p-2 border rounded-lg"
+            >
+              <option value="low">Düşük Öncelik</option>
+              <option value="medium">Orta Öncelik</option>
+              <option value="high">Yüksek Öncelik</option>
+              <option value="urgent">Acil</option>
+            </select>
+            <textarea
+              placeholder="Açıklama"
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              className="w-full p-2 border rounded-lg h-24 resize-none"
+              required
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowSupportForm(false)}
+                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                İptal
+              </button>
+              <button
+                type="submit"
+                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Gönder
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="flex flex-col h-[600px] bg-white rounded-lg shadow-lg">
+    <>
+      <div className="flex flex-col h-[600px] bg-white rounded-lg shadow-lg">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
         <div className="flex items-center gap-2">
-          <Bot className="w-6 h-6 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">AI Finansal Asistan</h3>
+          <Bot className="w-6 h-6 text-white" />
+          <h3 className="font-semibold text-white">🤖 TeknoBOT</h3>
+          <span className="text-xs bg-white/20 px-2 py-1 rounded-full">TeknoBOT</span>
         </div>
         <div className="flex items-center gap-2">
           {isSpeaking && (
             <button
               onClick={stopSpeaking}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="p-2 text-red-300 hover:bg-white/10 rounded-lg transition-colors"
               title="Konuşmayı durdur"
             >
               <VolumeX className="w-4 h-4" />
             </button>
           )}
+          <button
+            onClick={clearChatHistory}
+            className="p-2 text-white/80 hover:bg-white/10 rounded-lg transition-colors"
+            title="Chat geçmişini temizle"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -294,6 +625,43 @@ export const EnhancedAIAssistant: React.FC = () => {
             </div>
           </div>
         ))}
+
+        {/* Hazır Sorular ve Hızlı İşlemler */}
+        {showQuickQuestions && messages.length <= 1 && (
+          <div className="space-y-4">
+            {/* Hızlı İşlemler */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700">🚀 Hızlı İşlemler</p>
+              <div className="grid grid-cols-2 gap-2">
+                {quickActions.map((action, index) => (
+                  <button
+                    key={index}
+                    onClick={action.action}
+                    className="p-4 text-left text-sm bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 text-purple-700 rounded-lg transition-all border border-purple-200 hover:border-purple-300 hover:shadow-md min-h-[60px] flex items-center"
+                  >
+                    {action.text}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Hazır Sorular */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700">💬 Hazır Sorular</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {quickQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleQuickQuestion(question)}
+                    className="p-3 text-left text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors border border-blue-200 hover:border-blue-300"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         
         {isLoading && (
           <div className="flex items-start gap-3">
@@ -318,43 +686,36 @@ export const EnhancedAIAssistant: React.FC = () => {
       {/* Input */}
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center gap-2">
+
+          
           <div className="flex-1 relative">
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Finansal sorularınızı sorun..."
+              placeholder="Mesajını yaz"
               className="w-full p-3 pr-12 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={1}
               disabled={isLoading}
             />
           </div>
           
-          <div className="flex items-center gap-1">
-            <button
-              onClick={isListening ? stopListening : startListening}
-              className={`p-3 rounded-lg transition-colors ${
-                isListening
-                  ? 'bg-red-600 text-white hover:bg-red-700'
-                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-              }`}
-              title={isListening ? 'Dinlemeyi durdur' : 'Sesli mesaj'}
-            >
-              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-            </button>
-            
-            <button
-              onClick={handleSendMessage}
-              disabled={!inputText.trim() || isLoading}
-              className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Gönder"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </div>
+          <button
+            onClick={() => handleSendMessage()}
+            disabled={!inputText.trim() || isLoading}
+            className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title="Gönder"
+          >
+            <Send className="w-4 h-4" />
+          </button>
         </div>
       </div>
-    </div>
+      </div>
+      
+      {/* Form Modalleri */}
+      {showApplicationForm && <ApplicationForm />}
+      {showSupportForm && <SupportForm />}
+    </>
   );
 };
 

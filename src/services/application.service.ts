@@ -39,7 +39,7 @@ class ApplicationService {
       };
 
       const docRef = await addDoc(
-        collection(db, 'teknokapsul', userId, 'applications'), 
+        collection(db, 'teknokapsul-application'), 
         newApplication
       );
       
@@ -54,7 +54,8 @@ class ApplicationService {
   async getUserApplications(userId: string): Promise<Application[]> {
     try {
       const q = query(
-        collection(db, 'teknokapsul', userId, 'applications'),
+        collection(db, 'teknokapsul-application'),
+        where('userId', '==', userId),
         orderBy('createdAt', 'desc')
       );
       
@@ -76,7 +77,8 @@ class ApplicationService {
   async getApplicationByNumber(userId: string, applicationNumber: string): Promise<Application | null> {
     try {
       const q = query(
-        collection(db, 'teknokapsul', userId, 'applications'),
+        collection(db, 'teknokapsul-application'),
+        where('userId', '==', userId),
         where('applicationNumber', '==', applicationNumber)
       );
       
@@ -101,7 +103,6 @@ class ApplicationService {
 
   // Update application status
   async updateApplicationStatus(
-    userId: string, 
     applicationId: string, 
     status: Application['status'],
     notes?: string
@@ -120,7 +121,7 @@ class ApplicationService {
         updateData.completedAt = Timestamp.fromDate(new Date());
       }
       
-      const docRef = doc(db, 'teknokapsul', userId, 'applications', applicationId);
+      const docRef = doc(db, 'teknokapsul-application', applicationId);
       await updateDoc(docRef, updateData);
     } catch (error) {
       console.error('Error updating application status:', error);
@@ -128,10 +129,27 @@ class ApplicationService {
     }
   }
 
-  // Delete application
-  async deleteApplication(userId: string, applicationId: string): Promise<void> {
+  // Update application
+  async updateApplication(
+    applicationId: string,
+    updateData: Partial<Omit<Application, 'id' | 'userId' | 'applicationNumber' | 'createdAt'>>
+  ): Promise<void> {
     try {
-      await deleteDoc(doc(db, 'teknokapsul', userId, 'applications', applicationId));
+      const docRef = doc(db, 'teknokapsul-application', applicationId);
+      await updateDoc(docRef, {
+        ...updateData,
+        updatedAt: Timestamp.fromDate(new Date())
+      });
+    } catch (error) {
+      console.error('Error updating application:', error);
+      throw error;
+    }
+  }
+
+  // Delete application
+  async deleteApplication(applicationId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'teknokapsul-application', applicationId));
     } catch (error) {
       console.error('Error deleting application:', error);
       throw error;
@@ -142,7 +160,8 @@ class ApplicationService {
   async getPendingApplicationsCount(userId: string): Promise<number> {
     try {
       const q = query(
-        collection(db, 'teknokapsul', userId, 'applications'),
+        collection(db, 'teknokapsul-application'),
+        where('userId', '==', userId),
         where('status', '==', 'pending')
       );
       
@@ -157,3 +176,12 @@ class ApplicationService {
 
 export const applicationService = new ApplicationService();
 export default applicationService;
+
+// Named exports for individual functions
+export const createApplication = applicationService.createApplication.bind(applicationService);
+export const getUserApplications = applicationService.getUserApplications.bind(applicationService);
+export const getApplicationByNumber = applicationService.getApplicationByNumber.bind(applicationService);
+export const updateApplicationStatus = applicationService.updateApplicationStatus.bind(applicationService);
+export const updateApplication = applicationService.updateApplication.bind(applicationService);
+export const deleteApplication = applicationService.deleteApplication.bind(applicationService);
+export const getPendingApplicationsCount = applicationService.getPendingApplicationsCount.bind(applicationService);
