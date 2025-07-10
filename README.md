@@ -53,8 +53,34 @@ VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id_here
 npm run dev
 ```
 
-## 🚀 Deployment
+## 📧 Email Reminder Sistemi
 
+### Vercel Cron ile Otomatik Email Hatırlatmaları
+
+Proje, gider ödemelerinin 3 gün öncesinden email hatırlatması gönderen bir sistem içerir:
+
+- **Vercel Cron**: Her gün saat 16:34'te çalışır
+- **API Route**: `/api/expense-reminders` endpoint'i
+- **Zapier Entegrasyonu**: `/api/zapier-webhook` ile Zapier entegrasyonu mümkün
+
+### Gerekli Environment Variables
+
+```bash
+# Firebase Admin SDK
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_CLIENT_EMAIL=your_service_account_email
+FIREBASE_PRIVATE_KEY=your_private_key
+
+# Email Configuration
+GMAIL_USER=your_gmail_address
+GMAIL_PASSWORD=your_gmail_app_password
+
+# Security
+CRON_SECRET=your_random_secret_key
+ZAPIER_API_KEY=your_zapier_api_key
+```
+
+## 🚀 Deployment
 ### Vercel'e Deploy Etme
 
 1. Vercel hesabınızı GitHub ile bağlayın
@@ -67,6 +93,13 @@ npm run dev
    - `VITE_FIREBASE_MESSAGING_SENDER_ID`
    - `VITE_FIREBASE_APP_ID`
    - `VITE_FIREBASE_MEASUREMENT_ID`
+   - `FIREBASE_PROJECT_ID`
+   - `FIREBASE_CLIENT_EMAIL`
+   - `FIREBASE_PRIVATE_KEY`
+   - `GMAIL_USER`
+   - `GMAIL_PASSWORD`
+   - `CRON_SECRET`
+   - `ZAPIER_API_KEY`
 
 4. Deploy butonuna tıklayın
 

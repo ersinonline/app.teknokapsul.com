@@ -1,21 +1,28 @@
-import * as functions from 'firebase-functions';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import * as admin from 'firebase-admin';
 import * as nodemailer from 'nodemailer';
+import { defineString } from 'firebase-functions/params';
 
-admin.initializeApp();
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
-const transporter = nodemailer.createTransport({
+const gmailUser = defineString('GMAIL_USER');
+const gmailPassword = defineString('GMAIL_PASSWORD');
+
+const transporter = nodemailer.createTransporter({
   service: 'gmail',
   auth: {
-    user: functions.config().gmail.user,
-    pass: functions.config().gmail.password
+    user: gmailUser.value(),
+    pass: gmailPassword.value()
   }
 });
 
-export const checkExpenseReminders = functions.pubsub
-  .schedule('every day 16:34')
-  .timeZone('Europe/Istanbul')
-  .onRun(async (context) => {
+export const checkExpenseReminders = onSchedule({
+  schedule: 'every day 17:02',
+  timeZone: 'Europe/Istanbul',
+  memory: '256MiB'
+}, async (event) => {
     const db = admin.firestore();
     const now = new Date();
     const threeDaysLater = new Date(now);
