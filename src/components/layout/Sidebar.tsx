@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen } from 'lucide-react';
+import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const Sidebar: React.FC = () => {
@@ -14,12 +14,13 @@ export const Sidebar: React.FC = () => {
     { id: 'expenses', path: '/expenses', label: 'Giderlerim', icon: TrendingDown },
     { id: 'portfolio', path: '/portfolio', label: 'Portföyüm', icon: PieChart },
     { id: 'subscriptions', path: '/subscriptions', label: 'Aboneliklerim', icon: Clock },
-    { id: 'financial-data', path: '/financial-data', label: 'Finansal Verilerim', icon: CreditCard }
+    { id: 'financial-data', path: '/financial-data', label: 'Finansal Verilerim', icon: CreditCard },
   ];
 
   const otherMenuItems = [
     { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
     { id: 'documents', path: '/documents', label: 'Dosyalarım', icon: FolderOpen },
+        { id: 'loan-calculator', path: '/loan-calculator', label: 'Kredi Hesaplama', icon: Calculator },
     { id: 'cargo-tracking', path: '/cargo-tracking', label: 'Kargo Takip', icon: Package },
     { id: 'notes', path: '/notes', label: 'Notlar', icon: StickyNote },
     { id: 'calendar', path: '/calendar', label: 'Takvim', icon: Calendar },

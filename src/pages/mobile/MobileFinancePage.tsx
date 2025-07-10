@@ -97,6 +97,16 @@ export const MobileFinancePage: React.FC = () => {
       color: 'bg-yellow-500',
       bgColor: 'bg-yellow-50',
       textColor: 'text-yellow-700'
+    },
+        {
+      id: 'portfolio',
+      title: 'Kredi Hesaplama',
+      description: 'Kredilerinizi hesaplayın',
+      icon: PieChart,
+      path: '/loan-calculator',
+      color: 'bg-yellow-500',
+      bgColor: 'bg-yellow-50',
+      textColor: 'text-yellow-700'
     }
   ];
 

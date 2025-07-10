@@ -32,6 +32,7 @@ import { ExpensePage } from './pages/expense/ExpensePage';
 import { FinancialDataPage } from './pages/financial/FinancialDataPage';
 import { PortfolioPage } from './pages/portfolio/PortfolioPage';
 import { MobileFinancePage } from './pages/mobile/MobileFinancePage';
+import LoanCalculator from './pages/other/LoanCalculator';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
   <AuthGuard>
@@ -130,6 +131,10 @@ const router = createBrowserRouter([
   {
     path: '/mobile-finance',
     element: <ProtectedRoute><MobileFinancePage /></ProtectedRoute>
+  },
+  {
+    path: '/loan-calculator',
+    element: <ProtectedRoute><LoanCalculator /></ProtectedRoute>
   },
   {
           path: '/documents',
