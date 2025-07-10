@@ -3,10 +3,6 @@
     {
       "path": "/api/expense-reminders",
       "schedule": "34 16 * * *"
-    },
-    {
-      "path": "/api/google-sheets-sync",
-      "schedule": "30 16 * * *"
     }
   ],
   "rewrites": [
