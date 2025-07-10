@@ -17,7 +17,7 @@ if (!getApps().length) {
 const db = getFirestore();
 
 // Nodemailer transporter
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.GMAIL_USER,
@@ -26,14 +26,17 @@ const transporter = nodemailer.createTransporter({
 });
 
 export default async function handler(req: NextRequest) {
-  // Sadece POST isteklerini kabul et
-  if (req.method !== 'POST') {
+  // GET ve POST isteklerini kabul et
+  if (req.method !== 'GET' && req.method !== 'POST') {
     return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
   }
 
-  // Güvenlik için authorization header kontrolü
+  // Güvenlik için secret kontrolü (query parameter veya header)
+  const secretFromQuery = req.nextUrl.searchParams.get('secret');
   const authHeader = req.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const secretFromHeader = authHeader?.replace('Bearer ', '');
+  
+  if (secretFromQuery !== process.env.CRON_SECRET && secretFromHeader !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
