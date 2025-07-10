@@ -648,7 +648,14 @@ export const FinancialDataPage = () => {
                 <input name="dueDate" type="number" placeholder="Son Ödeme Günü (1-31)" defaultValue={editingCreditCard?.dueDate || ''} className="w-full p-2 border rounded" required />
                 <input name="minimumPayment" type="text" placeholder="Minimum Ödeme" defaultValue={editingCreditCard?.minimumPayment || ''} className="w-full p-2 border rounded" />
                 <input name="interestRate" type="text" step="0.01" placeholder="Faiz Oranı (%)" defaultValue={editingCreditCard?.interestRate || ''} className="w-full p-2 border rounded" />
-                <input name="annualFeeDate" type="date" placeholder="Yıllık Aidat Tarihi" defaultValue={editingCreditCard?.annualFeeDate ? new Date(editingCreditCard.annualFeeDate).toISOString().split('T')[0] : ''} className="w-full p-2 border rounded" />
+                <input name="annualFeeDate" type="date" placeholder="Yıllık Aidat Tarihi" defaultValue={editingCreditCard?.annualFeeDate ? (() => {
+                  try {
+                    const date = new Date(editingCreditCard.annualFeeDate);
+                    return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
+                  } catch {
+                    return '';
+                  }
+                })() : ''} className="w-full p-2 border rounded" />
               </div>
               <div className="flex gap-2 mt-6">
                 <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Ekle</button>
@@ -785,7 +792,14 @@ export const FinancialDataPage = () => {
                 <input name="totalInstallments" type="number" placeholder="Toplam Taksit Sayısı" defaultValue={editingLoan?.totalInstallments || ''} className="w-full p-2 border rounded" required />
                 <input name="remainingInstallments" type="number" placeholder="Kalan Taksit Sayısı" defaultValue={editingLoan?.remainingInstallments || ''} className="w-full p-2 border rounded" required />
                 <input name="interestRate" type="text" step="0.01" placeholder="Faiz Oranı (%)" defaultValue={editingLoan?.interestRate || ''} className="w-full p-2 border rounded" />
-                <input name="startDate" type="date" placeholder="Başlangıç Tarihi" defaultValue={editingLoan?.startDate ? new Date(editingLoan.startDate).toISOString().split('T')[0] : ''} className="w-full p-2 border rounded" required />
+                <input name="startDate" type="date" placeholder="Başlangıç Tarihi" defaultValue={editingLoan?.startDate ? (() => {
+                  try {
+                    const date = new Date(editingLoan.startDate);
+                    return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
+                  } catch {
+                    return '';
+                  }
+                })() : ''} className="w-full p-2 border rounded" required />
               </div>
               <div className="flex gap-2 mt-6">
                 <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Ekle</button>

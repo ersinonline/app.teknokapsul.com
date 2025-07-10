@@ -1,29 +1,49 @@
 import { 
   collection, 
-  addDoc, 
-  getDocs, 
   doc, 
+  addDoc, 
   updateDoc, 
   deleteDoc, 
+  getDocs, 
   query, 
   where, 
-  orderBy,
-  Timestamp
+  orderBy, 
+  Timestamp 
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { CreditCard, CashAdvanceAccount, Loan, LoanPayment } from '../types/financial';
+import { offlineService } from './offline.service';
 
 // Kredi Kartı İşlemleri
 export const addCreditCard = async (userId: string, creditCard: Omit<CreditCard, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<string> => {
   try {
     const now = new Date();
-    const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'financial'), {
+    const newCard = {
       ...creditCard,
       type: 'creditCard',
       createdAt: Timestamp.fromDate(now),
       updatedAt: Timestamp.fromDate(now)
-    });
-    return docRef.id;
+    };
+    
+    if (navigator.onLine) {
+      const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'financial'), newCard);
+      
+      // Save to offline storage
+      const cardWithId = { id: docRef.id, ...newCard };
+      await offlineService.saveData('creditCards', cardWithId);
+      
+      return docRef.id;
+    } else {
+      // Generate temporary ID for offline
+      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const cardWithId = { id: tempId, ...newCard };
+      
+      // Save to offline storage and queue for sync
+      await offlineService.saveData('creditCards', cardWithId);
+      await offlineService.addToSyncQueue('create', 'creditCard', cardWithId, userId);
+      
+      return tempId;
+    }
   } catch (error) {
     console.error('Error adding credit card:', error);
     throw error;
@@ -32,31 +52,63 @@ export const addCreditCard = async (userId: string, creditCard: Omit<CreditCard,
 
 export const getCreditCards = async (userId: string): Promise<CreditCard[]> => {
   try {
-    const q = query(
-      collection(db, 'teknokapsul', userId, 'financial'),
-      where('type', '==', 'creditCard'),
-      orderBy('createdAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate() || new Date(),
-      updatedAt: doc.data().updatedAt?.toDate() || new Date()
-    })) as CreditCard[];
+    if (navigator.onLine) {
+      const q = query(
+        collection(db, 'teknokapsul', userId, 'financial'),
+        where('type', '==', 'creditCard'),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      const cards = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate() || new Date(),
+        updatedAt: doc.data().updatedAt?.toDate() || new Date()
+      })) as CreditCard[];
+      
+      // Save to offline storage
+      for (const card of cards) {
+        await offlineService.saveData('creditCards', card);
+      }
+      
+      return cards;
+    } else {
+      // Get from offline storage
+      const offlineCards = await offlineService.getData('creditCards');
+      return offlineCards || [];
+    }
   } catch (error) {
     console.error('Error getting credit cards:', error);
-    throw error;
+    // Fallback to offline data
+    const offlineCards = await offlineService.getData('creditCards');
+    return offlineCards || [];
   }
 };
 
 export const updateCreditCard = async (userId: string, id: string, updates: Partial<CreditCard>): Promise<void> => {
   try {
-    const docRef = doc(db, 'teknokapsul', userId, 'financial', id);
-    await updateDoc(docRef, {
+    const updateData = {
       ...updates,
       updatedAt: Timestamp.fromDate(new Date())
-    });
+    };
+    
+    if (navigator.onLine) {
+      const docRef = doc(db, 'teknokapsul', userId, 'financial', id);
+      await updateDoc(docRef, updateData);
+      
+      // Update offline storage
+      const existingCard = await offlineService.getData('creditCards', id);
+      if (existingCard) {
+        await offlineService.saveData('creditCards', { ...existingCard, ...updateData });
+      }
+    } else {
+      // Save to offline storage and queue for sync
+      const existingCard = await offlineService.getData('creditCards', id);
+      if (existingCard) {
+        await offlineService.saveData('creditCards', { ...existingCard, ...updateData });
+      }
+      await offlineService.addToSyncQueue('update', 'creditCard', { id, ...updateData }, userId);
+    }
   } catch (error) {
     console.error('Error updating credit card:', error);
     throw error;
@@ -65,7 +117,15 @@ export const updateCreditCard = async (userId: string, id: string, updates: Part
 
 export const deleteCreditCard = async (userId: string, id: string): Promise<void> => {
   try {
-    await deleteDoc(doc(db, 'teknokapsul', userId, 'financial', id));
+    if (navigator.onLine) {
+      await deleteDoc(doc(db, 'teknokapsul', userId, 'financial', id));
+      // Remove from offline storage
+      await offlineService.deleteData('creditCards', id);
+    } else {
+      // Remove from offline storage and queue for sync
+      await offlineService.deleteData('creditCards', id);
+      await offlineService.addToSyncQueue('delete', 'creditCard', { id }, userId);
+    }
   } catch (error) {
     console.error('Error deleting credit card:', error);
     throw error;

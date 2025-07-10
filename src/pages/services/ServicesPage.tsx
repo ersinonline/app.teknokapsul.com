@@ -1,10 +1,85 @@
+import { useState, useEffect } from 'react';
 import { 
   Shield, Receipt, Wifi, Smartphone, 
   Tv, Gamepad2, Wrench,
-  Truck, Building, ExternalLink, Calculator, CreditCard
+  Truck, Building, ExternalLink, Calculator, CreditCard,
+  FileText, Clock, CheckCircle, AlertCircle, Eye, X
 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { applicationService } from '../../services/application.service';
+import { Application } from '../../types/application';
+import { useLocation } from 'react-router-dom';
 
 const Services = () => {
+  const { user } = useAuth();
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loadingApplications, setLoadingApplications] = useState(true);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const location = useLocation();
+  const { applicationNumber, successMessage } = location.state || {};
+
+  useEffect(() => {
+    const fetchApplications = async () => {
+      if (user) {
+        try {
+          const userApplications = await applicationService.getUserApplications(user.uid);
+          setApplications(userApplications);
+        } catch (error) {
+          console.error('Error fetching applications:', error);
+        } finally {
+          setLoadingApplications(false);
+        }
+      }
+    }; // Removed else block as it's redundant with finally
+
+    fetchApplications();
+  }, [user]);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'text-yellow-600 bg-yellow-50';
+      case 'approved':
+        return 'text-green-600 bg-green-50';
+      case 'rejected':
+        return 'text-red-600 bg-red-50';
+      case 'completed':
+        return 'text-[#ffb700] bg-[#fff7e6]';
+      default:
+        return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Clock className="w-4 h-4" />;
+      case 'approved':
+        return <CheckCircle className="w-4 h-4" />;
+      case 'rejected':
+        return <AlertCircle className="w-4 h-4" />;
+      case 'completed':
+        return <CheckCircle className="w-4 h-4" />;
+      default:
+        return <FileText className="w-4 h-4" />;
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'Beklemede';
+      case 'approved':
+        return 'Onaylandı';
+      case 'rejected':
+        return 'Reddedildi';
+      case 'completed':
+        return 'Tamamlandı';
+      default:
+        return 'Bilinmiyor';
+    }
+  };
   const RESELLER_ID = "123456";
   const REFID = "54108";
   const BAYI_ID = "54108";
@@ -24,7 +99,9 @@ const Services = () => {
         { name: 'Takvim', tag: 'Ücretsiz', url: '/calendar' },
         { name: 'Bütçe Yönetimi', tag: 'Ücretsiz', url: '/expenses' },
         { name: 'Portföy Takibi', tag: 'Ücretsiz', url: '/portfolio' },
-        { name: 'AI Asistan', tag: 'Yeni', url: '/ai-assistant' }
+        { name: 'Dosyalarım', tag: 'Yeni', url: '/documents' },
+        { name: 'AI Asistan', tag: 'Yeni', url: '/ai-assistant' },
+        { name: 'Hizmet Başvuruları', tag: 'Yeni', url: '/services-list' }
       ]
     },
 
@@ -85,10 +162,10 @@ const Services = () => {
     {
       title: 'Fatura Ödemeleri',
       icon: <Receipt className="w-8 h-8" />,
-      color: 'bg-blue-500',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
-      textColor: 'text-blue-700',
+      color: 'bg-[#ffb700]',
+      bgColor: 'bg-[#fff7e6]',
+      borderColor: 'border-[#ffe0b3]',
+      textColor: 'text-[#ffb700]',
       services: [
         { name: 'EnerjiSA', tag: 'Elektrik', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/elektrik-faturasi-odeme.html?bayiid=${BAYI_ID}` },
         { name: 'CK Enerji', tag: 'Elektrik', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/elektrik-faturasi-odeme.html?bayiid=${BAYI_ID}` },
@@ -243,6 +320,7 @@ const Services = () => {
       borderColor: 'border-cyan-200',
       textColor: 'text-cyan-700',
       services: [
+        { name: 'Dosyalarım', tag: 'Yeni', url: '/documents' },
         { name: 'E-İmza Başvurusu', tag: 'Kurumsal', url: 'https://basvuru.teknokapsul.com/apply/e_services' },
         { name: 'KEP Adresi', tag: 'Resmi', url: 'https://basvuru.teknokapsul.com/apply/e_services' },
         { name: 'E-Fatura', tag: 'Ticari', url: 'https://basvuru.teknokapsul.com/apply/e_services' }
@@ -251,7 +329,14 @@ const Services = () => {
   ];
 
   const handleServiceClick = (url: string) => {
-    window.open(url, '_blank');
+    // Check if it's an internal route (starts with /)
+    if (url.startsWith('/')) {
+      // Navigate to internal route in the same tab
+      window.location.href = url;
+    } else {
+      // Open external links in new tab
+      window.open(url, '_blank');
+    }
   };
 
   return (
@@ -267,6 +352,87 @@ const Services = () => {
           </p>
           <div className="w-20 h-1 bg-primary mx-auto mt-4 rounded-full"></div>
         </div>
+
+        {/* Success Message Display */}
+        {successMessage && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
+            <strong className="font-bold">Başarılı!</strong>
+            <span className="block sm:inline"> {successMessage}</span>
+            {applicationNumber && (
+              <span className="block sm:inline"> Başvuru Numaranız: <span className="font-bold">{applicationNumber}</span></span>
+            )}
+          </div>
+        )}
+
+        {/* Application Tracking Section */}
+        {user && !loadingApplications && applications.length > 0 && (
+          <div className="mb-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-[#ffb700] to-[#e6a600] px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="w-6 h-6 text-white" />
+                    <h2 className="text-xl font-semibold text-white">Başvuru Takibi</h2>
+                  </div>
+                  <span className="bg-white bg-opacity-20 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    {applications.length} başvuru
+                  </span>
+                </div>
+              </div>
+              
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {applications.slice(0, 6).map((application) => (
+                    <div
+                      key={application.id}
+                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50 hover:bg-white"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900 text-sm mb-1">
+                            {application.serviceName}
+                          </h3>
+                          <p className="text-xs text-gray-600 mb-2">
+                            Başvuru No: {application.applicationNumber}
+                          </p>
+                        </div>
+                        <Eye 
+                          className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedApplication(application);
+                            setShowModal(true);
+                          }}
+                        />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(application.status)}`}>
+                          {getStatusIcon(application.status)}
+                          <span>{getStatusText(application.status)}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          {application.createdAt instanceof Date 
+                            ? application.createdAt.toLocaleDateString('tr-TR')
+                            : new Date(application.createdAt).toLocaleDateString('tr-TR')
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {applications.length > 6 && (
+                  <div className="mt-4 text-center">
+                    <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                      Tüm başvuruları görüntüle ({applications.length - 6} daha)
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Service Groups */}
         <div className="space-y-12">
@@ -329,6 +495,78 @@ const Services = () => {
             İletişime Geç
           </button>
         </div>
+
+        {/* Application Details Modal */}
+        {showModal && selectedApplication && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-md w-full p-6 relative">
+              <button
+                onClick={() => setShowModal(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <div className="mb-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Başvuru Detayları
+                </h3>
+                <div className="w-12 h-1 bg-[#ffb700] rounded-full"></div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Başvuru Numarası</label>
+                  <p className="text-lg font-semibold text-gray-900">{selectedApplication.applicationNumber}</p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Hizmet</label>
+                  <p className="text-gray-900">{selectedApplication.serviceName}</p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Durum</label>
+                  <div className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedApplication.status)}`}>
+                    {getStatusIcon(selectedApplication.status)}
+                    <span>{getStatusText(selectedApplication.status)}</span>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Başvuru Tarihi</label>
+                  <p className="text-gray-900">
+                    {selectedApplication.createdAt instanceof Date 
+                      ? selectedApplication.createdAt.toLocaleDateString('tr-TR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                      : new Date(selectedApplication.createdAt).toLocaleDateString('tr-TR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                    }
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mt-6">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="w-full bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a600] transition-colors"
+                >
+                  Kapat
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

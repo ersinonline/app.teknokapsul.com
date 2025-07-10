@@ -11,8 +11,8 @@ import {
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { PortfolioItem, PortfolioSummary, AIRecommendation, PortfolioAnalysis, PORTFOLIO_CATEGORIES } from '../types/portfolio';
-
 import { exchangeRateService } from './exchange-rate.service';
+import { offlineService } from './offline.service';
 
 class PortfolioService {
 
@@ -51,8 +51,25 @@ class PortfolioService {
         lastUpdated: new Date()
       };
 
-      const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'portfolio'), portfolioItem);
-      return docRef.id;
+      if (navigator.onLine) {
+        const docRef = await addDoc(collection(db, 'teknokapsul', userId, 'portfolio'), portfolioItem);
+        
+        // Save to offline storage
+        const itemWithId = { id: docRef.id, ...portfolioItem };
+        await offlineService.saveData('portfolioItems', itemWithId);
+        
+        return docRef.id;
+      } else {
+        // Generate temporary ID for offline
+        const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const itemWithId = { id: tempId, ...portfolioItem };
+        
+        // Save to offline storage and queue for sync
+        await offlineService.saveData('portfolioItems', itemWithId);
+        await offlineService.addToSyncQueue('create', 'portfolio', itemWithId, userId);
+        
+        return tempId;
+      }
     } catch (error) {
       console.error('Error adding portfolio item:', error);
       throw error;
@@ -61,62 +78,99 @@ class PortfolioService {
 
   async getPortfolioItems(userId: string): Promise<PortfolioItem[]> {
     try {
-      const q = query(
-        collection(db, 'teknokapsul', userId, 'portfolio'),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const items: PortfolioItem[] = [];
-      
-      for (const docSnap of querySnapshot.docs) {
-        const data = docSnap.data();
-        // Veritabanında kayıtlı currentPrice'ı kullan, yoksa alış fiyatını kullan
-        const currentPrice = data.currentPrice || data.purchasePrice;
+      // Try to get from Firebase first
+      if (navigator.onLine) {
+        const q = query(
+          collection(db, 'teknokapsul', userId, 'portfolio'),
+          orderBy('createdAt', 'desc')
+        );
         
-        const totalValue = data.quantity * currentPrice;
-        const totalInvestment = data.quantity * data.purchasePrice;
-        const totalReturn = totalValue - totalInvestment;
-        const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
+        const querySnapshot = await getDocs(q);
+        const items: PortfolioItem[] = [];
         
+        for (const docSnap of querySnapshot.docs) {
+          const data = docSnap.data();
+          // Veritabanında kayıtlı currentPrice'ı kullan, yoksa alış fiyatını kullan
+          const currentPrice = data.currentPrice || data.purchasePrice;
+          
+          const totalValue = data.quantity * currentPrice;
+          const totalInvestment = data.quantity * data.purchasePrice;
+          const totalReturn = totalValue - totalInvestment;
+          const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
+          
+          const item = {
+            id: docSnap.id,
+            ...data,
+            currentPrice,
+            totalValue,
+            totalReturn,
+            returnPercentage,
+            createdAt: data.createdAt?.toDate() || new Date(),
+            updatedAt: new Date(),
+            lastUpdated: data.lastUpdated?.toDate() || new Date()
+          } as PortfolioItem;
 
-
-        items.push({
-          id: docSnap.id,
-          ...data,
-          currentPrice,
-          totalValue,
-          totalReturn,
-          returnPercentage,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: new Date(),
-          lastUpdated: data.lastUpdated?.toDate() || new Date()
-        } as PortfolioItem);
+          items.push(item);
+          
+          // Save to offline storage
+          await offlineService.saveData('portfolioItems', item);
+        }
+        
+        return items;
+      } else {
+        // Get from offline storage
+        const offlineItems = await offlineService.getData('portfolioItems');
+        return offlineItems || [];
       }
-      
-      return items;
     } catch (error) {
       console.error('Error getting portfolio items:', error);
-      return [];
+      // Fallback to offline data
+      const offlineItems = await offlineService.getData('portfolioItems');
+      return offlineItems || [];
     }
   }
 
-  async updatePortfolioItem(id: string, userId: string, updates: Partial<PortfolioItem>): Promise<void> {
+  async updatePortfolioItem(userId: string, id: string, updates: Partial<PortfolioItem>): Promise<void> {
     try {
-      const docRef = doc(db, 'teknokapsul', userId, 'portfolio', id);
-      await updateDoc(docRef, {
+      const updateData = {
         ...updates,
         updatedAt: new Date()
-      });
+      };
+      
+      if (navigator.onLine) {
+        const docRef = doc(db, 'teknokapsul', userId, 'portfolio', id);
+        await updateDoc(docRef, updateData);
+        
+        // Update offline storage
+        const existingItem = await offlineService.getData('portfolioItems', id);
+        if (existingItem) {
+          await offlineService.saveData('portfolioItems', { ...existingItem, ...updateData });
+        }
+      } else {
+        // Save to offline storage and queue for sync
+        const existingItem = await offlineService.getData('portfolioItems', id);
+        if (existingItem) {
+          await offlineService.saveData('portfolioItems', { ...existingItem, ...updateData });
+        }
+        await offlineService.addToSyncQueue('update', 'portfolio', { id, ...updateData }, userId);
+      }
     } catch (error) {
       console.error('Error updating portfolio item:', error);
       throw error;
     }
   }
 
-  async deletePortfolioItem(id: string, userId: string): Promise<void> {
+  async deletePortfolioItem(userId: string, id: string): Promise<void> {
     try {
-      await deleteDoc(doc(db, 'teknokapsul', userId, 'portfolio', id));
+      if (navigator.onLine) {
+        await deleteDoc(doc(db, 'teknokapsul', userId, 'portfolio', id));
+        // Remove from offline storage
+        await offlineService.deleteData('portfolioItems', id);
+      } else {
+        // Remove from offline storage and queue for sync
+        await offlineService.deleteData('portfolioItems', id);
+        await offlineService.addToSyncQueue('delete', 'portfolio', { id }, userId);
+      }
     } catch (error) {
       console.error('Error deleting portfolio item:', error);
       throw error;

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { offlineService } from './services/offline.service';
 import { LoginPage } from './pages/auth/LoginPage';
 import { AppLayout } from './components/layout/AppLayout';
 import { AuthGuard } from './components/auth/AuthGuard';
@@ -21,6 +22,10 @@ import { FinancialAnalytics } from './components/analytics/FinancialAnalytics';
 import { MobileNavigation } from './components/navigation/MobileNavigation';
 import { OfflineIndicator } from './components/offline/OfflineIndicator';
 import { AIAssistantPage } from './pages/ai/AIAssistantPage';
+import { ServicesListPage } from './pages/applications/ServicesListPage';
+import { ApplicationPage } from './pages/applications/ApplicationPage';
+import DocumentsPage from './pages/documents/DocumentsPage';
+import AdminPage from './pages/admin/AdminPage';
 
 import { IncomePage } from './pages/income/IncomePage';
 import { ExpensePage } from './pages/expense/ExpensePage';
@@ -102,6 +107,18 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><AIAssistantPage /></ProtectedRoute>
   },
   {
+    path: '/services-list',
+    element: <ProtectedRoute><ServicesListPage /></ProtectedRoute>
+  },
+  {
+    path: '/application/:serviceId',
+    element: <ProtectedRoute><ApplicationPage /></ProtectedRoute>
+  },
+  {
+    path: '/application',
+    element: <Navigate to="/services-list" replace />
+  },
+  {
     path: '/financial',
     element: <ProtectedRoute><FinancialDataPage /></ProtectedRoute>
   },
@@ -115,12 +132,44 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><MobileFinancePage /></ProtectedRoute>
   },
   {
+          path: '/documents',
+          element: <ProtectedRoute><DocumentsPage /></ProtectedRoute>
+        },
+        {
+          path: '/admin',
+          element: <ProtectedRoute><AdminPage /></ProtectedRoute>
+        },
+  {
     path: '/',
     element: <Navigate to="/dashboard" replace />
   }
 ]);
 
 function App() {
+  useEffect(() => {
+    // Initialize offline service
+    offlineService.init();
+    
+    // Listen for online/offline events
+    const handleOnline = () => {
+      console.log('App is online, syncing data...');
+      offlineService.syncOfflineData();
+    };
+    
+    const handleOffline = () => {
+      console.log('App is offline');
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+  
   return (
     <ThemeProvider>
       <AuthProvider>
