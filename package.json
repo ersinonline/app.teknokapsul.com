@@ -19,6 +19,7 @@
     "@firebase/ai": "^0.0.1",
     "@mui/icons-material": "^5.15.13",
     "@mui/material": "^5.15.13",
+    "@vercel/node": "^5.3.4",
     "clsx": "^2.1.0",
     "firebase": "^11.8.1",
     "firebase-admin": "^12.0.0",

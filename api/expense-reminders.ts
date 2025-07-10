@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import nodemailer from 'nodemailer';
@@ -25,19 +25,19 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export default async function handler(req: NextRequest) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // GET ve POST isteklerini kabul et
   if (req.method !== 'GET' && req.method !== 'POST') {
-    return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   // Güvenlik için secret kontrolü (query parameter veya header)
-  const secretFromQuery = req.nextUrl.searchParams.get('secret');
-  const authHeader = req.headers.get('authorization');
+  const secretFromQuery = req.query.secret as string;
+  const authHeader = req.headers.authorization;
   const secretFromHeader = authHeader?.replace('Bearer ', '');
   
   if (secretFromQuery !== process.env.CRON_SECRET && secretFromHeader !== process.env.CRON_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
@@ -129,7 +129,7 @@ export default async function handler(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ 
+    return res.status(200).json({ 
       success: true, 
       message: `Expense reminder check completed. ${emailsSent} emails sent.`,
       emailsSent 
@@ -137,9 +137,9 @@ export default async function handler(req: NextRequest) {
 
   } catch (error) {
     console.error('Error in expense reminder function:', error);
-    return NextResponse.json({ 
+    return res.status(500).json({ 
       error: 'Internal server error', 
       details: error instanceof Error ? error.message : 'Unknown error' 
-    }, { status: 500 });
+    });
   }
 }
