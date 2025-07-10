@@ -1,4 +1,4 @@
-import { getUpcomingExpensesForSheets, sendToGoogleSheets } from '../src/services/google-sheets.service';
+import { getUpcomingExpensesForSheets, sendToGoogleSheets } from '../../src/services/google-sheets.service';
 
 /**
  * Google Sheets ile senkronizasyon için API endpoint

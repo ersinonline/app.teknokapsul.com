@@ -3,6 +3,7 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import nodemailer from 'nodemailer';
 
+
 // Firebase Admin SDK'yı başlat
 if (!getApps().length) {
   initializeApp({
