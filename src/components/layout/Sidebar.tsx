@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator } from 'lucide-react';
+import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator, ShoppingBag, Shield, Target, Wallet } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const Sidebar: React.FC = () => {
@@ -12,15 +12,21 @@ export const Sidebar: React.FC = () => {
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
     { id: 'income', path: '/income', label: 'Gelirlerim', icon: TrendingUp },
     { id: 'expenses', path: '/expenses', label: 'Giderlerim', icon: TrendingDown },
+    { id: 'budget', path: '/budget', label: 'Bütçe Planlama', icon: Wallet },
+    { id: 'goals', path: '/goals', label: 'Hedeflerim', icon: Target },
     { id: 'portfolio', path: '/portfolio', label: 'Portföyüm', icon: PieChart },
     { id: 'subscriptions', path: '/subscriptions', label: 'Aboneliklerim', icon: Clock },
     { id: 'financial-data', path: '/financial-data', label: 'Finansal Verilerim', icon: CreditCard },
+    { id: 'credit-score', path: '/credit-score', label: 'Findeks Kredi Notu', icon: TrendingUp },
+    { id: 'warranty-tracking', path: '/warranty-tracking', label: 'Garanti Takibi', icon: Shield },
   ];
 
   const otherMenuItems = [
     { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
     { id: 'documents', path: '/documents', label: 'Dosyalarım', icon: FolderOpen },
-        { id: 'loan-calculator', path: '/loan-calculator', label: 'Kredi Hesaplama', icon: Calculator },
+    { id: 'loan-calculator', path: '/loan-calculator', label: 'Kredi Hesaplama', icon: Calculator },
+
+    { id: 'shop-rewards', path: '/shop-rewards', label: 'Harcadıkça Kazan', icon: ShoppingBag },
     { id: 'cargo-tracking', path: '/cargo-tracking', label: 'Kargo Takip', icon: Package },
     { id: 'notes', path: '/notes', label: 'Notlar', icon: StickyNote },
     { id: 'calendar', path: '/calendar', label: 'Takvim', icon: Calendar },

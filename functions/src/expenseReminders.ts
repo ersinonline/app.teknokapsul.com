@@ -10,7 +10,7 @@ if (!admin.apps.length) {
 const gmailUser = defineString('GMAIL_USER');
 const gmailPassword = defineString('GMAIL_PASSWORD');
 
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: gmailUser.value(),
@@ -79,5 +79,5 @@ export const checkExpenseReminders = onSchedule({
       }
     }
     
-    return null;
+    return;
   });

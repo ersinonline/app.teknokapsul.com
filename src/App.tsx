@@ -30,9 +30,20 @@ import AdminPage from './pages/admin/AdminPage';
 import { IncomePage } from './pages/income/IncomePage';
 import { ExpensePage } from './pages/expense/ExpensePage';
 import { FinancialDataPage } from './pages/financial/FinancialDataPage';
+import CreditScorePage from './pages/financial/CreditScorePage';
+import { WarrantyTrackingPage } from './pages/warranty/WarrantyTrackingPage';
 import { PortfolioPage } from './pages/portfolio/PortfolioPage';
 import { MobileFinancePage } from './pages/mobile/MobileFinancePage';
 import LoanCalculator from './pages/other/LoanCalculator';
+
+import { ShopRewardsPage } from './pages/other/ShopRewardsPage';
+import MyOrdersPage from './pages/other/MyOrdersPage';
+
+import EarnAsYouSpendPage from './pages/other/EarnAsYouSpendPage';
+import CheckoutPage from './pages/other/CheckoutPage';
+import OrderSuccessPage from './pages/other/OrderSuccessPage';
+import { GoalsPage } from './pages/goals/GoalsPage';
+import { BudgetPage } from './pages/budget/BudgetPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
   <AuthGuard>
@@ -123,6 +134,14 @@ const router = createBrowserRouter([
     path: '/financial',
     element: <ProtectedRoute><FinancialDataPage /></ProtectedRoute>
   },
+  {
+    path: '/credit-score',
+    element: <ProtectedRoute><CreditScorePage /></ProtectedRoute>
+  },
+  {
+    path: '/warranty-tracking',
+    element: <ProtectedRoute><WarrantyTrackingPage /></ProtectedRoute>
+  },
 
   {
     path: '/portfolio',
@@ -135,6 +154,40 @@ const router = createBrowserRouter([
   {
     path: '/loan-calculator',
     element: <ProtectedRoute><LoanCalculator /></ProtectedRoute>
+  },
+
+  {
+    path: '/shop-rewards',
+    element: <ProtectedRoute><ShopRewardsPage /></ProtectedRoute>
+  },
+
+  {
+    path: '/other/earn-as-you-spend',
+    element: <ProtectedRoute><EarnAsYouSpendPage /></ProtectedRoute>
+  },
+  {
+    path: '/other/shop-rewards',
+    element: <ProtectedRoute><ShopRewardsPage /></ProtectedRoute>
+  },
+  {
+    path: '/other/checkout',
+    element: <ProtectedRoute><CheckoutPage /></ProtectedRoute>
+  },
+  {
+    path: '/other/order-success',
+    element: <ProtectedRoute><OrderSuccessPage /></ProtectedRoute>
+  },
+  {
+    path: '/other/my-orders',
+    element: <ProtectedRoute><MyOrdersPage /></ProtectedRoute>
+  },
+  {
+    path: '/goals',
+    element: <ProtectedRoute><GoalsPage /></ProtectedRoute>
+  },
+  {
+    path: '/budget',
+    element: <ProtectedRoute><BudgetPage /></ProtectedRoute>
   },
   {
           path: '/documents',

@@ -1,6 +1,5 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { StickyNote, Calendar, HelpCircle, Settings, ChevronRight } from 'lucide-react';
+import { StickyNote, Calendar, HelpCircle, Settings, Package, ChevronRight } from 'lucide-react';
 import { useFirebaseData } from '../../hooks/useFirebaseData';
 import { Note } from '../../types/notes';
 import { Event } from '../../types/calendar';
@@ -28,6 +27,32 @@ export const OtherPage = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-gray-900">Diğer İşlemler</h1>
+
+      {/* Orders Section */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="p-6 border-b">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Package className="w-5 h-5 text-orange-600" />
+              </div>
+              <h2 className="text-lg font-medium">Siparişlerim</h2>
+            </div>
+            <button
+              onClick={() => navigate('/other/my-orders')}
+              className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1"
+            >
+              Tümünü Gör
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        <div className="p-4">
+          <p className="text-sm text-gray-600">
+            Siparişlerinizi takip edin, durumlarını görüntüleyin ve geçmiş alışverişlerinizi inceleyin.
+          </p>
+        </div>
+      </div>
 
       {/* Notes Section */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">

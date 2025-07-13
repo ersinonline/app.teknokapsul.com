@@ -8,7 +8,58 @@ import { Subscription } from '../types/subscription';
 import { Note } from '../types/notes';
 import { Event } from '../types/calendar';
 
-type DataType = Payment | Expense | Subscription | Note | Event;
+// Additional types for new features
+interface Goal {
+  id: string;
+  title: string;
+  description?: string;
+  targetAmount: number;
+  currentAmount: number;
+  category: string;
+  priority: 'low' | 'medium' | 'high';
+  status: 'active' | 'completed' | 'paused';
+  deadline: Date;
+  userId: string;
+  createdAt: Date;
+  targetDate?: Date;
+}
+
+interface BudgetPlan {
+  id: string;
+  name: string;
+  totalBudget: number;
+  categories: {
+    [key: string]: {
+      name: string;
+      budget: number;
+      spent: number;
+    };
+  };
+  period: string;
+  month: number;
+  year: number;
+  userId: string;
+  createdAt: Date;
+}
+
+interface Warranty {
+  id: string;
+  productName: string;
+  brand: string;
+  model?: string;
+  serialNumber?: string;
+  purchaseDate: Date;
+  warrantyPeriod: number;
+  warrantyEndDate: Date;
+  category: string;
+  purchasePrice: number;
+  store?: string;
+  notes?: string;
+  userId: string;
+  createdAt: Date;
+}
+
+type DataType = Payment | Expense | Subscription | Note | Event | Goal | BudgetPlan | Warranty;
 
 interface UseFirebaseDataReturn<T> {
   data: T[];
@@ -51,6 +102,9 @@ export const useFirebaseData = <T extends DataType>(
           case 'notes':
           case 'events':
           case 'financial':
+          case 'goals':
+          case 'budget':
+          case 'warranties':
             collectionRef = collection(db, 'teknokapsul', user.uid, collectionName);
             q = query(collectionRef);
             break;

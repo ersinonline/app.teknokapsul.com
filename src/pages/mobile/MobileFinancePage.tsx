@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, CreditCard, PieChart } from 'lucide-react';
+import { TrendingUp, TrendingDown, CreditCard, PieChart, FileText, Target } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserIncomes } from '../../services/income.service';
 import { getUserExpenses } from '../../services/expense.service';
@@ -98,8 +98,8 @@ export const MobileFinancePage: React.FC = () => {
       bgColor: 'bg-yellow-50',
       textColor: 'text-yellow-700'
     },
-        {
-      id: 'portfolio',
+    {
+      id: 'loan-calculator',
       title: 'Kredi Hesaplama',
       description: 'Kredilerinizi hesaplayın',
       icon: PieChart,
@@ -107,6 +107,36 @@ export const MobileFinancePage: React.FC = () => {
       color: 'bg-yellow-500',
       bgColor: 'bg-yellow-50',
       textColor: 'text-yellow-700'
+    },
+    {
+      id: 'credit-score',
+      title: 'Findeks Risk Raporu',
+      description: 'Kredi notunuzu takip edin',
+      icon: FileText,
+      path: '/credit-score',
+      color: 'bg-purple-500',
+      bgColor: 'bg-purple-50',
+      textColor: 'text-purple-700'
+    },
+    {
+      id: 'goals',
+      title: 'Hedeflerim',
+      description: 'Finansal hedeflerinizi takip edin',
+      icon: Target,
+      path: '/goals',
+      color: 'bg-indigo-500',
+      bgColor: 'bg-indigo-50',
+      textColor: 'text-indigo-700'
+    },
+    {
+      id: 'budget',
+      title: 'Bütçelerim',
+      description: 'Bütçenizi planlayın ve takip edin',
+      icon: PieChart,
+      path: '/budget',
+      color: 'bg-teal-500',
+      bgColor: 'bg-teal-50',
+      textColor: 'text-teal-700'
     }
   ];
 

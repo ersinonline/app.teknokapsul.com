@@ -92,7 +92,7 @@ export const ExpensePage: React.FC = () => {
               className="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-lg font-medium transition-colors shadow-lg hover:shadow-xl text-sm lg:text-base w-full sm:w-auto"
             >
               <Plus className="w-4 h-4 lg:w-5 lg:h-5" />
-              <span className="sm:inline">Yeni Gider Ekle</span>
+              <span>Yeni Gider Ekle</span>
             </button>
           </div>
           

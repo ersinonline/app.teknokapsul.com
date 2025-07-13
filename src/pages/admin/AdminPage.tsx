@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { Eye, Calendar, User, FileText, Search, Trash2, MessageSquare, Headphones, Edit, Check, X } from 'lucide-react';
+import { Eye, Calendar, User, FileText, Search, Trash2, MessageSquare, Headphones, Edit, Check, X, Package, ShoppingCart, Plus, Clock, Settings, CheckCircle } from 'lucide-react';
 import { getAllSupportTickets, updateSupportTicketStatus, deleteSupportTicket, updateSupportTicket } from '../../services/support.service';
 import { deleteApplication, updateApplication } from '../../services/application.service';
 import { SupportTicket, SUPPORT_CATEGORIES, SUPPORT_PRIORITIES, SUPPORT_STATUSES } from '../../types/support';
 import { SupportTicketReplies } from '../../components/support/SupportTicketReplies';
+import { Order } from '../../services/order.service';
 
 interface FormSubmission {
   id: string;
@@ -19,23 +20,114 @@ interface FormSubmission {
   userId?: string;
 }
 
+interface Product {
+  id: string;
+  urunAdi: string;
+  aciklama: string;
+  kategori: string;
+  marka: string;
+  magazaFiyati: number;
+  piyasaFiyati: number;
+  stokAdedi: number;
+  stokKodu: string;
+  barkod: string;
+  resim1: string;
+  agirlik: number;
+  kdvOrani: number;
+  magaza: string;
+  paraBirimi: string;
+}
+
+// Order interface is now imported from order.service.ts
+
 const AdminPage: React.FC = () => {
   const { user } = useAuth();
   const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
   const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedSubmission, setSelectedSubmission] = useState<FormSubmission | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'applications' | 'support'>('applications');
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'applications' | 'support' | 'products' | 'orders'>('applications');
   const [isEditing, setIsEditing] = useState(false);
   const [editingTicket, setEditingTicket] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(false);
   const [editFormData, setEditFormData] = useState<any>({});
   const [editTicketData, setEditTicketData] = useState<any>({});
+  const [editProductData, setEditProductData] = useState<any>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(25);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [productCategoryFilter, setProductCategoryFilter] = useState('all');
+  const [bulkPriceChange, setBulkPriceChange] = useState({ type: 'increase', value: 0, unit: 'percent' });
+
+
+  // Filtreleme fonksiyonları
+  const getFilteredProducts = () => {
+    return products.filter(product => {
+      const matchesSearch = product.urunAdi.toLowerCase().includes(productSearchTerm.toLowerCase());
+      const matchesCategory = productCategoryFilter === 'all' || product.kategori.includes(productCategoryFilter);
+      return matchesSearch && matchesCategory;
+    });
+  };
+
+  // Sayfalandırma fonksiyonları
+  const getCurrentPageProducts = () => {
+    const filteredProducts = getFilteredProducts();
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredProducts.slice(startIndex, endIndex);
+  };
+
+  const getCurrentPageOrders = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return orders.slice(startIndex, endIndex);
+  };
+
+  const getTotalPages = () => {
+    if (activeTab === 'products') {
+      const filteredProducts = getFilteredProducts();
+      return Math.ceil(filteredProducts.length / itemsPerPage);
+    } else if (activeTab === 'orders') {
+      return Math.ceil(orders.length / itemsPerPage);
+    }
+    return 1;
+  };
+
+  const getVisiblePages = () => {
+    const totalPages = getTotalPages();
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   // Admin kontrolü
   if (!user || user.email !== 'clk.ersinnn@gmail.com') {
@@ -45,7 +137,12 @@ const AdminPage: React.FC = () => {
   useEffect(() => {
     fetchSubmissions();
     fetchSupportTickets();
+    fetchProducts();
+    fetchOrders();
+
   }, []);
+
+
 
   const fetchSubmissions = async () => {
     try {
@@ -182,6 +279,198 @@ const AdminPage: React.FC = () => {
     }
   };
 
+  // Ürün yönetimi fonksiyonları
+  const handleAddProduct = () => {
+    setSelectedProduct(null);
+    setEditProductData({
+      urunAdi: '',
+      aciklama: '',
+      kategori: '',
+      marka: '',
+      magazaFiyati: 0,
+      piyasaFiyati: 0,
+      stokAdedi: 0,
+      stokKodu: '',
+      barkod: '',
+      resim1: '',
+      agirlik: 0,
+      kdvOrani: 1,
+      magaza: 'yap',
+      paraBirimi: 'TRY'
+    });
+    setEditingProduct(true);
+    setShowProductModal(true);
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setEditProductData(product);
+    setEditingProduct(true);
+    setShowProductModal(true);
+  };
+
+  const handleSaveProduct = async () => {
+    try {
+      if (selectedProduct) {
+        // Güncelleme
+        const productRef = doc(db, 'shop', selectedProduct.id);
+        await updateDoc(productRef, editProductData);
+        console.log('✅ Ürün güncellendi');
+      } else {
+        // Yeni ekleme
+        const productsRef = collection(db, 'shop');
+        await addDoc(productsRef, editProductData);
+        console.log('✅ Yeni ürün eklendi');
+      }
+      
+      await fetchProducts();
+      setEditingProduct(false);
+      setShowProductModal(false);
+    } catch (error) {
+      console.error('❌ Ürün kaydedilirken hata:', error);
+      alert('Ürün kaydedilirken bir hata oluştu.');
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await deleteDoc(doc(db, 'shop', productId));
+      await fetchProducts();
+      console.log('✅ Ürün silindi');
+    } catch (error) {
+      console.error('❌ Ürün silinirken hata:', error);
+      alert('Ürün silinirken bir hata oluştu.');
+    }
+  };
+
+  // Çoklu ürün seçimi fonksiyonları
+  const handleSelectProduct = (productId: string) => {
+    setSelectedProducts(prev => {
+      if (prev.includes(productId)) {
+        return prev.filter(id => id !== productId);
+      } else {
+        return [...prev, productId];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedProducts([]);
+    } else {
+      const currentPageProductIds = getCurrentPageProducts().map(product => product.id);
+      setSelectedProducts(currentPageProductIds);
+    }
+    setSelectAll(!selectAll);
+  };
+
+  // Sayfa değiştiğinde selectAll durumunu güncelle
+  React.useEffect(() => {
+    const currentPageProductIds = getCurrentPageProducts().map(product => product.id);
+    const allCurrentPageSelected = currentPageProductIds.length > 0 && 
+      currentPageProductIds.every(id => selectedProducts.includes(id));
+    setSelectAll(allCurrentPageSelected);
+  }, [currentPage, selectedProducts, products]);
+
+  const handleDeleteSelectedProducts = async () => {
+    if (selectedProducts.length === 0) {
+      alert('Lütfen silmek istediğiniz ürünleri seçin.');
+      return;
+    }
+
+    if (window.confirm(`Seçili ${selectedProducts.length} ürünü silmek istediğinizden emin misiniz?`)) {
+      try {
+        // Tüm seçili ürünleri sil
+        const deletePromises = selectedProducts.map(productId => 
+          deleteDoc(doc(db, 'shop', productId))
+        );
+        
+        await Promise.all(deletePromises);
+        await fetchProducts();
+        setSelectedProducts([]);
+        setSelectAll(false);
+        console.log(`✅ ${selectedProducts.length} ürün silindi`);
+      } catch (error) {
+        console.error('❌ Ürünler silinirken hata:', error);
+        alert('Ürünler silinirken bir hata oluştu.');
+      }
+    }
+  };
+
+  // Toplu fiyat değişikliği fonksiyonları
+  const handleBulkPriceChange = async () => {
+    if (bulkPriceChange.value <= 0) {
+      alert('Lütfen geçerli bir değer girin.');
+      return;
+    }
+
+    const confirmMessage = `Tüm ürünlere ${bulkPriceChange.type === 'increase' ? 'artış' : 'indirim'} uygulamak istediğinizden emin misiniz? (${bulkPriceChange.value}${bulkPriceChange.unit === 'percent' ? '%' : ' TL'})`;
+    
+    if (window.confirm(confirmMessage)) {
+      try {
+        const updatePromises = products.map(async (product) => {
+          let newPrice = product.magazaFiyati;
+          
+          if (bulkPriceChange.unit === 'percent') {
+            const multiplier = bulkPriceChange.type === 'increase' 
+              ? (1 + bulkPriceChange.value / 100)
+              : (1 - bulkPriceChange.value / 100);
+            newPrice = product.magazaFiyati * multiplier;
+          } else {
+            newPrice = bulkPriceChange.type === 'increase'
+              ? product.magazaFiyati + bulkPriceChange.value
+              : product.magazaFiyati - bulkPriceChange.value;
+          }
+          
+          // Fiyatın negatif olmamasını sağla
+          newPrice = Math.max(0, newPrice);
+          
+          const productRef = doc(db, 'shop', product.id);
+          return updateDoc(productRef, { magazaFiyati: newPrice });
+        });
+        
+        await Promise.all(updatePromises);
+        await fetchProducts();
+        setBulkPriceChange({ type: 'increase', value: 0, unit: 'percent' });
+        console.log('✅ Toplu fiyat değişikliği uygulandı');
+        alert('Toplu fiyat değişikliği başarıyla uygulandı!');
+      } catch (error) {
+        console.error('❌ Toplu fiyat değişikliği sırasında hata:', error);
+        alert('Toplu fiyat değişikliği sırasında bir hata oluştu.');
+      }
+    }
+  };
+
+  const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      // Global orders koleksiyonunu güncelle
+      const globalOrderRef = doc(db, 'orders', orderId);
+      await updateDoc(globalOrderRef, {
+        status: newStatus,
+        updatedAt: new Date()
+      });
+      
+      // Kullanıcının kendi orders koleksiyonunu da güncelle
+      const orderData = orders.find(order => order.id === orderId);
+      if (orderData && orderData.userId && orderData.userOrderId) {
+        const userOrderRef = doc(db, 'teknokapsul', orderData.userId, 'orders', orderData.userOrderId);
+        await updateDoc(userOrderRef, {
+          status: newStatus,
+          updatedAt: new Date()
+        });
+        console.log('✅ Kullanıcı siparişi güncellendi:', orderData.userOrderId);
+      } else {
+        console.warn('⚠️ Kullanıcı sipariş bilgisi bulunamadı:', { userId: orderData?.userId, userOrderId: orderData?.userOrderId });
+      }
+      
+      await fetchOrders();
+      console.log('✅ Sipariş durumu güncellendi');
+    } catch (error) {
+      console.error('❌ Sipariş durumu güncellenirken hata:', error);
+      alert('Sipariş durumu güncellenirken bir hata oluştu.');
+    }
+  };
+
   const fetchSupportTickets = async () => {
     try {
       const tickets = await getAllSupportTickets();
@@ -191,6 +480,50 @@ const AdminPage: React.FC = () => {
       console.error('❌ Destek talepleri yüklenirken hata:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const productsRef = collection(db, 'shop');
+      const q = query(productsRef, orderBy('urunAdi', 'asc'));
+      const productsSnapshot = await getDocs(q);
+      
+      const productsData: Product[] = [];
+      productsSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        productsData.push({
+          id: doc.id,
+          ...data
+        } as Product);
+      });
+      
+      setProducts(productsData);
+      console.log('✅ Ürünler yüklendi:', productsData.length);
+    } catch (error) {
+      console.error('❌ Ürünler yüklenirken hata:', error);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const ordersRef = collection(db, 'orders');
+      const q = query(ordersRef, orderBy('createdAt', 'desc'));
+      const ordersSnapshot = await getDocs(q);
+      
+      const ordersData: Order[] = [];
+      ordersSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        ordersData.push({
+          id: doc.id,
+          ...data
+        } as Order);
+      });
+      
+      setOrders(ordersData);
+      console.log('✅ Siparişler yüklendi:', ordersData.length);
+    } catch (error) {
+      console.error('❌ Siparişler yüklenirken hata:', error);
     }
   };
 
@@ -320,69 +653,73 @@ const AdminPage: React.FC = () => {
           <div className="w-20 h-1 bg-[#ffb700] rounded-full mt-4"></div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Ad, email ile ara..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
-              />
+        {/* Filters - Sadece başvurular ve destek talepleri için */}
+        {(activeTab === 'applications' || activeTab === 'support') && (
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Ad, email ile ara..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                />
+              </div>
+              
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+              >
+                <option value="all">Tüm Türler</option>
+                {activeTab === 'applications' ? (
+                  <>
+                    <option value="application">Başvuru Formu</option>
+                    <option value="contact">İletişim Formu</option>
+                    <option value="support">Destek Talebi</option>
+                    <option value="complaint">Şikayet Formu</option>
+                    <option value="suggestion">Öneri Formu</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="technical">Teknik Destek</option>
+                    <option value="billing">Faturalama</option>
+                    <option value="general">Genel Sorular</option>
+                    <option value="feature_request">Özellik Talebi</option>
+                    <option value="bug_report">Hata Bildirimi</option>
+                  </>
+                )}
+              </select>
+              
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+              >
+                <option value="all">Tüm Durumlar</option>
+                {activeTab === 'applications' ? (
+                  <>
+                    <option value="pending">Beklemede</option>
+                    <option value="reviewed">İncelendi</option>
+                    <option value="approved">Onaylandı</option>
+                    <option value="rejected">Reddedildi</option>
+                  </>
+                ) : activeTab === 'support' ? (
+                  <>
+                    <option value="open">Açık</option>
+                    <option value="in_progress">İşlemde</option>
+                    <option value="resolved">Çözüldü</option>
+                    <option value="closed">Kapatıldı</option>
+                  </>
+                ) : null}
+              </select>
             </div>
-            
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
-            >
-              <option value="all">Tüm Türler</option>
-              {activeTab === 'applications' ? (
-                <>
-                  <option value="application">Başvuru Formu</option>
-                  <option value="contact">İletişim Formu</option>
-                  <option value="support">Destek Talebi</option>
-                  <option value="complaint">Şikayet Formu</option>
-                  <option value="suggestion">Öneri Formu</option>
-                </>
-              ) : (
-                <>
-                  <option value="technical">Teknik Destek</option>
-                  <option value="billing">Faturalama</option>
-                  <option value="general">Genel Sorular</option>
-                  <option value="feature_request">Özellik Talebi</option>
-                  <option value="bug_report">Hata Bildirimi</option>
-                </>
-              )}
-            </select>
-            
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
-            >
-              <option value="all">Tüm Durumlar</option>
-              {activeTab === 'applications' ? (
-                <>
-                  <option value="pending">Beklemede</option>
-                  <option value="reviewed">İncelendi</option>
-                  <option value="approved">Onaylandı</option>
-                  <option value="rejected">Reddedildi</option>
-                </>
-              ) : (
-                <>
-                  <option value="open">Açık</option>
-                  <option value="in_progress">İşlemde</option>
-                  <option value="resolved">Çözüldü</option>
-                  <option value="closed">Kapatıldı</option>
-                </>
-              )}
-            </select>
           </div>
-        </div>
+        )}
+
+
 
         {/* Tab Navigation */}
         <div className="bg-white rounded-xl shadow-sm mb-6">
@@ -409,6 +746,29 @@ const AdminPage: React.FC = () => {
               <Headphones className="w-4 h-4 inline mr-2" />
               Destek Talepleri
             </button>
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'products'
+                  ? 'border-[#ffb700] text-[#ffb700]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Package className="w-4 h-4 inline mr-2" />
+              Ürün Yönetimi
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'orders'
+                  ? 'border-[#ffb700] text-[#ffb700]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <ShoppingCart className="w-4 h-4 inline mr-2" />
+              Sipariş Yönetimi
+            </button>
+
           </div>
         </div>
 
@@ -469,66 +829,491 @@ const AdminPage: React.FC = () => {
               </div>
             </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <MessageSquare className="w-6 h-6 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Toplam Talep</p>
-                  <p className="text-2xl font-bold text-gray-900">{supportTickets.length}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-yellow-100 rounded-lg">
-                  <Calendar className="w-6 h-6 text-yellow-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Açık</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {supportTickets.filter(t => t.status === 'open').length}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <User className="w-6 h-6 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">İşlemde</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {supportTickets.filter(t => t.status === 'in_progress').length}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-center">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <Headphones className="w-6 h-6 text-green-600" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Çözüldü</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {supportTickets.filter(t => t.status === 'resolved').length}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        ) : null}
 
         {/* Content Tables */}
-        {activeTab === 'applications' ? (
+        {activeTab === 'products' ? (
+          <>
+            {/* Ürün İstatistikleri */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <Package className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Toplam Ürün</p>
+                    <p className="text-2xl font-bold text-gray-900">{products.length}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-green-100 rounded-lg">
+                    <Package className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Stokta Var</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {products.filter(p => p.stokAdedi > 0).length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-red-100 rounded-lg">
+                    <Package className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Stok Tükendi</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {products.filter(p => p.stokAdedi === 0).length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-yellow-100 rounded-lg">
+                    <Package className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Düşük Stok</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {products.filter(p => p.stokAdedi > 0 && p.stokAdedi <= 5).length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Ürün Filtreleme ve Toplu İşlemler */}
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ürün Ara</label>
+                  <input
+                    type="text"
+                    placeholder="Ürün adı ile ara..."
+                    value={productSearchTerm}
+                    onChange={(e) => setProductSearchTerm(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                  <select
+                    value={productCategoryFilter}
+                    onChange={(e) => setProductCategoryFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">Tüm Kategoriler</option>
+                    {Array.from(new Set(products.map(p => p.kategori.split(' > ')[0]))).map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Toplu Fiyat İşlemi</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={bulkPriceChange.type}
+                      onChange={(e) => setBulkPriceChange(prev => ({ ...prev, type: e.target.value as 'increase' | 'decrease' }))}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="increase">Artış</option>
+                      <option value="decrease">İndirim</option>
+                    </select>
+                    <input
+                      type="number"
+                      placeholder="Değer"
+                      value={bulkPriceChange.value || ''}
+                      onChange={(e) => setBulkPriceChange(prev => ({ ...prev, value: Number(e.target.value) }))}
+                      className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <select
+                      value={bulkPriceChange.unit}
+                      onChange={(e) => setBulkPriceChange(prev => ({ ...prev, unit: e.target.value as 'percent' | 'amount' }))}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="percent">%</option>
+                      <option value="amount">TL</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={handleBulkPriceChange}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    Fiyat Değiştir
+                  </button>
+                  <button 
+                    onClick={handleAddProduct}
+                    className="bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a600] transition-colors flex items-center gap-2 justify-center"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Yeni Ürün
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                  <h2 className="text-lg font-semibold text-gray-900">Ürün Yönetimi ({getFilteredProducts().length} ürün)</h2>
+                  {selectedProducts.length > 0 && (
+                    <button 
+                      onClick={handleDeleteSelectedProducts}
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Seçili Ürünleri Sil ({selectedProducts.length})
+                    </button>
+                  )}
+                </div>
+              </div>
+            
+            {products.length === 0 ? (
+              <div className="text-center py-12">
+                <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">Henüz ürün bulunmuyor.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Ürün Adı
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Kategori
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Fiyat
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Stok
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {getCurrentPageProducts().map((product) => (
+                      <tr key={product.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="checkbox"
+                            checked={selectedProducts.includes(product.id)}
+                            onChange={() => handleSelectProduct(product.id)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex space-x-2 mr-3">
+                              <button 
+                                onClick={() => handleEditProduct(product)}
+                                className="text-blue-600 hover:text-blue-900 p-1 rounded"
+                                title="Düzenle"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => handleDeleteProduct(product.id)}
+                                className="text-red-600 hover:text-red-900 p-1 rounded"
+                                title="Sil"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <div className="w-10 h-10 bg-gray-200 rounded-lg mr-3 overflow-hidden">
+                              {product.resim1 && (
+                                <img 
+                                  src={product.resim1} 
+                                  alt={product.urunAdi}
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{product.urunAdi}</div>
+                              <div className="text-sm text-gray-500">SKU: {product.stokKodu}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                            {product.kategori.split(' > ').pop()}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ₺{product.magazaFiyati.toLocaleString('tr-TR')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {product.stokAdedi}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+              
+            {getFilteredProducts().length > itemsPerPage && (
+                <div className="px-6 py-4 border-t border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Toplam {getFilteredProducts().length} ürün, sayfa {currentPage} / {getTotalPages()}
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                      >
+                        Önceki
+                      </button>
+                      {getVisiblePages().map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-3 py-1 text-sm border rounded ${
+                            currentPage === page
+                              ? 'bg-blue-500 text-white border-blue-500'
+                              : 'border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === getTotalPages()}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                      >
+                        Sonraki
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        ) : activeTab === 'orders' ? (
+          <>
+            {/* Sipariş İstatistikleri */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <ShoppingCart className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Toplam Sipariş</p>
+                    <p className="text-2xl font-bold text-gray-900">{orders.length}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-yellow-100 rounded-lg">
+                    <ShoppingCart className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Hazırlanıyor</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {orders.filter(o => o.status === 'processing').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-green-100 rounded-lg">
+                    <ShoppingCart className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Tamamlandı</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {orders.filter(o => o.status === 'delivered').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-purple-100 rounded-lg">
+                    <ShoppingCart className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Toplam Gelir</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {orders.reduce((sum, order) => sum + order.total, 0).toLocaleString('tr-TR')} ₺
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Sipariş Yönetimi</h2>
+              </div>
+            
+            {orders.length === 0 ? (
+              <div className="text-center py-12">
+                <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">Henüz sipariş bulunmuyor.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Sipariş No
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Müşteri
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Toplam
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Durum
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tarih
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        İşlemler
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {getCurrentPageOrders().map((order) => (
+                      <tr key={order.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">#{order.orderNumber}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{order.shippingAddress?.fullName || 'İsim yok'}</div>
+                            <div className="text-sm text-gray-500">{order.shippingAddress?.email || 'Email yok'}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ₺{order.total.toLocaleString('tr-TR')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                            order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                            order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                            order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                            order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {order.status === 'delivered' ? 'Tamamlandı' :
+                             order.status === 'processing' ? 'Hazırlanıyor' :
+                             order.status === 'shipped' ? 'Kargoda' :
+                             order.status === 'cancelled' ? 'İptal Edildi' :
+                             'Beklemede'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('tr-TR') : 'Tarih yok'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-2">
+                            <button 
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setShowOrderModal(true);
+                              }}
+                              className="text-blue-600 hover:text-blue-900"
+                              title="Görüntüle"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <select 
+                              value={order.status}
+                              onChange={(e) => handleUpdateOrderStatus(order.id!, e.target.value)}
+                              className="text-xs border border-gray-300 rounded px-2 py-1"
+                            >
+                              <option value="pending">Beklemede</option>
+                              <option value="processing">Hazırlanıyor</option>
+                              <option value="shipped">Kargoda</option>
+                              <option value="delivered">Teslim Edildi</option>
+                              <option value="cancelled">İptal Edildi</option>
+                            </select>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            {/* Sayfalandırma Kontrolleri - Orders */}
+            {orders.length > itemsPerPage && (
+              <div className="px-6 py-4 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-700">
+                    Toplam {orders.length} sipariş, sayfa {currentPage} / {getTotalPages()}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    >
+                      Önceki
+                    </button>
+                    {getVisiblePages().map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-1 text-sm border rounded ${
+                          currentPage === page
+                            ? 'bg-blue-500 text-white border-blue-500'
+                            : 'border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === getTotalPages()}
+                      className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    >
+                      Sonraki
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            </div>
+          </>
+        ) : activeTab === 'applications' ? (
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Form Başvuruları</h2>
@@ -619,10 +1404,68 @@ const AdminPage: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Destek Talepleri</h2>
+          <>
+            {/* Destek Talepleri İstatistikleri */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-blue-100 rounded-full">
+                    <MessageSquare className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Toplam Talep</p>
+                    <p className="text-2xl font-bold text-gray-900">{supportTickets.length}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-yellow-100 rounded-full">
+                    <Clock className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Açık Talepler</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {supportTickets.filter(ticket => ticket.status === 'open').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-blue-100 rounded-full">
+                    <Settings className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">İşlemde</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {supportTickets.filter(ticket => ticket.status === 'in_progress').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-green-100 rounded-full">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Çözüldü</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {supportTickets.filter(ticket => ticket.status === 'resolved').length}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
+            
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Destek Talepleri</h2>
+              </div>
             
             {filteredSupportTickets.length === 0 ? (
               <div className="text-center py-12">
@@ -733,6 +1576,7 @@ const AdminPage: React.FC = () => {
               </div>
             )}
           </div>
+          </>
         )}
 
         {/* Submission Details Modal */}
@@ -1196,6 +2040,339 @@ const AdminPage: React.FC = () => {
                       <option value="closed">Kapatıldı</option>
                     </select>
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Product Modal */}
+        {showProductModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {editingProduct ? 'Ürün Düzenle' : 'Yeni Ürün Ekle'}
+                    </h3>
+                    <div className="w-12 h-1 bg-[#ffb700] rounded-full"></div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowProductModal(false);
+                      setEditingProduct(false);
+                      setEditProductData({
+                        urunAdi: '',
+                        kategori: '',
+                        magazaFiyati: 0,
+                        piyasaFiyati: 0,
+                        stokAdedi: 0,
+                        stokKodu: '',
+                        barkod: '',
+                        marka: '',
+                        paraBirimi: 'TRY',
+                        magaza: 'yap',
+                        kdvOrani: 1,
+                        agirlik: 0,
+                        aciklama: '',
+                        resim1: ''
+                      });
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Ürün Adı</label>
+                      <input
+                        type="text"
+                        value={editProductData.urunAdi}
+                        onChange={(e) => setEditProductData({...editProductData, urunAdi: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                        placeholder="Ürün adını girin"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                      <input
+                        type="text"
+                        value={editProductData.kategori}
+                        onChange={(e) => setEditProductData({...editProductData, kategori: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                        placeholder="Kategori girin"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Mağaza Fiyatı</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editProductData.magazaFiyati}
+                        onChange={(e) => setEditProductData({...editProductData, magazaFiyati: parseFloat(e.target.value) || 0})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Piyasa Fiyatı</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editProductData.piyasaFiyati}
+                        onChange={(e) => setEditProductData({...editProductData, piyasaFiyati: parseFloat(e.target.value) || 0})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Stok Adedi</label>
+                      <input
+                        type="number"
+                        value={editProductData.stokAdedi}
+                        onChange={(e) => setEditProductData({...editProductData, stokAdedi: parseInt(e.target.value) || 0})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Stok Kodu</label>
+                      <input
+                        type="text"
+                        value={editProductData.stokKodu}
+                        onChange={(e) => setEditProductData({...editProductData, stokKodu: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                        placeholder="Stok kodu girin"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Barkod</label>
+                      <input
+                        type="text"
+                        value={editProductData.barkod}
+                        onChange={(e) => setEditProductData({...editProductData, barkod: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                        placeholder="Barkod girin"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Marka</label>
+                      <input
+                        type="text"
+                        value={editProductData.marka}
+                        onChange={(e) => setEditProductData({...editProductData, marka: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                        placeholder="Marka girin"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Para Birimi</label>
+                      <select
+                        value={editProductData.paraBirimi}
+                        onChange={(e) => setEditProductData({...editProductData, paraBirimi: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      >
+                        <option value="TRY">TRY</option>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Ağırlık (kg)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editProductData.agirlik}
+                        onChange={(e) => setEditProductData({...editProductData, agirlik: parseFloat(e.target.value) || 0})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
+                    <textarea
+                      value={editProductData.aciklama}
+                      onChange={(e) => setEditProductData({...editProductData, aciklama: e.target.value})}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      placeholder="Ürün açıklaması girin"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ürün Resmi URL</label>
+                    <input
+                      type="url"
+                      value={editProductData.resim1}
+                      onChange={(e) => setEditProductData({...editProductData, resim1: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </div>
+                </div>
+                
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={handleSaveProduct}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    <Check className="w-4 h-4" />
+                    {editingProduct ? 'Güncelle' : 'Kaydet'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowProductModal(false);
+                      setEditingProduct(false);
+                      setEditProductData({
+                        urunAdi: '',
+                        kategori: '',
+                        magazaFiyati: 0,
+                        piyasaFiyati: 0,
+                        stokAdedi: 0,
+                        stokKodu: '',
+                        barkod: '',
+                        marka: '',
+                        paraBirimi: 'TRY',
+                        magaza: 'yap',
+                        kdvOrani: 1,
+                        agirlik: 0,
+                        aciklama: '',
+                        resim1: ''
+                      });
+                    }}
+                    className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    İptal
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Order Details Modal */}
+        {showOrderModal && selectedOrder && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Sipariş Detayları
+                    </h3>
+                    <div className="w-12 h-1 bg-[#ffb700] rounded-full"></div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowOrderModal(false);
+                      setSelectedOrder(null);
+                    }}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Sipariş Numarası</label>
+                      <p className="text-gray-900 font-mono">{selectedOrder.orderNumber}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Müşteri Adı</label>
+                      <p className="text-gray-900">{selectedOrder.shippingAddress?.fullName || 'İsim yok'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">E-posta</label>
+                      <p className="text-gray-900">{selectedOrder.shippingAddress?.email || 'Email yok'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Toplam Tutar</label>
+                      <p className="text-gray-900 font-semibold">{selectedOrder.total.toFixed(2)} ₺</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Durum</label>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        selectedOrder.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        selectedOrder.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                        selectedOrder.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
+                        selectedOrder.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {selectedOrder.status === 'pending' ? 'Beklemede' :
+                         selectedOrder.status === 'processing' ? 'İşleniyor' :
+                         selectedOrder.status === 'shipped' ? 'Kargoda' :
+                         selectedOrder.status === 'delivered' ? 'Teslim Edildi' :
+                         'İptal Edildi'}
+                      </span>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Oluşturulma Tarihi</label>
+                      <p className="text-gray-900">{formatDate(selectedOrder.createdAt)}</p>
+                    </div>
+                  </div>
+                  
+                  {selectedOrder.items && selectedOrder.items.length > 0 && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-2 block">Sipariş Ürünleri</label>
+                      <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                        {selectedOrder.items.map((item: any, index: number) => (
+                          <div key={index} className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium text-gray-900">{item.name}</p>
+                              <p className="text-sm text-gray-500">Adet: {item.quantity}</p>
+                            </div>
+                            <p className="font-semibold text-gray-900">{(item.price * item.quantity).toFixed(2)} ₺</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {selectedOrder.shippingAddress && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-2 block">Teslimat Adresi</label>
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="space-y-1">
+                          <p className="text-gray-700">{selectedOrder.shippingAddress.fullName}</p>
+                          <p className="text-gray-700">{selectedOrder.shippingAddress.address}</p>
+                          <p className="text-gray-700">{selectedOrder.shippingAddress.district}, {selectedOrder.shippingAddress.city}</p>
+                          <p className="text-gray-700">{selectedOrder.shippingAddress.postalCode}</p>
+                          <p className="text-gray-700">Tel: {selectedOrder.shippingAddress.phone}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="mt-6 flex gap-3">
+                  <select
+                    value={selectedOrder.status}
+                    onChange={(e) => handleUpdateOrderStatus(selectedOrder.id!, e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                  >
+                    <option value="pending">Beklemede</option>
+                    <option value="processing">İşleniyor</option>
+                    <option value="shipped">Kargoda</option>
+                    <option value="delivered">Teslim Edildi</option>
+                    <option value="cancelled">İptal Edildi</option>
+                  </select>
+                  <button
+                    onClick={() => {
+                      setShowOrderModal(false);
+                      setSelectedOrder(null);
+                    }}
+                    className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    Kapat
+                  </button>
                 </div>
               </div>
             </div>

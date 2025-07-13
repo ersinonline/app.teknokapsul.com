@@ -10,8 +10,8 @@ const AIChat: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Başvuru/destek durumu ile ilgili anahtar kelimeler
-  const statusKeywords = ['başvuru', 'durum', 'destek', 'talep', 'başvurum', 'durumu', 'nerede', 'ne zaman', 'onaylandı', 'reddedildi', 'beklemede'];
+  // Başvuru/destek/sipariş durumu ile ilgili anahtar kelimeler
+  const statusKeywords = ['başvuru', 'durum', 'destek', 'talep', 'başvurum', 'durumu', 'nerede', 'ne zaman', 'onaylandı', 'reddedildi', 'beklemede', 'sipariş', 'siparişim', 'siparişler', 'takip', 'kargo', 'teslimat', 'gönderildi', 'hazırlanıyor', 'teslim'];
 
   const isStatusQuery = (text: string) => {
     const lowerText = text.toLowerCase();
@@ -79,6 +79,13 @@ const AIChat: React.FC = () => {
               <Chip 
                 label="Başvurularımın durumu nedir?"
                 onClick={() => handleQuickQuery('Başvurularımın durumu nedir?')}
+                variant="outlined"
+                size="small"
+                sx={{ cursor: 'pointer' }}
+              />
+              <Chip 
+                label="Siparişlerimi takip et"
+                onClick={() => handleQuickQuery('Siparişlerimi takip et')}
                 variant="outlined"
                 size="small"
                 sx={{ cursor: 'pointer' }}

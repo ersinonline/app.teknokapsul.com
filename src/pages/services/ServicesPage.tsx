@@ -98,7 +98,7 @@ const Services = () => {
         { name: 'Kargo Takip', tag: 'Ücretsiz', url: '/cargo-tracking' },
         { name: 'Not Hatırlatıcı', tag: 'Ücretsiz', url: '/notes' },
         { name: 'Takvim', tag: 'Ücretsiz', url: '/calendar' },
-        { name: 'Bütçe Yönetimi', tag: 'Ücretsiz', url: '/expenses' },
+        { name: 'Garanti Takibi', tag: 'Ücretsiz', url: '/warranty-tracking' },
         { name: 'Portföy Takibi', tag: 'Ücretsiz', url: '/portfolio' },
         { name: 'Dosyalarım', tag: 'Yeni', url: '/documents' },
         { name: 'AI Asistan', tag: 'Yeni', url: '/ai-assistant' },

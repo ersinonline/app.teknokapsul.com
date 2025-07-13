@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react';
 import {
   Home,
-  CreditCard,
-  Key,
   Calculator,
+  ShoppingBag,
   X,
   LogOut,
 } from 'lucide-react';
@@ -25,9 +24,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Ana Sayfa', icon: Home },
-    { id: 'payments', label: 'Ödemelerim', icon: CreditCard },
-    { id: 'accounts', label: 'Hesaplarım', icon: Key },
     { id: 'loan-calculator', label: 'Kredi Hesaplama', icon: Calculator },
+
+    { id: 'shop-rewards', label: 'Harcadıkça Kazan', icon: ShoppingBag },
   ];
 
   const sidebarClasses = `

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Clock, TrendingUp, TrendingDown } from 'lucide-react';
-import { Sidebar } from './Sidebar';
+import { Home, TrendingUp, TrendingDown, Target, Wallet } from 'lucide-react';
+import Sidebar from './Sidebar';
 import { ChatButton } from '../chat/ChatButton';
 import { MaintenanceBanner } from '../common/MaintenanceBanner';
 import { OfflineIndicator } from '../common/OfflineIndicator';
@@ -31,7 +31,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
     { id: 'income', path: '/income', label: 'Gelirlerim', icon: TrendingUp },
     { id: 'expenses', path: '/expenses', label: 'Giderlerim', icon: TrendingDown },
-    { id: 'subscriptions', path: '/subscriptions', label: 'Aboneliklerim', icon: Clock }
+    { id: 'budget', path: '/budget', label: 'Bütçe', icon: Wallet },
+    { id: 'goals', path: '/goals', label: 'Hedefler', icon: Target }
   ];
 
   return (
@@ -67,7 +68,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       {/* Mobil Alt Menü - Fixed */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t lg:hidden z-20">
-        <div className="grid grid-cols-4">
+        <div className="grid grid-cols-5">
           {mobileMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;

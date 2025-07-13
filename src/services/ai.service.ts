@@ -101,11 +101,29 @@ export const getUserSupportTickets = async (userId: string) => {
   }
 };
 
-// AI ile başvuru/destek durumu sorgulama
+// Kullanıcının siparişlerini getir
+export const getUserOrders = async (userId: string) => {
+  try {
+    const ordersRef = collection(db, 'teknokapsul', userId, 'orders');
+    const q = query(ordersRef, orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Kullanıcı siparişleri alınırken hata:', error);
+    return [];
+  }
+};
+
+// AI ile başvuru/destek/sipariş durumu sorgulama
 export const queryUserStatus = async (userId: string, userQuery: string): Promise<string> => {
   try {
     const applications = await getUserApplications(userId);
     const supportTickets = await getUserSupportTickets(userId);
+    const orders = await getUserOrders(userId);
     
     const prompt = `Kullanıcının sorusu: "${userQuery}"
 
@@ -115,13 +133,21 @@ ${JSON.stringify(applications, null, 2)}
 Kullanıcının destek talepleri:
 ${JSON.stringify(supportTickets, null, 2)}
 
-Lütfen kullanıcının sorusuna göre başvuru ve destek taleplerinin durumunu açıklayın. Türkçe ve samimi bir dille yanıtlayın. Başvuru numaralarını ve durumları belirtin.`;
+Kullanıcının siparişleri:
+${JSON.stringify(orders, null, 2)}
+
+Lütfen kullanıcının sorusuna göre başvuru, destek talepleri ve siparişlerin durumunu açıklayın. Türkçe ve samimi bir dille yanıtlayın. Sipariş numaralarını, durumları ve tarihlerini belirtin. Sipariş durumları için şu açıklamaları kullan:
+- pending: Beklemede
+- processing: Hazırlanıyor
+- shipped: Kargoda
+- delivered: Teslim Edildi
+- cancelled: İptal Edildi`;
     
     const result = await generateText(prompt);
     return result;
   } catch (error) {
     console.error('AI durum sorgulama hatası:', error);
-    return 'Üzgünüm, şu anda başvuru ve destek taleplerini sorgulayamıyorum. Lütfen daha sonra tekrar deneyin.';
+    return 'Üzgünüm, şu anda başvuru, destek talepleri ve siparişleri sorgulayamıyorum. Lütfen daha sonra tekrar deneyin.';
   }
 };
 
