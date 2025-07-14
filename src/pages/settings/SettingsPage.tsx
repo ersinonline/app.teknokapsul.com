@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Settings, User, Lock, Bell, MessageSquare, Mail, Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { Settings, User, Lock, Bell, MessageSquare, Mail, Save, AlertCircle, CheckCircle, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { updateUserProfile, updateUserPassword } from '../../services/auth.service';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 
@@ -9,7 +10,8 @@ import { NotificationPreferences } from '../../components/notifications/Notifica
 import { ProfileManagement } from '../../components/profile/ProfileManagement';
 
 export const SettingsPage = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -57,6 +59,15 @@ export const SettingsPage = () => {
       setError('Şifre güncellenirken bir hata oluştu.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (error) {
+      setError('Çıkış yapılırken bir hata oluştu.');
     }
   };
 
@@ -221,6 +232,27 @@ export const SettingsPage = () => {
               <h2 className="text-lg font-semibold text-gray-900">Geri Bildirim</h2>
             </div>
             <FeedbackForm />
+          </div>
+
+          {/* Çıkış Yap */}
+          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <LogOut className="w-5 h-5 text-red-500" />
+              <h2 className="text-lg font-semibold text-gray-900">Hesap</h2>
+            </div>
+            <div className="space-y-4">
+              <p className="text-gray-600 text-sm">
+                Hesabınızdan çıkış yapmak için aşağıdaki butona tıklayın.
+              </p>
+              <button
+                onClick={handleLogout}
+                disabled={loading}
+                className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <LogOut className="w-4 h-4" />
+                {loading ? 'Çıkış Yapılıyor...' : 'Çıkış Yap'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
