@@ -15,6 +15,7 @@ import { SubscriptionsPage } from './pages/subscriptions/SubscriptionsPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { NotesPage } from './pages/notes/NotesPage';
 import { CalendarPage } from './pages/calendar/CalendarPage';
+import { NotificationsPage } from './pages/notifications/NotificationsPage';
 import { FAQPage } from './pages/faq/FAQPage';
 import { OtherPage } from './pages/other/OtherPage';
 import { CargoTrackingPage } from './pages/other/CargoTrackingPage';
@@ -44,6 +45,10 @@ import CheckoutPage from './pages/other/CheckoutPage';
 import OrderSuccessPage from './pages/other/OrderSuccessPage';
 import { GoalsPage } from './pages/goals/GoalsPage';
 import { BudgetPage } from './pages/budget/BudgetPage';
+import PremiumIntroPage from './pages/PremiumIntroPage';
+import PremiumManagePage from './pages/PremiumManagePage';
+import AdminPremiumPage from './pages/AdminPremiumPage';
+import { PremiumProvider } from './contexts/PremiumContext';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
   <AuthGuard>
@@ -101,6 +106,10 @@ const router = createBrowserRouter([
   {
     path: '/calendar',
     element: <ProtectedRoute><CalendarPage /></ProtectedRoute>
+  },
+  {
+    path: '/notifications',
+    element: <ProtectedRoute><NotificationsPage /></ProtectedRoute>
   },
   {
     path: '/faq',
@@ -190,13 +199,25 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><BudgetPage /></ProtectedRoute>
   },
   {
-          path: '/documents',
-          element: <ProtectedRoute><DocumentsPage /></ProtectedRoute>
-        },
-        {
-          path: '/admin',
-          element: <ProtectedRoute><AdminPage /></ProtectedRoute>
-        },
+    path: '/documents',
+    element: <ProtectedRoute><DocumentsPage /></ProtectedRoute>
+  },
+  {
+    path: '/admin',
+    element: <ProtectedRoute><AdminPage /></ProtectedRoute>
+  },
+  {
+    path: '/premium',
+    element: <ProtectedRoute><PremiumIntroPage /></ProtectedRoute>
+  },
+  {
+    path: '/premium/manage',
+    element: <ProtectedRoute><PremiumManagePage /></ProtectedRoute>
+  },
+  {
+    path: '/admin/premium',
+    element: <ProtectedRoute><AdminPremiumPage /></ProtectedRoute>
+  },
   {
     path: '/',
     element: <Navigate to="/dashboard" replace />
@@ -231,9 +252,11 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <div className="min-h-screen bg-gray-50 transition-colors duration-300">
-          <RouterProvider router={router} />
-        </div>
+        <PremiumProvider>
+          <div className="min-h-screen bg-gray-50 transition-colors duration-300">
+            <RouterProvider router={router} />
+          </div>
+        </PremiumProvider>
       </AuthProvider>
     </ThemeProvider>
   );

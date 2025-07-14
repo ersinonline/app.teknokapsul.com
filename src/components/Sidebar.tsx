@@ -6,6 +6,7 @@ import {
   X,
   LogOut,
 } from 'lucide-react';
+import { Logo } from './common/Logo';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -64,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       >
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">TeknoKapsül</h2>
+            <Logo className="" showPremium={true} />
             <button
               onClick={onClose}
               className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"

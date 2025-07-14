@@ -15,13 +15,25 @@ export const SocialLogin = ({ method = 'all' }: SocialLoginProps) => {
   const [verificationCode, setVerificationCode] = useState('');
   const [confirmationResult, setConfirmationResult] = useState<any>(null);
 
+  const isWebView = () => {
+    const userAgent = navigator.userAgent;
+    return /wv|WebView|Android.*Version\/[.\d]+.*Chrome|iPhone.*AppleWebKit.*Mobile.*Safari|iPad.*AppleWebKit.*Mobile.*Safari/.test(userAgent);
+  };
+
   const handleGoogleLogin = async () => {
     setError(null);
     setIsLoading(true);
     
     try {
       const provider = new GoogleAuthProvider();
-      // Try popup first
+      
+      // For webview or mobile apps, use redirect method directly
+      if (isWebView() || /Mobi|Android/i.test(navigator.userAgent)) {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      
+      // For desktop browsers, try popup first
       try {
         await signInWithPopup(auth, provider);
       } catch (popupError: any) {
@@ -57,7 +69,13 @@ export const SocialLogin = ({ method = 'all' }: SocialLoginProps) => {
       provider.addScope('email');
       provider.addScope('name');
       
-      // Try popup first, fallback to redirect
+      // For webview or mobile apps, use redirect method directly
+      if (isWebView() || /Mobi|Android/i.test(navigator.userAgent)) {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      
+      // For desktop browsers, try popup first
       try {
         await signInWithPopup(auth, provider);
       } catch (popupError: any) {

@@ -8,6 +8,11 @@ import {
   Grid3X3,
   PieChart
 } from 'lucide-react';
+import { usePremium } from '../../contexts/PremiumContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 interface NavigationItem {
   path: string;
@@ -26,10 +31,30 @@ const bottomNavigationItems: NavigationItem[] = [
 export const MobileNavigation: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isPremium } = usePremium();
+  const { user } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const handleUserClick = () => {
     navigate('/settings');
   };
+
+  const handleNotificationClick = () => {
+    navigate('/notifications');
+  };
+
+  useEffect(() => {
+    if (!user) return;
+
+    const notificationsRef = collection(db, 'teknokapsul', user.uid, 'notifications');
+    const q = query(notificationsRef, where('read', '==', false));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setUnreadCount(snapshot.size);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
 
   return (
     <>
@@ -40,15 +65,25 @@ export const MobileNavigation: React.FC = () => {
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">T</span>
             </div>
-            <h1 className="text-lg font-semibold text-gray-900">TeknoKapsül</h1>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-lg font-semibold text-gray-900">TeknoKapsül</h1>
+              {isPremium && (
+                <img src="https://i.hizliresim.com/indgl7s.png" alt="TeknoKapsül" className="h-4 object-contain" />
+              )}
+            </div>
           </div>
           
           <div className="flex items-center space-x-2">
-            <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative">
+            <button 
+              onClick={handleNotificationClick}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
+            >
               <Bell className="w-5 h-5 text-gray-600" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-                3
-              </span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </button>
 
             <button 
