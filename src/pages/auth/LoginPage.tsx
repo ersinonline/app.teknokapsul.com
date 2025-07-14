@@ -29,8 +29,8 @@ export const LoginPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100">
       <div className="container mx-auto px-4 py-8 lg:py-0 flex flex-col lg:flex-row min-h-screen">
-        {/* Left Section - Hero/Branding */}
-        <div className="lg:w-1/2 flex flex-col justify-center py-8 lg:py-16">
+        {/* Left Section - Hero/Branding - Hidden on mobile */}
+        <div className="hidden lg:flex lg:w-1/2 flex-col justify-center py-8 lg:py-16">
           <div className="max-w-xl mx-auto space-y-8">
             <div className="flex items-center gap-3">
               <Package className="w-10 h-10 sm:w-12 sm:h-12 text-yellow-600" />
@@ -77,7 +77,7 @@ export const LoginPage = () => {
         </div>
 
         {/* Right Section - Login Form */}
-        <div className="lg:w-1/2 flex items-center justify-center py-8 lg:py-16">
+        <div className="w-full lg:w-1/2 flex items-center justify-center py-8 lg:py-16">
           <div className="w-full max-w-md">
             <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 backdrop-blur-sm">
               <div className="text-center mb-6 sm:mb-8">
