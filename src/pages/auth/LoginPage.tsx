@@ -103,17 +103,19 @@ export const LoginPage = () => {
                     </h3>
                     
                     <div className="space-y-3">
-                      <SocialLogin method="google" />
-                      <SocialLogin method="apple" />
+                      {/* Google ve telefon girişi geçici olarak gizlendi */}
+                      {/* <SocialLogin method="google" />
+                      <SocialLogin method="apple" /> */}
                       
-                      <div className="grid grid-cols-2 gap-3">
-                        <button
+                      <div className="grid grid-cols-1 gap-3">
+                        {/* SMS girişi geçici olarak gizlendi */}
+                        {/* <button
                           onClick={() => setSelectedMethod('sms')}
                           className="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-xl hover:border-green-300 hover:bg-green-50 transition-all duration-200 group"
                         >
                           <Smartphone className="h-8 w-8 mb-2 text-gray-700 group-hover:text-green-600" />
                           <span className="text-sm font-medium text-gray-700 group-hover:text-green-600">SMS</span>
-                        </button>
+                        </button> */}
                         
                         <button
                           onClick={() => setSelectedMethod('email')}
@@ -142,7 +144,8 @@ export const LoginPage = () => {
                       </button>
                     </div>
                     
-                    {selectedMethod === 'google' && (
+                    {/* Google ve telefon girişi geçici olarak gizlendi */}
+                    {/* {selectedMethod === 'google' && (
                        <SocialLogin method="google" />
                      )}
                      
@@ -152,7 +155,7 @@ export const LoginPage = () => {
                      
                      {selectedMethod === 'sms' && (
                        <SocialLogin method="sms" />
-                     )}
+                     )} */}
                     
                     {selectedMethod === 'email' && (
                       <LoginForm isSignUp={isSignUp} />

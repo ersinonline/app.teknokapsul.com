@@ -69,21 +69,21 @@ export const SubscriptionsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 lg:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <div className="bg-[#ffb700] p-6 sm:p-8">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 sm:p-4 bg-white/20 backdrop-blur-sm rounded-xl">
-                    <Calendar className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+        <div className="mb-4 lg:mb-8">
+          <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-gray-100 overflow-hidden">
+            <div className="bg-[#ffb700] p-4 sm:p-6 lg:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 lg:gap-4">
+                <div className="flex items-center gap-3 lg:gap-4">
+                  <div className="p-2 sm:p-3 lg:p-4 bg-white/20 backdrop-blur-sm rounded-lg lg:rounded-xl">
+                    <Calendar className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 lg:mb-2">
                       Aboneliklerim
                     </h1>
-                    <p className="text-white/90 text-sm sm:text-base">
+                    <p className="text-white/90 text-xs sm:text-sm lg:text-base">
                       Aboneliklerinizi takip edin ve yönetin
                     </p>
                   </div>
@@ -94,12 +94,12 @@ export const SubscriptionsPage = () => {
         </div>
 
         {successMessage && (
-          <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500 rounded-lg">
-                <AlertCircle className="w-5 h-5 text-white" />
+          <div className="bg-green-50 border border-green-200 rounded-lg lg:rounded-xl p-3 lg:p-4 mb-4 lg:mb-6 shadow-md lg:shadow-lg mx-1 lg:mx-0">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="p-1.5 lg:p-2 bg-green-500 rounded-md lg:rounded-lg">
+                <AlertCircle className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
               </div>
-              <p className="text-green-700 font-medium text-sm lg:text-base">
+              <p className="text-green-700 font-medium text-xs lg:text-sm">
                 {successMessage}
               </p>
             </div>
@@ -107,30 +107,30 @@ export const SubscriptionsPage = () => {
         )}
 
         {subscriptions.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-4 lg:mb-6">
             <SubscriptionStats subscriptions={sortedSubscriptions} />
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden mb-6">
-          <div className="bg-[#ffb700]/10 p-6 border-b border-gray-100">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-[#ffb700] rounded-xl shadow-lg">
-                <Plus className="w-6 h-6 text-white" />
+        <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-gray-100 overflow-hidden mb-4 lg:mb-6 mx-1 lg:mx-0">
+          <div className="bg-[#ffb700]/10 p-4 lg:p-6 border-b border-gray-100">
+            <div className="flex items-center gap-3 lg:gap-4">
+              <div className="p-2 lg:p-3 bg-[#ffb700] rounded-lg lg:rounded-xl shadow-md lg:shadow-lg">
+                <Plus className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Yeni Abonelik Ekle</h2>
-                <p className="text-gray-600 text-sm">Yeni bir abonelik ekleyerek takibinizi başlatın</p>
+                <h2 className="text-lg lg:text-xl font-bold text-gray-900">Yeni Abonelik Ekle</h2>
+                <p className="text-gray-600 text-xs lg:text-sm">Yeni bir abonelik ekleyerek takibinizi başlatın</p>
               </div>
             </div>
           </div>
-          <div className="p-6">
+          <div className="p-4 lg:p-6">
             <SubscriptionForm onSubmit={handleSubmit} isLoading={isSubmitting} />
           </div>
         </div>
 
         {subscriptions.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-12">
+          <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-gray-100 p-8 lg:p-12 mx-1 lg:mx-0">
             <EmptyState
               icon={Clock}
               title="Abonelik Bulunamadı"
@@ -138,23 +138,23 @@ export const SubscriptionsPage = () => {
             />
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <div className="bg-[#ffb700]/10 p-6 border-b border-gray-100">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-[#ffb700] rounded-xl shadow-lg">
-                    <CreditCard className="w-6 h-6 text-white" />
+          <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-gray-100 overflow-hidden mx-1 lg:mx-0">
+            <div className="bg-[#ffb700]/10 p-4 lg:p-6 border-b border-gray-100">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 lg:gap-4">
+                <div className="flex items-center gap-3 lg:gap-4">
+                  <div className="p-2 lg:p-3 bg-[#ffb700] rounded-lg lg:rounded-xl shadow-md lg:shadow-lg">
+                    <CreditCard className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Abonelik Listesi</h2>
-                    <p className="text-gray-600 text-sm">Tüm aboneliklerinizi görüntüleyin ve yönetin</p>
+                    <h2 className="text-lg lg:text-xl font-bold text-gray-900">Abonelik Listesi</h2>
+                    <p className="text-gray-600 text-xs lg:text-sm">Tüm aboneliklerinizi görüntüleyin ve yönetin</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="bg-[#ffb700]/20 text-[#ffb700] px-4 py-2 rounded-full">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4" />
-                      <span className="font-semibold text-sm">{subscriptions.length} abonelik</span>
+                  <div className="bg-[#ffb700]/20 text-[#ffb700] px-3 lg:px-4 py-1.5 lg:py-2 rounded-full">
+                    <div className="flex items-center gap-1.5 lg:gap-2">
+                      <TrendingUp className="w-3 h-3 lg:w-4 lg:h-4" />
+                      <span className="font-semibold text-xs lg:text-sm">{subscriptions.length} abonelik</span>
                     </div>
                   </div>
                 </div>

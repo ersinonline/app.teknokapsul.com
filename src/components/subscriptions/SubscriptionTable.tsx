@@ -213,48 +213,49 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
       </div>
 
       {/* Mobile Card View */}
-      <div className="lg:hidden space-y-3 p-3">
+      <div className="lg:hidden space-y-2 p-2">
         {sortedSubscriptions.map((subscription) => {
           const daysRemaining = calculateDaysRemaining(subscription.endDate);
           const { icon, text, className } = getStatusInfo(daysRemaining, subscription.isActive);
 
           return (
-            <div key={subscription.id} className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium text-gray-900">{subscription.name}</h3>
-          <p className="text-xs text-gray-700">{subscription.price} TL/ay</p>
+            <div key={subscription.id} className="bg-gray-50 rounded-lg border border-gray-200 p-3 shadow-sm">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-medium text-gray-900 truncate">{subscription.name}</h3>
+                  <p className="text-xs text-gray-600">{subscription.price} TL/ay</p>
                 </div>
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${className}`}
+                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${className} ml-2 flex-shrink-0`}
                 >
                   {icon}
-                  {text}
+                  <span className="hidden sm:inline">{text}</span>
+                  <span className="sm:hidden">{text.split(' ')[0]}</span>
                 </span>
               </div>
               
-              <div className="mb-3">
-                <p className="text-xs text-gray-700">
+              <div className="mb-2">
+                <p className="text-xs text-gray-600">
                   Bitiş: {formatDate(subscription.endDate)}
                 </p>
                 {subscription.autoRenew && (
-                  <p className="text-xs text-gray-600">
-                    Otomatik yenileme: {subscription.renewalDay}. gün
+                  <p className="text-xs text-gray-500">
+                    Oto. yenileme: {subscription.renewalDay}. gün
                   </p>
                 )}
               </div>
               
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-1">
                 <button
                   onClick={() => setEditingSubscription(subscription)}
-                  className="p-2 text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 rounded"
+                  className="p-2 text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 rounded-md transition-colors"
                   title="Düzenle"
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => handleToggleStatus(subscription.id, subscription.isActive)}
-                  className={`p-2 ${subscription.isActive ? 'text-green-600 hover:text-green-900 hover:bg-green-50' : 'text-red-600 hover:text-red-900 hover:bg-red-50'} disabled:opacity-50 rounded`}
+                  className={`p-2 ${subscription.isActive ? 'text-green-600 hover:text-green-900 hover:bg-green-50' : 'text-red-600 hover:text-red-900 hover:bg-red-50'} disabled:opacity-50 rounded-md transition-colors`}
                   title={subscription.isActive ? 'Pasif Yap' : 'Aktif Yap'}
                   disabled={isToggling === subscription.id}
                 >
@@ -262,7 +263,7 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
                 </button>
                 <button
                   onClick={() => handleDelete(subscription.id)}
-                  className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded"
+                  className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors"
                   disabled={isDeleting === subscription.id}
                   title="Sil"
                 >
