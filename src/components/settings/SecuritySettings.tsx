@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Lock, Shield } from 'lucide-react';
 
 export const SecuritySettings = () => {
@@ -32,8 +32,8 @@ export const SecuritySettings = () => {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Lock className="w-5 h-5 text-purple-600" />
+            <div className="p-2 bg-yellow-100 rounded-lg">
+                  <Lock className="w-5 h-5 text-yellow-600" />
             </div>
             <div>
               <p className="font-medium">Oturum Geçmişi</p>

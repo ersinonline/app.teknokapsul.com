@@ -22,7 +22,10 @@ export const ChatButton: React.FC = () => {
       {/* Chat Button */}
       <button
         onClick={handleChatClick}
-        className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50 bg-primary text-white p-4 rounded-full shadow-lg hover:bg-primary-dark transition-all duration-300 hover:scale-110"
+        className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+        style={{ backgroundColor: '#ffb700' }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
         aria-label="AI Sohbet"
       >
         {isOpen ? (
@@ -44,11 +47,14 @@ export const ChatButton: React.FC = () => {
           {/* Chat Container */}
           <div className="relative bg-white rounded-t-2xl lg:rounded-2xl shadow-2xl h-full lg:h-[600px] flex flex-col mt-16 lg:mt-0">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b bg-primary text-white rounded-t-2xl lg:rounded-t-2xl">
+            <div className="flex items-center justify-between p-4 border-b text-white rounded-t-2xl lg:rounded-t-2xl" style={{ backgroundColor: '#ffb700' }}>
               <h3 className="font-semibold">AI Asistan</h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-primary-dark rounded-full transition-colors"
+                className="p-1 rounded-full transition-colors"
+                style={{ backgroundColor: 'rgba(0,0,0,0.1)' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.2)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.1)'}
               >
                 <X className="w-5 h-5" />
               </button>

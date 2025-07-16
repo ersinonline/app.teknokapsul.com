@@ -252,10 +252,10 @@ const Services = () => {
     {
       title: 'Film Kodları',
       icon: <Tv className="w-8 h-8" />,
-      color: 'bg-purple-500',
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200',
-      textColor: 'text-purple-700',
+      color: 'bg-yellow-500',
+        bgColor: 'bg-yellow-50',
+        borderColor: 'border-yellow-200',
+        textColor: 'text-yellow-700',
       services: [
         { name: 'Tod Paketleri', tag: 'Paket', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/tod-paketleri-mid-1?refid=${REFID}` },
         { name: 'D-Smart Go Paketleri', tag: 'Paket', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/d-smart-go-paketleri-mid-2?refid=${REFID}` },
@@ -267,10 +267,10 @@ const Services = () => {
     {
       title: 'Uygulama Kodları',
       icon: <Tv className="w-8 h-8" />,
-      color: 'bg-purple-500',
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200',
-      textColor: 'text-purple-700',
+      color: 'bg-yellow-500',
+        bgColor: 'bg-yellow-50',
+        borderColor: 'border-yellow-200',
+        textColor: 'text-yellow-700',
       services: [
         { name: 'Google Play Paketleri', tag: 'Paket', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/google-play-paketleri-mid-4?refid=${REFID}` },
         { name: 'Apple Store Paketleri', tag: 'Paket', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/apple-store-paketleri-mid-5?refid=${REFID}` }

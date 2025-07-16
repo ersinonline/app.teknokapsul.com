@@ -88,14 +88,14 @@ export const OtherPage = () => {
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Calendar className="w-5 h-5 text-purple-600" />
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <Calendar className="w-5 h-5 text-yellow-600" />
               </div>
               <h2 className="text-lg font-medium">Takvim</h2>
             </div>
             <button
               onClick={() => navigate('/calendar')}
-              className="text-sm text-purple-600 hover:text-purple-700 flex items-center gap-1"
+              className="text-sm text-yellow-600 hover:text-yellow-700 flex items-center gap-1"
             >
               Tümünü Gör
               <ChevronRight className="w-4 h-4" />

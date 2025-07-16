@@ -166,10 +166,10 @@ export const IncomePage: React.FC = () => {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1">
                 <p className="text-xs lg:text-sm font-medium text-gray-600">Tek Seferlik</p>
-                <p className="text-lg lg:text-2xl font-bold text-purple-600">{formatCurrency(totalOneTimeIncome)}</p>
+                <p className="text-lg lg:text-2xl font-bold text-yellow-600">{formatCurrency(totalOneTimeIncome)}</p>
               </div>
-              <div className="p-2 lg:p-3 bg-purple-100 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
-                <DollarSign className="w-4 h-4 lg:w-6 lg:h-6 text-purple-600" />
+              <div className="p-2 lg:p-3 bg-yellow-100 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
+                <DollarSign className="w-4 h-4 lg:w-6 lg:h-6 text-yellow-600" />
               </div>
             </div>
           </div>

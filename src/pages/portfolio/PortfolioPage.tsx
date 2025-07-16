@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, TrendingUp, Target, Brain, Eye, EyeOff, RefreshCw, PieChart, BarChart3 } from 'lucide-react';
+import { Plus, TrendingUp, Target, Brain, Eye, EyeOff, RefreshCw, PieChart } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { portfolioService } from '../../services/portfolio.service';
 import { PortfolioItem, AIRecommendation, PORTFOLIO_CATEGORIES } from '../../types/portfolio';
@@ -24,7 +24,7 @@ export const PortfolioPage: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'charts' | 'investments' | 'ai' | 'returns' | 'prices'>('investments');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'investments' | 'returns' | 'prices'>('investments');
 
   const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
   const [showValues, setShowValues] = useState(true);
@@ -157,11 +157,10 @@ export const PortfolioPage: React.FC = () => {
       </div>
 
       {/* Tab Navigation */}
-       <div className="grid grid-cols-5 gap-1 mb-6 bg-gray-100 p-1 rounded-lg">
+       <div className="grid grid-cols-4 gap-1 mb-6 bg-gray-100 p-1 rounded-lg">
          {[
-           { key: 'charts', label: 'Grafikler', mobileLabel: 'Grafikler', icon: BarChart3 },
+           { key: 'analytics', label: 'Analiz & Grafikler', mobileLabel: 'Analiz', icon: Brain },
            { key: 'investments', label: 'Yatırımlar', mobileLabel: 'Yatırımlar', icon: PieChart },
-           { key: 'ai', label: 'AI Analizi', mobileLabel: 'AI', icon: Brain },
            { key: 'returns', label: 'Getiri Sırası', mobileLabel: 'Getiri', icon: TrendingUp },
            { key: 'prices', label: 'Fiyat Güncelle', mobileLabel: 'Güncelle', icon: RefreshCw }
          ].map(({ key, label, mobileLabel, icon: Icon }) => (
@@ -253,20 +252,39 @@ export const PortfolioPage: React.FC = () => {
         </>
       )}
 
-      {activeTab === 'charts' && (
+      {activeTab === 'analytics' && (
         <div className="space-y-6">
-          {/* Portfolio Chart */}
           {portfolioItems.length > 0 ? (
-            <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border">
-              <PortfolioChart portfolioItems={portfolioItems} showValues={showValues} />
-            </div>
+            <>
+              {/* Portfolio Analytics */}
+              <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Portföy Analizi</h2>
+                <PortfolioAnalytics 
+                  portfolioItems={portfolioItems}
+                />
+              </div>
+              
+              {/* Portfolio Chart */}
+              <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border">
+                <PortfolioChart portfolioItems={portfolioItems} showValues={showValues} />
+              </div>
+              
+              {/* AI Recommendations */}
+              <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">AI Önerileri</h2>
+                <AIRecommendationsPanel 
+                  recommendations={recommendations}
+                  loading={loading}
+                />
+              </div>
+            </>
           ) : (
             <div className="bg-white rounded-xl p-8 shadow-sm border text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BarChart3 className="w-8 h-8 text-gray-400" />
+                <Brain className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Henüz yatırımınız yok</h3>
-              <p className="text-gray-600 mb-6">Grafikleri görüntülemek için ilk yatırımınızı ekleyin</p>
+              <p className="text-gray-600 mb-6">Analiz ve grafikleri görüntülemek için ilk yatırımınızı ekleyin</p>
               <button
                 onClick={() => setShowAddModal(true)}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
@@ -276,24 +294,6 @@ export const PortfolioPage: React.FC = () => {
               </button>
             </div>
           )}
-        </div>
-      )}
-
-      {activeTab === 'ai' && (
-        <div className="space-y-6">
-          <div className="max-w-4xl mx-auto">
-            <PortfolioAnalytics 
-              portfolioItems={portfolioItems}
-            />
-          </div>
-          
-          {/* AI Recommendations */}
-          <div className="max-w-4xl mx-auto">
-            <AIRecommendationsPanel 
-              recommendations={recommendations}
-              loading={loading}
-            />
-          </div>
         </div>
       )}
 

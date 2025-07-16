@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Clock, Plus, Calendar, CreditCard, AlertCircle } from 'lucide-react';
+import { Clock, Plus, Calendar, CreditCard, AlertCircle, TrendingUp } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { addSubscription, getUserSubscriptions } from '../../services/subscription.service';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
@@ -71,25 +71,37 @@ export const SubscriptionsPage = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <Calendar className="w-6 h-6 lg:w-8 lg:h-8 text-blue-500" />
-                Aboneliklerim
-              </h1>
-              <p className="text-gray-600 mt-1 text-sm lg:text-base">
-                Aboneliklerinizi takip edin ve yönetin
-              </p>
+        <div className="mb-8">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+            <div className="bg-[#ffb700] p-6 sm:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 sm:p-4 bg-white/20 backdrop-blur-sm rounded-xl">
+                    <Calendar className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+                      Aboneliklerim
+                    </h1>
+                    <p className="text-white/90 text-sm sm:text-base">
+                      Aboneliklerinizi takip edin ve yönetin
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {successMessage && (
-          <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg text-sm lg:text-base mb-6">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" />
-              {successMessage}
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-500 rounded-lg">
+                <AlertCircle className="w-5 h-5 text-white" />
+              </div>
+              <p className="text-green-700 font-medium text-sm lg:text-base">
+                {successMessage}
+              </p>
             </div>
           </div>
         )}
@@ -100,16 +112,25 @@ export const SubscriptionsPage = () => {
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Plus className="w-5 h-5 text-blue-500" />
-            <h2 className="text-lg font-semibold text-gray-900">Yeni Abonelik Ekle</h2>
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden mb-6">
+          <div className="bg-[#ffb700]/10 p-6 border-b border-gray-100">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-[#ffb700] rounded-xl shadow-lg">
+                <Plus className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Yeni Abonelik Ekle</h2>
+                <p className="text-gray-600 text-sm">Yeni bir abonelik ekleyerek takibinizi başlatın</p>
+              </div>
+            </div>
           </div>
-          <SubscriptionForm onSubmit={handleSubmit} isLoading={isSubmitting} />
+          <div className="p-6">
+            <SubscriptionForm onSubmit={handleSubmit} isLoading={isSubmitting} />
+          </div>
         </div>
 
         {subscriptions.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-12">
             <EmptyState
               icon={Clock}
               title="Abonelik Bulunamadı"
@@ -117,14 +138,26 @@ export const SubscriptionsPage = () => {
             />
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <CreditCard className="w-5 h-5 text-blue-500" />
-                <h2 className="text-lg font-semibold text-gray-900">Abonelik Listesi</h2>
-                <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs font-medium">
-                  {subscriptions.length} abonelik
-                </span>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+            <div className="bg-[#ffb700]/10 p-6 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-[#ffb700] rounded-xl shadow-lg">
+                    <CreditCard className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">Abonelik Listesi</h2>
+                    <p className="text-gray-600 text-sm">Tüm aboneliklerinizi görüntüleyin ve yönetin</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="bg-[#ffb700]/20 text-[#ffb700] px-4 py-2 rounded-full">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4" />
+                      <span className="font-semibold text-sm">{subscriptions.length} abonelik</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <SubscriptionTable subscriptions={sortedSubscriptions} onUpdate={loadSubscriptions} />

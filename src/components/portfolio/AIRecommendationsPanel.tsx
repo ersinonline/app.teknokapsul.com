@@ -46,7 +46,7 @@ export const AIRecommendationsPanel: React.FC<AIRecommendationsPanelProps> = ({
       case 'hold':
         return <Target className="w-4 h-4 text-blue-600" />;
       case 'diversify':
-        return <Brain className="w-4 h-4 text-purple-600" />;
+        return <Brain className="w-4 h-4 text-yellow-600" />;
       default:
         return <Brain className="w-4 h-4 text-gray-600" />;
     }

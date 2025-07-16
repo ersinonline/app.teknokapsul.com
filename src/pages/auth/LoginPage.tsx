@@ -62,8 +62,8 @@ export const LoginPage = () => {
                 <span className="font-medium">7/24 Destek</span>
               </div>
               <div className="flex items-center gap-3 p-4 bg-white/50 rounded-xl backdrop-blur-sm transition-all hover:bg-white/70">
-                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-purple-600">✓</span>
+                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-yellow-600">✓</span>
                 </div>
                 <span className="font-medium">Kolay Kullanım</span>
               </div>

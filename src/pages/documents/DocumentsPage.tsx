@@ -59,9 +59,9 @@ const DocumentsPage: React.FC = () => {
       id: 'contracts',
       name: 'Sözleşmeler',
       icon: <File className="w-5 h-5" />,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200'
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-50',
+      borderColor: 'border-yellow-200'
     },
     {
       id: 'certificates',

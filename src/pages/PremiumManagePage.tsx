@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Crown, Calendar, CreditCard, TrendingUp, Bell, Headphones, Package, AlertTriangle, CheckCircle, Zap, Shield, BarChart3, Sparkles, Clock, Award } from 'lucide-react';
+import { Crown, TrendingUp, Bell, Headphones, Package, AlertTriangle, CheckCircle, Shield, BarChart3, Calendar, Clock, CreditCard, Award } from 'lucide-react';
 import { usePremium } from '../contexts/PremiumContext';
 import { useAuth } from '../contexts/AuthContext';
-import { cancelPremiumSubscription, restorePremiumSubscription, canRestoreSubscription } from '../services/premium.service';
+import { restorePremiumSubscription, canRestoreSubscription } from '../services/premium.service';
 import { useNavigate } from 'react-router-dom';
 
 const PremiumManagePage: React.FC = () => {
   const { user } = useAuth();
-  const { premiumUser, subscription, isPremium, refreshPremiumStatus } = usePremium();
+  const { premiumUser, isPremium, refreshPremiumStatus } = usePremium();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -15,77 +15,45 @@ const PremiumManagePage: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Gerçek kullanım verilerini simüle eden fonksiyon
-  const generateRealUsageData = () => {
-    return {
-      exchangeQueries: Math.floor(Math.random() * 500) + 800, // 800-1300 arası
-      cargoTracking: Math.floor(Math.random() * 15) + 5, // 5-20 arası
-      reminders: Math.floor(Math.random() * 8) + 3, // 3-11 arası
-      consultations: Math.floor(Math.random() * 3) + 1, // 1-4 arası
-      reports: Math.floor(Math.random() * 20) + 15, // 15-35 arası
-      avgResponseTime: (Math.random() * 2 + 1).toFixed(1), // 1.0-3.0s arası
-      aiSuggestions: Math.floor(Math.random() * 10) + 8 // 8-18 arası
-    };
-  };
 
-  const [usageData] = useState(generateRealUsageData());
+
 
   const premiumFeatures = [
     {
       icon: TrendingUp,
       title: 'Anlık Döviz & Borsa Kurları',
       description: 'Döviz, fon, hisse ve altın kurlarını anlık olarak takip edin',
-      status: 'active',
-      usage: `${usageData.exchangeQueries} sorgu`
+      status: 'active'
     },
     {
       icon: Package,
       title: 'Kargo Takibi',
       description: 'Kargolarınızı sitemizden çıkmadan direkt takip edin',
-      status: 'active',
-      usage: `${usageData.cargoTracking} kargo`
+      status: 'active'
     },
     {
       icon: Bell,
       title: 'Akıllı Hatırlatmalar',
       description: 'Giderlerinizi 3 gün önceden e-posta ile hatırlayın',
-      status: 'active',
-      usage: `${usageData.reminders} hatırlatma`
+      status: 'active'
     },
     {
       icon: Headphones,
       title: 'VIP Danışman Hizmeti',
       description: 'Ücretsiz premium danışmanlık hizmeti alın',
-      status: 'active',
-      usage: `${usageData.consultations} görüşme`
+      status: 'active'
     },
     {
       icon: BarChart3,
       title: 'Gelişmiş Analitik',
       description: 'Detaylı finansal raporlar ve analizler',
-      status: 'active',
-      usage: `${usageData.reports} rapor`
+      status: 'active'
     },
     {
       icon: Shield,
       title: 'Premium Güvenlik',
       description: 'Gelişmiş güvenlik özellikleri ve veri koruması',
-      status: 'active',
-      usage: 'Aktif'
-    },
-    {
-      icon: Zap,
-      title: 'Hızlı İşlemler',
-      description: 'Öncelikli işlem sırası ve hızlı yanıt',
-      status: 'active',
-      usage: `${usageData.avgResponseTime}s ortalama`
-    },
-    {
-      icon: Sparkles,
-      title: 'AI Destekli Öneriler',
-      description: 'Yapay zeka ile kişiselleştirilmiş finansal öneriler',
-      status: 'active',
-      usage: `${usageData.aiSuggestions} öneri`
+      status: 'active'
     }
   ];
 
@@ -112,23 +80,10 @@ const PremiumManagePage: React.FC = () => {
   }, [user, isPremium, navigate, premiumUser]);
 
   const handleCancelSubscription = async () => {
-    if (!user || !subscription) return;
+    if (!user) return;
 
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      await cancelPremiumSubscription(user.uid);
-      await refreshPremiumStatus();
-      setSuccess('Aboneliğiniz başarıyla iptal edildi. 7 gün içinde geri alabilirsiniz. Mevcut dönem sonuna kadar premium özelliklerden faydalanmaya devam edebilirsiniz.');
-      setShowCancelModal(false);
-      setCanRestore(true);
-    } catch (error: any) {
-      setError(error.message || 'Abonelik iptal edilirken bir hata oluştu.');
-    } finally {
-      setLoading(false);
-    }
+    // Direkt Stripe billing portalına yönlendir
+    window.open('https://billing.stripe.com/p/login/7sY6oGezng7111XcFh24000', '_blank');
   };
 
   const handleRestoreSubscription = async () => {
@@ -193,10 +148,10 @@ const PremiumManagePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="bg-transparent border-b border-gray-200 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-orange-100 rounded-xl">
@@ -219,7 +174,7 @@ const PremiumManagePage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full overflow-x-hidden">
 
         {/* Alerts */}
         {error && (
@@ -240,92 +195,34 @@ const PremiumManagePage: React.FC = () => {
           </div>
         )}
 
-        {/* Quick Stats */}
-         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-             <div className="flex items-center gap-3">
-               <div className="p-2 bg-blue-100 rounded-lg">
-                 <TrendingUp className="w-5 h-5 text-blue-600" />
-               </div>
-               <div>
-                 <div className="text-xl font-bold text-gray-900">{usageData.exchangeQueries}</div>
-                 <div className="text-gray-600 text-sm">Döviz Sorgusu</div>
-               </div>
-             </div>
-           </div>
-           
-           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-             <div className="flex items-center gap-3">
-               <div className="p-2 bg-green-100 rounded-lg">
-                 <Package className="w-5 h-5 text-green-600" />
-               </div>
-               <div>
-                 <div className="text-xl font-bold text-gray-900">{usageData.cargoTracking}</div>
-                 <div className="text-gray-600 text-sm">Kargo Takibi</div>
-               </div>
-             </div>
-           </div>
-           
-           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-             <div className="flex items-center gap-3">
-               <div className="p-2 bg-purple-100 rounded-lg">
-                 <Bell className="w-5 h-5 text-purple-600" />
-               </div>
-               <div>
-                 <div className="text-xl font-bold text-gray-900">{usageData.reminders}</div>
-                 <div className="text-gray-600 text-sm">Hatırlatma</div>
-               </div>
-             </div>
-           </div>
-           
-           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-             <div className="flex items-center gap-3">
-               <div className="p-2 bg-orange-100 rounded-lg">
-                 <BarChart3 className="w-5 h-5 text-orange-600" />
-               </div>
-               <div>
-                 <div className="text-xl font-bold text-gray-900">{usageData.reports}</div>
-                 <div className="text-gray-600 text-sm">Analiz Raporu</div>
-               </div>
-             </div>
-           </div>
-         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Subscription Status */}
           <div className="lg:col-span-2 space-y-6">
             {/* Current Plan */}
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 border-b border-gray-100">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl shadow-lg">
-                      <Crown className="w-8 h-8 text-white" />
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="p-2 sm:p-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl shadow-lg">
+                      <Crown className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-gray-900">
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                         Premium Plan
                       </h2>
-                      <p className="text-gray-600">
+                      <p className="text-sm sm:text-base text-gray-600">
                         Tüm premium özellikleriniz aktif
                       </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-gray-900">
-                      ₺19.99<span className="text-lg font-normal text-gray-600">/ay</span>
-                    </div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                      <CheckCircle className="w-4 h-4" />
-                      Aktif
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="p-6">
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-100">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                  <div className="rounded-xl p-6 border" style={{ background: 'linear-gradient(to bottom right, #fff8e1, #ffecb3)', borderColor: '#ffcc02' }}>
                     <div className="flex items-center gap-3 mb-3">
                       <div className="p-2 bg-blue-500 rounded-lg">
                         <Calendar className="w-5 h-5 text-white" />
@@ -347,9 +244,9 @@ const PremiumManagePage: React.FC = () => {
                       {formatDate(premiumUser.premiumEndDate)}
                     </p>
                   </div>
-                  <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-6 border border-purple-100">
+                  <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-100">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 bg-purple-500 rounded-lg">
+                      <div className="p-2 bg-yellow-500 rounded-lg">
                         <CreditCard className="w-5 h-5 text-white" />
                       </div>
                       <span className="font-semibold text-gray-900">Kalan Gün</span>
@@ -361,8 +258,8 @@ const PremiumManagePage: React.FC = () => {
                 </div>
 
                 {daysRemaining !== null && (
-                  <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
-                    <div className="text-blue-700 font-medium">
+                  <div className="mt-6 p-4 rounded-xl border" style={{ background: 'linear-gradient(to right, #fff8e1, #ffecb3)', borderColor: '#ffcc02' }}>
+                    <div className="font-medium" style={{ color: '#e65100' }}>
                       {daysRemaining > 0 ? (
                         `Premium üyeliğiniz ${daysRemaining} gün sonra sona erecek.`
                       ) : (
@@ -387,17 +284,17 @@ const PremiumManagePage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-full self-start sm:self-auto">
                   <Award className="w-5 h-5" />
-                  <span className="font-semibold text-sm">8 Özellik Aktif</span>
+                  <span className="font-semibold text-sm">6 Özellik Aktif</span>
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {premiumFeatures.map((feature, index) => {
                   const Icon = feature.icon;
                   const colors = [
-                    'from-blue-500 to-blue-600',
+                    'from-orange-500 to-orange-600',
                     'from-green-500 to-green-600',
-                    'from-purple-500 to-purple-600',
+                    'from-yellow-500 to-yellow-600',
                     'from-orange-500 to-orange-600',
                     'from-red-500 to-red-600',
                     'from-cyan-500 to-cyan-600',
@@ -426,16 +323,9 @@ const PremiumManagePage: React.FC = () => {
                         </div>
                       </div>
                       
-                      <p className="text-gray-600 text-xs sm:text-sm mb-3 leading-relaxed">
+                      <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
                         {feature.description}
                       </p>
-                      
-                      <div className="pt-3 border-t border-gray-100">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-500">Bu ay</span>
-                          <span className="text-xs sm:text-sm font-semibold text-gray-700">{feature.usage}</span>
-                        </div>
-                      </div>
                     </div>
                   );
                 })}
@@ -496,7 +386,7 @@ const PremiumManagePage: React.FC = () => {
                         </p>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="p-3 sm:p-4 bg-gray-50 rounded-lg text-center">
                           <div className="text-xl sm:text-2xl font-bold text-gray-900">7</div>
                           <div className="text-gray-600 text-xs sm:text-sm">Gün geri alma süresi</div>
@@ -509,8 +399,8 @@ const PremiumManagePage: React.FC = () => {
                     </div>
                     
                     <button
-                      onClick={() => setShowCancelModal(true)}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white py-3 sm:py-4 px-6 rounded-lg font-semibold transition-colors duration-200"
+                      onClick={() => window.open('/premium-cancel', '_blank')}
+                      className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
                     >
                       <div className="flex items-center justify-center gap-2">
                         <AlertTriangle className="w-5 h-5" />

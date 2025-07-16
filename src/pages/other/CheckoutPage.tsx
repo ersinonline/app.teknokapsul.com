@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { ArrowLeft, MapPin, Package } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, MapPin, Package, Plus, BookOpen } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getShippingQuote, createShipment } from '../../../geliver';
+import { getShippingQuote } from '../../../geliver';
 import { useAuth } from '../../contexts/AuthContext';
-import { createOrder, OrderItem, ShippingAddress } from '../../services/order.service';
-import { usePoints } from '../../services/points.service';
+import { createPremiumCheckoutSession } from '../../services/stripe.service';
+import { getSavedAddresses, saveAddress, SavedAddress } from '../../services/user.service';
+import AddressAutocomplete from '../../components/AddressAutocomplete';
 
 interface CartItem {
   product: {
@@ -39,11 +40,85 @@ const CheckoutPage: React.FC = () => {
     postalCode: ''
   });
   
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedSavedAddress, setSelectedSavedAddress] = useState<SavedAddress | null>(null);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  // Address saving is now automatic, no need for user confirmation
+  
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
   const [loadingQuotes, setLoadingQuotes] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1); // 1: Adres, 2: Kargo, 3: Ödeme
+
+  // Kayıtlı adresleri yükle
+  useEffect(() => {
+    if (user) {
+      loadSavedAddresses();
+    }
+  }, [user]);
+
+  const loadSavedAddresses = async () => {
+    if (!user) return;
+    
+    try {
+      const addresses = await getSavedAddresses(user.uid);
+      setSavedAddresses(addresses);
+      
+      // Default adresi otomatik seç
+      const defaultAddress = addresses.find(addr => addr.isDefault);
+      if (defaultAddress && !selectedSavedAddress) {
+        setSelectedSavedAddress(defaultAddress);
+        setShippingAddress({
+          fullName: defaultAddress.fullName,
+          email: defaultAddress.email,
+          phone: defaultAddress.phone,
+          address: defaultAddress.address,
+          city: defaultAddress.city,
+          district: defaultAddress.district,
+          postalCode: defaultAddress.postalCode || ''
+        });
+      }
+    } catch (error) {
+      console.error('Kayıtlı adresler yüklenemedi:', error);
+    }
+  };
+
+  const handleSavedAddressSelect = (address: SavedAddress) => {
+    setSelectedSavedAddress(address);
+    setShippingAddress({
+      fullName: address.fullName,
+      email: address.email,
+      phone: address.phone,
+      address: address.address,
+      city: address.city,
+      district: address.district,
+      postalCode: address.postalCode || ''
+    });
+    setShowAddressForm(false);
+  };
+
+  const handleSaveAddress = async () => {
+    if (!user) return;
+    
+    try {
+      await saveAddress(user.uid, {
+        fullName: shippingAddress.fullName,
+        email: shippingAddress.email,
+        phone: shippingAddress.phone,
+        address: shippingAddress.address,
+        city: shippingAddress.city,
+        district: shippingAddress.district,
+        postalCode: shippingAddress.postalCode,
+        isDefault: savedAddresses.length === 0 // İlk adres ise default yap
+      });
+      
+      // Kayıtlı adresleri yeniden yükle
+      await loadSavedAddresses();
+    } catch (error) {
+      console.error('Adres kaydedilemedi:', error);
+    }
+  };
 
   const getShippingQuotesForOrder = async () => {
     if (!shippingAddress.fullName || !shippingAddress.email || !shippingAddress.phone || !shippingAddress.address || !shippingAddress.city || !shippingAddress.district) {
@@ -83,7 +158,7 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
-  const completeOrder = async () => {
+  const proceedToPayment = async () => {
     if (!user) {
       alert('Sipariş vermek için giriş yapmalısınız!');
       return;
@@ -96,78 +171,36 @@ const CheckoutPage: React.FC = () => {
 
     setIsCompleting(true);
     try {
-      const orderNumber = `ORD-${Date.now()}`;
       const pointsDiscount = pointsToUse * 0.01; // 100 puan = 1 TL
       const finalTotal = (cartTotal + selectedShipping.totalAmount) - pointsDiscount;
+      const amountInCents = Math.round(finalTotal * 100); // Stripe için kuruş cinsinden
 
-      // Firebase'e sipariş kaydet
-      const orderItems: OrderItem[] = cart.map((item: CartItem) => ({
-        id: item.product.id,
-        name: item.product.urunAdi,
-        quantity: item.quantity,
-        price: item.product.magazaFiyati
-      }));
-
-      const orderAddress: ShippingAddress = {
-        fullName: shippingAddress.fullName,
-        email: shippingAddress.email,
-        phone: shippingAddress.phone,
-        address: shippingAddress.address,
-        city: shippingAddress.city,
-        district: shippingAddress.district,
-        postalCode: shippingAddress.postalCode
+      // Sipariş bilgilerini localStorage'a kaydet (ödeme sonrası kullanmak için)
+      const orderData = {
+        cart,
+        cartTotal,
+        shippingAddress,
+        selectedShipping,
+        pointsToUse,
+        finalTotal
       };
+      localStorage.setItem('pendingOrder', JSON.stringify(orderData));
 
-      await createOrder(user.uid, {
-        orderNumber,
-        items: orderItems,
-        total: cartTotal,
-        shippingCost: selectedShipping.totalAmount,
-        grandTotal: finalTotal,
-        status: 'pending' as const,
-        orderDate: new Date(),
-        shippingAddress: orderAddress
+      // Stripe checkout session oluştur
+      const session = await createPremiumCheckoutSession({
+        userId: user.uid,
+        productId: 'order_payment', // Sipariş ödemesi için özel product ID
+        customerEmail: user.email || shippingAddress.email,
+        amount: amountInCents,
+        successUrl: `${window.location.origin}/other/order-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${window.location.origin}/other/checkout`
       });
 
-      // Geliver'a kargo oluştur
-      await createShipment({
-        receiverName: shippingAddress.fullName,
-        receiverPhone: shippingAddress.phone,
-        receiverEmail: shippingAddress.email,
-        receiverAddress: shippingAddress.address,
-        receiverDistrict: shippingAddress.district,
-        receiverCity: shippingAddress.city,
-        receiverPostalCode: shippingAddress.postalCode || '34000',
-        packages: cart.map((item: CartItem) => ({
-          weight: item.product.agirlik || 1,
-          length: 20,
-          width: 15,
-          height: 10,
-          quantity: item.quantity
-        })),
-        selectedOffer: {
-          company: selectedShipping.company,
-          service: selectedShipping.service,
-          price: selectedShipping.totalAmount
-        }
-      });
-
-      // Puanları kullan
-      if (pointsToUse > 0) {
-        await usePoints(user.uid, pointsToUse);
-      }
-
-      // Sipariş başarı sayfasına yönlendir
-      navigate('/other/order-success', {
-        state: {
-          orderNumber,
-          total: finalTotal,
-          items: orderItems
-        }
-      });
+      // Stripe ödeme sayfasına yönlendir
+      window.location.href = session.url;
     } catch (error) {
-      console.error('❌ Sipariş oluşturulurken hata:', error);
-      alert('Sipariş oluşturulurken bir hata oluştu!');
+      console.error('❌ Ödeme sayfasına yönlendirilirken hata:', error);
+      alert('Ödeme sayfasına yönlendirilirken bir hata oluştu!');
     } finally {
       setIsCompleting(false);
     }
@@ -204,7 +237,94 @@ const CheckoutPage: React.FC = () => {
                 <h2 className="text-lg font-semibold">Teslimat Adresi</h2>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Kayıtlı Adresler */}
+              {user && savedAddresses.length > 0 && !showAddressForm && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-md font-medium text-gray-700">Kayıtlı Adreslerim</h3>
+                    <button
+                      onClick={() => setShowAddressForm(true)}
+                      className="flex items-center gap-1 text-sm text-yellow-600 hover:text-yellow-700"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Yeni Adres Ekle
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {savedAddresses.map((address) => (
+                      <div
+                        key={address.id}
+                        onClick={() => handleSavedAddressSelect(address)}
+                        className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                          selectedSavedAddress?.id === address.id
+                            ? 'border-yellow-400 bg-yellow-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-sm">{address.fullName}</span>
+                              {address.isDefault && (
+                                <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">
+                                  Varsayılan
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {address.address}, {address.district}, {address.city}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {address.phone} • {address.email}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Yeni Adres Formu veya Adres Düzenleme */}
+              {(showAddressForm || savedAddresses.length === 0 || selectedSavedAddress) && (
+                <div>
+                  {savedAddresses.length > 0 && showAddressForm && (
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-md font-medium text-gray-700">Yeni Adres Ekle</h3>
+                      <button
+                        onClick={() => setShowAddressForm(false)}
+                        className="text-sm text-gray-500 hover:text-gray-700"
+                      >
+                        ← Kayıtlı Adreslerime Dön
+                      </button>
+                    </div>
+                  )}
+                  
+                  {selectedSavedAddress && !showAddressForm && (
+                    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <BookOpen className="w-4 h-4 text-green-600" />
+                        <span className="text-sm font-medium text-green-800">Seçili Adres</span>
+                      </div>
+                      <p className="text-sm text-green-700">
+                        {selectedSavedAddress.fullName} - {selectedSavedAddress.address}, {selectedSavedAddress.district}, {selectedSavedAddress.city}
+                      </p>
+                      <button
+                        onClick={() => {
+                          setSelectedSavedAddress(null);
+                          setShowAddressForm(true);
+                        }}
+                        className="text-xs text-green-600 hover:text-green-700 mt-1"
+                      >
+                        Farklı adres kullan
+                      </button>
+                    </div>
+                  )}
+              
+                  {/* Adres Formu - sadece gerektiğinde göster */}
+                  {(showAddressForm || savedAddresses.length === 0 || !selectedSavedAddress) && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Ad Soyad *</label>
                   <input
@@ -272,21 +392,48 @@ const CheckoutPage: React.FC = () => {
                 </div>
                 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Adres *</label>
-                  <textarea
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Adres * (Google ile ara)</label>
+                  <AddressAutocomplete
                     value={shippingAddress.address}
-                    onChange={(e) => setShippingAddress(prev => ({ ...prev, address: e.target.value }))}
-                    rows={3}
+                    onChange={(value) => setShippingAddress(prev => ({ ...prev, address: value }))}
+                    onAddressSelect={(addressData) => {
+                      setShippingAddress(prev => ({
+                        ...prev,
+                        address: addressData.fullAddress,
+                        city: addressData.city || prev.city,
+                        district: addressData.district || prev.district,
+                        postalCode: addressData.postalCode || prev.postalCode
+                      }));
+                    }}
+                    placeholder="Adres aramaya başlayın..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    placeholder="Detaylı adres bilgisi"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Google haritalardan adres seçebilir veya manuel olarak yazabilirsiniz
+                  </p>
                 </div>
-              </div>
+                  
+                      {/* Adresler otomatik olarak kaydedilir */}
+                      {user && !selectedSavedAddress && (
+                        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <p className="text-sm text-blue-700">
+                            ℹ️ Bu adres otomatik olarak kaydedilecek ve gelecek siparişlerinizde kullanabileceksiniz.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
               
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (shippingAddress.fullName && shippingAddress.email && shippingAddress.phone && 
                       shippingAddress.city && shippingAddress.district && shippingAddress.address) {
+                    // Adresi otomatik kaydet (kullanıcıya sormadan)
+                    if (user && !selectedSavedAddress) {
+                      await handleSaveAddress();
+                    }
                     getShippingQuotesForOrder();
                     setCurrentStep(2);
                   } else {
@@ -395,12 +542,12 @@ const CheckoutPage: React.FC = () => {
               </div>
               
               <button
-                onClick={completeOrder}
+                onClick={proceedToPayment}
                 disabled={!selectedShipping || isCompleting}
                 style={{backgroundColor: selectedShipping && !isCompleting ? '#ffb700' : undefined}}
                 className="w-full mt-6 py-3 text-white rounded-lg font-semibold transition-opacity disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
               >
-                {isCompleting ? 'Sipariş Oluşturuluyor...' : 'Siparişi Tamamla'}
+                {isCompleting ? 'Ödeme Sayfasına Yönlendiriliyor...' : 'Ödemeye Geç'}
               </button>
             </div>
           </div>

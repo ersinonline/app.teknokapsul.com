@@ -25,7 +25,7 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({
       case 'diversify':
         return <Lightbulb className="w-5 h-5 text-yellow-600" />;
       default:
-        return <Brain className="w-5 h-5 text-purple-600" />;
+        return <Brain className="w-5 h-5 text-yellow-600" />;
     }
   };
 
@@ -40,7 +40,7 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({
       case 'diversify':
         return 'border-yellow-200 bg-yellow-50';
       default:
-        return 'border-purple-200 bg-purple-50';
+        return 'border-yellow-200 bg-yellow-50';
     }
   };
 
@@ -60,14 +60,14 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({
   return (
     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-white">
+      <div className="p-6 text-white" style={{ background: 'linear-gradient(to right, #ffb700, #ff8c00)' }}>
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
             <Sparkles className="w-6 h-6" />
           </div>
           <div>
             <h2 className="text-xl font-bold">AI Finansal Danışman</h2>
-            <p className="text-purple-100">Kişiselleştirilmiş yatırım önerileri</p>
+            <p className="text-yellow-100">Kişiselleştirilmiş yatırım önerileri</p>
           </div>
         </div>
 
@@ -77,7 +77,7 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({
             onClick={() => setActiveTab('recommendations')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeTab === 'recommendations'
-                ? 'bg-white text-purple-600'
+                ? 'bg-white text-yellow-600'
                 : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
             }`}
           >
@@ -87,7 +87,7 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({
             onClick={() => setActiveTab('analysis')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeTab === 'analysis'
-                ? 'bg-white text-purple-600'
+                ? 'bg-white text-yellow-600'
                 : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
             }`}
           >
@@ -227,7 +227,7 @@ export const AIRecommendations: React.FC<AIRecommendationsProps> = ({
             </div>
 
             {/* Öneriler Özeti */}
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
+            <div className="rounded-xl p-4 border" style={{ background: 'linear-gradient(to right, #fff8e1, #ffecb3)', borderColor: '#ffcc02' }}>
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <Lightbulb className="w-5 h-5 text-yellow-500" />
                 Genel Öneriler

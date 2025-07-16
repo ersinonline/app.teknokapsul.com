@@ -29,7 +29,7 @@ const GOAL_CATEGORIES = {
   savings: { label: 'Tasarruf', color: 'bg-green-500', icon: DollarSign },
   investment: { label: 'Yatırım', color: 'bg-blue-500', icon: TrendingUp },
   debt: { label: 'Borç Ödeme', color: 'bg-red-500', icon: Target },
-  purchase: { label: 'Alışveriş', color: 'bg-purple-500', icon: Calendar },
+  purchase: { label: 'Alışveriş', color: 'bg-yellow-500', icon: Calendar },
   other: { label: 'Diğer', color: 'bg-gray-500', icon: Target }
 };
 
@@ -202,8 +202,8 @@ export const GoalsPage = () => {
           
           <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <DollarSign className="w-5 h-5 text-purple-600" />
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <DollarSign className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Toplam Hedef</p>

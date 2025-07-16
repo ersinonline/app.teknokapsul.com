@@ -155,17 +155,7 @@ export const FinancialDataPage = () => {
     }
   };
 
-  const getDebtRatioColor = (availableRatio: number) => {
-    if (availableRatio >= 80) return 'text-green-600';
-    if (availableRatio >= 50) return 'text-yellow-600';
-    return 'text-red-600';
-  };
 
-  const getProgressColor = (availableRatio: number) => {
-    if (availableRatio >= 80) return 'bg-green-500';
-    if (availableRatio >= 50) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
 
   const tabs = [
     { id: 'creditCards', label: 'Kredi Kartları', icon: CreditCardIcon, count: creditCards.length },
@@ -188,32 +178,31 @@ export const FinancialDataPage = () => {
   const totalCashAdvanceDebt = cashAdvanceAccounts.reduce((sum, acc) => sum + acc.currentDebt, 0);
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Finansal Verilerim</h1>
-        <p className="text-gray-600">Kredi kartları, avans hesapları ve kredilerinizi yönetin</p>
+    <div className="p-3 sm:p-6 max-w-7xl mx-auto">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Finansal Verilerim</h1>
+        <p className="text-sm sm:text-base text-gray-600">Kredi kartları, avans hesapları ve kredilerinizi yönetin</p>
       </div>
 
-
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
+      {/* Tabs - Mobile Responsive */}
+      <div className="border-b border-gray-200 mb-4 sm:mb-6">
+        <nav className="-mb-px flex flex-wrap sm:space-x-8">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`flex items-center space-x-1 sm:space-x-2 py-2 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm flex-1 sm:flex-none justify-center sm:justify-start ${
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
+                    ? 'border-yellow-500 text-yellow-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                <span>{tab.label}</span>
-                <span className="bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">
+                <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden text-xs">{tab.label.split(' ')[0]}</span>
+                <span className="bg-gray-100 text-gray-600 py-0.5 px-1 sm:px-2 rounded-full text-xs">
                   {tab.count}
                 </span>
               </button>
@@ -227,132 +216,136 @@ export const FinancialDataPage = () => {
         {/* Kredi Kartları */}
         {activeTab === 'creditCards' && (
           <div>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
               <h2 className="text-lg font-semibold text-gray-900">Kredi Kartları</h2>
               <button 
                 onClick={() => setShowCreditCardForm(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 flex items-center justify-center space-x-2 w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4" />
                 <span>Yeni Kart Ekle</span>
               </button>
             </div>
 
-            {/* Kredi Kartı Özeti */}
+            {/* Kredi Kartı Özeti - Mobile Responsive */}
             {creditCards.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-blue-50 rounded-lg p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <div className="bg-gradient-to-r from-orange-50 to-yellow-100 rounded-lg p-3 sm:p-4 border border-orange-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-blue-600 font-medium">Toplam Limit</p>
-                      <p className="text-xl font-bold text-blue-900">{formatCurrency(totalCreditLimit)}</p>
+                      <p className="text-xs sm:text-sm text-orange-600 font-medium">Toplam Limit</p>
+                      <p className="text-lg sm:text-xl font-bold text-orange-900">{formatCurrency(totalCreditLimit)}</p>
                     </div>
-                    <CreditCardIcon className="w-8 h-8 text-blue-500" />
+                    <CreditCardIcon className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
                   </div>
                 </div>
-                <div className="bg-red-50 rounded-lg p-4">
+                <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-3 sm:p-4 border border-red-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-red-600 font-medium">Toplam Borç</p>
-                      <p className="text-xl font-bold text-red-900">{formatCurrency(totalCreditDebt)}</p>
+                      <p className="text-xs sm:text-sm text-red-600 font-medium">Toplam Borç</p>
+                      <p className="text-lg sm:text-xl font-bold text-red-900">{formatCurrency(totalCreditDebt)}</p>
                     </div>
-                    <DollarSign className="w-8 h-8 text-red-500" />
+                    <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
                   </div>
                 </div>
-                <div className="bg-green-50 rounded-lg p-4">
+                <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-3 sm:p-4 border border-green-200 sm:col-span-2 lg:col-span-1">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-green-600 font-medium">Borç Oranı</p>
-                      <p className="text-xl font-bold text-green-900">%{totalCreditLimit > 0 ? Math.round((totalCreditDebt / totalCreditLimit) * 100) : 0}</p>
+                      <p className="text-xs sm:text-sm text-green-600 font-medium">Borç Oranı</p>
+                      <p className="text-lg sm:text-xl font-bold text-green-900">%{totalCreditLimit > 0 ? Math.round((totalCreditDebt / totalCreditLimit) * 100) : 0}</p>
                     </div>
-                    <Percent className="w-8 h-8 text-green-500" />
+                    <Percent className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" />
                   </div>
                 </div>
               </div>
             )}
 
             {creditCards.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <CreditCardIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">Henüz kredi kartı eklenmemiş</p>
+              <div className="text-center py-8 sm:py-12 bg-gray-50 rounded-lg">
+                <CreditCardIcon className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-sm sm:text-base text-gray-500">Henüz kredi kartı eklenmemiş</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                 {creditCards
                   .sort((a, b) => {
-                    const availableRatioA = ((a.limit - a.currentDebt) / a.limit) * 100;
-                    const availableRatioB = ((b.limit - b.currentDebt) / b.limit) * 100;
-                    return availableRatioA - availableRatioB;
+                    // Borç oranına göre sırala (yüksek borç oranı önce)
+                    const debtRatioA = (a.currentDebt / a.limit) * 100;
+                    const debtRatioB = (b.currentDebt / b.limit) * 100;
+                    return debtRatioB - debtRatioA;
                   })
                   .map((card) => {
                   const debtRatio = calculateDebtRatio(card.currentDebt, card.limit);
                   const availableLimit = calculateAvailableLimit(card.limit, card.currentDebt);
                   
                   return (
-                    <div key={card.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{card.name}</h3>
-                          <p className="text-sm text-gray-600">{card.bank}</p>
+                    <div key={card.id} className="bg-white border-2 border-blue-300 rounded-xl p-4 sm:p-6 hover:shadow-xl transition-all duration-300 hover:border-blue-400 hover:scale-105 shadow-md">
+                      <div className="flex justify-between items-start mb-3 sm:mb-4">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{card.name}</h3>
+                          <p className="text-xs sm:text-sm text-gray-600">{card.bank}</p>
                           <p className="text-xs text-gray-500">**** {card.cardNumber}</p>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex flex-row gap-1 ml-2">
                           <button 
                             onClick={() => {
                               setEditingCreditCard(card);
                               setShowCreditCardForm(true);
                             }}
-                            className="text-gray-400 hover:text-blue-600"
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button 
                             onClick={() => handleDeleteCreditCard(card.id)}
-                            className="text-gray-400 hover:text-red-600"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
 
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Limit</span>
-                          <span className="font-medium">{formatCurrency(card.limit)}</span>
-                        </div>
-                        
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Borç</span>
-                          <span className="font-medium text-red-600">{formatCurrency(card.currentDebt)}</span>
-                        </div>
-                        
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Kullanılabilir</span>
-                          <span className="font-medium text-green-600">{formatCurrency(availableLimit)}</span>
+                      <div className="space-y-2 sm:space-y-3">
+                        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                          <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                            <span className="text-xs text-purple-700 font-semibold block mb-1">💳 Limit</span>
+                            <span className="text-sm sm:text-lg font-bold text-purple-900">{formatCurrency(card.limit)}</span>
+                          </div>
+                          <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                            <span className="text-xs text-red-700 font-semibold block mb-1">💸 Borç</span>
+                            <span className="text-sm sm:text-lg font-bold text-red-900">{formatCurrency(card.currentDebt)}</span>
+                          </div>
+                          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                            <span className="text-xs text-emerald-700 font-semibold block mb-1">✅ Kullanılabilir</span>
+                            <span className="text-sm sm:text-lg font-bold text-emerald-900">{formatCurrency(availableLimit)}</span>
+                          </div>
+                          <div className="bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                            <span className="text-xs text-amber-700 font-semibold block mb-1">📊 Borç Oranı</span>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-sm sm:text-lg font-bold ${
+                                debtRatio > 80 ? 'text-red-600' : debtRatio > 50 ? 'text-orange-600' : 'text-green-600'
+                              }`}>
+                                %{Math.round(debtRatio)}
+                              </span>
+                              <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className={`h-2 rounded-full transition-all duration-300 ${
+                                    debtRatio > 80 ? 'bg-red-500' : debtRatio > 50 ? 'bg-orange-500' : 'bg-green-500'
+                                  }`}
+                                  style={{ width: `${Math.min(debtRatio, 100)}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-600">Kullanılabilir Oran</span>
-                            <span className={`font-medium ${getDebtRatioColor(100 - debtRatio)}`}>
-                              %{100 - debtRatio}
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${getProgressColor(100 - debtRatio)}`}
-                              style={{ width: `${Math.min(100 - debtRatio, 100)}%` }}
-                            ></div>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between items-center pt-2 border-t">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-2 border-t gap-1 sm:gap-0">
                           <div className="flex items-center space-x-1">
-                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                             <span className="text-xs text-gray-600">Kesim: {card.statementDate}</span>
                           </div>
                           <div className="flex items-center space-x-1">
-                            <DollarSign className="w-4 h-4 text-gray-400" />
+                            <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                             <span className="text-xs text-gray-600">Vade: {card.dueDate}</span>
                           </div>
                         </div>
@@ -382,13 +375,13 @@ export const FinancialDataPage = () => {
             {/* Avans Hesap Özeti */}
             {cashAdvanceAccounts.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-purple-50 rounded-lg p-4">
+                <div className="bg-yellow-50 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-purple-600 font-medium">Toplam Limit</p>
-                      <p className="text-xl font-bold text-purple-900">{formatCurrency(totalCashAdvanceLimit)}</p>
+                      <p className="text-sm text-yellow-600 font-medium">Toplam Limit</p>
+                      <p className="text-xl font-bold text-yellow-900">{formatCurrency(totalCashAdvanceLimit)}</p>
                     </div>
-                    <Banknote className="w-8 h-8 text-purple-500" />
+                    <Banknote className="w-8 h-8 text-yellow-500" />
                   </div>
                 </div>
                 <div className="bg-red-50 rounded-lg p-4">
@@ -430,68 +423,76 @@ export const FinancialDataPage = () => {
                   const availableLimit = calculateAvailableLimit(account.limit, account.currentDebt);
                   
                   return (
-                    <div key={account.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div key={account.id} className="bg-white border-2 border-purple-300 rounded-xl p-6 hover:shadow-xl transition-all duration-300 hover:border-purple-400 hover:scale-105 shadow-md">
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h3 className="font-semibold text-gray-900">{account.name}</h3>
                           <p className="text-sm text-gray-600">{account.bank}</p>
                           <p className="text-xs text-gray-500">**** {account.accountNumber}</p>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex flex-row gap-1 ml-2">
                           <button 
                             onClick={() => {
                               setEditingCashAdvance(account);
                               setShowCashAdvanceForm(true);
                             }}
-                            className="text-gray-400 hover:text-blue-600"
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button 
                             onClick={() => handleDeleteCashAdvance(account.id)}
-                            className="text-gray-400 hover:text-red-600"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
 
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Limit</span>
-                          <span className="font-medium">{formatCurrency(account.limit)}</span>
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4">
+                        {/* Limit Kutusu */}
+                        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-indigo-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <span className="text-xs text-indigo-700 font-semibold block mb-1">💰 Limit</span>
+                          <span className="text-sm sm:text-lg font-bold text-indigo-900">{formatCurrency(account.limit)}</span>
                         </div>
                         
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Borç</span>
-                          <span className="font-medium text-red-600">{formatCurrency(account.currentDebt)}</span>
+                        {/* Borç Kutusu */}
+                        <div className="bg-gradient-to-br from-rose-50 to-rose-100 border-2 border-rose-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <span className="text-xs text-rose-700 font-semibold block mb-1">💸 Borç</span>
+                          <span className="text-sm sm:text-lg font-bold text-rose-900">{formatCurrency(account.currentDebt)}</span>
                         </div>
                         
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Kullanılabilir</span>
-                          <span className="font-medium text-green-600">{formatCurrency(availableLimit)}</span>
+                        {/* Kullanılabilir Kutusu */}
+                        <div className="bg-gradient-to-br from-teal-50 to-teal-100 border-2 border-teal-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <span className="text-xs text-teal-700 font-semibold block mb-1">✅ Uygun Limit</span>
+                          <span className="text-sm sm:text-lg font-bold text-teal-900">{formatCurrency(availableLimit)}</span>
                         </div>
-
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-600">Kullanılabilir Oran</span>
-                            <span className={`font-medium ${getDebtRatioColor(100 - debtRatio)}`}>
-                              %{100 - debtRatio}
+                        
+                        {/* Kullanılabilir Oran Kutusu */}
+                        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <span className="text-xs text-emerald-700 font-semibold block mb-1">📈 Oran</span>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm sm:text-lg font-bold ${
+                              (100 - debtRatio) >= 80 ? 'text-green-600' : (100 - debtRatio) >= 50 ? 'text-orange-600' : 'text-red-600'
+                            }`}>
+                              %{Math.round(100 - debtRatio)}
                             </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${getProgressColor(100 - debtRatio)}`}
-                              style={{ width: `${Math.min(100 - debtRatio, 100)}%` }}
-                            ></div>
+                            <div className="flex-1 bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-300 ${
+                                  (100 - debtRatio) >= 80 ? 'bg-green-500' : (100 - debtRatio) >= 50 ? 'bg-orange-500' : 'bg-red-500'
+                                }`}
+                                style={{ width: `${Math.min(100 - debtRatio, 100)}%` }}
+                              ></div>
+                            </div>
                           </div>
                         </div>
+                      </div>
 
-                        <div className="flex justify-between items-center pt-2 border-t">
-                          <div className="flex items-center space-x-1">
-                            <Percent className="w-4 h-4 text-gray-400" />
-                            <span className="text-xs text-gray-600">Faiz: %{account.interestRate}</span>
-                          </div>
+                      <div className="flex justify-between items-center pt-2 border-t">
+                        <div className="flex items-center space-x-1">
+                          <Percent className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs text-gray-600">Faiz: %{account.interestRate}</span>
                         </div>
                       </div>
                     </div>
@@ -523,11 +524,18 @@ export const FinancialDataPage = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {loans.map((loan) => {
+                {loans
+                  .sort((a, b) => {
+                    // Ödeme yüzdesine göre sırala (yüksek ödeme yüzdesi önce)
+                    const paymentRatioA = a.totalAmount > 0 ? ((a.totalAmount - a.remainingAmount) / a.totalAmount) * 100 : 0;
+                    const paymentRatioB = b.totalAmount > 0 ? ((b.totalAmount - b.remainingAmount) / b.totalAmount) * 100 : 0;
+                    return paymentRatioB - paymentRatioA;
+                  })
+                  .map((loan) => {
                   const progress = calculateLoanProgress(loan.totalInstallments, loan.remainingInstallments);
                   
                   return (
-                    <div key={loan.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div key={loan.id} className="bg-white border-2 border-green-300 rounded-xl p-6 hover:shadow-xl transition-all duration-300 hover:border-green-400 hover:scale-105 shadow-md">
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h3 className="font-semibold text-gray-900">{loan.name}</h3>
@@ -553,38 +561,67 @@ export const FinancialDataPage = () => {
                         </div>
                       </div>
 
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4">
+                        {/* Toplam Tutar Kutusu */}
+                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <span className="text-xs text-purple-700 font-semibold block mb-1">💰 Toplam Tutar</span>
+                          <span className="text-sm sm:text-lg font-bold text-purple-900">{formatCurrency(loan.totalAmount)}</span>
+                        </div>
+                        
+                        {/* Kalan Borç Kutusu */}
+                        <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <span className="text-xs text-red-700 font-semibold block mb-1">💸 Kalan Borç</span>
+                          <span className="text-sm sm:text-lg font-bold text-red-900">{formatCurrency(loan.remainingAmount)}</span>
+                        </div>
+                        
+                        {/* Aylık Ödeme Kutusu */}
+                        <div className="bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <span className="text-xs text-amber-700 font-semibold block mb-1">📅 Aylık Ödeme</span>
+                          <span className="text-sm sm:text-lg font-bold text-amber-900">{formatCurrency(loan.monthlyPayment)}</span>
+                        </div>
+                        
+                        {/* İlerleme Kutusu */}
+                        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <span className="text-xs text-emerald-700 font-semibold block mb-1">📊 İlerleme</span>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm sm:text-lg font-bold ${
+                              progress > 80 ? 'text-green-600' : progress > 50 ? 'text-orange-600' : 'text-red-600'
+                            }`}>
+                              %{progress}
+                            </span>
+                            <div className="flex-1 bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-300 ${
+                                  progress > 80 ? 'bg-green-500' : progress > 50 ? 'bg-orange-500' : 'bg-red-500'
+                                }`}
+                                style={{ width: `${Math.min(progress, 100)}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Toplam Tutar</span>
-                          <span className="font-medium">{formatCurrency(loan.totalAmount)}</span>
-                        </div>
-                        
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Kalan Borç</span>
-                          <span className="font-medium text-red-600">{formatCurrency(loan.remainingAmount)}</span>
-                        </div>
-                        
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Aylık Ödeme</span>
-                          <span className="font-medium">{formatCurrency(loan.monthlyPayment)}</span>
-                        </div>
 
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-600">İlerleme</span>
-                            <span className="font-medium text-blue-600">%{progress}</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="h-2 rounded-full bg-blue-500"
-                              style={{ width: `${progress}%` }}
-                            ></div>
+                        <div className="bg-white border-2 border-indigo-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <span className="text-xs text-indigo-700 font-semibold block mb-1">📈 İlerleme</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm sm:text-lg font-bold text-indigo-900">%{progress}</span>
+                            <div className="flex-1 bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-300 ${
+                                  progress > 80 ? 'bg-green-500' : progress > 50 ? 'bg-orange-500' : 'bg-red-500'
+                                }`}
+                                style={{ width: `${progress}%` }}
+                              ></div>
+                            </div>
                           </div>
                         </div>
 
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Kalan Taksit</span>
-                          <span className="font-medium">{loan.remainingInstallments}/{loan.totalInstallments}</span>
+                        {/* Taksit Sayısı Kutusu */}
+                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <span className="text-xs text-blue-700 font-semibold block mb-1">📊 Taksit Sayısı</span>
+                          <span className="text-sm sm:text-lg font-bold text-blue-900">{loan.remainingInstallments}/{loan.totalInstallments}</span>
                         </div>
 
                         <div className="flex justify-between items-center pt-2 border-t">
@@ -642,8 +679,28 @@ export const FinancialDataPage = () => {
                 <input name="name" placeholder="Kart Adı" defaultValue={editingCreditCard?.name || ''} className="w-full p-2 border rounded" required />
                 <input name="bank" placeholder="Banka" defaultValue={editingCreditCard?.bank || ''} className="w-full p-2 border rounded" required />
                 <input name="cardNumber" placeholder="Son 4 Hane" defaultValue={editingCreditCard?.cardNumber || ''} className="w-full p-2 border rounded" required />
-                <input name="limit" type="text" placeholder="Limit" defaultValue={editingCreditCard?.limit || ''} className="w-full p-2 border rounded" required />
-                <input name="currentDebt" type="text" placeholder="Mevcut Borç" defaultValue={editingCreditCard?.currentDebt || ''} className="w-full p-2 border rounded" />
+                <input name="limit" type="text" placeholder="Toplam Limit" defaultValue={editingCreditCard?.limit || ''} className="w-full p-2 border rounded" required />
+                <input 
+                  name="availableLimit" 
+                  type="text" 
+                  placeholder="Kullanılabilir Limit" 
+                  defaultValue={editingCreditCard ? (editingCreditCard.limit - editingCreditCard.currentDebt).toString() : ''} 
+                  className="w-full p-2 border rounded" 
+                  required 
+                  onChange={(e) => {
+                    const availableLimitInput = e.target;
+                    const limitInput = availableLimitInput.form?.querySelector('input[name="limit"]') as HTMLInputElement;
+                    const currentDebtInput = availableLimitInput.form?.querySelector('input[name="currentDebt"]') as HTMLInputElement;
+                    
+                    if (limitInput && currentDebtInput) {
+                      const totalLimit = parseFloat(limitInput.value.replace(',', '.')) || 0;
+                      const availableLimit = parseFloat(availableLimitInput.value.replace(',', '.')) || 0;
+                      const debt = totalLimit - availableLimit;
+                      currentDebtInput.value = debt >= 0 ? debt.toString() : '0';
+                    }
+                  }}
+                />
+                <input name="currentDebt" type="hidden" defaultValue={editingCreditCard?.currentDebt || ''} />
                 <input name="statementDate" type="number" placeholder="Ekstre Günü (1-31)" defaultValue={editingCreditCard?.statementDate || ''} className="w-full p-2 border rounded" required />
                 <input name="dueDate" type="number" placeholder="Son Ödeme Günü (1-31)" defaultValue={editingCreditCard?.dueDate || ''} className="w-full p-2 border rounded" required />
                 <input name="minimumPayment" type="text" placeholder="Minimum Ödeme" defaultValue={editingCreditCard?.minimumPayment || ''} className="w-full p-2 border rounded" />

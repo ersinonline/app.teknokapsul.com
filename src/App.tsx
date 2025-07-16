@@ -48,6 +48,8 @@ import { BudgetPage } from './pages/budget/BudgetPage';
 import PremiumIntroPage from './pages/PremiumIntroPage';
 import PremiumManagePage from './pages/PremiumManagePage';
 import AdminPremiumPage from './pages/AdminPremiumPage';
+import PremiumSuccessPage from './pages/PremiumSuccessPage';
+import PremiumCancelPage from './pages/PremiumCancelPage';
 import { PremiumProvider } from './contexts/PremiumContext';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
@@ -213,6 +215,14 @@ const router = createBrowserRouter([
   {
     path: '/premium/manage',
     element: <ProtectedRoute><PremiumManagePage /></ProtectedRoute>
+  },
+  {
+    path: '/premium/success',
+    element: <ProtectedRoute><PremiumSuccessPage /></ProtectedRoute>
+  },
+  {
+    path: '/premium/cancel',
+    element: <ProtectedRoute><PremiumCancelPage /></ProtectedRoute>
   },
   {
     path: '/admin/premium',

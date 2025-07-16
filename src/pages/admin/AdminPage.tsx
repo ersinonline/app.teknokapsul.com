@@ -1159,8 +1159,8 @@ const AdminPage: React.FC = () => {
               
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <div className="flex items-center">
-                  <div className="p-3 bg-purple-100 rounded-lg">
-                    <ShoppingCart className="w-6 h-6 text-purple-600" />
+                  <div className="p-3 bg-yellow-100 rounded-lg">
+                <ShoppingCart className="w-6 h-6 text-yellow-600" />
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Toplam Gelir</p>
@@ -1603,9 +1603,9 @@ const AdminPage: React.FC = () => {
                 
                 <div className="space-y-6">
                   {/* Başvuru Özeti */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                  <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl p-6 border border-orange-200">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-blue-500 rounded-full">
+                      <div className="p-2 bg-orange-500 rounded-full">
                         <FileText className="w-5 h-5 text-white" />
                       </div>
                       <div>
@@ -1616,7 +1616,7 @@ const AdminPage: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Başvuru No</label>
-                        <p className="text-sm font-mono font-semibold text-blue-600">{selectedSubmission.data.applicationNumber}</p>
+                        <p className="text-sm font-mono font-semibold text-orange-600">{selectedSubmission.data.applicationNumber}</p>
                       </div>
                       <div>
                         <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Gönderim Tarihi</label>
@@ -2302,7 +2302,7 @@ const AdminPage: React.FC = () => {
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         selectedOrder.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                         selectedOrder.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                        selectedOrder.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
+                        selectedOrder.status === 'shipped' ? 'bg-yellow-100 text-yellow-800' :
                         selectedOrder.status === 'delivered' ? 'bg-green-100 text-green-800' :
                         'bg-red-100 text-red-800'
                       }`}>

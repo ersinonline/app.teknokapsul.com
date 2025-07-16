@@ -71,7 +71,7 @@ export const ServicesListPage: React.FC = () => {
           {filteredCategories.map(category => (
             <div key={category.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
               {/* Category Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+              <div className="px-6 py-4" style={{ background: 'linear-gradient(to right, #ffb700, #ff8c00)' }}>
                 <h2 className="text-xl font-semibold text-white flex items-center">
                   <span className="text-2xl mr-3">{category.icon}</span>
                   {category.name}

@@ -15,7 +15,7 @@ interface ExchangeRateModalProps {
 const EXCHANGE_SYMBOLS = [
   { symbol: 'USD', name: 'Amerikan Doları', icon: DollarSign, color: 'text-green-600' },
   { symbol: 'EUR', name: 'Euro', icon: Euro, color: 'text-blue-600' },
-  { symbol: 'GBP', name: 'İngiliz Sterlini', icon: PoundSterling, color: 'text-purple-600' },
+  { symbol: 'GBP', name: 'İngiliz Sterlini', icon: PoundSterling, color: 'text-yellow-600' },
   { symbol: 'GOLD', name: 'Altın (Gram)', icon: TrendingUp, color: 'text-yellow-600' },
   { symbol: 'XAU', name: 'Altın (XAU)', icon: TrendingUp, color: 'text-yellow-500' },
   { symbol: 'SILVER', name: 'Gümüş (Gram)', icon: TrendingUp, color: 'text-gray-600' }

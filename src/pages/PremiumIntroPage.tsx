@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Crown, Check, TrendingUp, Bell, Headphones, Package, Zap, Shield, BarChart3, Sparkles } from 'lucide-react';
 import { usePremium } from '../contexts/PremiumContext';
 import { useAuth } from '../contexts/AuthContext';
-import { createPremiumSubscription, validatePromoCode } from '../services/premium.service';
+import { validatePromoCode, purchasePremiumWithStripe } from '../services/premium.service';
 import { useNavigate } from 'react-router-dom';
 
 const PremiumIntroPage: React.FC = () => {
@@ -38,24 +38,19 @@ const PremiumIntroPage: React.FC = () => {
     setError('');
 
     try {
-      await createPremiumSubscription('monthly', {
-        userId: user.uid,
-        planId: 'monthly',
-        status: 'active',
-        startDate: new Date(),
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-        autoRenew: true,
-        totalAmount: promoCode.trim() === 'TEKNO25' ? 0 : 19.99,
-        promoCode: promoCode.trim() || undefined,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-
+      // Premium durumunu yenile
       await refreshPremiumStatus();
-      navigate('/premium/manage');
+      
+      // Stripe ile ödeme işlemi
+      const { checkoutUrl } = await purchasePremiumWithStripe(
+        user.uid,
+        user.email || ''
+      );
+
+      // Stripe checkout sayfasına yönlendir
+      window.location.href = checkoutUrl;
     } catch (error: any) {
-      setError(error.message || 'Abonelik oluşturulurken bir hata oluştu.');
-    } finally {
+      setError(error.message || 'Ödeme işlemi başlatılırken bir hata oluştu.');
       setLoading(false);
     }
   };
@@ -65,7 +60,7 @@ const PremiumIntroPage: React.FC = () => {
       icon: TrendingUp,
       title: 'Anlık Döviz & Borsa Kurları',
       description: 'Döviz, fon, hisse ve altın kurlarını anlık olarak takip edin',
-      color: 'from-blue-500 to-cyan-500'
+      color: 'from-orange-500 to-yellow-500'
     },
     {
       icon: Package,
@@ -77,7 +72,7 @@ const PremiumIntroPage: React.FC = () => {
       icon: Bell,
       title: 'Akıllı Hatırlatmalar',
       description: 'Giderlerinizi 3 gün önceden e-posta ile hatırlayın',
-      color: 'from-purple-500 to-violet-500'
+      color: 'from-yellow-500 to-orange-500'
     },
     {
       icon: Headphones,
@@ -107,7 +102,7 @@ const PremiumIntroPage: React.FC = () => {
       icon: Sparkles,
       title: 'AI Destekli Öneriler',
       description: 'Yapay zeka ile kişiselleştirilmiş finansal öneriler',
-      color: 'from-indigo-500 to-purple-500'
+      color: 'from-yellow-500 to-orange-500'
     }
   ];
 
@@ -176,10 +171,10 @@ const PremiumIntroPage: React.FC = () => {
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
               <div className="text-3xl font-bold text-white mb-2">
-                ₺19.99<span className="text-lg font-normal">/ay</span>
+                ₺29,99<span className="text-lg font-normal">/ay</span>
               </div>
               <div className="text-white/80">
-                İlk ay ücretsiz deneme
+                Güvenli Stripe ödemesi
               </div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
@@ -301,15 +296,8 @@ const PremiumIntroPage: React.FC = () => {
                   Aylık Premium
                 </span>
                 <div className="text-right">
-                  {promoCode === 'TEKNO25' && promoValid === true ? (
-                    <>
-                      <div className="text-sm text-gray-500 line-through">₺19.99</div>
-                      <div className="text-2xl font-bold text-green-600">₺0.00</div>
-                      <div className="text-xs text-gray-500">İlk ay, sonra ₺19.99/ay</div>
-                    </>
-                  ) : (
-                    <div className="text-2xl font-bold text-gray-900">₺19.99</div>
-                  )}
+                  <div className="text-2xl font-bold text-gray-900">₺29,99</div>
+                  <div className="text-xs text-gray-500">Aylık abonelik</div>
                 </div>
               </div>
               <div className="space-y-2">

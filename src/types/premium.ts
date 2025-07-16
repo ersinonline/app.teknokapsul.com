@@ -22,6 +22,8 @@ export interface PremiumSubscription {
   promoCode?: string;
   discountAmount?: number;
   totalAmount: number;
+  stripeSubscriptionId?: string;
+  stripeCustomerId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

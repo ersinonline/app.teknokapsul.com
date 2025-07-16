@@ -68,14 +68,14 @@ export const SupportTicketReplies: React.FC<SupportTicketRepliesProps> = ({
                 key={reply.id}
                 className={`p-4 rounded-xl shadow-sm ${
                   reply.isAdmin
-                    ? 'bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 ml-4'
+                    ? 'bg-gradient-to-r from-orange-50 to-yellow-100 border border-orange-200 ml-4'
                     : 'bg-white border border-gray-200 mr-4'
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-full ${
-                      reply.isAdmin ? 'bg-blue-500' : 'bg-gray-400'
+                      reply.isAdmin ? 'bg-orange-500' : 'bg-gray-400'
                     }`}>
                       {reply.isAdmin ? (
                         <Shield className="w-4 h-4 text-white" />
@@ -88,7 +88,7 @@ export const SupportTicketReplies: React.FC<SupportTicketRepliesProps> = ({
                         {reply.isAdmin ? 'Müşteri Hizmetleri' : reply.authorName}
                       </span>
                       {reply.isAdmin && (
-                        <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-1 rounded-full">
+                        <span className="ml-2 text-xs bg-orange-500 text-white px-2 py-1 rounded-full">
                           Destek Ekibi
                         </span>
                       )}

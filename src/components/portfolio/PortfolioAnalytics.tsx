@@ -306,9 +306,9 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
           <p className="text-base sm:text-lg font-bold text-yellow-900">{riskMetrics.volatility.toFixed(1)}%</p>
         </div>
         
-        <div className="bg-purple-50 rounded-lg p-3 sm:p-4">
-          <p className="text-xs sm:text-sm font-medium text-purple-800 mb-1">Sharpe Oranı</p>
-          <p className="text-base sm:text-lg font-bold text-purple-900">{riskMetrics.sharpeRatio.toFixed(2)}</p>
+        <div className="bg-yellow-50 rounded-lg p-3 sm:p-4">
+              <p className="text-xs sm:text-sm font-medium text-yellow-800 mb-1">Sharpe Oranı</p>
+              <p className="text-base sm:text-lg font-bold text-yellow-900">{riskMetrics.sharpeRatio.toFixed(2)}</p>
         </div>
         
         <div className="bg-orange-50 rounded-lg p-3 sm:p-4">

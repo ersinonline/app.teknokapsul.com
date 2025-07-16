@@ -111,7 +111,7 @@ export const AIAssistant: React.FC = () => {
       <div className="flex items-center justify-between p-4 border-b bg-blue-600 text-white rounded-t-lg">
         <div className="flex items-center gap-2">
           <Bot className="w-5 h-5" />
-          <span className="font-medium">AI Asistan</span>
+          <span className="font-medium">TeknoBOT</span>
         </div>
         <div className="flex items-center gap-2">
           <button

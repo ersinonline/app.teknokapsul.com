@@ -8,7 +8,7 @@ interface PaymentSummaryProps {
 
 export const PaymentSummary: React.FC<PaymentSummaryProps> = ({ totalAmount }) => {
   return (
-    <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-md">
+    <div className="rounded-xl p-6 text-white shadow-md" style={{ background: 'linear-gradient(to right, #ffb700, #ff8c00)' }}>
       {/* Başlık ve Toplam Borç */}
       <div className="flex justify-between items-start">
         <div>

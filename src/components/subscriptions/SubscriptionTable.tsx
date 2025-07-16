@@ -125,25 +125,25 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
             <tr>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
               >
                 Abonelik
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
               >
                 Bitiş Tarihi
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
               >
                 Durum
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider"
               >
                 İşlemler
               </th>
@@ -158,14 +158,14 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
                 <tr key={subscription.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{subscription.name}</div>
-                <div className="text-sm text-gray-500">{subscription.price} TL/ay</div>
+                <div className="text-sm text-gray-700">{subscription.price} TL/ay</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-700">
                       {formatDate(subscription.endDate)}
                     </div>
                     {subscription.autoRenew && (
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-gray-600">
                         Otomatik yenileme: {subscription.renewalDay}. gün
                       </div>
                     )}
@@ -223,7 +223,7 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
                   <h3 className="text-sm font-medium text-gray-900">{subscription.name}</h3>
-          <p className="text-xs text-gray-500">{subscription.price} TL/ay</p>
+          <p className="text-xs text-gray-700">{subscription.price} TL/ay</p>
                 </div>
                 <span
                   className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${className}`}
@@ -234,11 +234,11 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
               </div>
               
               <div className="mb-3">
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-700">
                   Bitiş: {formatDate(subscription.endDate)}
                 </p>
                 {subscription.autoRenew && (
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-600">
                     Otomatik yenileme: {subscription.renewalDay}. gün
                   </p>
                 )}

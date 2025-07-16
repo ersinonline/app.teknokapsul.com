@@ -290,7 +290,17 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   {getStatusIcon(price.status)}
-                  <span className="font-medium text-gray-900 text-sm sm:text-base">{item.symbol}</span>
+                  <a 
+                    href={item.type === 'stock' 
+                      ? `https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/Temel-Degerler-Ve-Oranlar.aspx?hisse=${item.symbol}` 
+                      : `https://www.tefas.gov.tr/FonAnaliz.aspx?FonKod=${item.symbol}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-primary hover:text-primary-dark text-sm sm:text-base transition-colors"
+                  >
+                    {item.symbol}
+                  </a>
                 </div>
                 <span className="text-xs sm:text-sm text-gray-600 truncate">{item.name}</span>
               </div>

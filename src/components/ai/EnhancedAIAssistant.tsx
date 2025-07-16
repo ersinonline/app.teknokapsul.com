@@ -38,7 +38,11 @@ export const EnhancedAIAssistant: React.FC = () => {
     "Tasarruf ipuçları",
     "Başvuru durumu?",
     "Yatırım tavsiyeleri",
-    "Risk analizi"
+    "Risk analizi",
+    "Kargo durumu?",
+    "Garanti takibi?",
+    "Gelir/gider analizi",
+    "Sipariş durumu?"
   ];
 
   // Hızlı işlemler
@@ -46,7 +50,10 @@ export const EnhancedAIAssistant: React.FC = () => {
     { text: "📝 Başvuru Yap", action: () => handleShowApplicationForm() },
     { text: "🎫 Destek Talebi", action: () => handleShowSupportForm() },
     { text: "📊 Portföy Analizi", action: () => handlePortfolioAnalysis() },
-    { text: "💡 Yatırım Önerileri", action: () => handleInvestmentSuggestions() }
+    { text: "💡 Yatırım Önerileri", action: () => handleInvestmentSuggestions() },
+    { text: "📦 Kargo Takibi", action: () => handleSendMessage('Kargo durumum nedir?') },
+    { text: "🛡️ Garanti Takibi", action: () => handleSendMessage('Garanti durumum nedir?') },
+    { text: "💰 Finansal Analiz", action: () => handleSendMessage('Gelir gider analizimi yap') }
   ];
 
   const scrollToBottom = () => {
@@ -119,8 +126,8 @@ export const EnhancedAIAssistant: React.FC = () => {
   const generateAIResponse = async (userMessage: string): Promise<string> => {
     const lowerMessage = userMessage.toLowerCase();
     
-    // Başvuru/destek durumu sorgulama
-    const statusKeywords = ['başvuru', 'durum', 'destek', 'talep', 'başvurum', 'durumu', 'nerede', 'ne zaman', 'onaylandı', 'reddedildi', 'beklemede'];
+    // Kapsamlı durum sorgulama - başvuru, destek, sipariş, kargo, garanti, portföy
+    const statusKeywords = ['başvuru', 'durum', 'destek', 'talep', 'başvurum', 'durumu', 'nerede', 'ne zaman', 'onaylandı', 'reddedildi', 'beklemede', 'sipariş', 'kargo', 'garanti', 'portföy', 'gelir', 'gider', 'bütçe'];
     const isStatusQuery = statusKeywords.some(keyword => lowerMessage.includes(keyword));
     
     if (user && isStatusQuery) {
@@ -128,7 +135,7 @@ export const EnhancedAIAssistant: React.FC = () => {
         return await queryUserStatus(user.uid, userMessage);
       } catch (error) {
         console.error('Durum sorgulama hatası:', error);
-        return 'Üzgünüm, şu anda başvuru ve destek taleplerini sorgulayamıyorum. Lütfen daha sonra tekrar deneyin.';
+        return 'Üzgünüm, şu anda verilerinizi sorgulayamıyorum. Lütfen daha sonra tekrar deneyin.';
       }
     }
     
@@ -549,11 +556,10 @@ export const EnhancedAIAssistant: React.FC = () => {
     <>
       <div className="flex flex-col h-[600px] bg-white rounded-lg shadow-lg">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 text-white rounded-t-lg" style={{ background: 'linear-gradient(to right, #ffb700, #ff8c00)' }}>
         <div className="flex items-center gap-2">
           <Bot className="w-6 h-6 text-white" />
           <h3 className="font-semibold text-white">🤖 TeknoBOT</h3>
-          <span className="text-xs bg-white/20 px-2 py-1 rounded-full">TeknoBOT</span>
         </div>
         <div className="flex items-center gap-2">
           {isSpeaking && (
@@ -586,9 +592,9 @@ export const EnhancedAIAssistant: React.FC = () => {
           >
             <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
               message.sender === 'user' 
-                ? 'bg-blue-600 text-white' 
+                ? 'text-white' 
                 : 'bg-gray-200 text-gray-600'
-            }`}>
+            }`} style={message.sender === 'user' ? { backgroundColor: '#ffb700' } : {}}>
               {message.sender === 'user' ? (
                 <User className="w-4 h-4" />
               ) : (
@@ -600,9 +606,9 @@ export const EnhancedAIAssistant: React.FC = () => {
             }`}>
               <div className={`inline-block p-3 rounded-lg ${
                 message.sender === 'user'
-                  ? 'bg-blue-600 text-white'
+                  ? 'text-white'
                   : 'bg-gray-100 text-gray-900'
-              }`}>
+              }`} style={message.sender === 'user' ? { backgroundColor: '#ffb700' } : {}}>
                 <p className="text-sm whitespace-pre-wrap">{message.text}</p>
               </div>
               <div className="flex items-center gap-2 mt-1">
@@ -637,7 +643,7 @@ export const EnhancedAIAssistant: React.FC = () => {
                   <button
                     key={index}
                     onClick={action.action}
-                    className="p-4 text-left text-sm bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 text-purple-700 rounded-lg transition-all border border-purple-200 hover:border-purple-300 hover:shadow-md min-h-[60px] flex items-center"
+                    className="p-4 text-left text-sm rounded-lg transition-all border hover:shadow-md min-h-[60px] flex items-center" style={{ background: 'linear-gradient(to right, #fff8e1, #ffecb3)', color: '#e65100', borderColor: '#ffcc02' }}
                   >
                     {action.text}
                   </button>
@@ -703,7 +709,10 @@ export const EnhancedAIAssistant: React.FC = () => {
           <button
             onClick={() => handleSendMessage()}
             disabled={!inputText.trim() || isLoading}
-            className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="p-3 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            style={{ backgroundColor: '#ffb700' }}
+            onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#e6a500')}
+            onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#ffb700')}
             title="Gönder"
           >
             <Send className="w-4 h-4" />

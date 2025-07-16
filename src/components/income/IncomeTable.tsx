@@ -119,16 +119,16 @@ export const IncomeTable: React.FC<IncomeTableProps> = ({ incomes, onUpdate }) =
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Gelir
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
               Kategori
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
               Tarih
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
               Durum
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+            <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
               İşlemler
             </th>
           </tr>
@@ -143,7 +143,7 @@ export const IncomeTable: React.FC<IncomeTableProps> = ({ incomes, onUpdate }) =
                   <div className="text-sm font-medium text-gray-900">{income.title}</div>
                   <div className="text-sm text-green-600 font-semibold">{formatCurrency(income.amount)}</div>
                   {income.description && (
-                    <div className="text-xs text-gray-500 mt-1">{income.description}</div>
+                    <div className="text-xs text-gray-600 mt-1">{income.description}</div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -152,7 +152,7 @@ export const IncomeTable: React.FC<IncomeTableProps> = ({ incomes, onUpdate }) =
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-700">
                     {formatDate(income.date)}
                   </div>
                 </td>

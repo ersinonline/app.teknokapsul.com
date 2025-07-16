@@ -94,7 +94,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
     return {
       icon: <CreditCard className="w-4 h-4" />,
       text: 'Tek seferlik',
-      className: 'bg-purple-100 text-purple-800'
+      className: 'bg-yellow-100 text-yellow-800'
     };
   };
 
@@ -148,19 +148,19 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Gider
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
               Kategori
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
               Tarih
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
               Durum
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
               Ödeme
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+            <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
               İşlemler
             </th>
           </tr>
@@ -176,7 +176,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
                   <div className="text-sm font-medium text-gray-900">{expense.title}</div>
                   <div className="text-sm text-red-600 font-semibold">{formatCurrency(expense.amount)}</div>
                   {expense.description && (
-                    <div className="text-xs text-gray-500 mt-1">{expense.description}</div>
+                    <div className="text-xs text-gray-600 mt-1">{expense.description}</div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -185,7 +185,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-700">
                     {formatDate(expense.date)}
                   </div>
                 </td>

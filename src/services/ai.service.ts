@@ -2,6 +2,7 @@ import { getAI, getGenerativeModel, GoogleAIBackend, FunctionDeclaration, Object
 import { app, db } from "../config/firebase";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { getAllSupportTickets } from "./support.service";
+import { getUserCargoTrackings } from "./cargo.service";
 
 // AI servisini başlat
 const ai = getAI(app, { backend: new GoogleAIBackend() });
@@ -118,12 +119,134 @@ export const getUserOrders = async (userId: string) => {
   }
 };
 
-// AI ile başvuru/destek/sipariş durumu sorgulama
+// Kullanıcının kargo takiplerini getir
+export const getUserCargos = async (userId: string) => {
+  try {
+    const cargos = await getUserCargoTrackings(userId);
+    return cargos;
+  } catch (error) {
+    console.error('Kullanıcı kargo takipleri alınırken hata:', error);
+    return [];
+  }
+};
+
+// Kullanıcının garanti takiplerini getir
+export const getUserWarranties = async (userId: string) => {
+  try {
+    const warrantiesRef = collection(db, 'warranties');
+    const q = query(warrantiesRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      purchaseDate: doc.data().purchaseDate?.toDate?.() || doc.data().purchaseDate,
+      warrantyEndDate: doc.data().warrantyEndDate?.toDate?.() || doc.data().warrantyEndDate,
+      createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt
+    }));
+  } catch (error) {
+    console.error('Kullanıcı garanti takipleri alınırken hata:', error);
+    return [];
+  }
+};
+
+// Kullanıcının gelir/gider verilerini getir
+export const getUserFinancialData = async (userId: string) => {
+  try {
+    const [incomes, expenses, budgets, portfolios, creditCards] = await Promise.all([
+      getUserIncomes(userId),
+      getUserExpenses(userId),
+      getUserBudgets(userId),
+      getUserPortfolios(userId),
+      getUserCreditCards(userId)
+    ]);
+    
+    return {
+      incomes,
+      expenses,
+      budgets,
+      portfolios,
+      creditCards
+    };
+  } catch (error) {
+    console.error('Kullanıcı finansal verileri alınırken hata:', error);
+    return {
+      incomes: [],
+      expenses: [],
+      budgets: [],
+      portfolios: [],
+      creditCards: []
+    };
+  }
+};
+
+// Yardımcı fonksiyonlar
+const getUserIncomes = async (userId: string) => {
+  try {
+    const incomesRef = collection(db, 'teknokapsul', userId, 'incomes');
+    const q = query(incomesRef, orderBy('date', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    return [];
+  }
+};
+
+const getUserExpenses = async (userId: string) => {
+  try {
+    const expensesRef = collection(db, 'teknokapsul', userId, 'expenses');
+    const q = query(expensesRef, orderBy('date', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    return [];
+  }
+};
+
+const getUserBudgets = async (userId: string) => {
+  try {
+    const budgetsRef = collection(db, 'teknokapsul', userId, 'budgets');
+    const q = query(budgetsRef, orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    return [];
+  }
+};
+
+const getUserPortfolios = async (userId: string) => {
+  try {
+    const portfoliosRef = collection(db, 'teknokapsul', userId, 'portfolios');
+    const q = query(portfoliosRef, orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    return [];
+  }
+};
+
+const getUserCreditCards = async (userId: string) => {
+  try {
+    const creditCardsRef = collection(db, 'teknokapsul', userId, 'creditCards');
+    const q = query(creditCardsRef, orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    return [];
+  }
+};
+
+// AI ile kapsamlı kullanıcı durumu sorgulama
 export const queryUserStatus = async (userId: string, userQuery: string): Promise<string> => {
   try {
-    const applications = await getUserApplications(userId);
-    const supportTickets = await getUserSupportTickets(userId);
-    const orders = await getUserOrders(userId);
+    const [applications, supportTickets, orders, cargos, warranties, financialData] = await Promise.all([
+      getUserApplications(userId),
+      getUserSupportTickets(userId),
+      getUserOrders(userId),
+      getUserCargos(userId),
+      getUserWarranties(userId),
+      getUserFinancialData(userId)
+    ]);
     
     const prompt = `Kullanıcının sorusu: "${userQuery}"
 
@@ -136,18 +259,43 @@ ${JSON.stringify(supportTickets, null, 2)}
 Kullanıcının siparişleri:
 ${JSON.stringify(orders, null, 2)}
 
-Lütfen kullanıcının sorusuna göre başvuru, destek talepleri ve siparişlerin durumunu açıklayın. Türkçe ve samimi bir dille yanıtlayın. Sipariş numaralarını, durumları ve tarihlerini belirtin. Sipariş durumları için şu açıklamaları kullan:
+Kullanıcının kargo takipleri:
+${JSON.stringify(cargos, null, 2)}
+
+Kullanıcının garanti takipleri:
+${JSON.stringify(warranties, null, 2)}
+
+Kullanıcının finansal verileri:
+${JSON.stringify(financialData, null, 2)}
+
+Lütfen kullanıcının sorusuna göre tüm verilerini analiz ederek kapsamlı bir yanıt verin. Türkçe ve samimi bir dille yanıtlayın. 
+
+Sipariş durumları:
 - pending: Beklemede
 - processing: Hazırlanıyor
 - shipped: Kargoda
 - delivered: Teslim Edildi
-- cancelled: İptal Edildi`;
+- cancelled: İptal Edildi
+
+Kargo durumları:
+- isDelivered: true = Teslim Edildi, false = Yolda
+
+Garanti durumları:
+- Garanti bitiş tarihini kontrol ederek aktif/süresi dolmuş bilgisi ver
+
+Finansal analiz:
+- Gelir/gider dengesini analiz et
+- Portföy performansını değerlendir
+- Kredi kartı borçlarını kontrol et
+- Bütçe hedeflerine ulaşım durumunu değerlendir
+
+Eğer soru portföy ile ilgiliyse, finansal verileri analiz et ve portföy durumunu açıkla, sipariş bilgilerini verme.`;
     
     const result = await generateText(prompt);
     return result;
   } catch (error) {
     console.error('AI durum sorgulama hatası:', error);
-    return 'Üzgünüm, şu anda başvuru, destek talepleri ve siparişleri sorgulayamıyorum. Lütfen daha sonra tekrar deneyin.';
+    return 'Üzgünüm, şu anda verilerinizi sorgulayamıyorum. Lütfen daha sonra tekrar deneyin.';
   }
 };
 

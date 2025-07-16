@@ -151,17 +151,17 @@ const LoanCalculator: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50/30 to-gray-100/30 p-2 sm:p-4">
       <div className="max-w-5xl mx-auto space-y-3 sm:space-y-4 animate-fade-in">
         {/* Modern Header with Gradient */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 sm:p-5 text-white">
+        <div className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl p-4 sm:p-5 text-white" style={{ background: 'linear-gradient(to right, #ffb700, #ff8c00)' }}>
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
               <Calculator className="h-5 w-5 text-white" />
             </div>
             <h1 className="text-xl sm:text-2xl font-bold">Kredi Hesaplama</h1>
           </div>
-          <p className="text-blue-100 mb-3 text-sm">
+          <p className="text-yellow-100 mb-3 text-sm">
             Kredi detaylarınızı girin ve hesaplama yapın
           </p>
-          <div className="flex items-center gap-2 text-xs text-blue-200">
+          <div className="flex items-center gap-2 text-xs text-yellow-200">
             <Calculator className="h-3 w-3" />
             <span>Güncel faiz oranları ile hesaplama</span>
           </div>
@@ -170,7 +170,7 @@ const LoanCalculator: React.FC = () => {
         {/* Hesaplama Türünü Seçin */}
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-6">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Percent className="h-5 w-5 text-blue-600" />
+            <Percent className="h-5 w-5" style={{ color: '#ffb700' }} />
             Hesaplama Türünü Seçin
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -178,13 +178,14 @@ const LoanCalculator: React.FC = () => {
               onClick={() => setCalculationMode('rate')}
               className={`p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 hover:scale-105 ${
                 calculationMode === 'rate'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md'
+                  ? 'bg-yellow-50 text-yellow-700 shadow-md'
                   : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
               }`}
+              style={calculationMode === 'rate' ? { borderColor: '#ffb700' } : {}}
             >
               <div className="flex flex-col items-center text-center">
                 <div className={`p-1.5 rounded-lg mb-1.5 ${
-                  calculationMode === 'rate' ? 'bg-blue-100' : 'bg-gray-100'
+                  calculationMode === 'rate' ? 'bg-yellow-100' : 'bg-gray-100'
                 }`}>
                   <Percent className="h-4 w-4" />
                 </div>
@@ -196,13 +197,13 @@ const LoanCalculator: React.FC = () => {
               onClick={() => setCalculationMode('bank')}
               className={`p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 hover:scale-105 ${
                 calculationMode === 'bank'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md'
+                  ? 'bg-yellow-50 text-yellow-700 shadow-md'
                   : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
               }`}
             >
               <div className="flex flex-col items-center text-center">
                 <div className={`p-1.5 rounded-lg mb-1.5 ${
-                  calculationMode === 'bank' ? 'bg-blue-100' : 'bg-gray-100'
+                  calculationMode === 'bank' ? 'bg-yellow-100' : 'bg-gray-100'
                 }`}>
                   <Building2 className="h-4 w-4" />
                 </div>
@@ -235,12 +236,13 @@ const LoanCalculator: React.FC = () => {
                       onClick={() => setLoanType(type.value)}
                       className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center text-center hover:scale-105 ${
                         loanType === type.value
-                          ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md'
+                          ? 'bg-yellow-50 text-yellow-700 shadow-md'
                           : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                       }`}
+                      style={loanType === type.value ? { borderColor: '#ffb700' } : {}}
                     >
                       <div className={`p-2 rounded-lg mb-2 ${
-                        loanType === type.value ? 'bg-blue-100' : 'bg-gray-100'
+                        loanType === type.value ? 'bg-yellow-100' : 'bg-gray-100'
                       }`}>
                         <IconComponent className="h-5 w-5" />
                       </div>
@@ -264,7 +266,10 @@ const LoanCalculator: React.FC = () => {
                       type="number"
                       value={loanAmount}
                       onChange={(e) => setLoanAmount(Number(e.target.value))}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition-all duration-200"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:border-transparent text-base transition-all duration-200"
+                      style={{ '--tw-ring-color': '#ffb700' } as React.CSSProperties}
+                      onFocus={(e) => e.target.style.borderColor = '#ffb700'}
+                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                       placeholder="500000"
                       min="10000"
                       max="10000000"
@@ -284,7 +289,10 @@ const LoanCalculator: React.FC = () => {
                       type="number"
                       value={termMonths}
                       onChange={(e) => setTermMonths(Number(e.target.value))}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition-all duration-200"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:border-transparent text-base transition-all duration-200"
+                      style={{ '--tw-ring-color': '#ffb700' } as React.CSSProperties}
+                      onFocus={(e) => e.target.style.borderColor = '#ffb700'}
+                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                       placeholder="36"
                       min="6"
                       max="360"
@@ -307,7 +315,10 @@ const LoanCalculator: React.FC = () => {
                       type="number"
                       value={interestRate}
                       onChange={(e) => setInterestRate(Number(e.target.value))}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition-all duration-200"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:border-transparent text-base transition-all duration-200"
+                      style={{ '--tw-ring-color': '#ffb700' } as React.CSSProperties}
+                      onFocus={(e) => e.target.style.borderColor = '#ffb700'}
+                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                       placeholder="2.5"
                       min="0.1"
                       max="50"
@@ -333,7 +344,7 @@ const LoanCalculator: React.FC = () => {
               {calculation ? (
               <div className="space-y-3 sm:space-y-4 lg:space-y-6">
                 {/* Ana Sonuç */}
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white mb-6">
+                <div className="rounded-xl p-6 text-white mb-6" style={{ background: 'linear-gradient(to right, #ffb700, #ff8c00)' }}>
                   <div className="flex items-center gap-3 mb-2">
                     <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                       <Calendar className="h-5 w-5" />
@@ -376,16 +387,16 @@ const LoanCalculator: React.FC = () => {
                   </div>
 
                   {/* Faiz Oranı */}
-                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
+                  <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-xl border border-yellow-200">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <Percent className="h-4 w-4 text-purple-600" />
+                      <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <Percent className="h-4 w-4 text-yellow-600" />
                       </div>
-                      <h3 className="text-sm font-medium text-purple-900">
+                      <h3 className="text-sm font-medium text-yellow-900">
                         Faiz Oranı
                       </h3>
                     </div>
-                    <p className="text-xl font-bold text-purple-900">
+                    <p className="text-xl font-bold text-yellow-900">
                       {formatPercentage(interestRate)}
                     </p>
                   </div>
@@ -419,33 +430,33 @@ const LoanCalculator: React.FC = () => {
           {calculationMode === 'bank' && (
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-4 sm:p-6">
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-purple-600" />
+                <Building2 className="h-5 w-5 text-yellow-600" />
                 Banka Teklifleri
               </h2>
 
               {loanAmount > 0 && termMonths > 0 ? (
               <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-                <div className="text-sm sm:text-base font-medium text-gray-600 mb-3 sm:mb-4 lg:mb-6 bg-gradient-to-r from-blue-50 to-purple-50 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-blue-200">
+                <div className="text-sm sm:text-base font-medium text-gray-600 mb-3 sm:mb-4 lg:mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-yellow-200">
                   <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-blue-600" />
+                    <Building2 className="h-4 w-4" style={{ color: '#ffb700' }} />
                     <span>{loanType} için güncel faiz oranları ve taksit hesaplamaları:</span>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {getBankOffers().map((bank, index) => {
+                  {getBankOffers().map((bank) => {
                     const offer = calculateBankOffer(bank.rate);
                     if (!offer) return null;
                     
                     return (
-                      <div key={index} className="bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg hover:border-blue-300 transition-all duration-200">
+                      <div className="bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-200" onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ffb700'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}>
                         <div className="flex items-center justify-between mb-3">
                            <div className="flex items-center space-x-3">
                              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                               <img src={bank.logo} alt={bank.name} className="w-6 h-6 object-contain" onError={(e) => { e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iIzMzNzNkYyIvPgo8dGV4dCB4PSIxNiIgeT0iMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5CPC90ZXh0Pgo8L3N2Zz4K'; }} />
+                               <img src={bank.logo} alt={bank.name} className="w-6 h-6 object-contain" onError={(e) => { e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iI2ZmYjcwMCIvPgo8dGV4dCB4PSIxNiIgeT0iMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5CPC90ZXh0Pgo8L3N2Zz4K'; }} />
                              </div>
                              <div>
                                <h3 className="font-bold text-gray-900 text-sm">{bank.name}</h3>
-                               <p className="text-xs text-blue-600 font-medium">%{bank.rate.toFixed(2)} aylık faiz</p>
+                               <p className="text-xs font-medium" style={{ color: '#ffb700' }}>%{bank.rate.toFixed(2)} aylık faiz</p>
                              </div>
                            </div>
                         </div>

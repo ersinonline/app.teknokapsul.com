@@ -381,8 +381,8 @@ export const FinancialAnalytics: React.FC = () => {
                 {analyticsData.savingsRate.toFixed(1)}%
               </p>
             </div>
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <Target className="w-6 h-6 text-purple-600" />
+            <div className="p-3 bg-yellow-100 rounded-lg">
+              <Target className="w-6 h-6 text-yellow-600" />
             </div>
           </div>
         </div>

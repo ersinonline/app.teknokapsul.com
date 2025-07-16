@@ -276,7 +276,7 @@ export const Dashboard = () => {
       label: 'Aktif Abonelik',
       value: subscriptions.length.toString(),
       icon: Calendar,
-      color: 'bg-purple-500',
+      color: 'bg-yellow-500',
       trend: formatCurrency(subscriptions.reduce((sum, sub) => sum + sub.price, 0))
     }
   ];
@@ -375,13 +375,13 @@ export const Dashboard = () => {
               </div>
               
               {/* Euro */}
-              <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                 <div className="text-center">
-                  <h3 className="font-medium text-sm text-purple-800 mb-2">Euro</h3>
-                  <div className="text-lg font-bold text-purple-900">
+                  <h3 className="font-medium text-sm text-yellow-800 mb-2">Euro</h3>
+                  <div className="text-lg font-bold text-yellow-900">
                     {formatCurrency(portfolioItems.filter(item => item.type === 'eur').reduce((sum, item) => sum + item.totalValue, 0))}
                   </div>
-                  <div className="text-xs text-purple-600 mt-1">
+                  <div className="text-xs text-yellow-600 mt-1">
                     {portfolioItems.filter(item => item.type === 'eur').length} adet
                   </div>
                 </div>
@@ -648,38 +648,6 @@ export const Dashboard = () => {
 
       </div>
 
-      {/* AI Önerileri - Tam Genişlik */}
-      <div className="card p-4 sm:p-6 min-h-[300px]">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-medium">AI Önerileri</h2>
-          <Brain className="w-5 h-5" style={{ color: '#ffb700' }} />
-        </div>
-        <div className="space-y-4 min-h-[200px]">
-          {aiLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{ borderBottomColor: '#ffb700' }}></div>
-              <p className="text-sm text-muted-foreground mt-4">AI önerileri hazırlanıyor...</p>
-            </div>
-          ) : aiRecommendations.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              {aiRecommendations.slice(0, 6).map((recommendation, index) => (
-                <div key={index} className="p-4 rounded-lg min-h-[80px] flex items-center" style={{ backgroundColor: '#fff8e1', border: '1px solid #ffb700' }}>
-                  <p className="text-sm leading-relaxed" style={{ color: '#e65100' }}>{recommendation}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <Brain className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="text-base">AI önerileri şu anda mevcut değil</p>
-              <p className="text-sm mt-2">Portföyünüze yatırım ekleyerek AI önerilerini görüntüleyebilirsiniz</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-
-
       {/* Yaklaşan Ödemeler ve Abonelikler */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Yaklaşan Ödemeler */}
@@ -747,10 +715,10 @@ export const Dashboard = () => {
            {upcomingSubscriptions.length > 0 ? (
              upcomingSubscriptions.map((subscription) => {
                return (
-                 <div key={subscription.id} className="flex items-center justify-between p-3 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors">
+                 <div key={subscription.id} className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg hover:bg-yellow-100 transition-colors">
                    <div className="flex-1 min-w-0">
-                     <h4 className="font-medium text-sm truncate text-purple-800">{subscription.name}</h4>
-                     <p className="text-xs text-purple-600">
+                     <h4 className="font-medium text-sm truncate text-yellow-800">{subscription.name}</h4>
+                     <p className="text-xs text-yellow-600">
                        {subscription.daysRemaining} gün kaldı • {new Date(subscription.endDate).toLocaleDateString('tr-TR')}
                      </p>
                      <span className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${
@@ -761,7 +729,7 @@ export const Dashboard = () => {
                        {subscription.daysRemaining <= 3 ? 'Acil' : subscription.daysRemaining <= 7 ? 'Yakında' : 'Normal'}
                      </span>
                    </div>
-                   <span className="font-medium text-purple-700 text-sm">
+                   <span className="font-medium text-yellow-700 text-sm">
                      {formatCurrency(subscription.price)}
                    </span>
                  </div>
@@ -900,8 +868,35 @@ export const Dashboard = () => {
         </div>
       </div>
 
-
-
+      {/* AI Önerileri - Tam Genişlik */}
+      <div className="card p-4 sm:p-6 min-h-[300px]">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-medium">AI Önerileri</h2>
+          <Brain className="w-5 h-5" style={{ color: '#ffb700' }} />
+        </div>
+        <div className="space-y-4 min-h-[200px]">
+          {aiLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{ borderBottomColor: '#ffb700' }}></div>
+              <p className="text-sm text-muted-foreground mt-4">AI önerileri hazırlanıyor...</p>
+            </div>
+          ) : aiRecommendations.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {aiRecommendations.slice(0, 6).map((recommendation, index) => (
+                <div key={index} className="p-4 rounded-lg min-h-[80px] flex items-center" style={{ backgroundColor: '#fff8e1', border: '1px solid #ffb700' }}>
+                  <p className="text-sm leading-relaxed" style={{ color: '#e65100' }}>{recommendation}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <Brain className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p className="text-base">AI önerileri şu anda mevcut değil</p>
+              <p className="text-sm mt-2">Portföyünüze yatırım ekleyerek AI önerilerini görüntüleyebilirsiniz</p>
+            </div>
+          )}
+        </div>
+      </div>
 
     </div>
   );

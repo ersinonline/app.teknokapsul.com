@@ -114,9 +114,9 @@ export const MobileFinancePage: React.FC = () => {
       description: 'Kredi notunuzu takip edin',
       icon: FileText,
       path: '/credit-score',
-      color: 'bg-purple-500',
-      bgColor: 'bg-purple-50',
-      textColor: 'text-purple-700'
+      color: 'bg-yellow-500',
+        bgColor: 'bg-yellow-50',
+        textColor: 'text-yellow-700'
     },
     {
       id: 'goals',
@@ -143,31 +143,31 @@ export const MobileFinancePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
-      <div className="bg-transparent">
-        <div className="px-4 py-6">
-          <h1 className="text-2xl font-bold text-gray-900">Finans</h1>
-          <p className="text-gray-600 mt-1">Finansal durumunuzu yönetin</p>
+      <div className="bg-blue-600 rounded-b-lg">
+        <div className="px-4 py-8">
+          <h1 className="text-3xl font-bold text-white">💰 Finans</h1>
+          <p className="text-blue-100 mt-2 text-lg">Finansal durumunuzu yönetin</p>
         </div>
       </div>
 
       {/* Finance Cards */}
-      <div className="px-4 py-6">
-        <div className="grid grid-cols-2 gap-4">
+      <div className="px-4 py-6 -mt-4">
+        <div className="grid grid-cols-1 gap-4">
           {financeItems.map((item) => {
             const Icon = item.icon;
             return (
               <div
                 key={item.id}
                 onClick={() => navigate(item.path)}
-                className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 active:scale-95 transition-all duration-200 cursor-pointer"
+                className="bg-white rounded-lg p-5 border border-gray-200 active:scale-95 transition-all duration-300 cursor-pointer"
               >
-                <div className="text-center space-y-3">
-                  <div className={`w-14 h-14 ${item.bgColor} rounded-2xl flex items-center justify-center mx-auto`}>
-                    <Icon className={`w-7 h-7 ${item.textColor}`} />
+                <div className="flex items-center space-x-4">
+                  <div className={`w-12 h-12 ${item.bgColor} rounded-lg flex items-center justify-center`}>
+                    <Icon className={`w-6 h-6 ${item.textColor}`} />
                   </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-gray-900">{item.title}</h3>
-                    <p className="text-gray-500 text-xs mt-1">{item.description}</p>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-gray-900">{item.title}</h3>
+                    <p className="text-gray-500 text-sm mt-1">{item.description}</p>
                   </div>
                 </div>
               </div>
@@ -178,8 +178,11 @@ export const MobileFinancePage: React.FC = () => {
 
       {/* Quick Stats */}
       <div className="px-4 py-2">
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-6 shadow-sm border border-blue-100">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Bu Ay Özeti</h3>
+        <div className="bg-orange-50 rounded-lg p-6 border border-orange-200">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-2xl">📊</span>
+            <h3 className="text-xl font-bold text-gray-900">Bu Ay Özeti</h3>
+          </div>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
                <span className="text-gray-600">Toplam Gelir</span>
@@ -193,7 +196,7 @@ export const MobileFinancePage: React.FC = () => {
                  {loading ? '...' : `₺${totalExpense.toLocaleString('tr-TR')}`}
                </span>
              </div>
-             <div className="border-t border-blue-200 pt-3">
+             <div className="border-t border-orange-200 pt-3">
                <div className="flex justify-between items-center">
                  <span className="text-gray-700 font-medium">Net Durum</span>
                  <span className={`text-xl font-bold ${(totalIncome - totalExpense) >= 0 ? 'text-green-600' : 'text-red-600'}`}>

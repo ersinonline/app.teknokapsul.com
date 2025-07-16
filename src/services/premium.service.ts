@@ -20,6 +20,17 @@ import {
   PromoCode,
   PREMIUM_FEATURES 
 } from '../types/premium';
+import {
+  createPremiumCheckoutSession,
+  redirectToCheckout,
+  verifyCheckoutSession,
+  startPremiumCheckout,
+  cancelStripeSubscription as cancelStripeSubscriptionAPI,
+  reactivateStripeSubscription as reactivateStripeSubscriptionAPI
+} from './stripe.service';
+
+// Export startPremiumCheckout for use in components
+export { startPremiumCheckout };
 
 // Premium Plan Management
 export const createPremiumPlan = async (planData: Omit<PremiumPlan, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
@@ -130,6 +141,16 @@ export const cancelPremiumSubscription = async (userId: string): Promise<void> =
     const subscriptionDoc = querySnapshot.docs[0];
     const subscription = subscriptionDoc.data() as PremiumSubscription;
     
+    // Cancel subscription in Stripe first
+    if (subscription.stripeSubscriptionId) {
+      try {
+        await cancelStripeSubscriptionAPI(subscription.stripeSubscriptionId, userId);
+        console.log('Stripe subscription cancelled successfully');
+      } catch (stripeError) {
+        console.error('Stripe cancellation failed, proceeding with local cancellation:', stripeError);
+      }
+    }
+    
     // Calculate new end date: start date + 30 days
     const startDate = new Date(subscription.startDate);
     const newEndDate = new Date(startDate);
@@ -139,12 +160,14 @@ export const cancelPremiumSubscription = async (userId: string): Promise<void> =
     await addDoc(collection(db, 'premium-cancellation-requests'), {
       userId: userId,
       subscriptionId: subscriptionDoc.id,
+      stripeSubscriptionId: subscription.stripeSubscriptionId || null,
       originalEndDate: subscription.endDate,
       newEndDate: newEndDate.toISOString(),
       requestDate: serverTimestamp(),
       status: 'pending',
       canRestore: true,
-      restoreDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days to restore
+      restoreDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days to restore
+      source: 'user_request'
     });
     
     // Update subscription status to cancelled with new end date
@@ -210,6 +233,16 @@ export const restorePremiumSubscription = async (userId: string): Promise<void> 
     }
     
     const subscriptionDoc = subscriptionSnapshot.docs[0];
+    
+    // Reactivate subscription in Stripe first
+    if (cancellationData.stripeSubscriptionId) {
+      try {
+        await reactivateStripeSubscriptionAPI(cancellationData.stripeSubscriptionId, userId);
+        console.log('Stripe subscription reactivated successfully');
+      } catch (stripeError) {
+        console.error('Stripe reactivation failed, proceeding with local restoration:', stripeError);
+      }
+    }
     
     // Restore subscription
     await updateDoc(doc(db, 'premium-subscriptions', subscriptionDoc.id), {
@@ -395,7 +428,7 @@ export const getAllPremiumSubscriptions = async (): Promise<PremiumSubscription[
     const q = query(collection(db, 'premium-subscriptions'), orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     
-    return querySnapshot.docs.map(doc => ({
+    const allSubscriptions = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
       startDate: new Date(doc.data().startDate),
@@ -403,6 +436,20 @@ export const getAllPremiumSubscriptions = async (): Promise<PremiumSubscription[
       createdAt: doc.data().createdAt?.toDate() || new Date(),
       updatedAt: doc.data().updatedAt?.toDate() || new Date()
     })) as PremiumSubscription[];
+    
+    // Her kullanıcı için sadece en son aboneliği göster
+    const userLatestSubscriptions = new Map<string, PremiumSubscription>();
+    
+    allSubscriptions.forEach(subscription => {
+      const existingSubscription = userLatestSubscriptions.get(subscription.userId);
+      if (!existingSubscription || subscription.createdAt > existingSubscription.createdAt) {
+        userLatestSubscriptions.set(subscription.userId, subscription);
+      }
+    });
+    
+    return Array.from(userLatestSubscriptions.values()).sort((a, b) => 
+      b.createdAt.getTime() - a.createdAt.getTime()
+    );
   } catch (error) {
     console.error('Error getting all premium subscriptions:', error);
     throw error;
@@ -431,8 +478,14 @@ export const updateSubscriptionStatus = async (
     // Update user premium status accordingly
     const isPremium = status === 'active' && new Date(subscription.endDate) > new Date();
     
-    await updateDoc(doc(db, 'teknokapsul', subscription.userId, 'premium', 'status'), {
+    // Update both premium status and subscription status
+    await setDoc(doc(db, 'teknokapsul', subscription.userId, 'premium', 'status'), {
+      userId: subscription.userId,
       isPremium,
+      subscriptionId: subscriptionId,
+      premiumStartDate: subscription.startDate,
+      premiumEndDate: subscription.endDate,
+      features: isPremium ? [PREMIUM_FEATURES.REAL_TIME_EXCHANGE_RATES, PREMIUM_FEATURES.CARGO_TRACKING, PREMIUM_FEATURES.EMAIL_REMINDERS, PREMIUM_FEATURES.VIP_SUPPORT, PREMIUM_FEATURES.ADVANCED_ANALYTICS, PREMIUM_FEATURES.UNLIMITED_TRANSACTIONS] : [],
       updatedAt: serverTimestamp()
     });
   } catch (error) {
@@ -455,14 +508,21 @@ export const extendUserSubscription = async (
     const currentEndDate = new Date(subscription.endDate);
     const newEndDate = new Date(currentEndDate.getTime() + (additionalDays * 24 * 60 * 60 * 1000));
     
+    // Update subscription with new end date and ensure it's active
     await updateDoc(doc(db, 'premium-subscriptions', subscriptionId), {
       endDate: newEndDate.toISOString(),
+      status: 'active',
       updatedAt: serverTimestamp()
     });
     
-    // Update user premium status
-    await updateDoc(doc(db, 'teknokapsul', subscription.userId, 'premium', 'status'), {
+    // Update user premium status with complete data
+    await setDoc(doc(db, 'teknokapsul', subscription.userId, 'premium', 'status'), {
+      userId: subscription.userId,
+      isPremium: true,
+      subscriptionId: subscriptionId,
+      premiumStartDate: subscription.startDate,
       premiumEndDate: newEndDate.toISOString(),
+      features: [PREMIUM_FEATURES.REAL_TIME_EXCHANGE_RATES, PREMIUM_FEATURES.CARGO_TRACKING, PREMIUM_FEATURES.EMAIL_REMINDERS, PREMIUM_FEATURES.VIP_SUPPORT, PREMIUM_FEATURES.ADVANCED_ANALYTICS, PREMIUM_FEATURES.UNLIMITED_TRANSACTIONS],
       updatedAt: serverTimestamp()
     });
   } catch (error) {
@@ -507,4 +567,175 @@ export const subscribeToUserPremiumStatus = (
       callback(null);
     }
   });
+};
+
+// Stripe Integration Functions
+export const createStripePremiumSubscription = async (
+  userId: string,
+  customerEmail: string,
+  successUrl: string,
+  cancelUrl: string
+): Promise<{ sessionId: string; checkoutUrl: string }> => {
+  try {
+    const session = await createPremiumCheckoutSession({
+      productId: 'prod_SgrNWIaODU87Cq',
+      userId,
+      customerEmail,
+      successUrl,
+      cancelUrl
+    });
+
+    return {
+      sessionId: session.sessionId,
+      checkoutUrl: session.url
+    };
+  } catch (error) {
+    console.error('Error creating Stripe premium subscription:', error);
+    throw error;
+  }
+};
+
+export const redirectToStripePremiumCheckout = async (
+  userId: string,
+  customerEmail: string,
+  successUrl: string,
+  cancelUrl: string
+): Promise<void> => {
+  try {
+    const session = await createPremiumCheckoutSession({
+      productId: 'prod_SgrNWIaODU87Cq',
+      userId,
+      customerEmail,
+      successUrl,
+      cancelUrl
+    });
+
+    await redirectToCheckout(session.sessionId);
+  } catch (error) {
+    console.error('Error redirecting to Stripe checkout:', error);
+    throw error;
+  }
+};
+
+export const verifyStripePremiumPayment = async (
+  sessionId: string
+): Promise<{
+  success: boolean;
+  userId?: string;
+  subscriptionId?: string;
+  customerId?: string;
+}> => {
+  try {
+    const sessionData = await verifyCheckoutSession(sessionId);
+    
+    if (sessionData.paymentStatus === 'paid' && sessionData.productId === 'prod_SgrNWIaODU87Cq') {
+      const userId = sessionData.userId;
+      const subscriptionId = sessionData.subscriptionId;
+      
+      // If payment is verified, ensure premium status is updated
+      if (userId && subscriptionId) {
+        try {
+          // Check if premium status already exists
+          const premiumStatusDoc = await getDoc(doc(db, 'teknokapsul', userId, 'premium', 'status'));
+          
+          if (!premiumStatusDoc.exists() || !premiumStatusDoc.data()?.isPremium) {
+            // Premium status not found or not active, create/update it
+            const startDate = new Date();
+            const endDate = new Date();
+            endDate.setMonth(endDate.getMonth() + 1); // Add 1 month
+            
+            const premiumFeatures = [
+              {
+                id: 'real-time-exchange-rates',
+                name: 'Anlık Döviz Kurları',
+                description: 'Anlık değişen döviz, fon, hisse ve altın kurları',
+                isEnabled: true
+              },
+              {
+                id: 'cargo-tracking',
+                name: 'Kargo Takibi',
+                description: 'Direkt sitede kargo takibi',
+                isEnabled: true
+              },
+              {
+                id: 'email-reminders',
+                name: 'E-posta Hatırlatmaları',
+                description: 'Giderleri 3 gün önceden e-posta hatırlatması',
+                isEnabled: true
+              },
+              {
+                id: 'vip-support',
+                name: 'VIP Destek',
+                description: 'Ücretsiz VIP danışman hizmeti',
+                isEnabled: true
+              },
+              {
+                id: 'advanced-analytics',
+                name: 'Gelişmiş Analitik',
+                description: 'Gelişmiş analitik raporlar',
+                isEnabled: true
+              },
+              {
+                id: 'unlimited-transactions',
+                name: 'Sınırsız İşlem',
+                description: 'Sınırsız işlem kaydı',
+                isEnabled: true
+              }
+            ];
+            
+            await setDoc(doc(db, 'teknokapsul', userId, 'premium', 'status'), {
+              userId,
+              isPremium: true,
+              subscriptionId,
+              customerId: sessionData.customerId,
+              premiumStartDate: startDate.toISOString(),
+              premiumEndDate: endDate.toISOString(),
+              features: premiumFeatures,
+              subscriptionStatus: 'active',
+              updatedAt: serverTimestamp()
+            }, { merge: true });
+            
+            console.log(`Premium status manually updated for user: ${userId}`);
+          }
+        } catch (updateError) {
+          console.error('Error updating premium status:', updateError);
+          // Don't fail the verification if status update fails
+        }
+      }
+      
+      return {
+        success: true,
+        userId: sessionData.userId,
+        subscriptionId: sessionData.subscriptionId,
+        customerId: sessionData.customerId
+      };
+    }
+    
+    return { success: false };
+  } catch (error) {
+    console.error('Error verifying Stripe premium payment:', error);
+    return { success: false };
+  }
+};
+
+// Premium subscription with Stripe integration
+export const purchasePremiumWithStripe = async (
+  userId: string,
+  customerEmail: string
+): Promise<{ checkoutUrl: string; sessionId: string }> => {
+  try {
+    const baseUrl = window.location.origin;
+    const successUrl = `${baseUrl}/premium/success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${baseUrl}/premium/cancel`;
+
+    return await createStripePremiumSubscription(
+      userId,
+      customerEmail,
+      successUrl,
+      cancelUrl
+    );
+  } catch (error) {
+    console.error('Error purchasing premium with Stripe:', error);
+    throw error;
+  }
 };

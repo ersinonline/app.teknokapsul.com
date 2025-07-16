@@ -1,44 +1,44 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkExpenseReminders = void 0;
-const functions = require("firebase-functions");
+const scheduler_1 = require("firebase-functions/v2/scheduler");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
-admin.initializeApp();
+const params_1 = require("firebase-functions/params");
+if (!admin.apps.length) {
+    admin.initializeApp();
+}
+const gmailUser = (0, params_1.defineString)('GMAIL_USER');
+const gmailPassword = (0, params_1.defineString)('GMAIL_PASSWORD');
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: functions.config().gmail.user,
-        pass: functions.config().gmail.password
+        user: gmailUser.value(),
+        pass: gmailPassword.value()
     }
 });
-exports.checkExpenseReminders = functions.scheduler
-    .onSchedule('0 9 * * *', async (context) => {
-    console.log('Expense reminder function started');
+exports.checkExpenseReminders = (0, scheduler_1.onSchedule)({
+    schedule: 'every day 17:02',
+    timeZone: 'Europe/Istanbul',
+    memory: '256MiB'
+}, async (event) => {
     const db = admin.firestore();
     const now = new Date();
     const threeDaysLater = new Date(now);
     threeDaysLater.setDate(now.getDate() + 3);
-    console.log(`Checking expenses between ${now.toISOString()} and ${threeDaysLater.toISOString()}`);
     // Tüm kullanıcıları al
     const usersSnapshot = await db.collection('teknokapsul').get();
-    console.log(`Found ${usersSnapshot.docs.length} users`);
     for (const userDoc of usersSnapshot.docs) {
         const userId = userDoc.id;
         const userData = userDoc.data();
-        if (!userData.email) {
-            console.log(`User ${userId} has no email address`);
-            continue;
-        }
         // Kullanıcının giderlerini sorgula
         const expensesRef = db.collection('teknokapsul').doc(userId).collection('expenses');
         const querySnapshot = await expensesRef
-            .where('date', '>=', now.toISOString().split('T')[0])
-            .where('date', '<=', threeDaysLater.toISOString().split('T')[0])
+            .where('date', '>=', now.toISOString())
+            .where('date', '<=', threeDaysLater.toISOString())
             .where('isActive', '==', true)
             .where('isPaid', '==', false)
             .get();
-        console.log(`User ${userId} has ${querySnapshot.docs.length} upcoming expenses`);
         if (!querySnapshot.empty) {
             // Hatırlatılacak giderleri topla
             const upcomingExpenses = querySnapshot.docs.map(doc => {
@@ -66,16 +66,9 @@ exports.checkExpenseReminders = functions.scheduler
           `
             };
             // E-posta gönder
-            try {
-                await transporter.sendMail(mailOptions);
-                console.log(`Email sent successfully to ${userData.email}`);
-            }
-            catch (error) {
-                console.error(`Failed to send email to ${userData.email}:`, error);
-            }
+            await transporter.sendMail(mailOptions);
         }
     }
-    console.log('Expense reminder function completed');
-    return null;
+    return;
 });
 //# sourceMappingURL=expenseReminders.js.map

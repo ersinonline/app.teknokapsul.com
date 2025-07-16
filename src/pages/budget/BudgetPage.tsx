@@ -327,14 +327,14 @@ export const BudgetPage = () => {
               </div>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                 {Object.values(currentPlan.categories).map((category: any) => {
                   const spentAmount = calculateCategorySpent(category.name);
                   const percentage = category.budgetAmount > 0 ? (spentAmount / category.budgetAmount) * 100 : 0;
                   const status = getBudgetStatus(spentAmount, category.budgetAmount);
                   
                   return (
-                    <div key={category.id} className="border border-gray-200 rounded-lg p-4">
+                    <div key={category.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{category.icon}</span>
@@ -400,13 +400,13 @@ export const BudgetPage = () => {
               <h2 className="text-lg font-semibold text-gray-900">Bütçe Planları Geçmişi</h2>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                 {userBudgetPlans.map(plan => {
                   const planDate = new Date(plan.year, plan.month - 1);
                   const isCurrentPlan = plan.month === currentDate.getMonth() + 1 && plan.year === currentDate.getFullYear();
                   
                   return (
-                    <div key={plan.id} className={`border rounded-lg p-4 ${
+                    <div key={plan.id} className={`border rounded-lg p-3 sm:p-4 ${
                       isCurrentPlan ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
                     }`}>
                       <div className="flex items-center justify-between mb-3">
