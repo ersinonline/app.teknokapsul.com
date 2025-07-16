@@ -151,7 +151,7 @@ const PremiumManagePage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Header */}
       <div className="bg-transparent border-b border-gray-200 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-orange-100 rounded-xl">
@@ -174,7 +174,7 @@ const PremiumManagePage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full overflow-x-hidden">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 overflow-x-hidden">
 
         {/* Alerts */}
         {error && (

@@ -225,7 +225,7 @@ const EarnAsYouSpendPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="w-full px-4 sm:px-6 py-6 sm:py-8">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-0">
             <div className="w-full lg:w-auto">
               <h1 className="text-2xl sm:text-3xl font-bold mb-2">Harcadıkça Kazan</h1>
@@ -245,7 +245,7 @@ const EarnAsYouSpendPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+      <div className="w-full px-4 sm:px-6 py-4 sm:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">

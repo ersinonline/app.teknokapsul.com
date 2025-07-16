@@ -246,7 +246,7 @@ export const SettingsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="p-4 lg:p-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="w-full">
           {/* Header */}
           <div className="flex items-center gap-3 mb-8">
             <div className="p-3 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-xl shadow-lg">

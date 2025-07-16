@@ -128,16 +128,6 @@ export const MobileFinancePage: React.FC = () => {
       bgColor: 'bg-indigo-50',
       textColor: 'text-indigo-700'
     },
-    {
-      id: 'budget',
-      title: 'Bütçelerim',
-      description: 'Bütçenizi planlayın ve takip edin',
-      icon: PieChart,
-      path: '/budget',
-      color: 'bg-teal-500',
-      bgColor: 'bg-teal-50',
-      textColor: 'text-teal-700'
-    }
   ];
 
   return (

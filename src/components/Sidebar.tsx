@@ -64,11 +64,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         aria-expanded={isOpen}
       >
         <div className="p-4 border-b">
-          <div className="flex items-center justify-between">
-            <Logo className="" showPremium={true} />
+          <div className="flex items-center justify-center relative">
+            <Logo className="flex-1" showPremium={true} />
             <button
               onClick={onClose}
-              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg absolute top-2 right-2"
               aria-label="Menüyü Kapat"
             >
               <X className="w-5 h-5" />

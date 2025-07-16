@@ -236,7 +236,7 @@ const CreditScorePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-2 sm:p-4">
-      <div className="max-w-6xl mx-auto">
+      <div className="w-full">
         {/* Header */}
         <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

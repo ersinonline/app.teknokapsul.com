@@ -718,6 +718,99 @@ export const verifyStripePremiumPayment = async (
   }
 };
 
+// Create 30-day trial subscription
+export const createTrialSubscription = async (userId: string): Promise<string> => {
+  try {
+    // Check if user already had a trial
+    const existingTrialQuery = query(
+      collection(db, 'premium-subscriptions'),
+      where('userId', '==', userId),
+      where('paymentMethod', '==', 'trial')
+    );
+    
+    const existingTrialSnapshot = await getDocs(existingTrialQuery);
+    if (!existingTrialSnapshot.empty) {
+      throw new Error('Bu kullanıcı daha önce deneme süresi kullanmış.');
+    }
+
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(startDate.getDate() + 30); // 30 days trial
+
+    // Create trial subscription
+    const subscriptionRef = await addDoc(collection(db, 'premium-subscriptions'), {
+      userId: userId,
+      planId: 'trial-plan',
+      status: 'active',
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      autoRenew: false,
+      paymentMethod: 'trial',
+      promoCode: null,
+      discountAmount: 0,
+      totalAmount: 0,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    // Update user premium status
+    const premiumFeatures = [
+      {
+        id: 'real-time-exchange-rates',
+        name: 'Anlık Döviz Kurları',
+        description: 'Anlık değişen döviz, fon, hisse ve altın kurları',
+        isEnabled: true
+      },
+      {
+        id: 'cargo-tracking',
+        name: 'Kargo Takibi',
+        description: 'Direkt sitede kargo takibi',
+        isEnabled: true
+      },
+      {
+        id: 'email-reminders',
+        name: 'E-posta Hatırlatmaları',
+        description: 'Giderleri 3 gün önceden e-posta hatırlatması',
+        isEnabled: true
+      },
+      {
+        id: 'vip-support',
+        name: 'VIP Destek',
+        description: 'Ücretsiz VIP danışman hizmeti',
+        isEnabled: true
+      },
+      {
+        id: 'advanced-analytics',
+        name: 'Gelişmiş Analitik',
+        description: 'Gelişmiş analitik raporlar',
+        isEnabled: true
+      },
+      {
+        id: 'unlimited-transactions',
+        name: 'Sınırsız İşlem',
+        description: 'Sınırsız işlem kaydı',
+        isEnabled: true
+      }
+    ];
+
+    await setDoc(doc(db, 'teknokapsul', userId, 'premium', 'status'), {
+      userId,
+      isPremium: true,
+      subscriptionId: subscriptionRef.id,
+      premiumStartDate: startDate.toISOString(),
+      premiumEndDate: endDate.toISOString(),
+      features: premiumFeatures,
+      subscriptionStatus: 'trial',
+      updatedAt: serverTimestamp()
+    });
+
+    return subscriptionRef.id;
+  } catch (error) {
+    console.error('Error creating trial subscription:', error);
+    throw error;
+  }
+};
+
 // Premium subscription with Stripe integration
 export const purchasePremiumWithStripe = async (
   userId: string,

@@ -71,7 +71,7 @@ export const SubscriptionsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 lg:py-8">
+      <div className="w-full px-3 sm:px-6 lg:px-8 py-3 lg:py-8">
         {/* Header */}
         <div className="mb-4 lg:mb-8">
           <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-gray-100 overflow-hidden">

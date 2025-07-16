@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Crown, Check, TrendingUp, Bell, Headphones, Package, Zap, Shield, BarChart3, Sparkles } from 'lucide-react';
 import { usePremium } from '../contexts/PremiumContext';
 import { useAuth } from '../contexts/AuthContext';
-import { validatePromoCode, purchasePremiumWithStripe } from '../services/premium.service';
+import { validatePromoCode, purchasePremiumWithStripe, createTrialSubscription } from '../services/premium.service';
 import { useNavigate } from 'react-router-dom';
 
 const PremiumIntroPage: React.FC = () => {
@@ -13,6 +13,7 @@ const PremiumIntroPage: React.FC = () => {
   const [promoCode, setPromoCode] = useState('');
   const [promoValid, setPromoValid] = useState<boolean | null>(null);
   const [error, setError] = useState('');
+  const [trialLoading, setTrialLoading] = useState(false);
 
   const handlePromoValidation = async () => {
     if (!promoCode.trim()) {
@@ -52,6 +53,25 @@ const PremiumIntroPage: React.FC = () => {
     } catch (error: any) {
       setError(error.message || 'Ödeme işlemi başlatılırken bir hata oluştu.');
       setLoading(false);
+    }
+  };
+
+  const handleTrialStart = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    setTrialLoading(true);
+    setError('');
+
+    try {
+      await createTrialSubscription(user.uid);
+      await refreshPremiumStatus();
+      navigate('/dashboard');
+    } catch (error: any) {
+      setError(error.message || 'Deneme süresi başlatılırken bir hata oluştu.');
+      setTrialLoading(false);
     }
   };
 
@@ -109,7 +129,7 @@ const PremiumIntroPage: React.FC = () => {
   if (isPremium) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center gap-2 mb-4">
               <Crown className="w-8 h-8 text-yellow-500" />
@@ -151,7 +171,7 @@ const PremiumIntroPage: React.FC = () => {
           }} />
         </div>
         
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="relative w-full px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-3 mb-6 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3">
             <Crown className="w-8 h-8 text-white" />
             <span className="text-white font-semibold">Premium Üyelik</span>
@@ -196,8 +216,16 @@ const PremiumIntroPage: React.FC = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-4 bg-white text-orange-600 font-bold rounded-xl hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg">
-              Hemen Başla
+            <button 
+              onClick={handleTrialStart}
+              disabled={trialLoading}
+              className="px-8 py-4 bg-white text-orange-600 font-bold rounded-xl hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {trialLoading ? (
+                <div className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                '30 Gün Ücretsiz Dene'
+              )}
             </button>
             <button className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-200 border border-white/20">
               Özellikleri Gör
@@ -208,7 +236,7 @@ const PremiumIntroPage: React.FC = () => {
 
       {/* Features Section */}
       <div className="py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Premium Özellikler
@@ -243,7 +271,7 @@ const PremiumIntroPage: React.FC = () => {
 
       {/* Subscription Section */}
       <div className="bg-white py-16">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Premium'a Başlayın
@@ -322,20 +350,37 @@ const PremiumIntroPage: React.FC = () => {
               </div>
             )}
 
-            <button
-              onClick={handleSubscribe}
-              disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <Crown className="w-5 h-5" />
-                  Premium'a Başla
-                </>
-              )}
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={handleTrialStart}
+                disabled={trialLoading}
+                className="w-full py-3 px-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                {trialLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Crown className="w-5 h-5" />
+                    30 Gün Ücretsiz Dene
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={handleSubscribe}
+                disabled={loading}
+                className="w-full py-3 px-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Crown className="w-5 h-5" />
+                    Premium'a Başla
+                  </>
+                )}
+              </button>
+            </div>
 
             <p className="text-xs text-gray-500 text-center mt-4">
               Premium aboneliğinizi istediğiniz zaman iptal edebilirsiniz.

@@ -24,7 +24,7 @@ import {
   deleteCargoTracking,
   generateTrackingUrl
 } from '../../services/cargo.service';
-import { CargoTracking, CARGO_COMPANIES } from '../../types/cargo';
+import { CargoTracking, CargoCompany, CARGO_COMPANIES } from '../../types/cargo';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { formatDate } from '../../utils/date';
 
@@ -138,7 +138,7 @@ export const CargoTrackingPage = () => {
     setFormData({ name: '', trackingNumber: '', company: '', isDelivered: false });
   };
 
-  const filteredCargos = cargoList.filter(cargo => {
+  const filteredCargos = cargoList.filter((cargo: CargoTracking) => {
     const matchesSearch = cargo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cargo.trackingNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       CARGO_COMPANIES[cargo.company]?.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -150,8 +150,8 @@ export const CargoTrackingPage = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const deliveredCargos = filteredCargos.filter(cargo => cargo.isDelivered);
-  const pendingCargos = filteredCargos.filter(cargo => !cargo.isDelivered);
+  const deliveredCargos = filteredCargos.filter((cargo: CargoTracking) => cargo.isDelivered);
+  const pendingCargos = filteredCargos.filter((cargo: CargoTracking) => !cargo.isDelivered);
 
   const renderCargoCard = (cargo: CargoTracking) => {
     const company = CARGO_COMPANIES[cargo.company];
@@ -385,7 +385,7 @@ export const CargoTrackingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="w-full px-4 py-6">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
@@ -421,8 +421,8 @@ export const CargoTrackingPage = () => {
                   className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent appearance-none min-w-[100px] w-[100px] sm:min-w-[140px] sm:w-auto"
                 >
                   <option value="all">Tümü ({cargoList.length})</option>
-                  <option value="pending">Bekleyen ({cargoList.filter(c => !c.isDelivered).length})</option>
-                  <option value="delivered">Teslim Edilen ({cargoList.filter(c => c.isDelivered).length})</option>
+                  <option value="pending">Bekleyen ({cargoList.filter((c: CargoTracking) => !c.isDelivered).length})</option>
+                  <option value="delivered">Teslim Edilen ({cargoList.filter((c: CargoTracking) => c.isDelivered).length})</option>
                 </select>
               </div>
               
@@ -616,7 +616,7 @@ export const CargoTrackingPage = () => {
                     required
                   >
                     <option value="">Kargo firması seçin</option>
-                    {Object.entries(CARGO_COMPANIES).map(([key, company]) => (
+                    {Object.entries(CARGO_COMPANIES).map(([key, company]: [string, CargoCompany]) => (
                       <option key={key} value={key}>
                         {company.name}
                       </option>

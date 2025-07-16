@@ -239,7 +239,7 @@ const DocumentsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ffb700]"></div>
           </div>
@@ -250,7 +250,7 @@ const DocumentsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">

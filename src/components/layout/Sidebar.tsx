@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator, ShoppingBag, Shield, Target, Wallet, Crown, UserCog } from 'lucide-react';
+import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator, ShoppingBag, Shield, Target, Crown, UserCog, Menu, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePremium } from '../../contexts/PremiumContext';
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onCollapseChange?: (collapsed: boolean) => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuth();
@@ -62,14 +67,29 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className="fixed top-0 left-0 h-full w-64 bg-white shadow-lg hidden lg:block">
+    <aside className={`fixed top-0 left-0 h-full bg-white shadow-lg hidden lg:block transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
       <div className="flex flex-col h-full">
         <div className="p-4 border-b">
-          <div className="flex flex-col items-center gap-2">
-            <h2 className="text-xl font-semibold">TeknoKapsül</h2>
-            {isPremium && (
-              <img src="https://i.hizliresim.com/3g6ahm4.png" alt="TeknoKapsül" className="h-6 object-contain" />
+          <div className="flex items-center justify-between">
+            {!isCollapsed && (
+              <div className="flex flex-col items-center gap-2">
+                <h2 className="text-xl font-semibold">TeknoKapsül</h2>
+                {isPremium && (
+                  <img src="https://i.hizliresim.com/3g6ahm4.png" alt="TeknoKapsül" className="h-6 object-contain" />
+                )}
+              </div>
             )}
+            <button
+              onClick={() => {
+                const newCollapsed = !isCollapsed;
+                setIsCollapsed(newCollapsed);
+                onCollapseChange?.(newCollapsed);
+              }}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title={isCollapsed ? 'Menüyü Genişlet' : 'Menüyü Daralt'}
+            >
+              {isCollapsed ? <Menu className="w-4 h-4" /> : <X className="w-6 h-6" />}
+            </button>
           </div>
         </div>
 
@@ -85,14 +105,15 @@ export const Sidebar: React.FC = () => {
                   <li key={item.id}>
                     <button
                       onClick={() => navigate(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
                         isActive 
                           ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
+                      title={isCollapsed ? item.label : undefined}
                     >
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-600' : ''}`} />
-                      <span className="font-medium">{item.label}</span>
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && <span className="font-medium">{item.label}</span>}
                     </button>
                   </li>
                 );
@@ -102,9 +123,11 @@ export const Sidebar: React.FC = () => {
 
           {/* Finansal Yönetim */}
           <div className="mb-6">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-              Finansal Yönetim
-            </h3>
+            {!isCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+                Finansal Yönetim
+              </h3>
+            )}
             <ul className="space-y-1">
               {financeItems.map((item) => {
                 const Icon = item.icon;
@@ -114,14 +137,15 @@ export const Sidebar: React.FC = () => {
                   <li key={item.id}>
                     <button
                       onClick={() => navigate(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
                         isActive 
                           ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
+                      title={isCollapsed ? item.label : undefined}
                     >
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-600' : ''}`} />
-                      <span className="font-medium">{item.label}</span>
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && <span className="font-medium">{item.label}</span>}
                     </button>
                   </li>
                 );
@@ -131,9 +155,11 @@ export const Sidebar: React.FC = () => {
 
           {/* Veri Analizi */}
           <div className="mb-6">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-              Veri Analizi
-            </h3>
+            {!isCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+                Veri Analizi
+              </h3>
+            )}
             <ul className="space-y-1">
               {dataItems.map((item) => {
                 const Icon = item.icon;
@@ -143,14 +169,15 @@ export const Sidebar: React.FC = () => {
                   <li key={item.id}>
                     <button
                       onClick={() => navigate(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
                         isActive 
                           ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
+                      title={isCollapsed ? item.label : undefined}
                     >
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-600' : ''}`} />
-                      <span className="font-medium">{item.label}</span>
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && <span className="font-medium">{item.label}</span>}
                     </button>
                   </li>
                 );
@@ -160,9 +187,11 @@ export const Sidebar: React.FC = () => {
 
           {/* Premium */}
           <div className="mb-6">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-              Premium
-            </h3>
+            {!isCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+                Premium
+              </h3>
+            )}
             <ul className="space-y-1">
               {premiumMenuItems.map((item) => {
                 const Icon = item.icon;
@@ -172,18 +201,23 @@ export const Sidebar: React.FC = () => {
                   <li key={item.id}>
                     <button
                       onClick={() => navigate(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
                         isActive 
                           ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
+                      title={isCollapsed ? item.label : undefined}
                     >
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-600' : ''}`} />
-                      <span className="font-medium">{item.label}</span>
-                      {item.id === 'premium' && !isPremium && (
-                        <span className="ml-auto text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
-                          Yeni
-                        </span>
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && (
+                        <>
+                          <span className="font-medium">{item.label}</span>
+                          {item.id === 'premium' && !isPremium && (
+                            <span className="ml-auto text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                              Yeni
+                            </span>
+                          )}
+                        </>
                       )}
                     </button>
                   </li>
@@ -194,9 +228,11 @@ export const Sidebar: React.FC = () => {
 
           {/* Hizmetler */}
           <div className="mb-6">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-              Hizmetler
-            </h3>
+            {!isCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+                Hizmetler
+              </h3>
+            )}
             <ul className="space-y-1">
               {servicesItems.map((item) => {
                 const Icon = item.icon;
@@ -206,14 +242,15 @@ export const Sidebar: React.FC = () => {
                   <li key={item.id}>
                     <button
                       onClick={() => navigate(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
                         isActive 
                           ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
+                      title={isCollapsed ? item.label : undefined}
                     >
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-600' : ''}`} />
-                      <span>{item.label}</span>
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && <span>{item.label}</span>}
                     </button>
                   </li>
                 );
@@ -223,9 +260,11 @@ export const Sidebar: React.FC = () => {
 
           {/* Araçlar */}
           <div className="mb-6">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-              Araçlar
-            </h3>
+            {!isCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+                Araçlar
+              </h3>
+            )}
             <ul className="space-y-1">
               {toolsItems.map((item) => {
                 const Icon = item.icon;
@@ -235,14 +274,15 @@ export const Sidebar: React.FC = () => {
                   <li key={item.id}>
                     <button
                       onClick={() => navigate(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
                         isActive 
                           ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
+                      title={isCollapsed ? item.label : undefined}
                     >
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-600' : ''}`} />
-                      <span>{item.label}</span>
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && <span>{item.label}</span>}
                     </button>
                   </li>
                 );
@@ -252,9 +292,11 @@ export const Sidebar: React.FC = () => {
 
           {/* Destek */}
           <div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-              Destek
-            </h3>
+            {!isCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+                Destek
+              </h3>
+            )}
             <ul className="space-y-1">
               {supportItems.map((item) => {
                 const Icon = item.icon;
@@ -264,14 +306,15 @@ export const Sidebar: React.FC = () => {
                   <li key={item.id}>
                     <button
                       onClick={() => navigate(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
                         isActive 
                           ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
+                      title={isCollapsed ? item.label : undefined}
                     >
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-yellow-600' : ''}`} />
-                      <span>{item.label}</span>
+                      <Icon className={`w-6 h-6 ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && <span>{item.label}</span>}
                     </button>
                   </li>
                 );
@@ -283,10 +326,11 @@ export const Sidebar: React.FC = () => {
         <div className="p-4 border-t">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors`}
+            title={isCollapsed ? 'Çıkış Yap' : undefined}
           >
-            <LogOut className="w-5 h-5" />
-            <span>Çıkış Yap</span>
+            <LogOut className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'}`} />
+            {!isCollapsed && <span>Çıkış Yap</span>}
           </button>
         </div>
       </div>

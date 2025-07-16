@@ -7,7 +7,7 @@ const PremiumCancelPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-md mx-auto px-4">
+      <div className="w-full px-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
           {/* Cancel Icon */}
           <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-6">

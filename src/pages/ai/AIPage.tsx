@@ -4,7 +4,7 @@ import AIChat from '../../components/ai/AIChat';
 
 const AIPage: React.FC = () => {
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth={false} sx={{ py: 4 }}>
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Typography 
           variant="h4" 
@@ -35,4 +35,4 @@ const AIPage: React.FC = () => {
   );
 };
 
-export default AIPage; 
+export default AIPage;

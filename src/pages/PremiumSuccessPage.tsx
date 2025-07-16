@@ -91,7 +91,7 @@ const PremiumSuccessPage: React.FC = () => {
   if (verified) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50">
-        <div className="max-w-4xl mx-auto px-4 py-16">
+        <div className="w-full px-4 py-16">
           <div className="text-center">
             {/* Success Icon */}
             <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
@@ -113,7 +113,7 @@ const PremiumSuccessPage: React.FC = () => {
             </div>
 
             {/* Features Preview */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 max-w-2xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 w-full">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
                 Artık Bu Özellikleri Kullanabilirsiniz:
               </h3>
@@ -166,7 +166,7 @@ const PremiumSuccessPage: React.FC = () => {
             </div>
 
             {/* Additional Info */}
-            <div className="mt-12 bg-orange-50 rounded-xl p-6 max-w-2xl mx-auto">
+            <div className="mt-12 bg-orange-50 rounded-xl p-6 w-full">
               <h4 className="font-semibold text-orange-900 mb-2">
                 📧 E-posta Onayı
               </h4>

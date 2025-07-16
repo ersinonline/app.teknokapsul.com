@@ -7,6 +7,11 @@ export interface CargoTracking {
   createdAt: Date;
   updatedAt: Date;
   userId: string;
+  description?: string;
+  currentStatus?: string;
+  estimatedDelivery?: string;
+  lastLocation?: string;
+  lastUpdate?: string;
 }
 
 export interface CargoCompany {

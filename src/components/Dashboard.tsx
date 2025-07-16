@@ -286,10 +286,10 @@ export const Dashboard = () => {
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-            Hoş Geldiniz {user?.displayName?.split(' ')[0] || 'Ersin'} 👋
+            Hoş Geldin {user?.displayName?.split(' ')[0] || 'Ersin'} 👋
           </h1>
           <p className="text-sm text-gray-600 mt-1">
             Finansal durumunuzun özeti

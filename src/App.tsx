@@ -18,7 +18,7 @@ import { CalendarPage } from './pages/calendar/CalendarPage';
 import { NotificationsPage } from './pages/notifications/NotificationsPage';
 import { FAQPage } from './pages/faq/FAQPage';
 import { OtherPage } from './pages/other/OtherPage';
-import { CargoTrackingPage } from './pages/other/CargoTrackingPage';
+import { CargoTrackingPage } from './pages/cargo-tracking/CargoTrackingPage';
 import { FinancialAnalytics } from './components/analytics/FinancialAnalytics';
 import { MobileNavigation } from './components/navigation/MobileNavigation';
 import { OfflineIndicator } from './components/offline/OfflineIndicator';
@@ -36,7 +36,7 @@ import { WarrantyTrackingPage } from './pages/warranty/WarrantyTrackingPage';
 import { PortfolioPage } from './pages/portfolio/PortfolioPage';
 import { MobileFinancePage } from './pages/mobile/MobileFinancePage';
 import { TeknokapsulPage } from './pages/mobile/TeknokapsulPage';
-import LoanCalculator from './pages/other/LoanCalculator';
+import { CreditCalculatorPage } from './pages/credit-calculator/CreditCalculatorPage';
 
 import { ShopRewardsPage } from './pages/other/ShopRewardsPage';
 import MyOrdersPage from './pages/other/MyOrdersPage';
@@ -169,7 +169,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/loan-calculator',
-    element: <ProtectedRoute><LoanCalculator /></ProtectedRoute>
+    element: <ProtectedRoute><CreditCalculatorPage /></ProtectedRoute>
   },
 
   {

@@ -149,7 +149,7 @@ const LoanCalculator: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50/30 to-gray-100/30 p-2 sm:p-4">
-      <div className="max-w-5xl mx-auto space-y-3 sm:space-y-4 animate-fade-in">
+      <div className="w-full space-y-3 sm:space-y-4 animate-fade-in">
         {/* Modern Header with Gradient */}
         <div className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl p-4 sm:p-5 text-white" style={{ background: 'linear-gradient(to right, #ffb700, #ff8c00)' }}>
           <div className="flex items-center gap-3 mb-3">
