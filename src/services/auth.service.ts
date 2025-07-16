@@ -1,5 +1,6 @@
 import {
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
@@ -14,6 +15,25 @@ import { loginTrackingService } from './login-tracking.service';
 export const signInWithEmail = async (email: string, password: string) => {
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
+    await loginTrackingService.recordLogin('email', true);
+    return result;
+  } catch (error) {
+    await loginTrackingService.recordFailedLogin(email, 'email');
+    throw error;
+  }
+};
+
+export const signUpWithEmail = async (email: string, password: string, displayName?: string) => {
+  try {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    
+    // Update profile with display name if provided
+    if (displayName && result.user) {
+      await updateProfile(result.user, {
+        displayName,
+      });
+    }
+    
     await loginTrackingService.recordLogin('email', true);
     return result;
   } catch (error) {

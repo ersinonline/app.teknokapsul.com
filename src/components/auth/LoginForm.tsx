@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { signInWithEmail } from '../../services/auth.service';
+import { signInWithEmail, signUpWithEmail } from '../../services/auth.service';
 
-export const LoginForm = () => {
+interface LoginFormProps {
+  isSignUp?: boolean;
+}
+
+export const LoginForm = ({ isSignUp = false }: LoginFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -17,10 +23,46 @@ export const LoginForm = () => {
     setLoading(true);
 
     try {
-      await signInWithEmail(email, password);
+      if (isSignUp) {
+        // Validation for sign up
+        if (password !== confirmPassword) {
+          setError('Şifreler eşleşmiyor.');
+          setLoading(false);
+          return;
+        }
+        if (password.length < 6) {
+          setError('Şifre en az 6 karakter olmalıdır.');
+          setLoading(false);
+          return;
+        }
+        
+        await signUpWithEmail(email, password, displayName || undefined);
+      } else {
+        await signInWithEmail(email, password);
+      }
       navigate(from, { replace: true });
-    } catch (err) {
-      setError('Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.');
+    } catch (err: any) {
+      if (isSignUp) {
+        if (err.code === 'auth/email-already-in-use') {
+          setError('Bu e-posta adresi zaten kullanımda.');
+        } else if (err.code === 'auth/weak-password') {
+          setError('Şifre çok zayıf. Lütfen daha güçlü bir şifre seçin.');
+        } else if (err.code === 'auth/invalid-email') {
+          setError('Geçersiz e-posta adresi.');
+        } else {
+          setError('Kayıt olurken bir hata oluştu. Lütfen tekrar deneyin.');
+        }
+      } else {
+        if (err.code === 'auth/user-not-found') {
+          setError('Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.');
+        } else if (err.code === 'auth/wrong-password') {
+          setError('Hatalı şifre.');
+        } else if (err.code === 'auth/invalid-email') {
+          setError('Geçersiz e-posta adresi.');
+        } else {
+          setError('Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.');
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -31,6 +73,22 @@ export const LoginForm = () => {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
           {error}
+        </div>
+      )}
+
+      {isSignUp && (
+        <div>
+          <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">
+            Ad Soyad (İsteğe bağlı)
+          </label>
+          <input
+            id="displayName"
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500"
+            disabled={loading}
+          />
         </div>
       )}
 
@@ -64,13 +122,30 @@ export const LoginForm = () => {
         />
       </div>
 
+      {isSignUp && (
+        <div>
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+            Şifre Tekrarı
+          </label>
+          <input
+            id="confirmPassword"
+            type="password"
+            required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500"
+            disabled={loading}
+          />
+        </div>
+      )}
+
       <div>
         <button
           type="submit"
           disabled={loading}
           className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
         >
-          {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+          {loading ? (isSignUp ? 'Kayıt olunuyor...' : 'Giriş yapılıyor...') : (isSignUp ? 'Kayıt Ol' : 'Giriş Yap')}
         </button>
       </div>
     </form>

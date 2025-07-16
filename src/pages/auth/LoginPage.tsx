@@ -10,6 +10,7 @@ export const LoginPage = () => {
   const location = useLocation();
   const from = location.state?.from || '/dashboard';
   const [selectedMethod, setSelectedMethod] = useState<'google' | 'apple' | 'sms' | 'email' | null>(null);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   if (loading) {
     return (
@@ -87,10 +88,10 @@ export const LoginPage = () => {
                   </div>
                 </div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                  Hoş Geldiniz
+                  {isSignUp ? 'Hesap Oluşturun' : 'Hoş Geldiniz'}
                 </h2>
                 <p className="text-gray-600 mb-8">
-                  TeknoKapsül hesabınıza giriş yapın
+                  {isSignUp ? 'TeknoKapsül hesabınızı oluşturun' : 'TeknoKapsül hesabınıza giriş yapın'}
                 </p>
               </div>
 
@@ -98,7 +99,7 @@ export const LoginPage = () => {
                 {!selectedMethod ? (
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-gray-900 text-center mb-6">
-                      Giriş yönteminizi seçin
+                      {isSignUp ? 'Kayıt yönteminizi seçin' : 'Giriş yönteminizi seçin'}
                     </h3>
                     
                     <div className="space-y-3">
@@ -128,10 +129,10 @@ export const LoginPage = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-lg font-semibold text-gray-900">
-                        {selectedMethod === 'google' && 'Google ile Giriş'}
-                        {selectedMethod === 'apple' && 'Apple ile Giriş'}
-                        {selectedMethod === 'sms' && 'SMS ile Giriş'}
-                        {selectedMethod === 'email' && 'E-posta ile Giriş'}
+                        {selectedMethod === 'google' && (isSignUp ? 'Google ile Kayıt' : 'Google ile Giriş')}
+                        {selectedMethod === 'apple' && (isSignUp ? 'Apple ile Kayıt' : 'Apple ile Giriş')}
+                        {selectedMethod === 'sms' && (isSignUp ? 'SMS ile Kayıt' : 'SMS ile Giriş')}
+                        {selectedMethod === 'email' && (isSignUp ? 'E-posta ile Kayıt' : 'E-posta ile Giriş')}
                       </h3>
                       <button
                         onClick={() => setSelectedMethod(null)}
@@ -154,17 +155,20 @@ export const LoginPage = () => {
                      )}
                     
                     {selectedMethod === 'email' && (
-                      <LoginForm />
+                      <LoginForm isSignUp={isSignUp} />
                     )}
                   </div>
                 )}
                 
                 <div className="text-center">
                   <p className="text-sm text-gray-600">
-                    Henüz hesabınız yok mu?{' '}
-                    <span className="font-semibold text-yellow-600 hover:text-yellow-500 cursor-pointer transition-colors">
-                      Hemen kayıt olun
-                    </span>
+                    {isSignUp ? 'Zaten hesabınız var mı?' : 'Henüz hesabınız yok mu?'}{' '}
+                    <button
+                      onClick={() => setIsSignUp(!isSignUp)}
+                      className="font-semibold text-yellow-600 hover:text-yellow-500 transition-colors underline"
+                    >
+                      {isSignUp ? 'Giriş yapın' : 'Hemen kayıt olun'}
+                    </button>
                   </p>
                 </div>
               </div>
