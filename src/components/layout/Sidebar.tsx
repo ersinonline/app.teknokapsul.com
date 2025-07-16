@@ -67,7 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
   };
 
   return (
-    <aside className={`fixed top-0 left-0 h-full bg-white shadow-lg hidden lg:block transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
+    <aside className={`fixed top-0 left-0 h-full bg-white shadow-lg hidden xl:block transition-all duration-300 z-30 ${isCollapsed ? 'w-20' : 'w-64'}`}>
       <div className="flex flex-col h-full">
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">

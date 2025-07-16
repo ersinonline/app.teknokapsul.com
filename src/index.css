@@ -61,6 +61,53 @@ body {
   }
 }
 
+/* Tablet optimizations */
+@media (min-width: 768px) and (max-width: 1279px) {
+  .container {
+    @apply px-6;
+  }
+  
+  .grid-tablet {
+    @apply grid-cols-2 gap-6;
+  }
+  
+  .card-tablet {
+    @apply p-6 rounded-xl;
+  }
+  
+  .text-tablet {
+    @apply text-base;
+  }
+  
+  /* Tablet navigation improvements */
+  .tablet-nav {
+    @apply sticky top-0 z-30 bg-white/95 backdrop-blur-sm;
+  }
+  
+  /* Better touch targets for tablets */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Improved spacing for tablet */
+  .tablet-spacing {
+    @apply space-y-6;
+  }
+  
+  /* Grid optimizations for tablet */
+  .tablet-grid-2 {
+    @apply grid-cols-2;
+  }
+  
+  .tablet-grid-3 {
+    @apply grid-cols-3;
+  }
+  
+  .tablet-grid-4 {
+    @apply grid-cols-4;
+  }
+}
+
 /* Enhanced scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

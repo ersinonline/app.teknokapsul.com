@@ -309,7 +309,7 @@ export const Dashboard = () => {
       />
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {stats.map((stat, index) => (
           <div key={index} className="card card-interactive p-4 animate-bounce-in" style={{ animationDelay: `${index * 0.1}s` }}>
             <div className="flex items-center justify-between mb-2">
@@ -345,7 +345,7 @@ export const Dashboard = () => {
             <DollarSign className="w-5 h-5" style={{ color: '#ffb700' }} />
           </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {portfolioItems.length > 0 ? (
             <>
               {/* Toplam TL Değeri */}
@@ -463,7 +463,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Kredi Kartları */}
         <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/financial')}>
           <div className="flex items-center justify-between mb-4">

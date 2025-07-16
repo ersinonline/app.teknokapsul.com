@@ -74,23 +74,23 @@ export const CreditCalculatorPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center">
-          <Calculator className="w-8 h-8 mr-3 text-blue-600" />
+    <div className="max-w-6xl mx-auto p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center">
+          <Calculator className="w-6 h-6 sm:w-8 sm:h-8 mr-2 sm:mr-3 text-blue-600" />
           Kredi Hesaplama
         </h1>
-        <p className="text-gray-600">
+        <p className="text-sm sm:text-base text-gray-600">
           Kredi tutarı, faiz oranı ve vade bilgilerini girerek aylık ödeme tutarınızı hesaplayın.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
         {/* Hesaplama Formu */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Kredi Bilgileri</h2>
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Kredi Bilgileri</h2>
           
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <DollarSign className="w-4 h-4 inline mr-1" />
@@ -100,7 +100,7 @@ export const CreditCalculatorPage = () => {
                 type="number"
                 value={loanAmount}
                 onChange={(e) => setLoanAmount(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 placeholder="Örn: 100000"
               />
             </div>
@@ -115,7 +115,7 @@ export const CreditCalculatorPage = () => {
                 step="0.01"
                 value={interestRate}
                 onChange={(e) => setInterestRate(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 placeholder="Örn: 15.5"
               />
             </div>
@@ -129,21 +129,21 @@ export const CreditCalculatorPage = () => {
                 type="number"
                 value={loanTerm}
                 onChange={(e) => setLoanTerm(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 placeholder="Örn: 5"
               />
             </div>
 
-            <div className="flex space-x-4">
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
               <button
                 onClick={calculateLoan}
-                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="flex-1 bg-blue-600 text-white py-2 px-4 sm:py-3 sm:px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base"
               >
                 Hesapla
               </button>
               <button
                 onClick={resetCalculation}
-                className="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors font-medium"
+                className="flex-1 bg-gray-500 text-white py-2 px-4 sm:py-3 sm:px-6 rounded-lg hover:bg-gray-600 transition-colors font-medium text-sm sm:text-base"
               >
                 Temizle
               </button>
@@ -153,27 +153,27 @@ export const CreditCalculatorPage = () => {
 
         {/* Sonuçlar */}
         {calculation && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Hesaplama Sonuçları</h2>
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Hesaplama Sonuçları</h2>
             
-            <div className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="text-sm text-blue-600 font-medium">Aylık Ödeme</div>
-                <div className="text-2xl font-bold text-blue-900">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
+                <div className="text-xs sm:text-sm text-blue-600 font-medium">Aylık Ödeme</div>
+                <div className="text-xl sm:text-2xl font-bold text-blue-900">
                   ₺{calculation.monthlyPayment.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
                 </div>
               </div>
 
-              <div className="bg-green-50 p-4 rounded-lg">
-                <div className="text-sm text-green-600 font-medium">Toplam Ödeme</div>
-                <div className="text-xl font-bold text-green-900">
+              <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
+                <div className="text-xs sm:text-sm text-green-600 font-medium">Toplam Ödeme</div>
+                <div className="text-base sm:text-xl font-bold text-green-900">
                   ₺{calculation.totalPayment.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
                 </div>
               </div>
 
-              <div className="bg-red-50 p-4 rounded-lg">
-                <div className="text-sm text-red-600 font-medium">Toplam Faiz</div>
-                <div className="text-xl font-bold text-red-900">
+              <div className="bg-red-50 p-3 sm:p-4 rounded-lg">
+                <div className="text-xs sm:text-sm text-red-600 font-medium">Toplam Faiz</div>
+                <div className="text-base sm:text-xl font-bold text-red-900">
                   ₺{calculation.totalInterest.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
                 </div>
               </div>
@@ -184,34 +184,34 @@ export const CreditCalculatorPage = () => {
 
       {/* Ödeme Planı */}
       {calculation && (
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Ödeme Planı</h2>
+        <div className="mt-6 sm:mt-8 bg-white rounded-lg shadow-md p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Ödeme Planı</h2>
           
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-xs sm:text-sm">
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="px-4 py-3 text-left font-medium text-gray-900">Ay</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-900">Ödeme</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-900">Ana Para</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-900">Faiz</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-900">Kalan Bakiye</th>
+                  <th className="px-2 py-2 sm:px-4 sm:py-3 text-left font-medium text-gray-900">Ay</th>
+                  <th className="px-2 py-2 sm:px-4 sm:py-3 text-right font-medium text-gray-900">Ödeme</th>
+                  <th className="px-2 py-2 sm:px-4 sm:py-3 text-right font-medium text-gray-900">Ana Para</th>
+                  <th className="px-2 py-2 sm:px-4 sm:py-3 text-right font-medium text-gray-900">Faiz</th>
+                  <th className="px-2 py-2 sm:px-4 sm:py-3 text-right font-medium text-gray-900">Kalan Bakiye</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {calculation.paymentSchedule.slice(0, 12).map((payment) => (
                   <tr key={payment.month} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium">{payment.month}</td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-2 py-2 sm:px-4 sm:py-3 font-medium">{payment.month}</td>
+                    <td className="px-2 py-2 sm:px-4 sm:py-3 text-right">
                       ₺{payment.payment.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-2 py-2 sm:px-4 sm:py-3 text-right">
                       ₺{payment.principal.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-2 py-2 sm:px-4 sm:py-3 text-right">
                       ₺{payment.interest.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-2 py-2 sm:px-4 sm:py-3 text-right">
                       ₺{payment.balance.toLocaleString('tr-TR', { maximumFractionDigits: 2 })}
                     </td>
                   </tr>
@@ -219,7 +219,7 @@ export const CreditCalculatorPage = () => {
               </tbody>
             </table>
             {calculation.paymentSchedule.length > 12 && (
-              <div className="mt-4 text-center text-gray-500">
+              <div className="mt-3 sm:mt-4 text-center text-gray-500 text-xs sm:text-sm">
                 İlk 12 ay gösteriliyor. Toplam {calculation.paymentSchedule.length} aylık ödeme planı.
               </div>
             )}
