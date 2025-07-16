@@ -13,9 +13,12 @@ import {
   Menu,
   X,
   Briefcase,
-  Zap
+  Zap,
+  Crown
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePremium } from '../../contexts/PremiumContext';
+import { PremiumBadge } from '../premium/premiumbadge';
 
 interface TabletNavigationProps {
   className?: string;
@@ -26,6 +29,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { isPremium } = usePremium();
 
   const mainMenuItems = [
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
@@ -40,6 +44,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
     { id: 'goals', path: '/goals', label: 'Hedeflerim', icon: Target },
     { id: 'portfolio', path: '/portfolio', label: 'Portföyüm', icon: PieChart },
     { id: 'subscriptions', path: '/subscriptions', label: 'Aboneliklerim', icon: Clock },
+    { id: 'premium', path: '/premium', label: 'Premium', icon: Crown },
     { id: 'loan-calculator', path: '/credit-calculator', label: 'Kredi Hesaplama', icon: Calculator },
     { id: 'cargo-tracking', path: '/cargo-tracking', label: 'Kargo Takip', icon: Package },
     { id: 'settings', path: '/settings', label: 'Ayarlar', icon: Settings },
@@ -67,7 +72,10 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-            <h1 className="text-lg font-semibold text-gray-900">TeknoKapsül</h1>
+            <div className="flex items-center gap-2">
+                <h1 className="text-lg font-semibold text-gray-900">TeknoKapsül</h1>
+                <PremiumBadge size="lg" className="scale-[4] ml-8" showText={false} />
+              </div>
           </div>
           
           {/* Ana Menü - Tablet Landscape */}
@@ -169,6 +177,11 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
                       >
                         <Icon className="w-5 h-5" />
                         <span>{item.label}</span>
+                        {item.id === 'premium' && !isPremium && (
+                          <span className="ml-auto text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                            Yeni
+                          </span>
+                        )}
                       </button>
                     );
                   })}
