@@ -465,6 +465,7 @@ export const CargoTrackingPage = () => {
 
         {/* Statistics */}
         <div className="space-y-3 mb-6">
+          {/* Toplam Kargo - Geniş */}
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <div className="flex items-center gap-3">
               <Package className="w-8 h-8 text-blue-600" />
@@ -475,22 +476,25 @@ export const CargoTrackingPage = () => {
             </div>
           </div>
           
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center gap-3">
-              <Clock className="w-8 h-8 text-yellow-600" />
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{pendingCargos.length}</p>
-                <p className="text-sm text-gray-600">Bekleyen</p>
+          {/* Bekleyen ve Teslim Edilen - Yan Yana */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="flex items-center gap-3">
+                <Clock className="w-8 h-8 text-yellow-600" />
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">{pendingCargos.length}</p>
+                  <p className="text-sm text-gray-600">Bekleyen</p>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="w-8 h-8 text-green-600" />
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{deliveredCargos.length}</p>
-                <p className="text-sm text-gray-600">Teslim Edilen</p>
+            
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">{deliveredCargos.length}</p>
+                  <p className="text-sm text-gray-600">Teslim</p>
+                </div>
               </div>
             </div>
           </div>

@@ -17,6 +17,7 @@ export const SubscriptionsPage = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   const loadSubscriptions = async () => {
     if (!user) return;
@@ -50,6 +51,7 @@ export const SubscriptionsPage = () => {
       console.log('Adding subscription:', data);
       await addSubscription(user.uid, data);
       setSuccessMessage('Abonelik başarıyla eklendi.');
+      setShowForm(false);
       await loadSubscriptions();
     } catch (error) {
       console.error('Error adding subscription:', error);
@@ -114,19 +116,27 @@ export const SubscriptionsPage = () => {
 
         <div className="bg-white rounded-xl lg:rounded-2xl shadow-lg lg:shadow-xl border border-gray-100 overflow-hidden mb-4 lg:mb-6 mx-1 lg:mx-0">
           <div className="bg-[#ffb700]/10 p-4 lg:p-6 border-b border-gray-100">
-            <div className="flex items-center gap-3 lg:gap-4">
-              <div className="p-2 lg:p-3 bg-[#ffb700] rounded-lg lg:rounded-xl shadow-md lg:shadow-lg">
-                <Plus className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 lg:gap-4">
+                <div>
+                  <h2 className="text-lg lg:text-xl font-bold text-gray-900">Abonelik Ekle</h2>
+                  <p className="text-gray-600 text-xs lg:text-sm">Ekleyerek takibinizi başlatın</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-lg lg:text-xl font-bold text-gray-900">Yeni Abonelik Ekle</h2>
-                <p className="text-gray-600 text-xs lg:text-sm">Yeni bir abonelik ekleyerek takibinizi başlatın</p>
-              </div>
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="bg-[#ffb700] hover:bg-[#e6a600] text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+              >
+                <Plus className={`w-4 h-4 transition-transform duration-200 ${showForm ? 'rotate-45' : ''}`} />
+                {showForm ? 'Kapat' : 'Ekle'}
+              </button>
             </div>
           </div>
-          <div className="p-4 lg:p-6">
-            <SubscriptionForm onSubmit={handleSubmit} isLoading={isSubmitting} />
-          </div>
+          {showForm && (
+            <div className="p-4 lg:p-6">
+              <SubscriptionForm onSubmit={handleSubmit} isLoading={isSubmitting} />
+            </div>
+          )}
         </div>
 
         {subscriptions.length === 0 ? (
@@ -147,7 +157,7 @@ export const SubscriptionsPage = () => {
                   </div>
                   <div>
                     <h2 className="text-lg lg:text-xl font-bold text-gray-900">Abonelik Listesi</h2>
-                    <p className="text-gray-600 text-xs lg:text-sm">Tüm aboneliklerinizi görüntüleyin ve yönetin</p>
+                    <p className="text-gray-600 text-xs lg:text-sm">Tüm aboneliklerinizi görüntüleyin.</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

@@ -17,7 +17,7 @@ export const Sidebar: React.FC = () => {
   const financeItems = [
     { id: 'income', path: '/income', label: 'Gelirlerim', icon: TrendingUp },
     { id: 'expenses', path: '/expenses', label: 'Giderlerim', icon: TrendingDown },
-    { id: 'budget', path: '/budget', label: 'Bütçe Planlama', icon: Wallet },
+    // { id: 'budget', path: '/budget', label: 'Bütçe Planlama', icon: Wallet }, // Geçici olarak gizlendi
     { id: 'goals', path: '/goals', label: 'Hedeflerim', icon: Target },
     { id: 'portfolio', path: '/portfolio', label: 'Portföyüm', icon: PieChart },
     { id: 'subscriptions', path: '/subscriptions', label: 'Aboneliklerim', icon: Clock },

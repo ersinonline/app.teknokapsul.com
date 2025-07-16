@@ -47,7 +47,7 @@ export const FAQPage = () => {
                 }`}
               >
                 <BookOpen className="w-4 h-4" />
-                Sık Sorulan Sorular
+                Sorular
               </button>
               
               {user && (
@@ -61,7 +61,7 @@ export const FAQPage = () => {
                     }`}
                   >
                     <MessageSquare className="w-4 h-4" />
-                    Destek Talebi Oluştur
+                    Talep İlet
                   </button>
                   
                   <button
@@ -73,7 +73,7 @@ export const FAQPage = () => {
                     }`}
                   >
                     <Headphones className="w-4 h-4" />
-                    Destek Taleplerimi
+                    Taleplerim
                   </button>
                 </>
               )}

@@ -35,6 +35,7 @@ import CreditScorePage from './pages/financial/CreditScorePage';
 import { WarrantyTrackingPage } from './pages/warranty/WarrantyTrackingPage';
 import { PortfolioPage } from './pages/portfolio/PortfolioPage';
 import { MobileFinancePage } from './pages/mobile/MobileFinancePage';
+import { TeknokapsulPage } from './pages/mobile/TeknokapsulPage';
 import LoanCalculator from './pages/other/LoanCalculator';
 
 import { ShopRewardsPage } from './pages/other/ShopRewardsPage';
@@ -161,6 +162,10 @@ const router = createBrowserRouter([
   {
     path: '/mobile-finance',
     element: <ProtectedRoute><MobileFinancePage /></ProtectedRoute>
+  },
+  {
+    path: '/teknokapsul',
+    element: <ProtectedRoute><TeknokapsulPage /></ProtectedRoute>
   },
   {
     path: '/loan-calculator',

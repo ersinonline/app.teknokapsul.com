@@ -2,11 +2,11 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
-  CreditCard,
   Bell,
   User,
   Grid3X3,
-  PieChart
+  PieChart,
+  Zap
 } from 'lucide-react';
 import { usePremium } from '../../contexts/PremiumContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -23,9 +23,9 @@ interface NavigationItem {
 
 const bottomNavigationItems: NavigationItem[] = [
   { path: '/dashboard', label: 'Ana Sayfa', icon: Home },
-  { path: '/mobile-finance', label: 'Finans', icon: PieChart },
-  { path: '/subscriptions', label: 'Abonelikler', icon: CreditCard },
-  { path: '/services', label: 'Hizmetler', icon: Grid3X3 },
+  { path: '/mobile-finance', label: 'TeknoFinans', icon: PieChart },
+  { path: '/teknokapsul', label: 'TeknoKapsül', icon: Zap },
+  { path: '/services', label: 'TeknoHizmet', icon: Grid3X3 },
 ];
 
 export const MobileNavigation: React.FC = () => {

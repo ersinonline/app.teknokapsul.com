@@ -143,10 +143,10 @@ export const MobileFinancePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
-      <div className="bg-blue-600 rounded-b-lg">
+      <div className="bg-transparent rounded-b-lg">
         <div className="px-4 py-8">
-          <h1 className="text-3xl font-bold text-white">💰 Finans</h1>
-          <p className="text-blue-100 mt-2 text-lg">Finansal durumunuzu yönetin</p>
+          <h1 className="text-3xl font-bold text-gray-900">💰 TeknoFinans</h1>
+          <p className="text-gray-600 mt-2 text-lg">Finansal araçlarınız</p>
         </div>
       </div>
 

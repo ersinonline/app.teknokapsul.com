@@ -16,6 +16,7 @@ const Services = () => {
   const [loadingApplications, setLoadingApplications] = useState(true);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
   const { applicationNumber, successMessage } = location.state || {};
@@ -84,27 +85,26 @@ const Services = () => {
   const RESELLER_ID = "123456";
   const REFID = "54108";
   const BAYI_ID = "54108";
+
+  // Filtreleme fonksiyonu
+  const filterServiceGroups = (groups: any[], searchTerm: string) => {
+    if (!searchTerm.trim()) return groups;
+    
+    return groups.map(group => {
+      const filteredServices = group.services.filter((service: any) => 
+        service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.tag?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      
+      return {
+        ...group,
+        services: filteredServices
+      };
+    }).filter(group => group.services.length > 0);
+  };
   
   const serviceGroups = [
-    // 1. TeknoKapsül Hizmetleri
-    {
-      title: 'TeknoKapsül Hizmetleri',
-      icon: <Building className="w-8 h-8" />,
-      color: 'bg-yellow-500',
-      bgColor: 'bg-yellow-50',
-      borderColor: 'border-yellow-200',
-      textColor: 'text-yellow-700',
-      services: [
-        { name: 'Kargo Takip', tag: 'Ücretsiz', url: '/cargo-tracking' },
-        { name: 'Not Hatırlatıcı', tag: 'Ücretsiz', url: '/notes' },
-        { name: 'Takvim', tag: 'Ücretsiz', url: '/calendar' },
-        { name: 'Garanti Takibi', tag: 'Ücretsiz', url: '/warranty-tracking' },
-        { name: 'Portföy Takibi', tag: 'Ücretsiz', url: '/portfolio' },
-        { name: 'Dosyalarım', tag: 'Yeni', url: '/documents' },
-        { name: 'AI Asistan', tag: 'Yeni', url: '/ai-assistant' },
-        { name: 'Destek Talepleri', tag: 'Yeni', url: '/faq' }
-      ]
-    },
 
     // 2. Hesaplama Araçları
     {
@@ -434,18 +434,36 @@ const Services = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Tüm Hizmetler
-          </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Tüm hizmetlere tek yerden ulaşın, ihtiyacınıza en uygun çözümü bulun
-          </p>
-          <div className="w-20 h-1 bg-primary mx-auto mt-4 rounded-full"></div>
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Header */}
+      <div className="bg-transparent rounded-b-lg">
+        <div className="px-4 py-8">
+          <h1 className="text-3xl font-bold text-gray-900">🛠️ TeknoHizmet</h1>
+          <p className="text-gray-600 mt-2 text-lg">Teknolojik hizmetleriniz</p>
+          <br></br>
+          
+          {/* Search Bar */}
+          <div className="mt-4 relative">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Hizmet ara... (örn: fatura ödeme, kasko yaptırma)"
+                className="w-full px-4 py-3 pl-10 pr-4 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffb700] focus:border-transparent shadow-sm"
+              />
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="px-4 py-6 -mt-4">
+        <div className="max-w-7xl mx-auto">
 
         {/* Success Message Display */}
         {successMessage && (
@@ -530,7 +548,24 @@ const Services = () => {
 
         {/* Service Groups */}
         <div className="space-y-12">
-          {serviceGroups.map((group, groupIndex) => (
+          {filterServiceGroups(serviceGroups, searchTerm).length === 0 && searchTerm.trim() ? (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Arama sonucu bulunamadı</h3>
+              <p className="text-gray-500 mb-4">"<span className="font-medium">{searchTerm}</span>" için herhangi bir hizmet bulunamadı.</p>
+              <button 
+                onClick={() => setSearchTerm('')}
+                className="text-[#ffb700] hover:text-[#e6a600] font-medium"
+              >
+                Aramayı temizle
+              </button>
+            </div>
+          ) : (
+            filterServiceGroups(serviceGroups, searchTerm).map((group, groupIndex) => (
             <div key={groupIndex} className="">
               {/* Group Header */}
               <div className="flex items-center gap-4 mb-6">
@@ -547,7 +582,7 @@ const Services = () => {
 
               {/* Services Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {group.services.map((service, serviceIndex) => (
+                {group.services.map((service: any, serviceIndex: number) => (
                   <div
                     key={serviceIndex}
                     onClick={() => handleServiceClick(service.url)}
@@ -570,11 +605,12 @@ const Services = () => {
               </div>
 
               {/* Divider */}
-              {groupIndex < serviceGroups.length - 1 && (
+              {groupIndex < filterServiceGroups(serviceGroups, searchTerm).length - 1 && (
                 <div className="border-t border-gray-200 mt-8"></div>
               )}
             </div>
-          ))}
+          ))
+          )}
         </div>
 
         {/* Footer */}
@@ -660,7 +696,7 @@ const Services = () => {
               </div>
             </div>
           </div>
-        )}
+        )}        </div>
       </div>
     </div>
   );
