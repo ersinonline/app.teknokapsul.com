@@ -35,7 +35,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
     { id: 'teknofinans', path: '/mobile-finance', label: 'TeknoFinans', icon: PieChart },
     { id: 'teknohizmet', path: '/teknokapsul', label: 'TeknoKapsül', icon: Zap },
-    { id: 'teknokapsul', path: '/services', label: 'TeknoHizmet', icon: Briefcase },
+    // { id: 'teknokapsul', path: '/services', label: 'TeknoHizmet', icon: Briefcase }, // Geçici olarak gizlendi
   ];
 
   const secondaryMenuItems = [
@@ -44,7 +44,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
     { id: 'goals', path: '/goals', label: 'Hedeflerim', icon: Target },
     { id: 'portfolio', path: '/portfolio', label: 'Portföyüm', icon: PieChart },
     { id: 'subscriptions', path: '/subscriptions', label: 'Aboneliklerim', icon: Clock },
-    { id: 'premium', path: '/premium', label: 'Premium', icon: Crown },
+    // { id: 'premium', path: '/premium', label: 'Premium', icon: Crown }, // Geçici olarak gizlendi
     { id: 'loan-calculator', path: '/credit-calculator', label: 'Kredi Hesaplama', icon: Calculator },
     { id: 'cargo-tracking', path: '/cargo-tracking', label: 'Kargo Takip', icon: Package },
     { id: 'settings', path: '/settings', label: 'Ayarlar', icon: Settings },
