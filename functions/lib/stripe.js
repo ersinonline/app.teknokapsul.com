@@ -13,6 +13,7 @@ if (!(0, app_1.getApps)().length) {
 }
 const db = (0, firestore_1.getFirestore)();
 const stripeSecretKey = (0, params_1.defineSecret)('STRIPE_SECRET_KEY');
+const stripe = new stripe_1.default(stripeSecretKey.value());
 // CORS helper function
 const setCorsHeaders = (res) => {
     res.set('Access-Control-Allow-Origin', '*');
@@ -33,7 +34,6 @@ exports.createCheckoutSession = (0, https_1.onRequest)({ cors: true, secrets: [s
         return;
     }
     try {
-        const stripe = new stripe_1.default(stripeSecretKey.value());
         const { productId, userId, customerEmail, successUrl, cancelUrl, } = request.body;
         if (!productId || !userId || !successUrl || !cancelUrl) {
             response.status(400).json({ error: 'Missing required parameters' });
@@ -41,7 +41,7 @@ exports.createCheckoutSession = (0, https_1.onRequest)({ cors: true, secrets: [s
         }
         // Create Stripe checkout session
         let sessionConfig = {
-            payment_method_types: ['card'],
+            payment_method_types: ['card', 'googlepay', 'applepay'],
             customer_email: customerEmail,
             metadata: {
                 userId,
@@ -130,7 +130,6 @@ exports.verifySession = (0, https_1.onRequest)({ cors: true, secrets: [stripeSec
         return;
     }
     try {
-        const stripe = new stripe_1.default(stripeSecretKey.value());
         const sessionId = request.query.sessionId;
         if (!sessionId) {
             response.status(400).json({ error: 'Session ID is required' });
@@ -181,7 +180,6 @@ exports.cancelStripeSubscription = (0, https_1.onRequest)({ cors: true, secrets:
         return;
     }
     try {
-        const stripe = new stripe_1.default(stripeSecretKey.value());
         const { subscriptionId, userId } = request.body;
         if (!subscriptionId || !userId) {
             response.status(400).json({ error: 'Subscription ID and User ID are required' });
@@ -228,7 +226,6 @@ exports.createCustomerPortalSession = (0, https_1.onRequest)({ cors: true, secre
         return;
     }
     try {
-        const stripe = new stripe_1.default(stripeSecretKey.value());
         const { customerId, returnUrl } = request.body;
         if (!customerId || !returnUrl) {
             response.status(400).json({ error: 'Customer ID and return URL are required' });
@@ -261,7 +258,6 @@ exports.reactivateStripeSubscription = (0, https_1.onRequest)({ cors: true, secr
         return;
     }
     try {
-        const stripe = new stripe_1.default(stripeSecretKey.value());
         const { subscriptionId, userId } = request.body;
         if (!subscriptionId || !userId) {
             response.status(400).json({ error: 'Subscription ID and User ID are required' });
@@ -295,7 +291,7 @@ exports.reactivateStripeSubscription = (0, https_1.onRequest)({ cors: true, secr
     }
 });
 // Stripe Webhook
-exports.stripeWebhook = (0, https_1.onRequest)({ cors: true, secrets: [stripeSecretKey] }, async (request, response) => {
+exports.stripeWebhook = (0, https_1.onRequest)({ cors: true }, async (request, response) => {
     var _a, _b, _c, _d, _e;
     // Handle CORS
     setCorsHeaders(response);
@@ -316,7 +312,6 @@ exports.stripeWebhook = (0, https_1.onRequest)({ cors: true, secrets: [stripeSec
     }
     let event;
     try {
-        const stripe = new stripe_1.default(stripeSecretKey.value());
         event = stripe.webhooks.constructEvent(request.rawBody || request.body, sig, webhookSecret);
     }
     catch (err) {
@@ -335,7 +330,6 @@ exports.stripeWebhook = (0, https_1.onRequest)({ cors: true, secrets: [stripeSec
                         : (_b = session.subscription) === null || _b === void 0 ? void 0 : _b.id;
                     if (userId && subscriptionId) {
                         // Get subscription details to set end date
-                        const stripe = new stripe_1.default(stripeSecretKey.value());
                         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
                         const startDate = new Date();
                         const endDate = new Date(subscription.current_period_end * 1000);
@@ -422,7 +416,6 @@ exports.stripeWebhook = (0, https_1.onRequest)({ cors: true, secrets: [stripeSec
                 const invoice = event.data.object;
                 const subscriptionId = invoice.subscription;
                 if (subscriptionId) {
-                    const stripe = new stripe_1.default(stripeSecretKey.value());
                     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
                     const userId = (_c = subscription.metadata) === null || _c === void 0 ? void 0 : _c.userId;
                     if (userId) {

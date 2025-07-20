@@ -2,7 +2,11 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   GoogleAuthProvider,
+  OAuthProvider,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
   signOut as firebaseSignOut,
   updateProfile,
   updatePassword,
@@ -45,8 +49,42 @@ export const signUpWithEmail = async (email: string, password: string, displayNa
 export const signInWithGoogle = async () => {
   try {
     const provider = new GoogleAuthProvider();
+    provider.addScope('email');
+    provider.addScope('profile');
     const result = await signInWithPopup(auth, provider);
     await loginTrackingService.recordLogin('google', true);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const signInWithApple = async () => {
+  try {
+    const provider = new OAuthProvider('apple.com');
+    provider.addScope('email');
+    provider.addScope('name');
+    const result = await signInWithPopup(auth, provider);
+    await loginTrackingService.recordLogin('apple', true);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const signInWithPhone = async (phoneNumber: string, recaptchaVerifier: RecaptchaVerifier) => {
+  try {
+    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+    return confirmationResult;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const verifyPhoneCode = async (confirmationResult: any, verificationCode: string) => {
+  try {
+    const result = await confirmationResult.confirm(verificationCode);
+    await loginTrackingService.recordLogin('phone', true);
     return result;
   } catch (error) {
     throw error;

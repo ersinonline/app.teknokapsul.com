@@ -25,8 +25,6 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
   const [priceData, setPriceData] = useState<Record<string, PriceData>>({});
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
-  const [autoUpdate, setAutoUpdate] = useState(false);
-  const [updateInterval, setUpdateInterval] = useState<NodeJS.Timeout | null>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [editPrice, setEditPrice] = useState('');
 
@@ -36,25 +34,7 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
     }
   }, [portfolioItems]);
 
-  useEffect(() => {
-    if (autoUpdate) {
-      const interval = setInterval(() => {
-        updateAllPrices();
-      }, 60000); // Her dakika güncelle
-      setUpdateInterval(interval);
-    } else {
-      if (updateInterval) {
-        clearInterval(updateInterval);
-        setUpdateInterval(null);
-      }
-    }
 
-    return () => {
-      if (updateInterval) {
-        clearInterval(updateInterval);
-      }
-    };
-  }, [autoUpdate]);
 
   const initializePriceData = () => {
     const initialData: Record<string, PriceData> = {};
@@ -77,22 +57,73 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
     setPriceData(initialData);
   };
 
-  // Simulated price update function - In real app, this would call actual APIs
+  // Gerçek fiyat güncelleme fonksiyonu - Firebase Functions kullanarak
   const fetchPriceForSymbol = async (symbol: string): Promise<{ price: number; change: number; changePercent: number }> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
-    
-    // Simulate price changes
-    const currentPrice = priceData[symbol]?.currentPrice || 100;
-    const changePercent = (Math.random() - 0.5) * 10; // -5% to +5% change
-    const newPrice = currentPrice * (1 + changePercent / 100);
-    const change = newPrice - currentPrice;
-    
-    return {
-      price: Math.max(0.01, newPrice), // Ensure price is positive
-      change,
-      changePercent
-    };
+    try {
+      // Döviz kurları ve altın için Firebase Functions endpoint'ini çağır
+      if (['USD', 'EUR', 'GOLD'].includes(symbol)) {
+        const response = await fetch('https://updatesingleprice-qcivoym7rq-uc.a.run.app', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ symbol })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          const data = result.data;
+          let price = 0;
+          
+          // Satış fiyatını kullan (varsa), yoksa alış fiyatını kullan
+          if (data.sellPrice) {
+            price = parseFloat(data.sellPrice.replace(',', '.').replace(/[^0-9.]/g, ''));
+          } else if (data.buyPrice) {
+            price = parseFloat(data.buyPrice.replace(',', '.').replace(/[^0-9.]/g, ''));
+          }
+          
+          const currentPrice = priceData[symbol]?.currentPrice || price;
+          const change = price - currentPrice;
+          const changePercent = currentPrice > 0 ? (change / currentPrice) * 100 : 0;
+          
+          return {
+            price: Math.max(0.01, price),
+            change,
+            changePercent
+          };
+        }
+      }
+      
+      // Diğer semboller için simülasyon (hisse senetleri, fonlar vb.)
+      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+      
+      const currentPrice = priceData[symbol]?.currentPrice || 100;
+      const changePercent = (Math.random() - 0.5) * 10; // -5% to +5% change
+      const newPrice = currentPrice * (1 + changePercent / 100);
+      const change = newPrice - currentPrice;
+      
+      return {
+        price: Math.max(0.01, newPrice),
+        change,
+        changePercent
+      };
+      
+    } catch (error) {
+      console.error(`Error fetching price for ${symbol}:`, error);
+      
+      // Hata durumunda mevcut fiyatı döndür
+      const currentPrice = priceData[symbol]?.currentPrice || 100;
+      return {
+        price: currentPrice,
+        change: 0,
+        changePercent: 0
+      };
+    }
   };
 
   const updatePriceForSymbol = async (symbol: string) => {
@@ -123,17 +154,19 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
         }
       }));
 
-      // Update Firebase
-      const portfolioItem = portfolioItems.find(item => item.symbol === symbol);
-      if (portfolioItem) {
-        await updateDoc(
-          doc(db, 'teknokapsul', user.uid, 'portfolio', portfolioItem.id),
+      // Update Firebase for all items with the same symbol
+      const itemsWithSameSymbol = portfolioItems.filter(item => item.symbol === symbol);
+      const updatePromises = itemsWithSameSymbol.map(item => 
+        updateDoc(
+          doc(db, 'teknokapsul', user.uid, 'portfolio', item.id),
           {
             currentPrice: price,
             lastUpdated: new Date()
           }
-        );
-      }
+        )
+      );
+      
+      await Promise.all(updatePromises);
     } catch (error) {
       console.error(`Error updating price for ${symbol}:`, error);
       setPriceData(prev => ({
@@ -199,14 +232,21 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
     }
 
     try {
-      // Update Firebase
-      await updateDoc(
-        doc(db, 'teknokapsul', user.uid, 'portfolio', editingItem.id),
-        {
-          currentPrice: newPrice,
-          lastUpdated: new Date()
-        }
+      // Find all portfolio items with the same symbol
+      const itemsWithSameSymbol = portfolioItems.filter(item => item.symbol === editingItem.symbol);
+      
+      // Update Firebase for all items with the same symbol
+      const updatePromises = itemsWithSameSymbol.map(item => 
+        updateDoc(
+          doc(db, 'teknokapsul', user.uid, 'portfolio', item.id),
+          {
+            currentPrice: newPrice,
+            lastUpdated: new Date()
+          }
+        )
       );
+      
+      await Promise.all(updatePromises);
 
       // Update local state
       setPriceData(prev => ({
@@ -243,18 +283,6 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h2 className="text-lg sm:text-xl font-bold text-gray-900">Fiyat Güncelleme</h2>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="autoUpdate"
-              checked={autoUpdate}
-              onChange={(e) => setAutoUpdate(e.target.checked)}
-              className="rounded border-gray-300 text-primary focus:ring-primary"
-            />
-            <label htmlFor="autoUpdate" className="text-sm text-gray-700">
-              Otomatik güncelleme
-            </label>
-          </div>
           <button
             onClick={updateAllPrices}
             disabled={isUpdating}
@@ -285,22 +313,45 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
 
           const isPositive = price.change >= 0;
           
+          const getItemUrl = () => {
+             if (item.type === 'stock') {
+               return `https://fintables.com/sirketler/${item.symbol}`;
+             } else if (item.type === 'fund') {
+               return `https://fintables.com/fonlar/${item.symbol}`;
+             } else if (item.type === 'currency') {
+               if (item.symbol === 'EUR') {
+                 return 'https://bigpara.hurriyet.com.tr/doviz/euro/';
+               } else if (item.symbol === 'USD') {
+                 return 'https://bigpara.hurriyet.com.tr/doviz/dolar/';
+               }
+             } else if (item.type === 'gold') {
+               return 'https://bigpara.hurriyet.com.tr/altin/';
+             }
+             return null;
+           };
+           
+           const itemUrl = getItemUrl();
+           const hasLink = itemUrl && itemUrl !== '#';
+          
           return (
             <div key={item.symbol} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   {getStatusIcon(price.status)}
-                  <a 
-                    href={item.type === 'stock' 
-                      ? `https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/Temel-Degerler-Ve-Oranlar.aspx?hisse=${item.symbol}` 
-                      : `https://www.tefas.gov.tr/FonAnaliz.aspx?FonKod=${item.symbol}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium text-primary hover:text-primary-dark text-sm sm:text-base transition-colors"
-                  >
-                    {item.symbol}
-                  </a>
+                  {hasLink ? (
+                    <a 
+                      href={itemUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-primary hover:text-primary-dark text-sm sm:text-base transition-colors"
+                    >
+                      {item.symbol}
+                    </a>
+                  ) : (
+                    <span className="font-medium text-gray-900 text-sm sm:text-base">
+                      {item.symbol}
+                    </span>
+                  )}
                 </div>
                 <span className="text-xs sm:text-sm text-gray-600 truncate">{item.name}</span>
               </div>
@@ -310,18 +361,20 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
                   <p className="font-bold text-gray-900 text-sm sm:text-base">
                     {formatCurrency(price.currentPrice)}
                   </p>
-                  <div className="flex items-center gap-1">
-                    {isPositive ? (
-                      <TrendingUp className="w-3 h-3 text-green-600" />
-                    ) : (
-                      <TrendingDown className="w-3 h-3 text-red-600" />
-                    )}
-                    <span className={`text-xs font-medium ${
-                      isPositive ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {isPositive ? '+' : ''}{formatCurrency(price.change)} ({isPositive ? '+' : ''}{price.changePercent.toFixed(2)}%)
-                    </span>
-                  </div>
+                  {Math.abs(price.change) > 0.01 && (
+                    <div className="flex items-center gap-1">
+                      {isPositive ? (
+                        <TrendingUp className="w-3 h-3 text-green-600" />
+                      ) : (
+                        <TrendingDown className="w-3 h-3 text-red-600" />
+                      )}
+                      <span className={`text-xs font-medium ${
+                        isPositive ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {isPositive ? '+' : ''}{formatCurrency(price.change)} ({isPositive ? '+' : ''}{price.changePercent.toFixed(2)}%)
+                      </span>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex items-center gap-2">
@@ -353,13 +406,13 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
         </div>
       )}
 
-      <div className="mt-6 p-4 bg-yellow-50 rounded-lg">
+      <div className="mt-6 p-4 bg-blue-50 rounded-lg">
         <div className="flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+          <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-yellow-800">Bilgi</p>
-            <p className="text-xs text-yellow-700 mt-1">
-              Bu demo sürümde fiyatlar simüle edilmektedir. Gerçek uygulamada canlı piyasa verisi kullanılacaktır.
+            <p className="text-sm font-medium text-blue-800">Bilgi</p>
+            <p className="text-xs text-blue-700 mt-1">
+              Döviz kurları (USD, EUR) ve altın fiyatları Bigpara'dan canlı olarak çekilmektedir. Hisse senetleri ve fonlar için simüle edilmiş veriler kullanılmaktadır.
             </p>
           </div>
         </div>

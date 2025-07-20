@@ -36,7 +36,8 @@ import { WarrantyTrackingPage } from './pages/warranty/WarrantyTrackingPage';
 import { PortfolioPage } from './pages/portfolio/PortfolioPage';
 import { MobileFinancePage } from './pages/mobile/MobileFinancePage';
 import { TeknokapsulPage } from './pages/mobile/TeknokapsulPage';
-import { CreditCalculatorPage } from './pages/credit-calculator/CreditCalculatorPage';
+
+import CreditCalculatorPage2 from './pages/CreditCalculatorPage';
 
 import { ShopRewardsPage } from './pages/other/ShopRewardsPage';
 import MyOrdersPage from './pages/other/MyOrdersPage';
@@ -52,6 +53,9 @@ import AdminPremiumPage from './pages/AdminPremiumPage';
 import PremiumSuccessPage from './pages/PremiumSuccessPage';
 import PremiumCancelPage from './pages/PremiumCancelPage';
 import { PremiumProvider } from './contexts/PremiumContext';
+import { ResponsiveTestPage } from './pages/test/ResponsiveTestPage';
+import WorkTrackingPage from './pages/WorkTrackingPage';
+import PharmacyPage from './pages/PharmacyPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
   <AuthGuard>
@@ -167,10 +171,7 @@ const router = createBrowserRouter([
     path: '/teknokapsul',
     element: <ProtectedRoute><TeknokapsulPage /></ProtectedRoute>
   },
-  {
-    path: '/loan-calculator',
-    element: <ProtectedRoute><CreditCalculatorPage /></ProtectedRoute>
-  },
+
 
   {
     path: '/shop-rewards',
@@ -232,6 +233,22 @@ const router = createBrowserRouter([
   {
     path: '/admin/premium',
     element: <ProtectedRoute><AdminPremiumPage /></ProtectedRoute>
+  },
+  {
+    path: '/test/responsive',
+    element: <ProtectedRoute><ResponsiveTestPage /></ProtectedRoute>
+  },
+  {
+    path: '/work-tracking',
+    element: <ProtectedRoute><WorkTrackingPage /></ProtectedRoute>
+  },
+  {
+    path: '/pharmacy',
+    element: <ProtectedRoute><PharmacyPage /></ProtectedRoute>
+  },
+  {
+    path: '/credit-calculator',
+    element: <ProtectedRoute><CreditCalculatorPage2 /></ProtectedRoute>
   },
   {
     path: '/',

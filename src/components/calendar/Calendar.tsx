@@ -42,7 +42,7 @@ export const Calendar: React.FC<CalendarProps> = ({
     // Render weekday headers
     weekDays.forEach(day => {
       days.push(
-        <div key={`header-${day}`} className="font-medium text-gray-500 text-center py-2">
+        <div key={`header-${day}`} className="font-medium text-gray-500 text-center py-3">
           {day}
         </div>
       );
@@ -50,7 +50,7 @@ export const Calendar: React.FC<CalendarProps> = ({
 
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(<div key={`empty-${i}`} className="p-2" />);
+      days.push(<div key={`empty-${i}`} className="p-4" />);
     }
 
     // Render the days of the month
@@ -70,7 +70,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         <div
           key={day}
           onClick={() => onDateSelect(date)}
-          className={`p-2 cursor-pointer hover:bg-gray-50 relative ${
+          className={`p-4 min-h-[60px] cursor-pointer hover:bg-gray-50 relative flex flex-col items-center justify-start ${
             isSelected ? 'bg-yellow-50' : ''
           }`}
         >

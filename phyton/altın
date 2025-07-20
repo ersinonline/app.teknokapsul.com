@@ -1,0 +1,72 @@
+import requests
+from bs4 import BeautifulSoup
+import json
+
+def fetch_html(url):
+    """
+    Belirtilen URL'den HTML içeriğini çeker.
+    Fetches HTML content from the given URL.
+    """
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # HTTP hataları için istisna fırlatır
+        return response.text
+    except requests.exceptions.RequestException as e:
+        print(f"URL'den veri çekilirken hata oluştu {url}: {e}")
+        return None
+
+def parse_altin_data(html_content):
+    """
+    Altın sayfasından Gram Altın fiyatını ayrıştırır.
+    Parses Gram Gold price from the gold page.
+    """
+    if not html_content:
+        return {}
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+    altin_data = {}
+
+    # Gram Altın için
+    # Kullanıcının verdiği HTML yapısına göre 'cell010' sınıfına sahip li'nin içindeki 'ALTIN (TL/GR)' metnini arıyoruz.
+    # Sonra onun ebeveyn 'ul' elementini buluyoruz.
+    gold_h3 = soup.find('h3', string=lambda text: text and 'ALTIN (TL/GR)' in text)
+    if gold_h3:
+        gold_ul = gold_h3.find_parent('ul')
+        if gold_ul:
+            lis = gold_ul.find_all('li', class_='cell009')
+            if len(lis) >= 4: # En az 4 li elemanı bekliyoruz (alış, satış, değişim, saat)
+                altin_data['Gram Altın Alış'] = lis[0].text.strip()
+                altin_data['Gram Altın Satış'] = lis[1].text.strip()
+                altin_data['Gram Altın Değişim'] = lis[2].text.strip()
+                altin_data['Gram Altın Güncelleme Saati'] = lis[3].text.strip()
+
+    return altin_data
+
+def get_altin_prices():
+    """
+    Bigpara'dan güncel altın fiyatlarını çeker.
+    Fetches current gold prices from Bigpara.
+    """
+    altin_url = "https://bigpara.hurriyet.com.tr/altin/"
+
+    print(f"Altın verileri çekiliyor: {altin_url}")
+    altin_html = fetch_html(altin_url)
+    if altin_html:
+        altin_prices = parse_altin_data(altin_html)
+        print("Altın verileri başarıyla çekildi.")
+        return altin_prices
+    else:
+        print("Altın verileri çekilemedi.")
+        return {}
+
+# Fiyatları al ve JSON olarak yazdır
+if __name__ == "__main__":
+    prices = get_altin_prices()
+    if prices:
+        # JSON formatında çıktı ver
+        print(json.dumps(prices, ensure_ascii=False))
+    else:
+        print(json.dumps({}, ensure_ascii=False))

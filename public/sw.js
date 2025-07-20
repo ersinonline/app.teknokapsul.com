@@ -350,13 +350,15 @@ async function syncOfflineSubscriptions() {
 
 // Push notification handling
 self.addEventListener('push', (event) => {
-  console.log('Service Worker: Push notification received');
+  console.log('Service Worker: Push notification received', event.data);
   
-  const options = {
+  let notificationData = {
+    title: 'TeknoKapsül',
     body: 'Yeni bir bildiriminiz var',
     icon: '/icons/icon-192x192.svg',
     badge: '/icons/icon-192x192.svg',
     vibrate: [200, 100, 200],
+    requireInteraction: false,
     data: {
       dateOfArrival: Date.now(),
       primaryKey: 1
@@ -376,23 +378,105 @@ self.addEventListener('push', (event) => {
   };
   
   if (event.data) {
-    const data = event.data.json();
-    options.body = data.body || options.body;
-    options.title = data.title || 'TeknoKapsül';
+    try {
+      const data = event.data.json();
+      notificationData.title = data.title || notificationData.title;
+      notificationData.body = data.body || notificationData.body;
+      notificationData.icon = data.icon || notificationData.icon;
+      notificationData.badge = data.badge || notificationData.badge;
+      notificationData.requireInteraction = data.requireInteraction || false;
+      notificationData.data = { ...notificationData.data, ...data.data };
+      
+      if (data.actions && Array.isArray(data.actions)) {
+        notificationData.actions = data.actions;
+      }
+    } catch (error) {
+      console.error('Error parsing push notification data:', error);
+    }
   }
   
   event.waitUntil(
-    self.registration.showNotification('TeknoKapsül', options)
+    self.registration.showNotification(notificationData.title, {
+      body: notificationData.body,
+      icon: notificationData.icon,
+      badge: notificationData.badge,
+      vibrate: notificationData.vibrate,
+      requireInteraction: notificationData.requireInteraction,
+      data: notificationData.data,
+      actions: notificationData.actions,
+      tag: notificationData.data.tag || 'default'
+    })
   );
 });
 
 // Notification click handling
 self.addEventListener('notificationclick', (event) => {
-  console.log('Service Worker: Notification clicked');
+  console.log('Service Worker: Notification clicked', event.action, event.notification.data);
   
   event.notification.close();
   
-  if (event.action === 'explore') {
+  const notificationData = event.notification.data || {};
+  
+  if (event.action === 'explore' || event.action === 'view-budget' || event.action === 'add-expense') {
+    let targetUrl = '/';
+    
+    // Bildirim tipine göre yönlendirme
+    if (notificationData.type === 'budget-alert') {
+      targetUrl = '/budget';
+    } else if (notificationData.type === 'expense-reminder') {
+      targetUrl = '/expense';
+    } else if (notificationData.type === 'payment-reminder') {
+      targetUrl = '/payments';
+    } else if (notificationData.type === 'daily-return-added') {
+      targetUrl = '/portfolio';
+    }
+    
+    event.waitUntil(
+      clients.matchAll({ type: 'window' }).then((clientList) => {
+        // Eğer zaten açık bir pencere varsa onu odakla
+        for (const client of clientList) {
+          if (client.url.includes(targetUrl) && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        // Yoksa yeni pencere aç
+        if (clients.openWindow) {
+          return clients.openWindow(targetUrl);
+        }
+      })
+    );
+  } else if (event.action === 'mark-paid') {
+    // Ödeme işaretleme işlemi
+    event.waitUntil(
+      fetch('/api/payments/mark-paid', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          paymentId: notificationData.paymentId
+        })
+      }).catch(error => {
+        console.error('Error marking payment as paid:', error);
+      })
+    );
+  } else if (event.action === 'snooze') {
+    // Hatırlatmayı ertele (1 saat sonra)
+    event.waitUntil(
+      self.registration.showNotification('Ödeme Hatırlatması (Ertelendi)', {
+        body: event.notification.body,
+        icon: event.notification.icon,
+        badge: event.notification.badge,
+        data: notificationData,
+        tag: 'payment-reminder-snoozed',
+        timestamp: Date.now() + (60 * 60 * 1000) // 1 saat sonra
+      })
+    );
+  } else if (event.action === 'close' || event.action === 'dismiss') {
+    // Sadece bildirimi kapat
+    return;
+  } else {
+    // Varsayılan davranış - ana sayfayı aç
     event.waitUntil(
       clients.openWindow('/')
     );

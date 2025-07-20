@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Loader2 } from 'lucide-react';
-import { PortfolioItem, PORTFOLIO_CATEGORIES, GOLD_TYPES, CURRENCY_TYPES } from '../../types/portfolio';
+import { PortfolioItem, PORTFOLIO_CATEGORIES, GOLD_TYPES } from '../../types/portfolio';
 import { formatCurrency } from '../../utils/currency';
+
 
 interface EditPortfolioModalProps {
   isOpen: boolean;
@@ -20,13 +21,56 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
     name: item.name,
     symbol: item.symbol,
     type: item.type,
-    quantity: item.quantity,
     purchasePrice: item.purchasePrice,
     currentPrice: item.currentPrice,
-    purchaseDate: item.purchaseDate
+    purchaseDate: item.purchaseDate,
+    annualInterestRate: item.metadata?.annualInterestRate?.toString() || '',
+    taxExemptPercentage: item.metadata?.taxExemptPercentage?.toString() || '10',
+    bankName: item.metadata?.bankName || '',
+    calculatedNetReturn: item.metadata?.calculatedNetReturn || 0
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Güncel fiyat hesaplama fonksiyonu (vadeli hesap için)
+  const calculateCurrentPrice = (annualRate: string, taxExemptPercentage: string, purchasePrice: number, purchaseDate: string) => {
+    const rate = parseFloat(annualRate || '0');
+    const exempt = parseFloat(taxExemptPercentage || '0');
+    
+    if (rate > 0 && purchasePrice > 0 && purchaseDate) {
+      const startDate = new Date(purchaseDate);
+      const currentDate = new Date();
+      const daysPassed = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Faiz işlemeyecek kısım (ana paradan düşülür)
+      const exemptAmount = purchasePrice * (exempt / 100);
+      
+      // Faiz işleyecek kısım
+      const taxableAmount = purchasePrice - exemptAmount;
+      
+      // Günlük net getiri hesaplama
+      const dailyGrossInterest = taxableAmount * (rate / 100) / 365;
+      const dailyWithholdingTax = dailyGrossInterest * 0.175;
+      const dailyNetReturn = dailyGrossInterest - dailyWithholdingTax;
+      
+      // Toplam kazanç
+      const totalEarnings = dailyNetReturn * daysPassed;
+      
+      // Güncel fiyat = Alış fiyatı + Toplam kazanç
+      const currentPrice = purchasePrice + totalEarnings;
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        currentPrice: currentPrice,
+        calculatedNetReturn: totalEarnings 
+      }));
+      
+      return currentPrice;
+    } else {
+      setFormData(prev => ({ ...prev, calculatedNetReturn: 0, currentPrice: purchasePrice }));
+      return purchasePrice;
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -34,12 +78,25 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
         name: item.name,
         symbol: item.symbol,
         type: item.type,
-        quantity: item.quantity,
         purchasePrice: item.purchasePrice,
         currentPrice: item.currentPrice,
-        purchaseDate: item.purchaseDate
+        purchaseDate: item.purchaseDate,
+        annualInterestRate: item.metadata?.annualInterestRate?.toString() || '',
+        taxExemptPercentage: item.metadata?.taxExemptPercentage?.toString() || '10',
+        bankName: item.metadata?.bankName || '',
+        calculatedNetReturn: item.metadata?.calculatedNetReturn || 0
       });
       setErrors({});
+      
+      // Vadeli hesap ise güncel fiyatı hesapla
+      if (item.type === 'deposit' && item.metadata?.annualInterestRate) {
+        calculateCurrentPrice(
+          item.metadata.annualInterestRate.toString(),
+          item.metadata.taxExemptPercentage?.toString() || '10',
+          item.purchasePrice,
+          item.purchaseDate
+        );
+      }
     }
   }, [isOpen, item]);
 
@@ -54,7 +111,7 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
       newErrors.symbol = 'Sembol gereklidir';
     }
 
-    if (formData.quantity <= 0) {
+    if (formData.type !== 'deposit' && item.quantity <= 0) {
       newErrors.quantity = 'Miktar 0\'dan büyük olmalıdır';
     }
 
@@ -64,6 +121,19 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
 
     if (!formData.purchaseDate) {
       newErrors.purchaseDate = 'Alış tarihi gereklidir';
+    }
+
+    // Vadeli hesap için ek validasyonlar
+    if (formData.type === 'deposit') {
+      if (!formData.annualInterestRate || parseFloat(formData.annualInterestRate) <= 0) {
+        newErrors.annualInterestRate = 'Yıllık faiz oranı 0\'dan büyük olmalıdır';
+      }
+
+
+
+      if (!formData.bankName.trim()) {
+        newErrors.bankName = 'Banka adı gereklidir';
+      }
     }
 
     setErrors(newErrors);
@@ -79,26 +149,63 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
 
     setLoading(true);
     try {
-      // Güncel fiyatı hesapla
-      const currentPrice = formData.currentPrice || formData.purchasePrice;
-      const totalValue = formData.quantity * currentPrice;
-      const totalInvestment = formData.quantity * formData.purchasePrice;
-      const totalReturn = totalValue - totalInvestment;
-      const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
+      let updateData: Partial<PortfolioItem>;
       
-      await onUpdate(item.id, {
-        name: formData.name,
-        symbol: formData.symbol,
-        type: formData.type,
-        quantity: formData.quantity,
-        purchasePrice: formData.purchasePrice,
-        purchaseDate: formData.purchaseDate,
-        currentPrice,
-        totalValue,
-        totalReturn,
-        returnPercentage,
-        lastUpdated: new Date()
-      });
+      if (formData.type === 'deposit') {
+        // Vadeli hesap için
+        const currentPrice = formData.currentPrice;
+        const totalValue = currentPrice; // Vadeli hesapta miktar 1 olarak kabul edilir
+        const totalInvestment = formData.purchasePrice;
+        const totalReturn = totalValue - totalInvestment;
+        const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
+        
+        updateData = {
+          name: formData.name,
+          symbol: formData.symbol,
+          type: formData.type,
+          quantity: 1, // Vadeli hesap için miktar her zaman 1
+          purchasePrice: formData.purchasePrice,
+          purchaseDate: formData.purchaseDate,
+          currentPrice,
+          totalValue,
+          totalReturn,
+          returnPercentage,
+          lastUpdated: new Date()
+        };
+      } else {
+        // Diğer yatırım türleri için
+        const currentPrice = formData.currentPrice || formData.purchasePrice;
+        const totalValue = item.quantity * currentPrice;
+        const totalInvestment = item.quantity * formData.purchasePrice;
+        const totalReturn = totalValue - totalInvestment;
+        const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
+        
+        updateData = {
+          name: formData.name,
+          symbol: formData.symbol,
+          type: formData.type,
+          quantity: item.quantity, // Mevcut miktarı koru
+          purchasePrice: formData.purchasePrice,
+          purchaseDate: formData.purchaseDate,
+          currentPrice,
+          totalValue,
+          totalReturn,
+          returnPercentage,
+          lastUpdated: new Date()
+        };
+      }
+
+      // Vadeli hesap için metadata ekle
+      if (formData.type === 'deposit') {
+        updateData.metadata = {
+          annualInterestRate: parseFloat(formData.annualInterestRate),
+          taxExemptPercentage: parseFloat(formData.taxExemptPercentage),
+          bankName: formData.bankName.trim(),
+          calculatedNetReturn: formData.calculatedNetReturn
+        };
+      }
+      
+      await onUpdate(item.id, updateData);
       onClose();
     } catch (error) {
       console.error('Error updating portfolio item:', error);
@@ -110,8 +217,11 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
   const getSymbolOptions = () => {
     if (formData.type === 'gold') {
       return Object.entries(GOLD_TYPES).map(([key, value]) => ({ key, value }));
-    } else if (['usd', 'eur'].includes(formData.type)) {
-      return Object.entries(CURRENCY_TYPES).map(([key, value]) => ({ key, value }));
+    } else if (formData.type === 'currency') {
+      return [
+        { key: 'USD', value: 'ABD Doları' },
+        { key: 'EUR', value: 'Euro' }
+      ];
     }
     return [];
   };
@@ -159,7 +269,7 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Sembol
             </label>
-            {(formData.type === 'gold' || ['usd', 'eur'].includes(formData.type)) ? (
+            {(formData.type === 'gold' || formData.type === 'currency') ? (
               <select
                 value={formData.symbol}
                 onChange={(e) => {
@@ -215,26 +325,26 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
             {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
           </div>
 
-          {/* Miktar */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Miktar
-            </label>
-            <input
-              type="number"
-              value={formData.quantity}
-              onChange={(e) => {
-                setFormData({ ...formData, quantity: parseFloat(e.target.value) || 0 });
-                setErrors({ ...errors, quantity: '' });
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="0"
-              min="0"
-              step="any"
-              required
-            />
-            {errors.quantity && <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>}
-          </div>
+          {/* Miktar - Sadece vadeli hesap dışındaki yatırımlar için */}
+          {formData.type !== 'deposit' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Miktar
+              </label>
+              <input
+                type="number"
+                value={item.quantity}
+                onChange={() => {
+                  // Miktar değişikliği için parent component'e bildirim gönderilecek
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="0"
+                min="0"
+                step="any"
+                required
+              />
+            </div>
+          )}
 
           {/* Alış Fiyatı */}
           <div>
@@ -245,8 +355,12 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
               type="number"
               value={formData.purchasePrice}
               onChange={(e) => {
-                setFormData({ ...formData, purchasePrice: parseFloat(e.target.value) || 0 });
+                const newPrice = parseFloat(e.target.value) || 0;
+                setFormData({ ...formData, purchasePrice: newPrice });
                 setErrors({ ...errors, purchasePrice: '' });
+                if (formData.type === 'deposit') {
+                  calculateCurrentPrice(formData.annualInterestRate, formData.taxExemptPercentage, newPrice, formData.purchaseDate);
+                }
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="0.00"
@@ -260,20 +374,30 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
           {/* Güncel Fiyat */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Güncel Fiyat (TL)
+              {formData.type === 'deposit' ? 'Güncel Değer (Otomatik Hesaplanır)' : 'Güncel Fiyat (TL)'}
             </label>
             <input
               type="number"
               value={formData.currentPrice}
               onChange={(e) => {
-                setFormData({ ...formData, currentPrice: parseFloat(e.target.value) || 0 });
-                setErrors({ ...errors, currentPrice: '' });
+                if (formData.type !== 'deposit') {
+                  setFormData({ ...formData, currentPrice: parseFloat(e.target.value) || 0 });
+                  setErrors({ ...errors, currentPrice: '' });
+                }
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+                formData.type === 'deposit' ? 'bg-gray-100 cursor-not-allowed' : ''
+              }`}
               placeholder="0.00"
               min="0"
               step="0.01"
+              readOnly={formData.type === 'deposit'}
             />
+            {formData.type === 'deposit' && (
+              <p className="text-sm text-gray-600 mt-1">
+                Vadeli hesap için güncel değer otomatik olarak hesaplanır
+              </p>
+            )}
             {errors.currentPrice && <p className="text-red-500 text-sm mt-1">{errors.currentPrice}</p>}
           </div>
 
@@ -288,6 +412,9 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
               onChange={(e) => {
                 setFormData({ ...formData, purchaseDate: e.target.value });
                 setErrors({ ...errors, purchaseDate: '' });
+                if (formData.type === 'deposit') {
+                  calculateCurrentPrice(formData.annualInterestRate, formData.taxExemptPercentage, formData.purchasePrice, e.target.value);
+                }
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               max={new Date().toISOString().split('T')[0]}
@@ -295,6 +422,128 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
             />
             {errors.purchaseDate && <p className="text-red-500 text-sm mt-1">{errors.purchaseDate}</p>}
           </div>
+
+          {/* Vadeli Hesap için Ek Alanlar */}
+          {formData.type === 'deposit' && (
+            <>
+              {/* Yıllık Faiz Oranı */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Yıllık Faiz Oranı (%)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.annualInterestRate}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setFormData(prev => ({ ...prev, annualInterestRate: newValue }));
+                    setErrors({ ...errors, annualInterestRate: '' });
+                    calculateCurrentPrice(newValue, formData.taxExemptPercentage, formData.purchasePrice, formData.purchaseDate);
+                  }}
+                  placeholder="Örn: 15.50"
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    errors.annualInterestRate ? 'border-red-500' : ''
+                  }`}
+                />
+                {errors.annualInterestRate && (
+                  <p className="mt-1 text-sm text-red-600">{errors.annualInterestRate}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Bankanın verdiği yıllık faiz oranını giriniz
+                </p>
+              </div>
+
+              {/* Faiz İşlenmeyen Yüzde */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Faiz İşlenmeyen Yüzde
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {['10', '15'].map((percentage) => (
+                    <button
+                      key={percentage}
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, taxExemptPercentage: percentage }));
+                        calculateCurrentPrice(formData.annualInterestRate, percentage, formData.purchasePrice, formData.purchaseDate);
+                      }}
+                      className={`px-3 py-2 border rounded-lg font-medium transition-colors ${
+                        formData.taxExemptPercentage === percentage
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      %{percentage}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Faizin vergiden muaf olan kısmını seçiniz
+                </p>
+              </div>
+
+
+
+              {/* Banka Adı */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Banka Adı
+                </label>
+                <input
+                  type="text"
+                  value={formData.bankName}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, bankName: e.target.value }));
+                    setErrors({ ...errors, bankName: '' });
+                  }}
+                  placeholder="Örn: Ziraat Bankası"
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    errors.bankName ? 'border-red-500' : ''
+                  }`}
+                />
+                {errors.bankName && (
+                  <p className="mt-1 text-sm text-red-600">{errors.bankName}</p>
+                )}
+              </div>
+
+              {/* Net Getiri Hesaplaması */}
+              {formData.calculatedNetReturn > 0 && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <h4 className="font-medium text-green-800 mb-2">Net Getiri Hesaplaması</h4>
+                  <div className="space-y-1 text-sm text-green-700">
+                    {(() => {
+                      const startDate = new Date(formData.purchaseDate);
+                      const currentDate = new Date();
+                      const daysPassed = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+                      
+                      const exemptAmount = formData.purchasePrice * parseFloat(formData.taxExemptPercentage) / 100;
+                      const taxableAmount = formData.purchasePrice - exemptAmount;
+                      const dailyGrossInterest = taxableAmount * parseFloat(formData.annualInterestRate || '0') / 100 / 365;
+                      const dailyWithholdingTax = dailyGrossInterest * 0.175;
+                      const dailyNetReturn = dailyGrossInterest - dailyWithholdingTax;
+                      
+                      return (
+                        <>
+                          <p>Alış Fiyatı: {formatCurrency(formData.purchasePrice)}</p>
+                          <p>Faiz İşlemeyecek Kısım (%{formData.taxExemptPercentage}): {formatCurrency(exemptAmount)}</p>
+                          <p>Faiz İşleyecek Kısım: {formatCurrency(taxableAmount)}</p>
+                          <p>Günlük Brüt Faiz: {formatCurrency(dailyGrossInterest)}</p>
+                          <p>Günlük Stopaj Vergisi (%17.5): {formatCurrency(dailyWithholdingTax)}</p>
+                          <p>Günlük Net Getiri: {formatCurrency(dailyNetReturn)}</p>
+                          <p>Geçen Gün Sayısı: {daysPassed} gün</p>
+                          <div className="border-t border-green-300 pt-2 mt-2">
+                            <p className="font-semibold">Toplam Kazanç: {formatCurrency(formData.calculatedNetReturn)}</p>
+                            <p className="font-semibold">Güncel Değer: {formatCurrency(formData.currentPrice)}</p>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
 
           {/* Özet Bilgiler */}
           <div className="bg-gray-50 rounded-lg p-4 space-y-2">

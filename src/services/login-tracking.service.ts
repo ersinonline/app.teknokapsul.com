@@ -9,7 +9,7 @@ interface LoginRecord {
   userAgent: string;
   device: string;
   location?: string;
-  loginMethod: 'email' | 'google' | 'phone';
+  loginMethod: 'email' | 'google' | 'apple' | 'phone';
   success: boolean;
 }
 
@@ -45,7 +45,7 @@ class LoginTrackingService {
     };
   }
 
-  async recordLogin(loginMethod: 'email' | 'google' | 'phone', success: boolean = true) {
+  async recordLogin(loginMethod: 'email' | 'google' | 'apple' | 'phone', success: boolean = true) {
     try {
       const user = auth.currentUser;
       if (!user) return;
@@ -70,7 +70,7 @@ class LoginTrackingService {
     }
   }
 
-  async recordFailedLogin(email: string, loginMethod: 'email' | 'google' | 'phone') {
+  async recordFailedLogin(email: string, loginMethod: 'email' | 'google' | 'apple' | 'phone') {
     try {
       const clientInfo = await this.getClientInfo();
       

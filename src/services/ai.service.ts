@@ -1,4 +1,8 @@
 import { getAI, getGenerativeModel, GoogleAIBackend, FunctionDeclaration, ObjectSchemaInterface } from "@firebase/ai";
+
+// Export types for use in other services
+export type { ObjectSchemaInterface } from "@firebase/ai";
+
 import { app, db } from "../config/firebase";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { getAllSupportTickets } from "./support.service";
@@ -332,4 +336,19 @@ export const getAIRecommendations = async (financialData: any): Promise<string[]
       "Günü geçmiş ödemelerinize dikkat edin ve öncelikle bunları kapatın."
     ];
   }
+};
+
+// Export aiService object for backward compatibility
+export const aiService = {
+  generateText,
+  generateStructuredOutput,
+  startChat,
+  getUserApplications,
+  getUserSupportTickets,
+  getUserOrders,
+  getUserCargos,
+  getUserWarranties,
+  getUserFinancialData,
+  queryUserStatus,
+  getAIRecommendations
 };

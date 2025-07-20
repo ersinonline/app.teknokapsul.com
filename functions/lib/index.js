@@ -15,5 +15,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // export * from './expenseReminders'; // Temporarily disabled
-__exportStar(require("./stripe"), exports);
+// export * from './stripe'; // Temporarily disabled due to secret key issue
+__exportStar(require("./priceUpdater"), exports);
 //# sourceMappingURL=index.js.map

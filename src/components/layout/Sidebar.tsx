@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator, ShoppingBag, Shield, Target, Crown, UserCog, Menu, X } from 'lucide-react';
+import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator, ShoppingBag, Shield, Target, Crown, UserCog, Menu, X, Briefcase } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePremium } from '../../contexts/PremiumContext';
 
@@ -41,12 +41,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
 
   const servicesItems = [
     { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
-    { id: 'loan-calculator', path: '/loan-calculator', label: 'Kredi Hesaplama', icon: Calculator },
+    { id: 'credit-calculator', path: '/credit-calculator', label: 'Kredi Hesaplama', icon: Calculator },
     { id: 'shop-rewards', path: '/shop-rewards', label: 'Harcadıkça Kazan', icon: ShoppingBag },
     { id: 'cargo-tracking', path: '/cargo-tracking', label: 'Kargo Takip', icon: Package },
   ];
 
   const toolsItems = [
+    { id: 'work-tracking', path: '/work-tracking', label: 'İş Takibi', icon: Briefcase },
     { id: 'documents', path: '/documents', label: 'Dosyalarım', icon: FolderOpen },
     { id: 'notes', path: '/notes', label: 'Notlar', icon: StickyNote },
     { id: 'calendar', path: '/calendar', label: 'Takvim', icon: Calendar },

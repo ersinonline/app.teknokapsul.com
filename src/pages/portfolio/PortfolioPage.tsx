@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, TrendingUp, Target, Brain, Eye, EyeOff, RefreshCw, PieChart } from 'lucide-react';
+import { Plus, TrendingUp, Target, Brain, Eye, EyeOff, RefreshCw, PieChart, Clock, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { portfolioService } from '../../services/portfolio.service';
 import { PortfolioItem, AIRecommendation, PORTFOLIO_CATEGORIES } from '../../types/portfolio';
@@ -13,7 +13,9 @@ import { ExchangeRateModal } from '../../components/portfolio/ExchangeRateModal'
 
 import { PriceUpdatePanel } from '../../components/portfolio/PriceUpdatePanel';
 import { PortfolioAnalytics } from '../../components/portfolio/PortfolioAnalytics';
+import { PortfolioDetailsModal } from '../../components/portfolio/PortfolioDetailsModal';
 import { exchangeRateService } from '../../services/exchange-rate.service';
+import { depositAutoReturnService } from '../../services/deposit-auto-return.service';
 
 export const PortfolioPage: React.FC = () => {
   const { user } = useAuth();
@@ -29,13 +31,22 @@ export const PortfolioPage: React.FC = () => {
   const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
   const [showValues, setShowValues] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedSymbol, setSelectedSymbol] = useState<string>('');
+  const [showDepositSettingsModal, setShowDepositSettingsModal] = useState(false);
+  const [depositAutoReturnActive, setDepositAutoReturnActive] = useState(false);
 
   useEffect(() => {
     if (user) {
       initializeExchangeRates();
       loadPortfolioData();
+      checkDepositAutoReturnStatus();
     }
   }, [user]);
+
+  const checkDepositAutoReturnStatus = () => {
+    setDepositAutoReturnActive(depositAutoReturnService.isServiceActive());
+  };
 
   const initializeExchangeRates = async () => {
     try {
@@ -76,7 +87,20 @@ export const PortfolioPage: React.FC = () => {
     if (!user) return;
     
     try {
-      await portfolioService.addPortfolioItem(user.uid, item);
+      const portfolioItem = await portfolioService.addPortfolioItem(user.uid, item);
+      
+      // Vadeli hesap ise otomatik getiri hesaplamasını başlat
+      if (item.type === 'deposit' && item.metadata?.annualInterestRate && item.metadata?.taxExemptPercentage) {
+        try {
+          await depositAutoReturnService.startAutoReturnCalculation(user.uid, portfolioItem);
+          setDepositAutoReturnActive(true);
+        } catch (error) {
+          console.error('Otomatik getiri hesaplama başlatılamadı:', error);
+          // Hata olsa bile portföy öğesi eklendi, kullanıcıyı bilgilendir
+          alert('Vadeli hesap eklendi ancak otomatik getiri hesaplama başlatılamadı. Lütfen daha sonra tekrar deneyin.');
+        }
+      }
+      
       await loadPortfolioData();
       setShowAddModal(false);
     } catch (error) {
@@ -104,10 +128,57 @@ export const PortfolioPage: React.FC = () => {
     }
   };
 
-  const filteredItems = (selectedFilter === 'all' 
+  const handleShowDetails = (symbol: string) => {
+    setSelectedSymbol(symbol);
+    setShowDetailsModal(true);
+  };
+
+  const handleStartDepositAutoReturn = async () => {
+    if (!user) return;
+    
+    try {
+      const depositItems = portfolioItems.filter(item => item.type === 'deposit');
+      if (depositItems.length === 0) {
+        alert('Vadeli hesap yatırımınız bulunmuyor.');
+        return;
+      }
+
+      await depositAutoReturnService.startAutoReturnForAllDeposits(user.uid, depositItems);
+      setDepositAutoReturnActive(true);
+      
+      // Bildirim gönder
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Vadeli Hesap Otomatik Getiri', {
+          body: `${depositItems.length} vadeli hesap için otomatik günlük getiri hesaplama başlatıldı.`,
+          icon: '/icons/icon-192x192.svg'
+        });
+      }
+    } catch (error) {
+      console.error('Error starting deposit auto return:', error);
+      alert('Otomatik getiri hesaplama başlatılırken bir hata oluştu.');
+    }
+  };
+
+  const handleStopDepositAutoReturn = () => {
+    depositAutoReturnService.stopService();
+    setDepositAutoReturnActive(false);
+    
+    // Bildirim gönder
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Vadeli Hesap Otomatik Getiri', {
+        body: 'Otomatik günlük getiri hesaplama durduruldu.',
+        icon: '/icons/icon-192x192.svg'
+      });
+    }
+  };
+
+  const baseFilteredItems = selectedFilter === 'all' 
     ? portfolioItems 
-    : portfolioItems.filter(item => item.type === selectedFilter))
-    .sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime()); // En yeni tarih en üstte
+    : portfolioItems.filter(item => item.type === selectedFilter);
+
+  // Aynı sembole sahip yatırımları birleştir
+  const filteredItems = portfolioService.consolidatePortfolioBySymbol(baseFilteredItems)
+    .sort((a, b) => new Date(b.purchaseDate).getTime() - new Date(a.purchaseDate).getTime());
 
   if (loading) {
     return (
@@ -143,6 +214,20 @@ export const PortfolioPage: React.FC = () => {
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               <span className="text-xs sm:text-sm">Yenile</span>
+            </button>
+            
+            <button
+              onClick={() => setShowDepositSettingsModal(true)}
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg transition-colors ${
+                depositAutoReturnActive 
+                  ? 'bg-green-600 text-white hover:bg-green-700' 
+                  : 'bg-orange-600 text-white hover:bg-orange-700'
+              }`}
+            >
+              <Clock className="w-4 h-4" />
+              <span className="text-xs sm:text-sm">
+                {depositAutoReturnActive ? 'Otomatik Getiri Aktif' : 'Otomatik Getiri'}
+              </span>
             </button>
             
             <button
@@ -219,15 +304,23 @@ export const PortfolioPage: React.FC = () => {
           {/* Portfolio Items List */}
           {filteredItems.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {filteredItems.map((item) => (
-                <PortfolioItemCard
-                  key={item.id}
-                  item={item}
-                  showValues={showValues}
-                  onUpdate={handleUpdateItem}
-                  onDelete={handleDeleteItem}
-                />
-              ))}
+              {filteredItems.map((item) => {
+                const sameSymbolCount = baseFilteredItems.filter(i => i.symbol === item.symbol).length;
+                const isConsolidated = sameSymbolCount > 1;
+                
+                return (
+                  <PortfolioItemCard
+                    key={item.id}
+                    item={item}
+                    showValues={showValues}
+                    onUpdate={handleUpdateItem}
+                    onDelete={handleDeleteItem}
+                    isConsolidated={isConsolidated}
+                    consolidatedCount={sameSymbolCount}
+                    onShowDetails={handleShowDetails}
+                  />
+                );
+              })}
             </div>
           ) : (
             <div className="bg-white rounded-xl p-8 shadow-sm border text-center">
@@ -271,7 +364,6 @@ export const PortfolioPage: React.FC = () => {
               
               {/* AI Recommendations */}
               <div className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm border">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">AI Önerileri</h2>
                 <AIRecommendationsPanel 
                   recommendations={recommendations}
                   loading={loading}
@@ -302,19 +394,13 @@ export const PortfolioPage: React.FC = () => {
           <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Getiri Sıralaması</h2>
           {portfolioItems.length > 0 ? (
             <div className="space-y-3">
-              {[...portfolioItems]
-                .sort((a, b) => {
-                  const returnA = ((a.currentPrice - a.purchasePrice) / a.purchasePrice) * 100;
-                  const returnB = ((b.currentPrice - b.purchasePrice) / b.purchasePrice) * 100;
-                  return returnB - returnA;
-                })
+              {portfolioService.consolidatePortfolioBySymbol(portfolioItems)
+                .sort((a, b) => b.returnPercentage - a.returnPercentage)
                 .map((item, index) => {
-                  const returnPercentage = ((item.currentPrice - item.purchasePrice) / item.purchasePrice) * 100;
-                  const returnAmount = (item.currentPrice - item.purchasePrice) * item.quantity;
-                  const isPositive = returnPercentage >= 0;
+                  const isPositive = item.returnPercentage >= 0;
                   
                   return (
-                    <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div key={item.symbol} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                           index === 0 ? 'bg-yellow-100 text-yellow-800' :
@@ -334,12 +420,12 @@ export const PortfolioPage: React.FC = () => {
                         <p className={`font-bold ${
                           isPositive ? 'text-green-600' : 'text-red-600'
                         }`}>
-                          {showValues ? `${isPositive ? '+' : ''}%${returnPercentage.toFixed(2)}` : '••••'}
+                          {showValues ? `${isPositive ? '+' : ''}%${item.returnPercentage.toFixed(2)}` : '••••'}
                         </p>
                         <p className={`text-sm ${
                           isPositive ? 'text-green-600' : 'text-red-600'
                         }`}>
-                          {showValues ? `${isPositive ? '+' : ''}${formatCurrency(returnAmount)}` : '••••••'}
+                          {showValues ? `${isPositive ? '+' : ''}${formatCurrency(item.totalReturn)}` : '••••••'}
                         </p>
                       </div>
                     </div>
@@ -383,6 +469,100 @@ export const PortfolioPage: React.FC = () => {
           }}
           portfolioItems={portfolioItems}
         />
+      )}
+
+      {/* Portfolio Details Modal */}
+      {showDetailsModal && selectedSymbol && (
+        <PortfolioDetailsModal
+          isOpen={showDetailsModal}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setSelectedSymbol('');
+          }}
+          symbol={selectedSymbol}
+          items={portfolioItems.filter(item => item.symbol === selectedSymbol)}
+          showValues={showValues}
+          onUpdate={handleUpdateItem}
+          onDelete={handleDeleteItem}
+        />
+      )}
+
+      {/* Deposit Auto Return Settings Modal */}
+      {showDepositSettingsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Vadeli Hesap Otomatik Getiri</h2>
+              <button
+                onClick={() => setShowDepositSettingsModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-medium text-blue-900">Otomatik Günlük Getiri</h3>
+                </div>
+                <p className="text-sm text-blue-700">
+                  Vadeli hesaplarınız için günlük getiri otomatik olarak hesaplanır ve tutarınıza eklenir.
+                </p>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">Durum:</span>
+                  <span className={`text-sm font-medium ${
+                    depositAutoReturnActive ? 'text-green-600' : 'text-orange-600'
+                  }`}>
+                    {depositAutoReturnActive ? 'Aktif' : 'Pasif'}
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">Vadeli Hesap Sayısı:</span>
+                  <span className="text-sm text-gray-600">
+                    {portfolioItems.filter(item => item.type === 'deposit').length}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                {depositAutoReturnActive ? (
+                  <button
+                    onClick={() => {
+                      handleStopDepositAutoReturn();
+                      setShowDepositSettingsModal(false);
+                    }}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Durdur
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      handleStartDepositAutoReturn();
+                      setShowDepositSettingsModal(false);
+                    }}
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    Başlat
+                  </button>
+                )}
+                
+                <button
+                  onClick={() => setShowDepositSettingsModal(false)}
+                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                >
+                  İptal
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

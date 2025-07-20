@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { signInWithPopup, signInWithRedirect, GoogleAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, GoogleAuthProvider, OAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
-import { AlertCircle, Smartphone } from 'lucide-react';
+import { AlertCircle, Smartphone, Apple } from 'lucide-react';
 
 interface SocialLoginProps {
   method?: 'google' | 'apple' | 'sms' | 'all';
@@ -56,6 +56,48 @@ export const SocialLogin = ({ method = 'all' }: SocialLoginProps) => {
         setError('Ağ bağlantısı hatası. İnternet bağlantınızı kontrol edin.');
       } else {
         setError('Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    setError(null);
+    setIsLoading(true);
+    
+    try {
+      const provider = new OAuthProvider('apple.com');
+      provider.addScope('email');
+      provider.addScope('name');
+      
+      // Try popup first, fallback to redirect if needed
+      if (isWebView()) {
+        await signInWithRedirect(auth, provider);
+      } else {
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (popupError: any) {
+          if (popupError.code === 'auth/popup-blocked' || popupError.code === 'auth/popup-closed-by-user') {
+            console.log('Popup blocked, trying redirect...');
+            await signInWithRedirect(auth, provider);
+          } else {
+            throw popupError;
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error('Apple login error:', error);
+      
+      // User-friendly error messages
+      if (error.code === 'auth/unauthorized-domain') {
+        setError('Bu domain henüz yetkilendirilmemiş. Lütfen sistem yöneticisi ile iletişime geçin.');
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        setError('Giriş penceresi kapatıldı. Lütfen tekrar deneyin.');
+      } else if (error.code === 'auth/network-request-failed') {
+        setError('Ağ bağlantısı hatası. İnternet bağlantınızı kontrol edin.');
+      } else {
+        setError('Apple ile giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.');
       }
     } finally {
       setIsLoading(false);
@@ -175,6 +217,18 @@ export const SocialLogin = ({ method = 'all' }: SocialLoginProps) => {
                 alt="Google"
               />
               <span>{isLoading ? 'Giriş yapılıyor...' : 'Google ile Giriş Yap'}</span>
+            </button>
+          )}
+
+          {(method === 'all' || method === 'apple') && (
+            <button
+              onClick={handleAppleLogin}
+              disabled={isLoading}
+              type="button"
+              className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-black text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            >
+              <Apple className="h-5 w-5 mr-3" />
+              <span>{isLoading ? 'Giriş yapılıyor...' : 'Apple ile Giriş Yap'}</span>
             </button>
           )}
 

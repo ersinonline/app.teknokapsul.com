@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { TrendingUp, TrendingDown, PieChart, BarChart3, Target, Calendar, DollarSign, Percent } from 'lucide-react';
 import { formatCurrency } from '../../utils/currency';
+import { portfolioService } from '../../services/portfolio.service';
 
 interface PortfolioAnalyticsProps {
   portfolioItems: any[];
@@ -22,8 +23,13 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
   const [selectedPeriod, setSelectedPeriod] = useState<'1D' | '1W' | '1M' | '3M' | '1Y' | 'ALL'>('1M');
   const [viewType, setViewType] = useState<'overview' | 'performance' | 'allocation' | 'risk'>('overview');
 
+  // Aynı sembole sahip yatırımları birleştir
+  const consolidatedItems = useMemo(() => {
+    return portfolioService.consolidatePortfolioBySymbol(portfolioItems);
+  }, [portfolioItems]);
+
   const metrics = useMemo((): PerformanceMetrics => {
-    if (!portfolioItems.length) {
+    if (!consolidatedItems.length) {
       return {
         totalValue: 0,
         totalCost: 0,
@@ -37,8 +43,8 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
       };
     }
 
-    const totalValue = portfolioItems.reduce((sum, item) => sum + (item.currentPrice * item.quantity), 0);
-    const totalCost = portfolioItems.reduce((sum, item) => sum + ((item.purchasePrice || item.averagePrice || item.currentPrice) * item.quantity), 0);
+    const totalValue = consolidatedItems.reduce((sum, item) => sum + (item.currentPrice * item.quantity), 0);
+    const totalCost = consolidatedItems.reduce((sum, item) => sum + ((item.purchasePrice || item.averagePrice || item.currentPrice) * item.quantity), 0);
     const totalReturn = totalValue - totalCost;
     const returnPercentage = totalCost > 0 ? (totalReturn / totalCost) * 100 : 0;
 
@@ -47,7 +53,7 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
     const dayChangePercent = totalValue > 0 ? (dayChange / totalValue) * 100 : 0;
 
     // Find best and worst performers
-    const itemsWithReturn = portfolioItems.map(item => {
+    const itemsWithReturn = consolidatedItems.map(item => {
       const currentValue = item.currentPrice * item.quantity;
       const cost = (item.purchasePrice || item.averagePrice || item.currentPrice) * item.quantity;
       const itemReturn = currentValue - cost;
@@ -55,14 +61,14 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
       return { ...item, return: itemReturn, returnPercent: itemReturnPercent };
     });
 
-    const bestPerformer = itemsWithReturn.reduce((best, item) => 
-      item.returnPercent > (best?.returnPercent || -Infinity) ? item : best, null);
+    const bestPerformer = itemsWithReturn.length > 0 ? itemsWithReturn.reduce((best, item) => 
+      item.returnPercent > best.returnPercent ? item : best) : null;
     
-    const worstPerformer = itemsWithReturn.reduce((worst, item) => 
-      item.returnPercent < (worst?.returnPercent || Infinity) ? item : worst, null);
+    const worstPerformer = itemsWithReturn.length > 0 ? itemsWithReturn.reduce((worst, item) => 
+      item.returnPercent < worst.returnPercent ? item : worst) : null;
 
     // Calculate diversification score (simplified)
-    const categories = [...new Set(portfolioItems.map(item => item.category))];
+    const categories = [...new Set(consolidatedItems.map(item => item.category || item.type))];
     const diversificationScore = Math.min(100, (categories.length / 10) * 100);
 
     return {
@@ -81,13 +87,14 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
   const allocationData = useMemo(() => {
     const categoryAllocation: Record<string, { value: number; count: number; percentage: number }> = {};
     
-    portfolioItems.forEach(item => {
+    consolidatedItems.forEach(item => {
       const value = item.currentPrice * item.quantity;
-      if (!categoryAllocation[item.category]) {
-        categoryAllocation[item.category] = { value: 0, count: 0, percentage: 0 };
+      const category = item.category || item.type;
+      if (!categoryAllocation[category]) {
+        categoryAllocation[category] = { value: 0, count: 0, percentage: 0 };
       }
-      categoryAllocation[item.category].value += value;
-      categoryAllocation[item.category].count += 1;
+      categoryAllocation[category].value += value;
+      categoryAllocation[category].count += 1;
     });
 
     Object.keys(categoryAllocation).forEach(category => {
@@ -97,7 +104,7 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
     });
 
     return categoryAllocation;
-  }, [portfolioItems, metrics.totalValue]);
+  }, [consolidatedItems, metrics.totalValue]);
 
   const riskMetrics = useMemo(() => {
     // Simplified risk calculations
@@ -348,7 +355,6 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-4 lg:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
-        <h2 className="text-lg sm:text-xl font-bold text-gray-900">Portföy Analizi</h2>
         <div className="flex flex-wrap gap-1 sm:gap-2">
           {[
             { key: 'overview', label: 'Genel', icon: TrendingUp },
@@ -377,7 +383,7 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
       {viewType === 'allocation' && renderAllocation()}
       {viewType === 'risk' && renderRisk()}
 
-      {portfolioItems.length === 0 && (
+      {consolidatedItems.length === 0 && (
         <div className="text-center py-6 sm:py-8 text-gray-500">
           <p className="text-sm sm:text-base">Analiz için portföyünüze yatırım ekleyin.</p>
         </div>

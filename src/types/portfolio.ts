@@ -1,7 +1,7 @@
 export interface PortfolioItem {
   id: string;
   userId: string;
-  type: 'stock' | 'fund' | 'gold' | 'usd' | 'eur' | 'crypto' | 'deposit';
+  type: 'stock' | 'fund' | 'gold' | 'currency' | 'crypto' | 'deposit';
   symbol: string;
   name: string;
   quantity: number;
@@ -11,6 +11,16 @@ export interface PortfolioItem {
   totalValue: number;
   totalReturn: number;
   returnPercentage: number;
+  averagePrice?: number;
+  category?: string;
+  metadata?: {
+    dailyReturnRate?: number;
+    maturityDate?: Date;
+    bankName?: string;
+    annualInterestRate?: number;
+    taxExemptPercentage?: number;
+    [key: string]: any;
+  };
   createdAt: Date;
   updatedAt: Date;
   lastUpdated: Date;
@@ -89,23 +99,22 @@ export const PORTFOLIO_CATEGORIES = {
   stock: 'Hisse Senedi',
   fund: 'Fon',
   gold: 'Altın',
-  usd: 'ABD Doları',
-  eur: 'Euro',
+  currency: 'Döviz',
   crypto: 'Kripto Para',
   deposit: 'Vadeli Hesap'
 } as const;
 
 export const GOLD_TYPES = {
-  'XAU': 'Gram Altın',
-  'GOLD_OUNCE': 'Altın (ONS)',
-  'TAMALTIN': 'Tam Altın',
-  'YARIMALTIN': 'Yarım Altın',
-  'CEYREKALTIN': 'Çeyrek Altın',
-  'CUMHURIYETALTINI': 'Cumhuriyet Altını',
-  'RESATALTIN': 'Reşat Altını',
-  '22BILEZIK': '22 Ayar Bilezik',
-  '18AYARALTIN': '18 Ayar Altın',
-  '14AYARALTIN': '14 Ayar Altın'
+  'GRAM': 'Gram Altın',
+  'ONS': 'Ons Altın',
+  'TAM': 'Tam Altın',
+  'YARIM': 'Yarım Altın',
+  'CEYREK': 'Çeyrek Altın',
+  'CUMHURIYET': 'Cumhuriyet Altını',
+  'RESAT': 'Reşat Altını',
+  'BILEZIK22': '22 Ayar Bilezik',
+  'ALTIN18': '18 Ayar Altın',
+  'ALTIN14': '14 Ayar Altın'
 } as const;
 
 export const CURRENCY_TYPES = {

@@ -172,6 +172,43 @@ class OfflineService {
     return navigator.onLine;
   }
 
+  // Get pending expenses
+  async getPendingExpenses(): Promise<any[]> {
+    return await this.getData('expenses') || [];
+  }
+
+  // Get pending incomes
+  async getPendingIncomes(): Promise<any[]> {
+    return await this.getData('income') || [];
+  }
+
+  // Get pending payments (from sync queue)
+  async getPendingPayments(): Promise<any[]> {
+    const syncQueue = await this.getSyncQueue();
+    return syncQueue.filter(item => item.collection === 'payments');
+  }
+
+  // Sync pending data
+  async syncPendingData(): Promise<void> {
+    await this.syncOfflineData();
+  }
+
+  // Clear all offline data
+  async clearAllOfflineData(): Promise<void> {
+    if (!this.db) await this.init();
+    if (!this.db) return;
+
+    try {
+      const collections = ['portfolioItems', 'creditCards', 'loans', 'cashAdvanceAccounts', 'expenses', 'income', 'syncQueue'];
+      for (const collection of collections) {
+        await this.db.clear(collection as any);
+      }
+      console.log('All offline data cleared');
+    } catch (error) {
+      console.error('Failed to clear offline data:', error);
+    }
+  }
+
   // Sync offline data when back online
   async syncOfflineData(): Promise<void> {
     if (!this.isOnline()) {

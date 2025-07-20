@@ -99,11 +99,11 @@ export const MobileFinancePage: React.FC = () => {
       textColor: 'text-yellow-700'
     },
     {
-      id: 'loan-calculator',
+      id: 'credit-calculator',
       title: 'Kredi Hesaplama',
       description: 'Kredilerinizi hesaplayın',
       icon: PieChart,
-      path: '/loan-calculator',
+      path: '/credit-calculator',
       color: 'bg-yellow-500',
       bgColor: 'bg-yellow-50',
       textColor: 'text-yellow-700'

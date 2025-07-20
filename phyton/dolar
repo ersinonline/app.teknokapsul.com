@@ -1,0 +1,89 @@
+import requests
+from bs4 import BeautifulSoup
+import json
+
+def fetch_html(url):
+    """
+    Belirtilen URL'den HTML içeriğini çeker.
+    Fetches HTML content from the given URL.
+    """
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # HTTP hataları için istisna fırlatır
+        return response.text
+    except requests.exceptions.RequestException as e:
+        print(f"URL'den veri çekilirken hata oluştu {url}: {e}")
+        return None
+
+def parse_usd_data(html_content):
+    """
+    Döviz sayfasından ABD Doları fiyatlarını ayrıştırır.
+    Parses USD prices from the currency page based on the new HTML structure.
+    """
+    if not html_content:
+        return {}
+
+    soup = BeautifulSoup(html_content, 'html.parser')
+    usd_data = {}
+
+    # Yeni HTML yapısına göre 'kurDetail' sınıfına sahip div'i bul.
+    kur_detail_div = soup.find('div', class_='kurDetail')
+
+    if kur_detail_div:
+        # Alış fiyatını bulmak için: 'ALIŞ(TL)' metnini içeren span'i bul, sonra onun ebeveyni olan div'deki 'value' span'i çek.
+        alis_text_span = kur_detail_div.find('span', class_='text', string='ALIŞ(TL)')
+        if alis_text_span:
+            alis_box = alis_text_span.find_parent('div', class_='kurBox')
+            if alis_box:
+                alis_value = alis_box.find('span', class_='value')
+                if alis_value:
+                    usd_data['ABD Doları Alış'] = alis_value.text.strip()
+
+        # Satış fiyatını bulmak için: 'SATIŞ(TL)' metnini içeren span'i bul, sonra onun ebeveyni olan div'deki 'value' span'i çek.
+        satis_text_span = kur_detail_div.find('span', class_='text', string='SATIŞ(TL)')
+        if satis_text_span:
+            satis_box = satis_text_span.find_parent('div', class_='kurBox')
+            if satis_box:
+                satis_value = satis_box.find('span', class_='value')
+                if satis_value:
+                    usd_data['ABD Doları Satış'] = satis_value.text.strip()
+
+        # Değişim oranını bul
+        last_box = kur_detail_div.find('div', class_='kurBox last')
+        if last_box:
+            degisim_value = last_box.find('span', class_='text3')
+            if degisim_value:
+                usd_data['ABD Doları Değişim'] = degisim_value.text.strip()
+    
+    # Güncelleme saati bu HTML yapısında bulunmadığı için kaldırıldı.
+    return usd_data
+
+def get_usd_price():
+    """
+    Bigpara'dan güncel ABD Doları fiyatını çeker.
+    Fetches current USD price from Bigpara.
+    """
+    # URL'yi dolar detay sayfasına güncelledik
+    doviz_url = "https://bigpara.hurriyet.com.tr/doviz/dolar/"
+    
+    print(f"ABD Doları verileri çekiliyor: {doviz_url}")
+    doviz_html = fetch_html(doviz_url)
+    if doviz_html:
+        usd_prices = parse_usd_data(doviz_html)
+        print("ABD Doları verileri başarıyla çekildi.")
+        return usd_prices
+    else:
+        print("ABD Doları verileri çekilemedi.")
+        return {}
+
+# Fiyatı al ve JSON olarak yazdır
+if __name__ == "__main__":
+    prices = get_usd_price()
+    if prices:
+        # JSON formatında çıktı ver
+        print(json.dumps(prices, ensure_ascii=False))
+    else:
+        print(json.dumps({}, ensure_ascii=False))

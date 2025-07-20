@@ -9,13 +9,19 @@ interface PortfolioItemCardProps {
   showValues: boolean;
   onUpdate: (id: string, updates: Partial<PortfolioItem>) => Promise<void>;
   onDelete: (id: string) => void;
+  isConsolidated?: boolean;
+  consolidatedCount?: number;
+  onShowDetails?: (symbol: string) => void;
 }
 
 export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
   item,
   showValues,
   onUpdate,
-  onDelete
+  onDelete,
+  isConsolidated = false,
+  consolidatedCount = 1,
+  onShowDetails
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -28,16 +34,8 @@ export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
         return '🏦';
       case 'gold':
         return '🥇';
-      case 'usd':
-        return '💵';
-      case 'eur':
-        return '💶';
-      case 'gbp':
-        return '💷';
-      case 'chf':
-        return '🇨🇭';
-      case 'jpy':
-        return '💴';
+      case 'currency':
+        return '💱';
       case 'crypto':
         return '₿';
       default:
@@ -49,8 +47,12 @@ export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
     if (item.type === 'gold' && GOLD_TYPES[item.symbol as keyof typeof GOLD_TYPES]) {
       return GOLD_TYPES[item.symbol as keyof typeof GOLD_TYPES];
     }
-    if (['usd', 'eur', 'gbp', 'chf', 'jpy'].includes(item.type)) {
-      return PORTFOLIO_CATEGORIES[item.type as keyof typeof PORTFOLIO_CATEGORIES];
+    if (item.type === 'currency') {
+      if (item.symbol === 'USD') {
+        return 'ABD Doları';
+      } else if (item.symbol === 'EUR') {
+        return 'Euro';
+      }
     }
     return item.name;
   };
@@ -66,27 +68,48 @@ export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
             {getTypeIcon(item.type)}
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{getDisplayName(item)}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{getDisplayName(item)}</h3>
+              {isConsolidated && consolidatedCount > 1 && item.type !== 'deposit' && (
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
+                  {consolidatedCount} adet
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-600">
               <span className="px-2 py-1 bg-gray-100 rounded text-xs font-medium">
                 {PORTFOLIO_CATEGORIES[item.type as keyof typeof PORTFOLIO_CATEGORIES]}
               </span>
               <span className="hidden sm:inline">•</span>
-              {(item.type === 'fund' || item.type === 'stock') ? (
-                <a
-                  href={item.type === 'fund' 
-                    ? `https://fintables.com/fonlar/${item.symbol.toUpperCase()}` 
-                    : `https://fintables.com/sirketler/${item.symbol.toUpperCase()}`
+              {(() => {
+                let url = null;
+                if (item.type === 'fund') {
+                  url = `https://fintables.com/fonlar/${item.symbol.toUpperCase()}`;
+                } else if (item.type === 'stock') {
+                  url = `https://fintables.com/sirketler/${item.symbol.toUpperCase()}`;
+                } else if (item.type === 'currency') {
+                  if (item.symbol === 'EUR') {
+                    url = 'https://bigpara.hurriyet.com.tr/doviz/euro/';
+                  } else if (item.symbol === 'USD') {
+                    url = 'https://bigpara.hurriyet.com.tr/doviz/dolar/';
                   }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="truncate text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-                >
-                  {item.symbol}
-                </a>
-              ) : (
-                <span className="truncate">{item.symbol}</span>
-              )}
+                } else if (item.type === 'gold') {
+                  url = 'https://bigpara.hurriyet.com.tr/altin/';
+                }
+                
+                return url ? (
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="truncate text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                  >
+                    {item.symbol}
+                  </a>
+                ) : (
+                  <span className="truncate">{item.symbol}</span>
+                );
+              })()}
             </div>
           </div>
         </div>
@@ -130,7 +153,10 @@ export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
         <div>
           <p className="text-xs text-gray-600 mb-1">Miktar</p>
           <p className="font-semibold text-gray-900 text-sm sm:text-base">
-            {item.quantity.toLocaleString('tr-TR')} {['usd', 'eur', 'gbp', 'chf', 'jpy'].includes(item.type) ? item.symbol : 'adet'}
+            {item.type === 'deposit' ? 
+              formatCurrency(item.quantity) : 
+              `${item.quantity.toLocaleString('tr-TR')} ${item.type === 'currency' ? item.symbol : 'adet'}`
+            }
           </p>
         </div>
         
@@ -204,6 +230,21 @@ export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
           />
         </div>
       </div>
+      
+      {/* Details Button for Consolidated Items */}
+      {isConsolidated && consolidatedCount > 1 && onShowDetails && (
+        <div className="mt-3 pt-3 border-t border-gray-100">
+          <button
+            onClick={() => onShowDetails(item.symbol)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+          >
+            <span>Detayları Göster {item.type !== 'deposit' ? `(${consolidatedCount} adet)` : ''}</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      )}
       
       <EditPortfolioModal
         isOpen={showEditModal}

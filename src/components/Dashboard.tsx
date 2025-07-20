@@ -120,9 +120,17 @@ export const Dashboard = () => {
       
       try {
         const items = await portfolioService.getPortfolioItems(user.uid);
+        console.log('🔍 Ham portföy verileri:', items);
         setPortfolioItems(items);
         
-        const summary = portfolioService.calculatePortfolioSummary(items);
+        // Aynı sembole sahip yatırımları birleştir
+        const consolidatedItems = portfolioService.consolidatePortfolioBySymbol(items);
+        console.log('🔍 Birleştirilmiş portföy verileri:', consolidatedItems);
+        
+        const summary = portfolioService.calculatePortfolioSummary(consolidatedItems);
+        console.log('🔍 Hesaplanan portföy özeti:', summary);
+        console.log('🔍 Toplam değer:', summary.totalValue);
+        
         setPortfolioSummary(summary);
       } catch (error) {
         console.error('Portföy verileri yüklenirken hata:', error);
@@ -345,7 +353,7 @@ export const Dashboard = () => {
             <DollarSign className="w-5 h-5" style={{ color: '#ffb700' }} />
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
           {portfolioItems.length > 0 ? (
             <>
               {/* Toplam TL Değeri */}
@@ -366,10 +374,10 @@ export const Dashboard = () => {
                 <div className="text-center">
                   <h3 className="font-medium text-sm text-green-800 mb-2">ABD Doları</h3>
                   <div className="text-lg font-bold text-green-900">
-                    {formatCurrency(portfolioItems.filter(item => item.type === 'usd').reduce((sum, item) => sum + item.totalValue, 0))}
+                    {formatCurrency(portfolioItems.filter(item => item.type === 'currency' && item.symbol === 'USD').reduce((sum, item) => sum + item.totalValue, 0))}
                   </div>
                   <div className="text-xs text-green-600 mt-1">
-                    {portfolioItems.filter(item => item.type === 'usd').length} adet
+                    {portfolioItems.filter(item => item.type === 'currency' && item.symbol === 'USD').length} adet
                   </div>
                 </div>
               </div>
@@ -379,10 +387,10 @@ export const Dashboard = () => {
                 <div className="text-center">
                   <h3 className="font-medium text-sm text-yellow-800 mb-2">Euro</h3>
                   <div className="text-lg font-bold text-yellow-900">
-                    {formatCurrency(portfolioItems.filter(item => item.type === 'eur').reduce((sum, item) => sum + item.totalValue, 0))}
+                    {formatCurrency(portfolioItems.filter(item => item.type === 'currency' && item.symbol === 'EUR').reduce((sum, item) => sum + item.totalValue, 0))}
                   </div>
                   <div className="text-xs text-yellow-600 mt-1">
-                    {portfolioItems.filter(item => item.type === 'eur').length} adet
+                    {portfolioItems.filter(item => item.type === 'currency' && item.symbol === 'EUR').length} adet
                   </div>
                 </div>
               </div>

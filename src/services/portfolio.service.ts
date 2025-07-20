@@ -19,6 +19,124 @@ class PortfolioService {
   // Manuel fiyat güncelleme - API kullanılmıyor
   // Fiyatlar sadece kullanıcı tarafından manuel olarak güncellenecek
 
+  // Vadeli hesap için otomatik getiri hesaplama
+  async calculateDailyReturn(portfolioItem: PortfolioItem): Promise<number> {
+    if (!portfolioItem.metadata?.annualInterestRate || !portfolioItem.metadata?.taxExemptPercentage) {
+      return 0;
+    }
+
+    const annualRate = portfolioItem.metadata.annualInterestRate;
+    const taxExemptPercentage = portfolioItem.metadata.taxExemptPercentage;
+    const totalAmount = portfolioItem.quantity * portfolioItem.purchasePrice;
+    
+    // Faiz işlemeyecek kısım (ana paradan düşülür)
+    const exemptAmount = totalAmount * (taxExemptPercentage / 100);
+    
+    // Faiz işleyecek kısım
+    const taxableAmount = totalAmount - exemptAmount;
+    
+    // Günlük brüt faiz hesaplama (faiz işleyecek kısımdan)
+    const dailyGrossInterest = taxableAmount * (annualRate / 100) / 365;
+    
+    // %17.5 stopaj vergisi
+    const withholdingTax = dailyGrossInterest * 0.175;
+    
+    // Günlük net getiri
+    const dailyReturn = dailyGrossInterest - withholdingTax;
+    
+    return dailyReturn;
+  }
+
+  // Vadeli hesap için günlük getiri ekleme
+  async addDailyReturnToDeposit(userId: string, portfolioItemId: string): Promise<void> {
+    try {
+      const items = await this.getPortfolioItems(userId);
+      const depositItem = items.find(item => item.id === portfolioItemId && item.type === 'deposit');
+      
+      if (!depositItem) {
+        throw new Error('Vadeli hesap bulunamadı');
+      }
+
+      // Vade tarihi kontrolü
+      if (depositItem.metadata?.maturityDate) {
+        const maturityDate = new Date(depositItem.metadata.maturityDate);
+        const today = new Date();
+        if (today > maturityDate) {
+          console.log(`Vadeli hesap ${depositItem.name} vade tarihi geçmiş, getiri eklenmedi.`);
+          return;
+        }
+      }
+
+      const dailyReturn = await this.calculateDailyReturn(depositItem);
+      
+      if (dailyReturn <= 0) {
+        console.log(`Vadeli hesap ${depositItem.name} için geçerli getiri hesaplanamadı.`);
+        return;
+      }
+
+      const newTotalValue = depositItem.totalValue + dailyReturn;
+      const newCurrentPrice = newTotalValue / depositItem.quantity;
+      
+      const totalInvestment = depositItem.quantity * depositItem.purchasePrice;
+      const totalReturn = newTotalValue - totalInvestment;
+      const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
+
+      await this.updatePortfolioItem(userId, portfolioItemId, {
+        currentPrice: newCurrentPrice,
+        totalValue: newTotalValue,
+        totalReturn,
+        returnPercentage,
+        lastUpdated: new Date()
+      });
+
+      console.log(`Vadeli hesap ${depositItem.name} günlük getiri eklendi: ${dailyReturn.toFixed(2)} TL`);
+    } catch (error) {
+      console.error('Vadeli hesap günlük getiri ekleme hatası:', error);
+      throw error;
+    }
+  }
+
+  // Tüm vadeli hesaplar için günlük getiri ekleme
+  async addDailyReturnToAllDeposits(userId: string): Promise<void> {
+    try {
+      const items = await this.getPortfolioItems(userId);
+      const depositItems = items.filter(item => item.type === 'deposit');
+      
+      console.log(`${depositItems.length} vadeli hesap için günlük getiri hesaplanıyor...`);
+      
+      for (const depositItem of depositItems) {
+        await this.addDailyReturnToDeposit(userId, depositItem.id);
+      }
+      
+      console.log('Tüm vadeli hesaplar için günlük getiri ekleme tamamlandı.');
+    } catch (error) {
+      console.error('Tüm vadeli hesaplar için günlük getiri ekleme hatası:', error);
+      throw error;
+    }
+  }
+
+  // Vadeli hesap bilgilerini güncelleme
+  async updateDepositInfo(userId: string, portfolioItemId: string, metadata: any): Promise<void> {
+    try {
+      const items = await this.getPortfolioItems(userId);
+      const depositItem = items.find(item => item.id === portfolioItemId && item.type === 'deposit');
+      
+      if (!depositItem) {
+        throw new Error('Vadeli hesap bulunamadı');
+      }
+
+      await this.updatePortfolioItem(userId, portfolioItemId, {
+        metadata: {
+          ...depositItem.metadata,
+          ...metadata
+        }
+      });
+    } catch (error) {
+      console.error('Vadeli hesap bilgi güncelleme hatası:', error);
+      throw error;
+    }
+  }
+
   // Tüm güncel kurları alma
   async getAllCurrentRates() {
     try {
@@ -97,6 +215,15 @@ class PortfolioService {
           const totalInvestment = data.quantity * data.purchasePrice;
           const totalReturn = totalValue - totalInvestment;
           const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
+          
+          console.log(`💰 Portföy öğesi hesaplaması:`, {
+            symbol: data.symbol,
+            quantity: data.quantity,
+            purchasePrice: data.purchasePrice,
+            currentPrice: currentPrice,
+            totalValue: totalValue,
+            dbCurrentPrice: data.currentPrice
+          });
           
           const item = {
             id: docSnap.id,
@@ -219,42 +346,109 @@ class PortfolioService {
 
   // Aynı sembol türündeki yatırımları birleştir (grafik için)
   consolidatePortfolioBySymbol(items: PortfolioItem[]): PortfolioItem[] {
+    console.log('🔄 Consolidation başlıyor, gelen items:', items.length);
     const symbolMap = new Map<string, PortfolioItem>();
     
-    items.forEach(item => {
+    items.forEach((item, index) => {
+      console.log(`🔄 İşlenen item ${index + 1}:`, {
+        symbol: item.symbol,
+        type: item.type,
+        quantity: item.quantity,
+        purchasePrice: item.purchasePrice,
+        currentPrice: item.currentPrice,
+        totalValue: item.totalValue
+      });
+      
       const existing = symbolMap.get(item.symbol);
       
       if (existing) {
-        // Mevcut yatırımla birleştir
-        const totalQuantity = existing.quantity + item.quantity;
-        const totalInvestment = (existing.quantity * existing.purchasePrice) + (item.quantity * item.purchasePrice);
-        const avgPurchasePrice = totalInvestment / totalQuantity;
-        const totalValue = totalQuantity * item.currentPrice;
-        const totalReturn = totalValue - totalInvestment;
-        const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
+        console.log(`🔄 ${item.symbol} için mevcut item bulundu, birleştiriliyor...`);
         
-        symbolMap.set(item.symbol, {
-          ...existing,
-          quantity: totalQuantity,
-          purchasePrice: avgPurchasePrice,
-          totalValue,
-          totalReturn,
-          returnPercentage,
-          // En son güncellenen tarihi kullan
-          updatedAt: item.updatedAt > existing.updatedAt ? item.updatedAt : existing.updatedAt,
-          lastUpdated: item.lastUpdated > existing.lastUpdated ? item.lastUpdated : existing.lastUpdated
-        });
+        // Vadeli hesaplar için özel mantık
+        if (item.type === 'deposit') {
+          console.log(`🔄 ${item.symbol} vadeli hesap - özel birleştirme mantığı`);
+          // Vadeli hesaplarda quantity aslında miktar (TL), adet değil
+          // Bu yüzden totalValue'ları direkt toplarız
+          const totalValue = existing.totalValue + item.totalValue;
+          const totalInvestment = existing.totalValue + item.totalValue; // Vadeli hesapta investment = current value
+          const totalReturn = 0; // Vadeli hesapta getiri ayrı hesaplanır
+          const returnPercentage = 0;
+          
+          console.log(`🔄 ${item.symbol} vadeli hesap birleştirme sonucu:`, {
+            totalValue,
+            totalInvestment
+          });
+          
+          symbolMap.set(item.symbol, {
+            ...existing,
+            quantity: totalValue, // Vadeli hesapta quantity = toplam miktar
+            purchasePrice: 1, // Vadeli hesapta birim fiyat 1 TL
+            currentPrice: 1,
+            totalValue,
+            totalReturn,
+            returnPercentage,
+            updatedAt: item.updatedAt > existing.updatedAt ? item.updatedAt : existing.updatedAt,
+            lastUpdated: item.lastUpdated > existing.lastUpdated ? item.lastUpdated : existing.lastUpdated
+          });
+        } else {
+          // Normal yatırımlar için mevcut mantık
+          const totalQuantity = existing.quantity + item.quantity;
+          const totalInvestment = (existing.quantity * existing.purchasePrice) + (item.quantity * item.purchasePrice);
+          const avgPurchasePrice = totalInvestment / totalQuantity;
+          const totalValue = totalQuantity * item.currentPrice;
+          const totalReturn = totalValue - totalInvestment;
+          const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
+          
+          console.log(`🔄 ${item.symbol} normal yatırım birleştirme sonucu:`, {
+            totalQuantity,
+            avgPurchasePrice,
+            currentPrice: item.currentPrice,
+            totalValue,
+            totalInvestment
+          });
+          
+          symbolMap.set(item.symbol, {
+            ...existing,
+            quantity: totalQuantity,
+            purchasePrice: avgPurchasePrice,
+            totalValue,
+            totalReturn,
+            returnPercentage,
+            updatedAt: item.updatedAt > existing.updatedAt ? item.updatedAt : existing.updatedAt,
+            lastUpdated: item.lastUpdated > existing.lastUpdated ? item.lastUpdated : existing.lastUpdated
+          });
+        }
       } else {
+        console.log(`🔄 ${item.symbol} için yeni item ekleniyor`);
         symbolMap.set(item.symbol, { ...item });
       }
     });
     
-    return Array.from(symbolMap.values());
+    const result = Array.from(symbolMap.values());
+    console.log('🔄 Consolidation tamamlandı, sonuç:', result.length, 'item');
+    return result;
   }
 
   // Portfolio Analysis
   calculatePortfolioSummary(items: PortfolioItem[]): PortfolioSummary {
+    console.log('📊 Portfolio Summary Hesaplaması Başlıyor...');
+    console.log('📊 Gelen items:', items.length, 'adet');
+    
+    // Her bir item'ın detaylarını logla
+    items.forEach((item, index) => {
+      console.log(`📊 Item ${index + 1}:`, {
+        symbol: item.symbol,
+        quantity: item.quantity,
+        purchasePrice: item.purchasePrice,
+        currentPrice: item.currentPrice,
+        totalValue: item.totalValue,
+        calculated: item.quantity * (item.currentPrice || item.purchasePrice)
+      });
+    });
+    
     const totalValue = items.reduce((sum, item) => sum + item.totalValue, 0);
+    console.log('📊 Hesaplanan toplam değer:', totalValue);
+    
     const totalInvestment = items.reduce((sum, item) => sum + (item.quantity * item.purchasePrice), 0);
     const totalReturn = totalValue - totalInvestment;
     const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;

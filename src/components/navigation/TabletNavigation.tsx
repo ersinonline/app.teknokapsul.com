@@ -35,7 +35,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
     { id: 'teknofinans', path: '/mobile-finance', label: 'TeknoFinans', icon: PieChart },
     { id: 'teknohizmet', path: '/teknokapsul', label: 'TeknoKapsül', icon: Zap },
-    // { id: 'teknokapsul', path: '/services', label: 'TeknoHizmet', icon: Briefcase }, // Geçici olarak gizlendi
+    { id: 'teknokapsul', path: '/services', label: 'TeknoHizmet', icon: Briefcase },
   ];
 
   const secondaryMenuItems = [
@@ -44,8 +44,8 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
     { id: 'goals', path: '/goals', label: 'Hedeflerim', icon: Target },
     { id: 'portfolio', path: '/portfolio', label: 'Portföyüm', icon: PieChart },
     { id: 'subscriptions', path: '/subscriptions', label: 'Aboneliklerim', icon: Clock },
-    // { id: 'premium', path: '/premium', label: 'Premium', icon: Crown }, // Geçici olarak gizlendi
-    { id: 'loan-calculator', path: '/credit-calculator', label: 'Kredi Hesaplama', icon: Calculator },
+    { id: 'premium', path: '/premium', label: 'Premium', icon: Crown },
+    { id: 'credit-calculator', path: '/credit-calculator', label: 'Kredi Hesaplama', icon: Calculator },
     { id: 'cargo-tracking', path: '/cargo-tracking', label: 'Kargo Takip', icon: Package },
     { id: 'settings', path: '/settings', label: 'Ayarlar', icon: Settings },
   ];
@@ -74,7 +74,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
             </button>
             <div className="flex items-center gap-2">
                 <h1 className="text-lg font-semibold text-gray-900">TeknoKapsül</h1>
-                <PremiumBadge size="lg" className="scale-[4] ml-8" showText={false} />
+                <PremiumBadge size="lg" className="scale-[2] ml-6" showText={false} />
               </div>
           </div>
           
