@@ -11,6 +11,7 @@ interface PortfolioDetailsModalProps {
   showValues: boolean;
   onUpdate: (id: string, updates: Partial<PortfolioItem>) => Promise<void>;
   onDelete: (id: string) => void;
+  onRefreshPrice?: (symbol: string, type: string) => Promise<void>;
 }
 
 export const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
@@ -20,7 +21,8 @@ export const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
   symbol,
   showValues,
   onUpdate,
-  onDelete
+  onDelete,
+  onRefreshPrice
 }) => {
   if (!isOpen) return null;
 
@@ -72,6 +74,7 @@ export const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
                     onDelete={onDelete}
                     isConsolidated={false}
                     consolidatedCount={1}
+                    onRefreshPrice={onRefreshPrice}
                   />
                 </div>
               ))

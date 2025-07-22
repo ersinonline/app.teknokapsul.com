@@ -1,6 +1,5 @@
-import { signInWithCustomToken, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithCustomToken } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { verifyAndCreateCustomToken } from '../api/mobile-auth';
 import { tokenVerificationService } from './token-verification.service';
 
 /**
@@ -86,24 +85,37 @@ class MobileAuthService {
   }
 
   /**
-   * ID Token ile direkt giriş yapar (Google credential kullanarak)
+   * ID Token'ı backend'de doğrulayıp custom token ile giriş yapar
    * @param idToken Firebase ID token
    * @returns Promise<void>
    */
   public async signInWithIdToken(idToken: string): Promise<void> {
     try {
-      console.log('ID Token ile giriş deneniyor...');
+      console.log('🔍 ID Token ile giriş deneniyor...');
       
-      // Google credential oluştur
-      const credential = GoogleAuthProvider.credential(idToken);
+      // Token formatını kontrol et
+      if (!idToken || typeof idToken !== 'string') {
+        throw new Error('Geçersiz token formatı: Token boş veya string değil');
+      }
       
-      // Credential ile giriş yap
-      const userCredential = await signInWithCredential(auth, credential);
-      console.log('✅ ID Token ile giriş başarılı:', userCredential.user.email);
+      // JWT formatını kontrol et (3 bölüm nokta ile ayrılmış)
+      const tokenParts = idToken.split('.');
+      if (tokenParts.length !== 3) {
+        throw new Error(`Geçersiz JWT formatı: Token ${tokenParts.length} bölümden oluşuyor, 3 bölüm olmalı`);
+      }
       
-      // Token'ı localStorage'a kaydet
-      localStorage.setItem('firebaseIdToken', idToken);
-      console.log('✅ Token localStorage\'a kaydedildi');
+      // Token uzunluğunu kontrol et
+      console.log(`📏 Token uzunluğu: ${idToken.length} karakter`);
+      console.log(`🔍 Token başlangıcı: ${idToken.substring(0, 50)}...`);
+      console.log(`🔍 Token sonu: ...${idToken.substring(idToken.length - 50)}`);
+      
+      // Önce backend'de ID token'ı doğrula ve custom token oluştur
+      const customToken = await this.verifyIdTokenAndCreateCustomToken(idToken);
+      console.log('✅ Custom token oluşturuldu');
+      
+      // Custom token ile giriş yap
+      await this.signInWithMobileToken(customToken);
+      console.log('✅ Custom token ile giriş başarılı');
       
     } catch (error: any) {
       console.error('❌ ID Token ile giriş başarısız:', error);
@@ -168,6 +180,57 @@ class MobileAuthService {
   }
 
   /**
+   * Mevcut kullanıcının ID token'ını kontrol eder ve konsola yazdırır (debug amaçlı)
+   * @returns Promise<string | null> ID token veya null
+   */
+  public async debugCurrentUserToken(): Promise<string | null> {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        console.log('🚫 Mevcut kullanıcı bulunamadı');
+        return null;
+      }
+      
+      console.log('👤 Mevcut kullanıcı UID:', user.uid);
+      console.log('📧 Mevcut kullanıcı email:', user.email);
+      
+      const idToken = await user.getIdToken();
+      console.log('🎫 Mevcut kullanıcının ID Token\'ı:');
+      console.log(`📏 Token uzunluğu: ${idToken.length} karakter`);
+      console.log(`🔍 Token başlangıcı: ${idToken.substring(0, 50)}...`);
+      console.log(`🔍 Token sonu: ...${idToken.substring(idToken.length - 50)}`);
+      
+      // JWT formatını kontrol et
+      const tokenParts = idToken.split('.');
+      console.log(`🧩 JWT bölüm sayısı: ${tokenParts.length}`);
+      
+      // Token süresini kontrol et
+      try {
+        const payload = JSON.parse(atob(tokenParts[1]));
+        const exp = payload.exp;
+        const currentTime = Math.floor(Date.now() / 1000);
+        const timeLeft = exp - currentTime;
+        
+        console.log(`⏰ Token süresi: ${new Date(exp * 1000).toLocaleString()}`);
+        console.log(`⏳ Kalan süre: ${Math.floor(timeLeft / 60)} dakika ${timeLeft % 60} saniye`);
+        
+        if (timeLeft <= 0) {
+          console.warn('⚠️ Token süresi dolmuş!');
+        } else if (timeLeft < 300) { // 5 dakikadan az
+          console.warn('⚠️ Token süresi yakında dolacak!');
+        }
+      } catch (error) {
+        console.error('❌ Token payload decode edilemedi:', error);
+      }
+      
+      return idToken;
+    } catch (error) {
+      console.error('❌ Token alınamadı:', error);
+      return null;
+    }
+  }
+
+  /**
    * Mobil uygulamadan gelen mesajları dinler
    * @param callback Mesaj alındığında çağrılacak fonksiyon
    */
@@ -206,7 +269,17 @@ declare global {
     AndroidInterface?: {
       getAuthData(): string;
     };
+    debugFirebaseToken?: () => Promise<string | null>;
   }
 }
 
 export const mobileAuthService = MobileAuthService.getInstance();
+
+// Debug fonksiyonunu global window objesine ekle (sadece development ortamında)
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  window.debugFirebaseToken = async () => {
+    console.log('🔧 Firebase Token Debug Başlatılıyor...');
+    return await mobileAuthService.debugCurrentUserToken();
+  };
+  console.log('🔧 Debug fonksiyonu eklendi: window.debugFirebaseToken()');
+}

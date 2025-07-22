@@ -16,8 +16,149 @@ import { offlineService } from './offline.service';
 
 class PortfolioService {
 
-  // Manuel fiyat güncelleme - API kullanılmıyor
-  // Fiyatlar sadece kullanıcı tarafından manuel olarak güncellenecek
+  // Borsa API'si ile hisse fiyatlarını güncelleme
+  async updateStockPricesFromAPI(userId: string): Promise<void> {
+    try {
+      // Borsa verilerini çek
+      const response = await fetch('https://doviz-api.onrender.com/api/borsaAll');
+      const data = await response.json();
+      
+      if (!data.success || !data.data) {
+        throw new Error('Borsa verileri alınamadı');
+      }
+      
+      // Kullanıcının portföyündeki hisseleri al
+      const portfolioItems = await this.getPortfolioItems(userId);
+      const stockItems = portfolioItems.filter(item => item.type === 'stock');
+      
+      // Her hisse için güncel fiyatı bul ve güncelle
+      for (const stockItem of stockItems) {
+        const stockData = data.data.find((stock: any) => 
+          stock.name.toLowerCase().includes(stockItem.symbol.toLowerCase()) ||
+          stockItem.name.toLowerCase().includes(stock.name.toLowerCase())
+        );
+        
+        if (stockData) {
+          // Türkçe fiyat formatını sayıya çevir ("4.459,25" -> 4459.25)
+          const currentPrice = this.parseTurkishPrice(stockData.price);
+          const totalValue = stockItem.quantity * currentPrice;
+          const totalInvestment = stockItem.quantity * stockItem.purchasePrice;
+          const totalReturn = totalValue - totalInvestment;
+          const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
+          
+          await this.updatePortfolioItem(userId, stockItem.id, {
+            currentPrice,
+            totalValue,
+            totalReturn,
+            returnPercentage,
+            lastUpdated: new Date()
+          });
+          
+          console.log(`${stockItem.symbol} fiyatı güncellendi: ${currentPrice} TL`);
+        }
+      }
+      
+      console.log('Hisse fiyatları başarıyla güncellendi');
+    } catch (error) {
+      console.error('Hisse fiyatları güncellenirken hata:', error);
+      throw error;
+    }
+  }
+  
+  // Türkçe fiyat formatını sayıya çevirme fonksiyonu
+  private parseTurkishPrice(priceStr: string): number {
+    // "4.459,25" -> 4459.25
+    return parseFloat(priceStr.replace(/\./g, '').replace(',', '.'));
+  }
+  
+  // Belirli bir hisse için güncel fiyat alma
+  async getStockCurrentPrice(symbol: string): Promise<number | null> {
+    try {
+      const response = await fetch('https://doviz-api.onrender.com/api/borsaAll');
+      const data = await response.json();
+      
+      if (!data.success || !data.data) {
+        return null;
+      }
+      
+      const stockData = data.data.find((stock: any) => 
+        stock.name.toLowerCase().includes(symbol.toLowerCase())
+      );
+      
+      if (stockData) {
+        return this.parseTurkishPrice(stockData.price);
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Hisse fiyatı alınırken hata:', error);
+      return null;
+    }
+  }
+
+  // Tüm fiyatları güncelleme (hisse, döviz, altın)
+  async updateAllPricesFromAPI(userId: string): Promise<void> {
+    try {
+      // Hisse fiyatlarını güncelle
+      await this.updateStockPricesFromAPI(userId);
+      
+      // Döviz, altın ve vadeli hesap fiyatlarını güncelle (kripto ve fonlar hariç)
+      const portfolioItems = await this.getPortfolioItems(userId);
+      const currencyAndGoldItems = portfolioItems.filter(item => 
+        item.type === 'currency' || item.type === 'gold' || item.type === 'deposit'
+      );
+      
+      for (const item of currencyAndGoldItems) {
+        try {
+          let apiUrl = '';
+          
+          if (item.type === 'currency') {
+            if (item.symbol === 'USD') {
+              apiUrl = 'https://doviz-api.onrender.com/api/usd';
+            } else if (item.symbol === 'EUR') {
+              apiUrl = 'https://doviz-api.onrender.com/api/eur';
+            }
+          } else if (item.type === 'gold') {
+            if (item.symbol === 'GOLD') {
+              apiUrl = 'https://doviz-api.onrender.com/api/gold';
+            } else if (item.symbol === 'GRAM') {
+              apiUrl = 'https://doviz-api.onrender.com/api/gram';
+            }
+          }
+          
+          if (apiUrl) {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            
+            if (data.success && data.data?.selling) {
+              const currentPrice = parseFloat(data.data.selling.replace(',', '.'));
+              const totalValue = item.quantity * currentPrice;
+              const totalInvestment = item.quantity * item.purchasePrice;
+              const totalReturn = totalValue - totalInvestment;
+              const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
+              
+              await this.updatePortfolioItem(userId, item.id, {
+                currentPrice,
+                totalValue,
+                totalReturn,
+                returnPercentage,
+                lastUpdated: new Date()
+              });
+              
+              console.log(`${item.symbol} fiyatı güncellendi: ${currentPrice} TL`);
+            }
+          }
+        } catch (error) {
+          console.error(`${item.symbol} fiyatı güncellenirken hata:`, error);
+        }
+      }
+      
+      console.log('Tüm fiyatlar başarıyla güncellendi');
+    } catch (error) {
+      console.error('Fiyatlar güncellenirken hata:', error);
+      throw error;
+    }
+  }
 
   // Vadeli hesap için otomatik getiri hesaplama
   async calculateDailyReturn(portfolioItem: PortfolioItem): Promise<number> {

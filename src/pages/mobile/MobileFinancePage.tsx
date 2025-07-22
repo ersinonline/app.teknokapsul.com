@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, CreditCard, PieChart, FileText, Target } from 'lucide-react';
+import { TrendingUp, TrendingDown, CreditCard, PieChart, FileText, Target, BarChart3 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getUserIncomes } from '../../services/income.service';
 import { getUserExpenses } from '../../services/expense.service';
@@ -117,6 +117,16 @@ export const MobileFinancePage: React.FC = () => {
       color: 'bg-yellow-500',
         bgColor: 'bg-yellow-50',
         textColor: 'text-yellow-700'
+    },
+    {
+      id: 'stock-market',
+      title: 'Borsa',
+      description: 'Borsa İstanbul verilerini takip edin',
+      icon: BarChart3,
+      path: '/stock-market',
+      color: 'bg-purple-500',
+      bgColor: 'bg-purple-50',
+      textColor: 'text-purple-700'
     },
     {
       id: 'goals',

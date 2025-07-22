@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator, ShoppingBag, Shield, Target, Crown, UserCog, Menu, X, Briefcase } from 'lucide-react';
+import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator, ShoppingBag, Shield, Target, Crown, UserCog, Menu, X, Briefcase, BarChart3 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePremium } from '../../contexts/PremiumContext';
 
@@ -25,6 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
     // { id: 'budget', path: '/budget', label: 'Bütçe Planlama', icon: Wallet }, // Geçici olarak gizlendi
     { id: 'goals', path: '/goals', label: 'Hedeflerim', icon: Target },
     { id: 'portfolio', path: '/portfolio', label: 'Portföyüm', icon: PieChart },
+    { id: 'stock-market', path: '/stock-market', label: 'Borsa', icon: BarChart3 },
     { id: 'subscriptions', path: '/subscriptions', label: 'Aboneliklerim', icon: Clock },
   ];
 

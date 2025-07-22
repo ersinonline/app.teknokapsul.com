@@ -82,9 +82,23 @@ exports.createCustomToken = functions.https.onRequest((req, res) => {
                 userId = uid;
             }
             else if (idToken) {
-                // ID token'dan uid'i çıkar
-                const decodedToken = await admin.auth().verifyIdToken(idToken);
-                userId = decodedToken.uid;
+                // ID token'ı doğrula ve uid'i çıkar
+                try {
+                    const decodedToken = await admin.auth().verifyIdToken(idToken);
+                    userId = decodedToken.uid;
+                }
+                catch (tokenError) {
+                    console.error('ID token doğrulama hatası:', tokenError);
+                    if (tokenError.code === 'auth/id-token-expired') {
+                        return res.status(401).json({ error: 'Token süresi dolmuş' });
+                    }
+                    else if (tokenError.code === 'auth/invalid-id-token' || tokenError.code === 'auth/argument-error') {
+                        return res.status(400).json({ error: 'Geçersiz ID token formatı' });
+                    }
+                    else {
+                        return res.status(400).json({ error: 'ID token doğrulanamadı: ' + tokenError.message });
+                    }
+                }
             }
             else {
                 return res.status(400).json({ error: 'uid veya idToken gerekli' });
@@ -98,14 +112,11 @@ exports.createCustomToken = functions.https.onRequest((req, res) => {
         }
         catch (error) {
             console.error('Custom token oluşturma hatası:', error);
-            if (error.code === 'auth/id-token-expired') {
-                return res.status(401).json({ error: 'Token süresi dolmuş' });
-            }
-            else if (error.code === 'auth/invalid-id-token') {
-                return res.status(401).json({ error: 'Geçersiz token' });
+            if (error.code === 'auth/uid-not-found') {
+                return res.status(404).json({ error: 'Kullanıcı bulunamadı' });
             }
             else {
-                return res.status(500).json({ error: 'Sunucu hatası' });
+                return res.status(500).json({ error: 'Sunucu hatası: ' + error.message });
             }
         }
     });

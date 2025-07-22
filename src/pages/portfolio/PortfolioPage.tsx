@@ -41,6 +41,25 @@ export const PortfolioPage: React.FC = () => {
       initializeExchangeRates();
       loadPortfolioData();
       checkDepositAutoReturnStatus();
+      
+      // Otomatik güncelleme - sayfa yüklendiğinde ve her 5 dakikada bir
+      const updateAllPrices = async () => {
+        try {
+          await portfolioService.updateStockPricesFromAPI(user.uid);
+          await portfolioService.updateAllPricesFromAPI(user.uid);
+          await loadPortfolioData();
+        } catch (error) {
+          console.error('Otomatik güncelleme hatası:', error);
+        }
+      };
+      
+      // İlk güncelleme
+      updateAllPrices();
+      
+      // 5 dakikada bir otomatik güncelleme
+      const interval = setInterval(updateAllPrices, 5 * 60 * 1000);
+      
+      return () => clearInterval(interval);
     }
   }, [user]);
 
@@ -78,9 +97,51 @@ export const PortfolioPage: React.FC = () => {
   };
 
   const handleRefresh = async () => {
+    if (!user) return;
+    
     setRefreshing(true);
-    await loadPortfolioData();
-    setRefreshing(false);
+    try {
+      // Tüm fiyatları güncelle (hisse, döviz, altın)
+      await portfolioService.updateAllPricesFromAPI(user.uid);
+      // Vadeli hesapları güncelle
+      await portfolioService.addDailyReturnToAllDeposits(user.uid);
+      // Portföy verilerini yeniden yükle
+      await loadPortfolioData();
+      
+      // Bildirim gönder
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Portföy Güncellendi', {
+          body: 'Tüm yatırımlarınızın fiyatları güncellendi.',
+          icon: '/icons/icon-192x192.svg'
+        });
+      }
+    } catch (error) {
+      console.error('Portföy güncellenirken hata:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleRefreshPrice = async (symbol: string, type: string) => {
+    if (!user) return;
+    
+    try {
+      if (type === 'deposit') {
+        // Vadeli hesap için günlük getiri hesapla ve ekle
+        const depositItems = portfolioItems.filter(item => item.type === 'deposit' && item.symbol === symbol);
+        for (const item of depositItems) {
+          await portfolioService.addDailyReturnToDeposit(user.uid, item.id);
+        }
+        await loadPortfolioData();
+      } else {
+        // Diğer yatırım türleri için normal fiyat güncelleme
+        await portfolioService.updateStockPricesFromAPI(user.uid);
+        await portfolioService.updateAllPricesFromAPI(user.uid);
+        await loadPortfolioData();
+      }
+    } catch (error) {
+      console.error('Error refreshing price:', error);
+    }
   };
 
   const handleAddItem = async (item: any) => {
@@ -89,15 +150,21 @@ export const PortfolioPage: React.FC = () => {
     try {
       const portfolioItem = await portfolioService.addPortfolioItem(user.uid, item);
       
-      // Vadeli hesap ise otomatik getiri hesaplamasını başlat
+      // Vadeli hesap ise otomatik getiri hesaplamasını başlat (kullanıcıya sormadan)
       if (item.type === 'deposit' && item.metadata?.annualInterestRate && item.metadata?.taxExemptPercentage) {
         try {
           await depositAutoReturnService.startAutoReturnCalculation(user.uid, portfolioItem);
           setDepositAutoReturnActive(true);
+          
+          // Bildirim gönder
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Vadeli Hesap Eklendi', {
+              body: 'Vadeli hesabınız eklendi ve otomatik günlük getiri hesaplama başlatıldı.',
+              icon: '/icons/icon-192x192.svg'
+            });
+          }
         } catch (error) {
           console.error('Otomatik getiri hesaplama başlatılamadı:', error);
-          // Hata olsa bile portföy öğesi eklendi, kullanıcıyı bilgilendir
-          alert('Vadeli hesap eklendi ancak otomatik getiri hesaplama başlatılamadı. Lütfen daha sonra tekrar deneyin.');
         }
       }
       
@@ -172,6 +239,8 @@ export const PortfolioPage: React.FC = () => {
     }
   };
 
+
+
   const baseFilteredItems = selectedFilter === 'all' 
     ? portfolioItems 
     : portfolioItems.filter(item => item.type === selectedFilter);
@@ -216,19 +285,7 @@ export const PortfolioPage: React.FC = () => {
               <span className="text-xs sm:text-sm">Yenile</span>
             </button>
             
-            <button
-              onClick={() => setShowDepositSettingsModal(true)}
-              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg transition-colors ${
-                depositAutoReturnActive 
-                  ? 'bg-green-600 text-white hover:bg-green-700' 
-                  : 'bg-orange-600 text-white hover:bg-orange-700'
-              }`}
-            >
-              <Clock className="w-4 h-4" />
-              <span className="text-xs sm:text-sm">
-                {depositAutoReturnActive ? 'Otomatik Getiri Aktif' : 'Otomatik Getiri'}
-              </span>
-            </button>
+
             
             <button
               onClick={() => setShowAddModal(true)}
@@ -318,6 +375,7 @@ export const PortfolioPage: React.FC = () => {
                     isConsolidated={isConsolidated}
                     consolidatedCount={sameSymbolCount}
                     onShowDetails={handleShowDetails}
+                    onRefreshPrice={handleRefreshPrice}
                   />
                 );
               })}
@@ -443,10 +501,13 @@ export const PortfolioPage: React.FC = () => {
       )}
 
       {activeTab === 'prices' && (
-        <PriceUpdatePanel 
-          portfolioItems={portfolioItems}
-          onRefresh={handleRefresh}
-        />
+        <div className="space-y-6">
+          {/* Fiyat Güncellemeleri */}
+          <PriceUpdatePanel 
+            portfolioItems={portfolioItems}
+            onRefresh={handleRefresh}
+          />
+        </div>
       )}
 
       {/* Add Portfolio Modal */}
@@ -484,6 +545,7 @@ export const PortfolioPage: React.FC = () => {
           showValues={showValues}
           onUpdate={handleUpdateItem}
           onDelete={handleDeleteItem}
+          onRefreshPrice={handleRefreshPrice}
         />
       )}
 

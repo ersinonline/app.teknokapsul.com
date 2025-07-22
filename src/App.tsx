@@ -37,6 +37,7 @@ import { WarrantyTrackingPage } from './pages/warranty/WarrantyTrackingPage';
 import { PortfolioPage } from './pages/portfolio/PortfolioPage';
 import { MobileFinancePage } from './pages/mobile/MobileFinancePage';
 import { TeknokapsulPage } from './pages/mobile/TeknokapsulPage';
+import StockMarketPage from './pages/financial/StockMarketPage';
 
 import CreditCalculatorPage2 from './pages/CreditCalculatorPage';
 
@@ -58,6 +59,7 @@ import { ResponsiveTestPage } from './pages/test/ResponsiveTestPage';
 import WorkTrackingPage from './pages/WorkTrackingPage';
 import PharmacyPage from './pages/PharmacyPage';
 import WebViewAuthPage from './pages/auth/WebViewAuthPage';
+import { VerifyPage } from './pages/auth/VerifyPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
   <AuthGuard>
@@ -77,6 +79,10 @@ const router = createBrowserRouter([
   {
     path: '/webview-auth',
     element: <AuthProvider><WebViewAuthPage /></AuthProvider>
+  },
+  {
+    path: '/verify',
+    element: <AuthProvider><VerifyPage /></AuthProvider>
   },
   {
     path: '/dashboard',
@@ -168,6 +174,10 @@ const router = createBrowserRouter([
   {
     path: '/portfolio',
     element: <ProtectedRoute><PortfolioPage /></ProtectedRoute>
+  },
+  {
+    path: '/stock-market',
+    element: <ProtectedRoute><StockMarketPage /></ProtectedRoute>
   },
   {
     path: '/mobile-finance',

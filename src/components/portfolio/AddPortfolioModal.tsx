@@ -33,26 +33,26 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Net getiri hesaplama fonksiyonu
-  const calculateNetReturn = (annualRate: string, taxExemptPercentage: string, quantity: string, purchasePrice: string) => {
+  const calculateNetReturn = (annualRate: string, taxExemptPercentage: string, purchasePrice: string) => {
     const rate = parseFloat(annualRate || '0');
     const exempt = parseFloat(taxExemptPercentage || '0');
-    const qty = parseFloat(quantity || '0');
     const price = parseFloat(purchasePrice || '0');
     
-    if (rate > 0 && qty > 0 && price > 0) {
-      const totalAmount = qty * price;
+    if (rate > 0 && price > 0) {
+      // Vadeli hesap için toplam tutar = yatırım tutarı (purchasePrice)
+      const totalAmount = price;
       
-      // Faiz işlemeyecek kısım (ana paradan düşülür)
-      const exemptAmount = totalAmount * (exempt / 100);
+      // Yıllık brüt faiz hesaplama (tüm tutardan)
+      const grossInterest = totalAmount * (rate / 100);
+      
+      // Faiz işlemeyecek kısım (faizden düşülür)
+      const exemptInterest = grossInterest * (exempt / 100);
       
       // Faiz işleyecek kısım
-      const taxableAmount = totalAmount - exemptAmount;
+      const taxableInterest = grossInterest - exemptInterest;
       
-      // Yıllık brüt faiz hesaplama (faiz işleyecek kısımdan)
-      const grossInterest = taxableAmount * (rate / 100);
-      
-      // %17.5 stopaj vergisi
-      const withholdingTax = grossInterest * 0.175;
+      // %17.5 stopaj vergisi (sadece faiz işleyecek kısımdan)
+      const withholdingTax = taxableInterest * 0.175;
       
       // Net yıllık getiri
       const netReturn = grossInterest - withholdingTax;
@@ -66,20 +66,19 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Yatırım adı gereklidir';
-    }
+    // Vadeli hesap dışındaki yatırımlar için validasyonlar
+    if (formData.type !== 'deposit') {
+      if (!formData.symbol.trim()) {
+        newErrors.symbol = 'Sembol gereklidir';
+      }
 
-    if (!formData.symbol.trim()) {
-      newErrors.symbol = 'Sembol gereklidir';
-    }
-
-    if (!formData.quantity || parseFloat(formData.quantity) <= 0) {
-      newErrors.quantity = 'Geçerli bir miktar giriniz';
+      if (!formData.quantity || parseFloat(formData.quantity) <= 0) {
+        newErrors.quantity = 'Geçerli bir miktar giriniz';
+      }
     }
 
     if (!formData.purchasePrice || parseFloat(formData.purchasePrice) <= 0) {
-      newErrors.purchasePrice = 'Geçerli bir alış fiyatı giriniz';
+      newErrors.purchasePrice = formData.type === 'deposit' ? 'Geçerli bir yatırım tutarı giriniz' : 'Geçerli bir alış fiyatı giriniz';
     }
 
     if (!formData.purchaseDate) {
@@ -112,9 +111,9 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
 
     const portfolioItem: any = {
       type: formData.type,
-      name: formData.name.trim(),
-      symbol: formData.symbol.trim().toUpperCase(),
-      quantity: parseFloat(formData.quantity),
+      name: formData.type === 'deposit' ? `${formData.bankName} Vadeli Hesap` : formData.name.trim(),
+      symbol: formData.type === 'deposit' ? 'DEPOSIT' : formData.symbol.trim().toUpperCase(),
+      quantity: formData.type === 'deposit' ? 1 : parseFloat(formData.quantity),
       purchasePrice: parseFloat(formData.purchasePrice),
       purchaseDate: formData.purchaseDate,
       createdAt: new Date(),
@@ -171,9 +170,11 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
     }
   };
 
+  
+
   const handleTypeChange = (type: keyof typeof PORTFOLIO_CATEGORIES) => {
-    setFormData(prev => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       type,
       symbol: '',
       name: '',
@@ -182,7 +183,15 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
       maturityDate: '',
       bankName: '',
       calculatedNetReturn: 0
-    }));
+    };
+    
+    // Altın türü seçildiğinde otomatik olarak GRAM seç
+    if (type === 'gold') {
+      newFormData.symbol = 'GRAM';
+      newFormData.name = 'Gram Altın';
+    }
+    
+    setFormData(newFormData);
     setErrors({});
   };
 
@@ -250,108 +259,125 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
             </div>
           </div>
 
-          {/* Sembol */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Sembol
-            </label>
-            {getSymbolOptions().length > 0 ? (
-              <select
-                value={formData.symbol}
-                onChange={(e) => handleSymbolChange(e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
-                  errors.symbol ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Seçiniz...</option>
-                {getSymbolOptions().map(({ key, value }) => (
-                  <option key={key} value={key}>
-                    {key} - {value}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={formData.symbol}
-                onChange={(e) => setFormData(prev => ({ ...prev, symbol: e.target.value }))}
-                placeholder="Örn: AAPL, THYAO, BTC"
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
-                  errors.symbol ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-            )}
-            {errors.symbol && (
-              <p className="mt-1 text-sm text-red-600">{errors.symbol}</p>
-            )}
-          </div>
+          {/* Sembol - Altın için gizle */}
+          {formData.type !== 'gold' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sembol
+              </label>
+              {getSymbolOptions().length > 0 ? (
+                <select
+                  value={formData.symbol}
+                  onChange={(e) => handleSymbolChange(e.target.value)}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                    errors.symbol ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Seçiniz...</option>
+                  {getSymbolOptions().map(({ key, value }) => (
+                    <option key={key} value={key}>
+                      {key} - {value}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={formData.symbol}
+                  onChange={(e) => setFormData(prev => ({ ...prev, symbol: e.target.value }))}
+                  placeholder="Örn: AAPL, THYAO, BTC"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                    errors.symbol ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+              )}
+              {errors.symbol && (
+                <p className="mt-1 text-sm text-red-600">{errors.symbol}</p>
+              )}
+            </div>
+          )}
 
-          {/* Yatırım Adı */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Yatırım Adı
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Örn: Apple Inc., Türk Hava Yolları"
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
-                errors.name ? 'border-red-500' : 'border-gray-300'
-              }`}
-            />
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-            )}
-          </div>
+
 
           {/* Miktar ve Alış Fiyatı */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Miktar
-              </label>
-              <input
-                type="number"
-                step="any"
-                value={formData.quantity}
-                onChange={(e) => {
-                  const newValue = e.target.value;
-                  setFormData(prev => ({ ...prev, quantity: newValue }));
-                  calculateNetReturn(formData.annualInterestRate, formData.taxExemptPercentage, newValue, formData.purchasePrice);
-                }}
-                placeholder="0"
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
-                  errors.quantity ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.quantity && (
-                <p className="mt-1 text-sm text-red-600">{errors.quantity}</p>
-              )}
-            </div>
+            {/* Vadeli hesap için miktar alanını gizle */}
+            {formData.type !== 'deposit' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {formData.type === 'gold' ? 'Gram' : 'Miktar'}
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  value={formData.quantity}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setFormData(prev => ({ ...prev, quantity: newValue }));
+                    calculateNetReturn(formData.annualInterestRate, formData.taxExemptPercentage, formData.purchasePrice);
+                  }}
+                  placeholder="0"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                    errors.quantity ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {errors.quantity && (
+                  <p className="mt-1 text-sm text-red-600">{errors.quantity}</p>
+                )}
+              </div>
+            )}
+            
+            {/* Vadeli hesap için tutar alanı */}
+            {formData.type === 'deposit' && (
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Yatırım Tutarı (₺)
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  value={formData.purchasePrice}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setFormData(prev => ({ ...prev, purchasePrice: newValue, quantity: '1' }));
+                    calculateNetReturn(formData.annualInterestRate, formData.taxExemptPercentage, newValue);
+                  }}
+                  placeholder="0.00"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                    errors.purchasePrice ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {errors.purchasePrice && (
+                  <p className="mt-1 text-sm text-red-600">{errors.purchasePrice}</p>
+                )}
+              </div>
+            )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Alış Fiyatı (₺)
-              </label>
-              <input
-                type="number"
-                step="any"
-                value={formData.purchasePrice}
-                onChange={(e) => {
-                  const newValue = e.target.value;
-                  setFormData(prev => ({ ...prev, purchasePrice: newValue }));
-                  calculateNetReturn(formData.annualInterestRate, formData.taxExemptPercentage, formData.quantity, newValue);
-                }}
-                placeholder="0.00"
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
-                  errors.purchasePrice ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.purchasePrice && (
-                <p className="mt-1 text-sm text-red-600">{errors.purchasePrice}</p>
-              )}
-            </div>
+            {/* Vadeli hesap dışındaki yatırımlar için alış fiyatı */}
+            {formData.type !== 'deposit' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Alış Fiyatı (₺)
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  value={formData.purchasePrice}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setFormData(prev => ({ ...prev, purchasePrice: newValue }));
+                    calculateNetReturn(formData.annualInterestRate, formData.taxExemptPercentage, newValue);
+                  }}
+                  placeholder="0.00"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
+                    errors.purchasePrice ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {errors.purchasePrice && (
+                  <p className="mt-1 text-sm text-red-600">{errors.purchasePrice}</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Alış Tarihi */}
@@ -388,7 +414,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
                   onChange={(e) => {
                     const newValue = e.target.value;
                     setFormData(prev => ({ ...prev, annualInterestRate: newValue }));
-                    calculateNetReturn(newValue, formData.taxExemptPercentage, formData.quantity, formData.purchasePrice);
+                    calculateNetReturn(newValue, formData.taxExemptPercentage, formData.purchasePrice);
                   }}
                   placeholder="Örn: 15.50"
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
@@ -415,7 +441,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
                       type="button"
                       onClick={() => {
                         setFormData(prev => ({ ...prev, taxExemptPercentage: percentage }));
-                        calculateNetReturn(formData.annualInterestRate, percentage, formData.quantity, formData.purchasePrice);
+                        calculateNetReturn(formData.annualInterestRate, percentage, formData.purchasePrice);
                       }}
                       className={`px-4 py-3 border rounded-lg font-medium transition-colors ${
                         formData.taxExemptPercentage === percentage

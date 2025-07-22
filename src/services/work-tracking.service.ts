@@ -36,7 +36,7 @@ class WorkTrackingService {
   async updateWorkEntry(entryId: string, updates: Partial<WorkEntry>): Promise<void> {
     try {
       const docRef = doc(db, this.workEntriesCollection, entryId);
-      const updateData: any = { ...updates };
+      const updateData = { ...updates } as Record<string, any>;
       
       if (updates.createdAt) {
         updateData.createdAt = Timestamp.fromDate(updates.createdAt);
@@ -64,7 +64,7 @@ class WorkTrackingService {
 
   async getWorkEntries(userId: string, month?: number, year?: number): Promise<WorkEntry[]> {
     try {
-      let q = query(
+      const q = query(
         collection(db, this.workEntriesCollection),
         where('userId', '==', userId),
         orderBy('date', 'desc')

@@ -177,13 +177,13 @@ declare namespace google {
     }
 
     namespace event {
-      function addListener(instance: any, eventName: string, handler: (...args: any[]) => void): MapsEventListener;
+      function addListener(instance: object, eventName: string, handler: (...args: unknown[]) => void): MapsEventListener;
       function removeListener(listener: MapsEventListener): void;
-      function clearInstanceListeners(instance: any): void;
-      function clearListeners(instance: any, eventName: string): void;
-      function trigger(instance: any, eventName: string, ...args: any[]): void;
+      function clearInstanceListeners(instance: object): void;
+      function clearListeners(instance: object, eventName: string): void;
+      function trigger(instance: object, eventName: string, ...args: unknown[]): void;
     }
   }
 }
 
-declare var google: typeof google;
+declare const google: typeof google;

@@ -12,6 +12,9 @@ import {
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { loginTrackingService } from './login-tracking.service';
@@ -44,6 +47,51 @@ export const signUpWithEmail = async (email: string, password: string, displayNa
     await loginTrackingService.recordFailedLogin(email, 'email');
     throw error;
   }
+};
+
+export const sendMagicLink = async (email: string) => {
+  try {
+    const actionCodeSettings = {
+      url: window.location.origin + '/verify',
+      handleCodeInApp: true,
+    };
+    
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    // Store email in localStorage for verification
+    localStorage.setItem('emailForSignIn', email);
+    return true;
+  } catch (error) {
+    console.error('Magic link gönderme hatası:', error);
+    throw error;
+  }
+};
+
+export const verifyMagicLink = async (email?: string) => {
+  try {
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      let emailForSignIn = email;
+      
+      if (!emailForSignIn) {
+        emailForSignIn = localStorage.getItem('emailForSignIn') || undefined;
+      }
+      
+      if (!emailForSignIn) {
+        throw new Error('Email not found');
+      }
+      
+      const result = await signInWithEmailLink(auth, emailForSignIn, window.location.href);
+      localStorage.removeItem('emailForSignIn');
+      await loginTrackingService.recordLogin('email', true);
+      return result;
+    }
+    return null;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const checkMagicLink = () => {
+  return isSignInWithEmailLink(auth, window.location.href);
 };
 
 export const signInWithGoogle = async () => {

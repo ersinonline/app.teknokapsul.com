@@ -210,15 +210,7 @@ export const SettingsPage = () => {
             <div className="border-t pt-6 mt-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Hesap İşlemleri</h3>
               <div className="space-y-3">
-                <a
-                  href="https://billing.stripe.com/p/login/7sY6oGezng7111XcFh24000"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium w-full sm:w-auto"
-                >
-                  <Settings className="w-4 h-4" />
-                  Abonelik İptal
-                </a>
+
                 <button
                   onClick={handleSignOut}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium w-full sm:w-auto"

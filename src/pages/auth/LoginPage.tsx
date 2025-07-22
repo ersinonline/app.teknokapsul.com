@@ -9,7 +9,7 @@ export const LoginPage = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
   const from = location.state?.from || '/dashboard';
-  const [selectedMethod, setSelectedMethod] = useState<'google' | 'apple' | 'sms' | 'email' | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<'email' | null>(null);
   const [isSignUp, setIsSignUp] = useState(false);
 
   if (loading) {
@@ -103,35 +103,20 @@ export const LoginPage = () => {
                     </h3>
                     
                     <div className="space-y-3">
-                      <SocialLogin method="google" />
-                      {/* <SocialLogin method="apple" /> */}
-                      
-                      <div className="grid grid-cols-1 gap-3">
-                        <button
-                          onClick={() => setSelectedMethod('sms')}
-                          className="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-xl hover:border-green-300 hover:bg-green-50 transition-all duration-200 group"
-                        >
-                          <Smartphone className="h-8 w-8 mb-2 text-gray-700 group-hover:text-green-600" />
-                          <span className="text-sm font-medium text-gray-700 group-hover:text-green-600">SMS</span>
-                        </button>
-                        
-                        <button
-                          onClick={() => setSelectedMethod('email')}
-                          className="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-xl hover:border-yellow-300 hover:bg-yellow-50 transition-all duration-200 group"
-                        >
-                          <Mail className="h-8 w-8 mb-2 text-gray-700 group-hover:text-yellow-600" />
-                          <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-600">E-posta</span>
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => setSelectedMethod('email')}
+                        className="w-full flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-xl hover:border-yellow-300 hover:bg-yellow-50 transition-all duration-200 group"
+                      >
+                        <Mail className="h-10 w-10 mb-3 text-gray-700 group-hover:text-yellow-600" />
+                        <span className="text-lg font-medium text-gray-700 group-hover:text-yellow-600">E-posta ile Giriş</span>
+                        <span className="text-sm text-gray-500 mt-1">Sihirli link ile hızlı giriş</span>
+                      </button>
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="text-lg font-semibold text-gray-900">
-                        {selectedMethod === 'google' && (isSignUp ? 'Google ile Kayıt' : 'Google ile Giriş')}
-                        {selectedMethod === 'apple' && (isSignUp ? 'Apple ile Kayıt' : 'Apple ile Giriş')}
-                        {selectedMethod === 'sms' && (isSignUp ? 'SMS ile Kayıt' : 'SMS ile Giriş')}
                         {selectedMethod === 'email' && (isSignUp ? 'E-posta ile Kayıt' : 'E-posta ile Giriş')}
                       </h3>
                       <button
@@ -141,18 +126,6 @@ export const LoginPage = () => {
                         Geri
                       </button>
                     </div>
-                    
-                    {selectedMethod === 'google' && (
-                       <SocialLogin method="google" />
-                     )}
-                     
-                     {/* {selectedMethod === 'apple' && (
-                       <SocialLogin method="apple" />
-                     )} */}
-                     
-                     {selectedMethod === 'sms' && (
-                       <SocialLogin method="sms" />
-                     )}
                     
                     {selectedMethod === 'email' && (
                       <LoginForm isSignUp={isSignUp} />

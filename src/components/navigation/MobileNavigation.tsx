@@ -25,7 +25,6 @@ const bottomNavigationItems: NavigationItem[] = [
   { path: '/dashboard', label: 'Ana Sayfa', icon: Home },
   { path: '/mobile-finance', label: 'TeknoFinans', icon: PieChart },
   { path: '/teknokapsul', label: 'TeknoKapsül', icon: Zap },
-  { path: '/services', label: 'TeknoHizmet', icon: Grid3X3 },
 ];
 
 export const MobileNavigation: React.FC = () => {
@@ -100,7 +99,7 @@ export const MobileNavigation: React.FC = () => {
 
       {/* Bottom Navigation for Mobile */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-40">
-        <div className="grid grid-cols-4 gap-1 px-2 py-2">
+        <div className="grid grid-cols-3 gap-1 px-2 py-2">
           {bottomNavigationItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;

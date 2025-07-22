@@ -10,8 +10,8 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   signOut: () => Promise<void>;
-  verifyToken: () => Promise<any>;
-  checkSession: () => Promise<any>;
+  verifyToken: () => Promise<boolean>;
+  checkSession: () => Promise<boolean>;
   refreshToken: () => Promise<boolean>;
   isWebView: boolean;
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TrendingUp, TrendingDown, MoreVertical, Edit2, Trash2, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, MoreVertical, Edit2, Trash2, Calendar, RefreshCw } from 'lucide-react';
 import { PortfolioItem, PORTFOLIO_CATEGORIES, GOLD_TYPES } from '../../types/portfolio';
 import { formatCurrency } from '../../utils/currency';
 import { EditPortfolioModal } from './EditPortfolioModal';
@@ -12,6 +12,7 @@ interface PortfolioItemCardProps {
   isConsolidated?: boolean;
   consolidatedCount?: number;
   onShowDetails?: (symbol: string) => void;
+  onRefreshPrice?: (symbol: string, type: string) => Promise<void>;
 }
 
 export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
@@ -21,10 +22,12 @@ export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
   onDelete,
   isConsolidated = false,
   consolidatedCount = 1,
-  onShowDetails
+  onShowDetails,
+  onRefreshPrice
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -69,7 +72,18 @@ export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{getDisplayName(item)}</h3>
+              {item.type === 'fund' && item.fintablesUrl ? (
+                <a 
+                  href={item.fintablesUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="font-semibold text-blue-600 hover:text-blue-800 text-sm sm:text-base truncate transition-colors"
+                >
+                  {getDisplayName(item)}
+                </a>
+              ) : (
+                <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{getDisplayName(item)}</h3>
+              )}
               {isConsolidated && consolidatedCount > 1 && item.type !== 'deposit' && (
                 <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
                   {consolidatedCount} adet
@@ -81,101 +95,100 @@ export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
                 {PORTFOLIO_CATEGORIES[item.type as keyof typeof PORTFOLIO_CATEGORIES]}
               </span>
               <span className="hidden sm:inline">•</span>
-              {(() => {
-                let url = null;
-                if (item.type === 'fund') {
-                  url = `https://fintables.com/fonlar/${item.symbol.toUpperCase()}`;
-                } else if (item.type === 'stock') {
-                  url = `https://fintables.com/sirketler/${item.symbol.toUpperCase()}`;
-                } else if (item.type === 'currency') {
-                  if (item.symbol === 'EUR') {
-                    url = 'https://bigpara.hurriyet.com.tr/doviz/euro/';
-                  } else if (item.symbol === 'USD') {
-                    url = 'https://bigpara.hurriyet.com.tr/doviz/dolar/';
-                  }
-                } else if (item.type === 'gold') {
-                  url = 'https://bigpara.hurriyet.com.tr/altin/';
-                }
-                
-                return url ? (
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="truncate text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-                  >
-                    {item.symbol}
-                  </a>
-                ) : (
-                  <span className="truncate">{item.symbol}</span>
-                );
-              })()}
+              <span className="truncate">{item.symbol}</span>
             </div>
           </div>
         </div>
 
-        <div className="relative">
-          <button
-            onClick={() => setShowMenu(!showMenu)}
-            className="p-1 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <MoreVertical className="w-4 h-4 text-gray-600" />
-          </button>
-          
-          {showMenu && (
-            <div className="absolute right-0 top-full mt-1 w-40 sm:w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-              <button
-                onClick={() => {
-                  setShowEditModal(true);
-                  setShowMenu(false);
-                }}
-                className="w-full flex items-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <Edit2 className="w-3 sm:w-4 h-3 sm:h-4" />
-                Düzenle
-              </button>
-              <button
-                onClick={() => {
-                  onDelete(item.id);
-                  setShowMenu(false);
-                }}
-                className="w-full flex items-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 transition-colors"
-              >
-                <Trash2 className="w-3 sm:w-4 h-3 sm:h-4" />
-                Sil
-              </button>
-            </div>
+        <div className="flex items-center gap-1">
+          {/* Vadeli hesaplar için güncelleme butonu */}
+          {item.type === 'deposit' && onRefreshPrice && (
+            <button
+              onClick={async () => {
+                setRefreshing(true);
+                try {
+                  await onRefreshPrice(item.symbol, item.type);
+                } catch (error) {
+                  console.error('Güncelleme hatası:', error);
+                } finally {
+                  setRefreshing(false);
+                }
+              }}
+              disabled={refreshing}
+              className="p-1 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              title="Vadeli hesap bilgilerini güncelle"
+            >
+              <RefreshCw className={`w-4 h-4 text-gray-600 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
           )}
+          
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="p-1 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <MoreVertical className="w-4 h-4 text-gray-600" />
+            </button>
+          
+            {showMenu && (
+              <div className="absolute right-0 top-full mt-1 w-40 sm:w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                <button
+                  onClick={() => {
+                    setShowEditModal(true);
+                    setShowMenu(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <Edit2 className="w-3 sm:w-4 h-3 sm:h-4" />
+                  Düzenle
+                </button>
+                <button
+                  onClick={() => {
+                    onDelete(item.id);
+                    setShowMenu(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <Trash2 className="w-3 sm:w-4 h-3 sm:h-4" />
+                  Sil
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-3 sm:mb-4">
-        <div>
-          <p className="text-xs text-gray-600 mb-1">Miktar</p>
-          <p className="font-semibold text-gray-900 text-sm sm:text-base">
-            {item.type === 'deposit' ? 
-              formatCurrency(item.quantity) : 
-              `${item.quantity.toLocaleString('tr-TR')} ${item.type === 'currency' ? item.symbol : 'adet'}`
-            }
-          </p>
-        </div>
+      <div className={`grid gap-3 sm:gap-4 mb-3 sm:mb-4 ${
+        item.type === 'deposit' ? 'grid-cols-3' : 'grid-cols-2 lg:grid-cols-4'
+      }`}>
+        {item.type !== 'deposit' && (
+          <div>
+            <p className="text-xs text-gray-600 mb-1">{item.type === 'gold' ? 'Gram' : 'Miktar'}</p>
+            <p className="font-semibold text-gray-900 text-sm sm:text-base">
+              {item.type === 'gold' ?
+                `${item.quantity.toLocaleString('tr-TR')} gram` :
+                `${item.quantity.toLocaleString('tr-TR')} ${item.type === 'currency' ? item.symbol : 'adet'}`
+              }
+            </p>
+          </div>
+        )}
         
         <div>
-          <p className="text-xs text-gray-600 mb-1">Alış Fiyatı</p>
+          <p className="text-xs text-gray-600 mb-1">Alış{item.type === 'deposit' ? '' : ' Fiyatı'}</p>
           <p className="font-semibold text-gray-900 text-sm sm:text-base">
             {showValues ? formatCurrency(item.purchasePrice) : '••••••'}
           </p>
         </div>
         
         <div>
-          <p className="text-xs text-gray-600 mb-1">Güncel Fiyat</p>
+          <p className="text-xs text-gray-600 mb-1">Güncel{item.type === 'deposit' ? '' : ' Fiyat'}</p>
           <p className="font-semibold text-gray-900 text-sm sm:text-base">
             {showValues ? formatCurrency(item.currentPrice) : '••••••'}
           </p>
         </div>
         
         <div>
-          <p className="text-xs text-gray-600 mb-1">Toplam Değer</p>
+          <p className="text-xs text-gray-600 mb-1">Toplam{item.type === 'deposit' ? '' : ' Değer'}</p>
           <p className="font-semibold text-gray-900 text-sm sm:text-base">
             {showValues ? formatCurrency(item.totalValue) : '••••••'}
           </p>

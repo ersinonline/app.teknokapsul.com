@@ -13,13 +13,14 @@ export interface PortfolioItem {
   returnPercentage: number;
   averagePrice?: number;
   category?: string;
+  fintablesUrl?: string;
   metadata?: {
     dailyReturnRate?: number;
     maturityDate?: Date;
     bankName?: string;
     annualInterestRate?: number;
     taxExemptPercentage?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -105,16 +106,7 @@ export const PORTFOLIO_CATEGORIES = {
 } as const;
 
 export const GOLD_TYPES = {
-  'GRAM': 'Gram Altın',
-  'ONS': 'Ons Altın',
-  'TAM': 'Tam Altın',
-  'YARIM': 'Yarım Altın',
-  'CEYREK': 'Çeyrek Altın',
-  'CUMHURIYET': 'Cumhuriyet Altını',
-  'RESAT': 'Reşat Altını',
-  'BILEZIK22': '22 Ayar Bilezik',
-  'ALTIN18': '18 Ayar Altın',
-  'ALTIN14': '14 Ayar Altın'
+  'GRAM': 'Gram Altın'
 } as const;
 
 export const CURRENCY_TYPES = {

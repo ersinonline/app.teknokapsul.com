@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { signInWithEmail, signUpWithEmail } from '../../services/auth.service';
+import { signInWithEmail, signUpWithEmail, sendMagicLink } from '../../services/auth.service';
 
 interface LoginFormProps {
   isSignUp?: boolean;
@@ -13,6 +13,8 @@ export const LoginForm = ({ isSignUp = false }: LoginFormProps) => {
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [useMagicLink, setUseMagicLink] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from || '/dashboard';
@@ -23,6 +25,8 @@ export const LoginForm = ({ isSignUp = false }: LoginFormProps) => {
     setLoading(true);
 
     try {
+      // Magic link functionality disabled
+
       if (isSignUp) {
         // Validation for sign up
         if (password !== confirmPassword) {
@@ -42,7 +46,13 @@ export const LoginForm = ({ isSignUp = false }: LoginFormProps) => {
       }
       navigate(from, { replace: true });
     } catch (err: any) {
-      if (isSignUp) {
+      if (useMagicLink && !isSignUp) {
+        if (err.code === 'auth/invalid-email') {
+          setError('Geçersiz e-posta adresi.');
+        } else {
+          setError('Sihirli link gönderilirken bir hata oluştu. Lütfen tekrar deneyin.');
+        }
+      } else if (isSignUp) {
         if (err.code === 'auth/email-already-in-use') {
           setError('Bu e-posta adresi zaten kullanımda.');
         } else if (err.code === 'auth/weak-password') {
@@ -68,6 +78,28 @@ export const LoginForm = ({ isSignUp = false }: LoginFormProps) => {
     }
   };
 
+  if (magicLinkSent) {
+    return (
+      <div className="text-center space-y-4">
+        <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded">
+          <p className="font-medium">Sihirli link gönderildi!</p>
+          <p className="text-sm mt-1">
+            {email} adresine giriş linki gönderdik. E-postanızı kontrol edin ve linke tıklayarak giriş yapın.
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            setMagicLinkSent(false);
+            setError('');
+          }}
+          className="text-yellow-600 hover:text-yellow-500 text-sm font-medium"
+        >
+          Tekrar gönder
+        </button>
+      </div>
+    );
+  }
+
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       {error && (
@@ -75,6 +107,8 @@ export const LoginForm = ({ isSignUp = false }: LoginFormProps) => {
           {error}
         </div>
       )}
+
+
 
       {isSignUp && (
         <div>
@@ -145,9 +179,15 @@ export const LoginForm = ({ isSignUp = false }: LoginFormProps) => {
           disabled={loading}
           className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
         >
-          {loading ? (isSignUp ? 'Kayıt olunuyor...' : 'Giriş yapılıyor...') : (isSignUp ? 'Kayıt Ol' : 'Giriş Yap')}
+          {loading ? (
+            isSignUp ? 'Kayıt olunuyor...' : 'Giriş yapılıyor...'
+          ) : (
+            isSignUp ? 'Kayıt Ol' : 'Giriş Yap'
+          )}
         </button>
       </div>
-    </form>
-  );
-};
+
+
+     </form>
+   );
+ };

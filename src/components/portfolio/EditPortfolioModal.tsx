@@ -251,7 +251,11 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
               value={formData.type}
               onChange={(e) => {
                 const newType = e.target.value as keyof typeof PORTFOLIO_CATEGORIES;
-                setFormData({ ...formData, type: newType, symbol: '', name: '' });
+                if (newType === 'gold') {
+                  setFormData({ ...formData, type: newType, symbol: 'GRAM', name: 'Gram Altın' });
+                } else {
+                  setFormData({ ...formData, type: newType, symbol: '', name: '' });
+                }
                 setErrors({ ...errors, type: '' });
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -264,72 +268,56 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
             {errors.type && <p className="text-red-500 text-sm mt-1">{errors.type}</p>}
           </div>
 
-          {/* Sembol */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Sembol
-            </label>
-            {(formData.type === 'gold' || formData.type === 'currency') ? (
-              <select
-                value={formData.symbol}
-                onChange={(e) => {
-                  const selectedOption = getSymbolOptions().find(opt => opt.key === e.target.value);
-                  setFormData({ 
-                    ...formData, 
-                    symbol: e.target.value,
-                    name: selectedOption?.value || ''
-                  });
-                  setErrors({ ...errors, symbol: '' });
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
-              >
-                <option value="">Seçiniz...</option>
-                {getSymbolOptions().map(({ key, value }) => (
-                  <option key={key} value={key}>{value} ({key})</option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={formData.symbol}
-                onChange={(e) => {
-                  setFormData({ ...formData, symbol: e.target.value.toUpperCase() });
-                  setErrors({ ...errors, symbol: '' });
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Örn: AAPL, BIST30"
-                required
-              />
-            )}
-            {errors.symbol && <p className="text-red-500 text-sm mt-1">{errors.symbol}</p>}
-          </div>
+          {/* Sembol - Altın için gizle */}
+          {formData.type !== 'gold' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sembol
+              </label>
+              {formData.type === 'currency' ? (
+                <select
+                  value={formData.symbol}
+                  onChange={(e) => {
+                    const selectedOption = getSymbolOptions().find(opt => opt.key === e.target.value);
+                    setFormData({ 
+                      ...formData, 
+                      symbol: e.target.value,
+                      name: selectedOption?.value || ''
+                    });
+                    setErrors({ ...errors, symbol: '' });
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  required
+                >
+                  <option value="">Seçiniz...</option>
+                  {getSymbolOptions().map(({ key, value }) => (
+                    <option key={key} value={key}>{value} ({key})</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={formData.symbol}
+                  onChange={(e) => {
+                    setFormData({ ...formData, symbol: e.target.value.toUpperCase() });
+                    setErrors({ ...errors, symbol: '' });
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="Örn: AAPL, BIST30"
+                  required
+                />
+              )}
+              {errors.symbol && <p className="text-red-500 text-sm mt-1">{errors.symbol}</p>}
+            </div>
+          )}
 
-          {/* Yatırım Adı */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Yatırım Adı
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => {
-                setFormData({ ...formData, name: e.target.value });
-                setErrors({ ...errors, name: '' });
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Yatırım adını girin"
-              required
-              readOnly={formData.type === 'gold' || ['usd', 'eur'].includes(formData.type)}
-            />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-          </div>
 
-          {/* Miktar - Sadece vadeli hesap dışındaki yatırımlar için */}
+
+          {/* Miktar/Gram - Sadece vadeli hesap dışındaki yatırımlar için */}
           {formData.type !== 'deposit' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Miktar
+                {formData.type === 'gold' ? 'Gram' : 'Miktar'}
               </label>
               <input
                 type="number"
@@ -508,7 +496,7 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
               </div>
 
               {/* Net Getiri Hesaplaması */}
-              {formData.calculatedNetReturn > 0 && (
+              {formData.type === 'deposit' && formData.purchasePrice && formData.annualInterestRate && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <h4 className="font-medium text-green-800 mb-2">Net Getiri Hesaplaması</h4>
                   <div className="space-y-1 text-sm text-green-700">
@@ -517,15 +505,15 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
                       const currentDate = new Date();
                       const daysPassed = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
                       
-                      const exemptAmount = formData.purchasePrice * parseFloat(formData.taxExemptPercentage) / 100;
-                      const taxableAmount = formData.purchasePrice - exemptAmount;
+                      const exemptAmount = (formData.purchasePrice || 0) * parseFloat(formData.taxExemptPercentage || '0') / 100;
+                      const taxableAmount = (formData.purchasePrice || 0) - exemptAmount;
                       const dailyGrossInterest = taxableAmount * parseFloat(formData.annualInterestRate || '0') / 100 / 365;
                       const dailyWithholdingTax = dailyGrossInterest * 0.175;
                       const dailyNetReturn = dailyGrossInterest - dailyWithholdingTax;
                       
                       return (
                         <>
-                          <p>Alış Fiyatı: {formatCurrency(formData.purchasePrice)}</p>
+                          <p>Alış Fiyatı: {formatCurrency(formData.purchasePrice || 0)}</p>
                           <p>Faiz İşlemeyecek Kısım (%{formData.taxExemptPercentage}): {formatCurrency(exemptAmount)}</p>
                           <p>Faiz İşleyecek Kısım: {formatCurrency(taxableAmount)}</p>
                           <p>Günlük Brüt Faiz: {formatCurrency(dailyGrossInterest)}</p>
@@ -533,8 +521,8 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
                           <p>Günlük Net Getiri: {formatCurrency(dailyNetReturn)}</p>
                           <p>Geçen Gün Sayısı: {daysPassed} gün</p>
                           <div className="border-t border-green-300 pt-2 mt-2">
-                            <p className="font-semibold">Toplam Kazanç: {formatCurrency(formData.calculatedNetReturn)}</p>
-                            <p className="font-semibold">Güncel Değer: {formatCurrency(formData.currentPrice)}</p>
+                            <p className="font-semibold">Toplam Kazanç: {formatCurrency(dailyNetReturn * daysPassed)}</p>
+                            <p className="font-semibold">Güncel Değer: {formatCurrency((formData.purchasePrice || 0) + (dailyNetReturn * daysPassed))}</p>
                           </div>
                         </>
                       );

@@ -332,83 +332,24 @@ const PremiumManagePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Subscription Actions */}
+            {/* Subscription Status Info */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="bg-gray-50 p-4 sm:p-6 border-b border-gray-100">
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
-                  Abonelik İşlemleri
+                  Abonelik Durumu
                 </h2>
                 <p className="text-gray-600 text-sm">
-                  Aboneliğinizi yönetin ve değişiklik yapın
+                  Premium aboneliğinizin durumu ve detayları
                 </p>
               </div>
               
               <div className="p-4 sm:p-6">
-                {premiumUser?.cancellationStatus === 'cancelled' && canRestore ? (
-                  <>
-                    <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-center gap-3 text-yellow-800 mb-2">
-                        <div className="p-2 bg-yellow-500 rounded-lg">
-                          <AlertTriangle className="w-5 h-5 text-white" />
-                        </div>
-                        <span className="font-semibold text-sm sm:text-base">Abonelik İptal Edildi</span>
-                      </div>
-                      <p className="text-yellow-700 text-sm">
-                        Aboneliğiniz iptal edildi ancak 7 gün içinde geri alabilirsiniz. Premium özellikleriniz hala aktif.
-                      </p>
-                    </div>
-                    
-                    <button
-                      onClick={handleRestoreSubscription}
-                      disabled={loading}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white py-3 sm:py-4 px-6 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                    >
-                      {loading ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          İşleniyor...
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center gap-2">
-                          <CheckCircle className="w-5 h-5" />
-                          Aboneliği Geri Al
-                        </div>
-                      )}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <div className="mb-6 space-y-4">
-                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                        <h3 className="font-semibold text-blue-900 mb-2 text-sm sm:text-base">Abonelik Yönetimi</h3>
-                        <p className="text-blue-700 text-sm">
-                          Premium aboneliğinizi istediğiniz zaman iptal edebilirsiniz. İptal sonrası 7 gün içinde geri alabilirsiniz.
-                        </p>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="p-3 sm:p-4 bg-gray-50 rounded-lg text-center">
-                          <div className="text-xl sm:text-2xl font-bold text-gray-900">7</div>
-                          <div className="text-gray-600 text-xs sm:text-sm">Gün geri alma süresi</div>
-                        </div>
-                        <div className="p-3 sm:p-4 bg-gray-50 rounded-lg text-center">
-                          <div className="text-xl sm:text-2xl font-bold text-gray-900">₺0</div>
-                          <div className="text-gray-600 text-xs sm:text-sm">İptal ücreti</div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <button
-                      onClick={() => window.open('/premium-cancel', '_blank')}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
-                    >
-                      <div className="flex items-center justify-center gap-2">
-                        <AlertTriangle className="w-5 h-5" />
-                        Aboneliği İptal Et
-                      </div>
-                    </button>
-                  </>
-                )}
+                <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                  <h3 className="font-semibold text-green-900 mb-2 text-sm sm:text-base">Premium Üyelik Aktif</h3>
+                  <p className="text-green-700 text-sm">
+                    Premium özelliklerinizden faydalanmaya devam edebilirsiniz.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
