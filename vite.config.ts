@@ -4,7 +4,10 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   define: {
-    'process.env': 'process.env'
+    'process.env': '{}',
+    'process.stdout': '{ isTTY: false }',
+    'process.stderr': '{ isTTY: false }',
+    global: 'globalThis'
   },
   build: {
     target: 'esnext',
@@ -12,6 +15,20 @@ export default defineConfig({
     sourcemap: true,
     minify: 'esbuild',
     rollupOptions: {
+      external: [
+        'node:events',
+        'node:util',
+        'node:stream',
+        'node:buffer',
+        'node:crypto',
+        'node:fs',
+        'node:path',
+        'node:os',
+        'node:http',
+        'node:https',
+        'node:url',
+        'firebase-admin'
+      ],
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
@@ -30,7 +47,21 @@ export default defineConfig({
       'firebase/auth',
       'firebase/firestore'
     ],
-    exclude: ['lucide-react']
+    exclude: [
+      'lucide-react',
+      'firebase-admin',
+      'node:events',
+      'node:util',
+      'node:stream',
+      'node:buffer',
+      'node:crypto',
+      'node:fs',
+      'node:path',
+      'node:os',
+      'node:http',
+      'node:https',
+      'node:url'
+    ]
   },
   server: {
     port: 3000,
