@@ -1,4 +1,4 @@
-import admin, { auth as adminAuth } from '../lib/firebase-admin';
+import { auth as adminAuth } from '../lib/firebase-admin';
 
 /**
  * Mobil uygulamadan gelen Firebase token'ını doğrulayan API endpoint
