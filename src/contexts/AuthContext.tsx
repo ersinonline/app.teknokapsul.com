@@ -4,6 +4,7 @@ import { auth } from '../lib/firebase';
 import { AuthContextType } from '../types/auth';
 import { signOut as firebaseSignOut, getRedirectResult } from 'firebase/auth';
 import { webViewAuthService } from '../services/webview-auth.service';
+import { tokenVerificationService } from '../services/token-verification.service';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -13,6 +14,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tokenValid, setTokenValid] = useState<boolean>(false);
+  const [sessionChecked, setSessionChecked] = useState<boolean>(false);
 
   useEffect(() => {
     // Handle redirect result from OAuth providers
@@ -45,17 +48,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     webViewAuthService.listenForWebViewAuth();
 
     const unsubscribe = auth.onAuthStateChanged(
-      (user) => {
+      async (user) => {
         setUser(user);
-        setLoading(false);
-        // Clear errors when user state changes successfully
+        
         if (user) {
+          // Kullanıcı giriş yaptığında token'ı backend'de doğrula
+          try {
+            const verification = await tokenVerificationService.verifyIdToken();
+            setTokenValid(verification.success && (verification.tokenValid || false));
+            
+            if (!verification.success) {
+              console.warn('Token doğrulama başarısız:', verification.error);
+              setError('Oturum doğrulama hatası');
+            } else {
+              setError(null);
+            }
+          } catch (error) {
+            console.error('Token doğrulama hatası:', error);
+            setTokenValid(false);
+            setError('Token doğrulama hatası');
+          }
+        } else {
+          setTokenValid(false);
           setError(null);
         }
+        
+        setSessionChecked(true);
+        setLoading(false);
       },
       (error) => {
         console.error('Authentication error:', error);
         setError('Authentication error occurred');
+        setTokenValid(false);
+        setSessionChecked(true);
         setLoading(false);
       }
     );
@@ -67,9 +92,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       await firebaseSignOut(auth);
       setUser(null);
+      setTokenValid(false);
+      setSessionChecked(false);
     } catch (error) {
       console.error('Sign-out error:', error);
       setError('Error during sign-out');
+    }
+  };
+
+  // Token doğrulama fonksiyonu
+  const verifyToken = async () => {
+    try {
+      const verification = await tokenVerificationService.verifyIdToken();
+      setTokenValid(verification.success && (verification.tokenValid || false));
+      return verification;
+    } catch (error) {
+      console.error('Token doğrulama hatası:', error);
+      setTokenValid(false);
+      return { success: false, tokenValid: false, error: 'Token doğrulama hatası' };
+    }
+  };
+
+  // Oturum durumu kontrol fonksiyonu
+  const checkSession = async () => {
+    try {
+      const sessionCheck = await tokenVerificationService.checkSession();
+      setTokenValid(sessionCheck.sessionValid);
+      return sessionCheck;
+    } catch (error) {
+      console.error('Oturum kontrol hatası:', error);
+      setTokenValid(false);
+      return { success: false, sessionValid: false, error: 'Oturum kontrol hatası' };
+    }
+  };
+
+  // Token yenileme fonksiyonu
+  const refreshToken = async () => {
+    try {
+      const refreshed = await tokenVerificationService.refreshTokenIfNeeded();
+      setTokenValid(refreshed);
+      return refreshed;
+    } catch (error) {
+      console.error('Token yenileme hatası:', error);
+      setTokenValid(false);
+      return false;
     }
   };
 
@@ -77,7 +143,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     user,
     loading,
     error,
+    tokenValid,
+    sessionChecked,
     signOut,
+    verifyToken,
+    checkSession,
+    refreshToken,
     isWebView: webViewAuthService.isWebView
   };
 

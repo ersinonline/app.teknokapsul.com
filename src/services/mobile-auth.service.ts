@@ -1,6 +1,7 @@
 import { signInWithCustomToken } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { verifyAndCreateCustomToken } from '../api/mobile-auth';
+import { tokenVerificationService } from './token-verification.service';
 
 /**
  * Mobil uygulama kimlik doğrulama servisi
@@ -57,9 +58,21 @@ class MobileAuthService {
    */
   public async verifyIdTokenAndCreateCustomToken(idToken: string): Promise<string> {
     try {
-      // API endpoint'i kullanarak ID token'ını doğrula ve custom token oluştur
-      const { customToken } = await verifyAndCreateCustomToken(idToken);
-      return customToken;
+      // Önce backend'de ID token'ını doğrula
+      const verification = await tokenVerificationService.verifyIdToken(idToken);
+      
+      if (!verification.success || !verification.tokenValid) {
+        throw new Error(verification.error || 'Token doğrulama başarısız');
+      }
+      
+      // Token geçerliyse custom token oluştur
+      const customTokenResult = await tokenVerificationService.createCustomToken(idToken);
+      
+      if (!customTokenResult.success || !customTokenResult.customToken) {
+        throw new Error(customTokenResult.error || 'Custom token oluşturulamadı');
+      }
+      
+      return customTokenResult.customToken;
     } catch (error) {
       console.error('ID token doğrulama hatası:', error);
       throw error;

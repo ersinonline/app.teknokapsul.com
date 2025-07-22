@@ -17,5 +17,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // export * from './expenseReminders'; // Temporarily disabled
 // export * from './stripe'; // Temporarily disabled due to secret key issue
 __exportStar(require("./priceUpdater"), exports);
-__exportStar(require("./genelparaProxy"), exports);
+__exportStar(require("./auth"), exports);
 //# sourceMappingURL=index.js.map

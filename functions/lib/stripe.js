@@ -96,7 +96,7 @@ exports.createCheckoutSession = (0, https_1.onRequest)({ cors: true, secrets: [s
                                 name: 'Premium Abonelik',
                                 description: 'Aylık premium abonelik',
                             },
-                            unit_amount: 2999,
+                            unit_amount: 2999, // ₺29.99
                             recurring: {
                                 interval: 'month',
                             },
