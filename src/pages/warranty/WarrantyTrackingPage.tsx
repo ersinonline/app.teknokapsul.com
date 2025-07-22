@@ -21,7 +21,7 @@ interface Warranty {
   category: string;
   purchasePrice: number;
   store?: string;
-  notes?: string;
+  invoiceUrl?: string;
   userId: string;
   createdAt: Date;
 }
@@ -30,6 +30,7 @@ export const WarrantyTrackingPage = () => {
   const { user } = useAuth();
   const { data: warranties = [], loading, error, reload } = useFirebaseData<Warranty>('warranties');
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingWarranty, setEditingWarranty] = useState<Warranty | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -44,6 +45,11 @@ export const WarrantyTrackingPage = () => {
         console.error('Error deleting warranty:', error);
       }
     }
+  };
+
+  const handleEdit = (warranty: Warranty) => {
+    setEditingWarranty(warranty);
+    setIsFormOpen(true);
   };
 
   const categories = Array.from(new Set(warranties.map(warranty => warranty.category)));
@@ -246,6 +252,7 @@ export const WarrantyTrackingPage = () => {
                 warranty={warranty}
                 status={getWarrantyStatus(warranty)}
                 onDelete={() => handleDelete(warranty.id)}
+                onEdit={() => handleEdit(warranty)}
               />
             ))}
           </div>
@@ -254,10 +261,15 @@ export const WarrantyTrackingPage = () => {
         {/* Warranty Form Modal */}
         {isFormOpen && (
           <WarrantyForm
-            onClose={() => setIsFormOpen(false)}
+            warranty={editingWarranty}
+            onClose={() => {
+              setIsFormOpen(false);
+              setEditingWarranty(null);
+            }}
             onSave={async () => {
               await reload();
               setIsFormOpen(false);
+              setEditingWarranty(null);
             }}
           />
         )}

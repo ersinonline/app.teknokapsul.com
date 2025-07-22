@@ -54,7 +54,7 @@ interface Warranty {
   category: string;
   purchasePrice: number;
   store?: string;
-  notes?: string;
+  invoiceUrl?: string;
   userId: string;
   createdAt: Date;
 }

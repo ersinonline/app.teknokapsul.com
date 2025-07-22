@@ -7,4 +7,5 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   signOut: () => Promise<void>;
+  isWebView: boolean;
 }

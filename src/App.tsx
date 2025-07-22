@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { offlineService } from './services/offline.service';
+import { MobileAuthHandler } from './components/auth/MobileAuthHandler';
 import { LoginPage } from './pages/auth/LoginPage';
 import { AppLayout } from './components/layout/AppLayout';
 import { AuthGuard } from './components/auth/AuthGuard';
@@ -56,6 +57,7 @@ import { PremiumProvider } from './contexts/PremiumContext';
 import { ResponsiveTestPage } from './pages/test/ResponsiveTestPage';
 import WorkTrackingPage from './pages/WorkTrackingPage';
 import PharmacyPage from './pages/PharmacyPage';
+import WebViewAuthPage from './pages/auth/WebViewAuthPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
   <AuthGuard>
@@ -71,6 +73,10 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />
+  },
+  {
+    path: '/webview-auth',
+    element: <AuthProvider><WebViewAuthPage /></AuthProvider>
   },
   {
     path: '/dashboard',
@@ -286,6 +292,11 @@ function App() {
       <AuthProvider>
         <PremiumProvider>
           <div className="min-h-screen bg-gray-50 transition-colors duration-300">
+            {/* Mobil uygulamadan gelen kimlik doğrulama token'ını işle */}
+            <MobileAuthHandler 
+              onAuthSuccess={() => console.log('Mobil token ile giriş başarılı')} 
+              onAuthFailure={(error) => console.error('Mobil token ile giriş başarısız:', error)} 
+            />
             <RouterProvider router={router} />
           </div>
         </PremiumProvider>

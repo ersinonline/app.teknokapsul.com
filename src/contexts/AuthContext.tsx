@@ -3,6 +3,7 @@ import { User } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { AuthContextType } from '../types/auth';
 import { signOut as firebaseSignOut, getRedirectResult } from 'firebase/auth';
+import { webViewAuthService } from '../services/webview-auth.service';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -39,6 +40,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     handleRedirectResult();
+    
+    // WebView kimlik doğrulama dinleyicisini başlat
+    webViewAuthService.listenForWebViewAuth();
 
     const unsubscribe = auth.onAuthStateChanged(
       (user) => {
@@ -73,7 +77,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     user,
     loading,
     error,
-    signOut
+    signOut,
+    isWebView: webViewAuthService.isWebView
   };
 
   return (

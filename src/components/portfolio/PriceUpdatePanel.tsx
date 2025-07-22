@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Clock, Edit3, X } from 'lucide-react';
 import { updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -23,18 +23,8 @@ interface PriceData {
 export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioItems, onRefresh }) => {
   const { user } = useAuth();
   const [priceData, setPriceData] = useState<Record<string, PriceData>>({});
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [editPrice, setEditPrice] = useState('');
-
-  useEffect(() => {
-    if (portfolioItems.length > 0) {
-      initializePriceData();
-    }
-  }, [portfolioItems]);
-
-
 
   const initializePriceData = () => {
     const initialData: Record<string, PriceData> = {};
@@ -57,18 +47,23 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
     setPriceData(initialData);
   };
 
-  // Gerçek fiyat güncelleme fonksiyonu - Firebase Functions kullanarak
-  const fetchPriceForSymbol = async (symbol: string): Promise<{ price: number; change: number; changePercent: number }> => {
+  // Gerçek fiyat güncelleme fonksiyonu - Doviz-API kullanarak
+  const fetchPriceForSymbol = useCallback(async (symbol: string): Promise<{ price: number; change: number; changePercent: number }> => {
     try {
-      // Döviz kurları ve altın için Firebase Functions endpoint'ini çağır
+      // Döviz kurları ve altın için Doviz-API endpoint'ini çağır
       if (['USD', 'EUR', 'GOLD'].includes(symbol)) {
-        const response = await fetch('https://updatesingleprice-qcivoym7rq-uc.a.run.app', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ symbol })
-        });
+        let apiEndpoint = '';
+        
+        // Sembole göre doğru endpoint'i belirle
+        if (symbol === 'USD') {
+          apiEndpoint = 'http://localhost:3004/api/';
+        } else if (symbol === 'EUR') {
+          apiEndpoint = 'http://localhost:3004/api/';
+        } else if (symbol === 'GOLD') {
+          apiEndpoint = 'http://localhost:3004/api/altin';
+        }
+        
+        const response = await fetch(apiEndpoint);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -76,16 +71,34 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
         
         const result = await response.json();
         
+        let price = 0;
+        
         if (result.success && result.data) {
-          const data = result.data;
-          let price = 0;
-          
-          // Satış fiyatını kullan (varsa), yoksa alış fiyatını kullan
-          if (data.sellPrice) {
-            price = parseFloat(data.sellPrice.replace(',', '.').replace(/[^0-9.]/g, ''));
-          } else if (data.buyPrice) {
-            price = parseFloat(data.buyPrice.replace(',', '.').replace(/[^0-9.]/g, ''));
+          // API yanıtından doğru veriyi çıkar
+          if (symbol === 'USD') {
+            // Ana API'den dolar verisi
+            const dolarData = result.data[0];
+            if (dolarData && dolarData.Dolar) {
+              price = parseFloat(dolarData.Dolar.replace(',', '.').replace(/[^0-9.]/g, ''));
+            }
+          } else if (symbol === 'EUR') {
+            // Ana API'den euro verisi
+            const euroData = result.data[0];
+            if (euroData && euroData.Euro) {
+              price = parseFloat(euroData.Euro.replace(',', '.').replace(/[^0-9.]/g, ''));
+            }
+          } else if (symbol === 'GOLD') {
+            // Altın API'sinden gram altın verisi
+            const altinData = result.data.Altin;
+            if (altinData && altinData.Satis) {
+              price = parseFloat(altinData.Satis.replace(',', '.').replace(/[^0-9.]/g, ''));
+            } else if (altinData && altinData.Alis) {
+              price = parseFloat(altinData.Alis.replace(',', '.').replace(/[^0-9.]/g, ''));
+            }
           }
+        }
+        
+        if (price > 0) {
           
           const currentPrice = priceData[symbol]?.currentPrice || price;
           const change = price - currentPrice;
@@ -124,9 +137,9 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
         changePercent: 0
       };
     }
-  };
+  }, [priceData]);
 
-  const updatePriceForSymbol = async (symbol: string) => {
+  const updatePriceForSymbol = useCallback(async (symbol: string) => {
     if (!user) return;
 
     setPriceData(prev => ({
@@ -177,24 +190,16 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
         }
       }));
     }
-  };
+  }, [user, portfolioItems, fetchPriceForSymbol]);
 
-  const updateAllPrices = async () => {
-    if (isUpdating) return;
-    
-    setIsUpdating(true);
-    const symbols = portfolioItems.map(item => item.symbol);
-    
-    try {
-      await Promise.all(symbols.map(symbol => updatePriceForSymbol(symbol)));
-      setLastUpdateTime(new Date());
-      onRefresh(); // Refresh parent component
-    } catch (error) {
-      console.error('Error updating prices:', error);
-    } finally {
-      setIsUpdating(false);
+  // İlk yükleme ve portfolioItems değiştiğinde fiyatları başlat
+  useEffect(() => {
+    if (portfolioItems.length > 0) {
+      initializePriceData();
     }
-  };
+  }, [portfolioItems]);
+
+
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -282,25 +287,9 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
     <div className="bg-white rounded-lg sm:rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h2 className="text-lg sm:text-xl font-bold text-gray-900">Fiyat Güncelleme</h2>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <button
-            onClick={updateAllPrices}
-            disabled={isUpdating}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base w-full sm:w-auto justify-center"
-          >
-            <RefreshCw className={`w-4 h-4 ${isUpdating ? 'animate-spin' : ''}`} />
-            {isUpdating ? 'Güncelleniyor...' : 'Fiyatları Güncelle'}
-          </button>
-        </div>
       </div>
 
-      {lastUpdateTime && (
-        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-          <p className="text-sm text-blue-800">
-            Son güncelleme: {formatTime(lastUpdateTime)}
-          </p>
-        </div>
-      )}
+
 
       <div className="space-y-3">
         {portfolioItems
@@ -385,14 +374,16 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
-                  <button
-                    onClick={() => updatePriceForSymbol(item.symbol)}
-                    disabled={price.status === 'loading'}
-                    className="p-2 text-gray-400 hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                    title="Bu sembolü güncelle"
-                  >
-                    <RefreshCw className={`w-4 h-4 ${price.status === 'loading' ? 'animate-spin' : ''}`} />
-                  </button>
+                  {(item.symbol === 'USD' || item.symbol === 'EUR') && (
+                    <button
+                      onClick={() => updatePriceForSymbol(item.symbol)}
+                      disabled={price.status === 'loading'}
+                      className="p-2 text-gray-400 hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                      title="Bu sembolü güncelle"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${price.status === 'loading' ? 'animate-spin' : ''}`} />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -412,7 +403,7 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
           <div>
             <p className="text-sm font-medium text-blue-800">Bilgi</p>
             <p className="text-xs text-blue-700 mt-1">
-              Döviz kurları (USD, EUR) ve altın fiyatları Bigpara'dan canlı olarak çekilmektedir. Hisse senetleri ve fonlar için simüle edilmiş veriler kullanılmaktadır.
+              Döviz kurları (USD, EUR) Doviz-API'den manuel olarak güncellenebilir. Altın, hisse senetleri ve fonlar için fiyat düzenleme özelliğini kullanabilirsiniz.
             </p>
           </div>
         </div>

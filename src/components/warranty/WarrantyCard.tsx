@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Package, Building, AlertCircle, CheckCircle, Clock, Trash2, FileText } from 'lucide-react';
+import { Package, Building, AlertCircle, CheckCircle, Clock, Trash2, FileText, Edit3 } from 'lucide-react';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -16,7 +16,7 @@ interface Warranty {
   category: string;
   purchasePrice: number;
   store?: string;
-  notes?: string;
+  invoiceUrl?: string;
   createdAt: Date;
   userId: string;
 }
@@ -25,9 +25,10 @@ interface WarrantyCardProps {
   warranty: Warranty;
   status: 'active' | 'expired' | 'expiring_soon';
   onDelete: () => void;
+  onEdit?: (warranty: Warranty) => void;
 }
 
-export const WarrantyCard: React.FC<WarrantyCardProps> = ({ warranty, status, onDelete }) => {
+export const WarrantyCard: React.FC<WarrantyCardProps> = ({ warranty, status, onDelete, onEdit }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
@@ -199,8 +200,8 @@ export const WarrantyCard: React.FC<WarrantyCardProps> = ({ warranty, status, on
           </div>
         )}
 
-        {/* Notes */}
-        {warranty.notes && (
+        {/* Invoice */}
+        {warranty.invoiceUrl && (
           <div className="mb-4">
             <button
               onClick={() => setShowDetails(!showDetails)}
@@ -210,11 +211,19 @@ export const WarrantyCard: React.FC<WarrantyCardProps> = ({ warranty, status, on
               onMouseLeave={(e) => e.currentTarget.style.color = '#ffb700'}
             >
               <FileText className="w-4 h-4" />
-              {showDetails ? 'Notları Gizle' : 'Notları Göster'}
+              {showDetails ? 'Faturayı Gizle' : 'Faturayı Göster'}
             </button>
             {showDetails && (
               <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-700">{warranty.notes}</p>
+                <a
+                  href={warranty.invoiceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span className="text-sm font-medium">Faturayı Görüntüle</span>
+                </a>
               </div>
             )}
           </div>
@@ -222,6 +231,15 @@ export const WarrantyCard: React.FC<WarrantyCardProps> = ({ warranty, status, on
 
         {/* Actions */}
         <div className="flex gap-2 pt-4 border-t border-gray-200">
+          {onEdit && (
+            <button
+              onClick={() => onEdit(warranty)}
+              className="flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              <Edit3 className="w-4 h-4" />
+              <span className="text-sm font-medium">Düzenle</span>
+            </button>
+          )}
           <button
             onClick={handleDelete}
             disabled={loading}
