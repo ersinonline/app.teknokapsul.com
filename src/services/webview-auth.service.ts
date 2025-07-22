@@ -106,18 +106,22 @@ class WebViewAuthService {
   }
 
   /**
-   * URL'den token parametresini kontrol eder
+   * URL'den kimlik doğrulama token'ını kontrol eder
+   * @returns Promise<boolean> Token bulundu ve işlendi ise true
    */
-  private async checkURLForAuthToken(): Promise<void> {
+  public async checkURLForAuthToken(): Promise<boolean> {
     try {
-      // MobileAuthService'i kullanarak URL'den token kontrolü yap
+      console.log('URL token kontrolü başlatılıyor...');
       const success = await mobileAuthService.checkAndSignInWithUrlToken();
-      
       if (success) {
-        console.log('URL token ile giriş başarılı');
+        console.log('✅ URL token ile giriş başarılı');
+      } else {
+        console.log('ℹ️ URL\'de firebase_token parametresi bulunamadı');
       }
+      return success;
     } catch (error) {
-      console.error('URL token kontrolü sırasında hata:', error);
+      console.error('❌ URL token kontrolü başarısız:', error);
+      return false;
     }
   }
 

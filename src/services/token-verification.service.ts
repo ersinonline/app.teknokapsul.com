@@ -54,6 +54,7 @@ class TokenVerificationService {
       const token = idToken || await this.getCurrentUserIdToken();
       
       if (!token) {
+        console.log('Token doğrulama: Token bulunamadı');
         return {
           success: false,
           tokenValid: false,
@@ -61,6 +62,7 @@ class TokenVerificationService {
         };
       }
 
+      console.log('Token doğrulama başlatılıyor...');
       const response = await fetch(`${this.baseUrl}/verifyIdToken`, {
         method: 'POST',
         headers: {
@@ -72,6 +74,7 @@ class TokenVerificationService {
       const data = await response.json();
       
       if (!response.ok) {
+        console.error('Backend token doğrulama hatası:', response.status, data);
         return {
           success: false,
           tokenValid: false,
@@ -79,9 +82,10 @@ class TokenVerificationService {
         };
       }
 
+      console.log('Token doğrulama sonucu:', data);
       return data;
     } catch (error: any) {
-      console.error('Token doğrulama hatası:', error);
+      console.error('❌ Token doğrulama hatası:', error);
       return {
         success: false,
         tokenValid: false,
