@@ -34,7 +34,20 @@ class WebViewAuthService {
    */
   private detectWebView(): boolean {
     const userAgent = navigator.userAgent;
-    return /wv|WebView|Android.*Version\/[.\d]+.*Chrome|iPhone.*AppleWebKit.*Mobile.*Safari|iPad.*AppleWebKit.*Mobile.*Safari/.test(userAgent);
+    
+    // Android WebView tespiti
+    const isAndroidWebView = /Android.*wv|Android.*Version\/[.\d]+.*Chrome/.test(userAgent);
+    
+    // iOS WebView tespiti (WKWebView)
+    const isIOSWebView = /iPhone.*AppleWebKit.*Mobile.*Safari|iPad.*AppleWebKit.*Mobile.*Safari/.test(userAgent) && 
+                        !userAgent.includes('CriOS') && 
+                        !userAgent.includes('FxiOS');
+    
+    // Ek WebView kontrolleri
+    const hasWebViewIndicators = window.navigator.standalone !== undefined || 
+                                window.AndroidInterface !== undefined;
+    
+    return isAndroidWebView || isIOSWebView || hasWebViewIndicators;
   }
 
   /**
@@ -145,6 +158,9 @@ declare global {
     AndroidInterface?: {
       getAuthData(): string;
     };
+  }
+  interface Navigator {
+    standalone?: boolean;
   }
 }
 

@@ -34,9 +34,19 @@ class MobileAuthService {
       const userCredential = await signInWithCustomToken(auth, token);
       console.log('Mobil token ile giriş başarılı:', userCredential.user.uid);
       return;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Mobil token ile giriş başarısız:', error);
-      throw error;
+      
+      // Firebase Auth hatalarını daha anlaşılır hale getir
+      if (error.code === 'auth/invalid-custom-token') {
+        throw new Error('Geçersiz kimlik doğrulama token\'ı');
+      } else if (error.code === 'auth/custom-token-mismatch') {
+        throw new Error('Token bu proje için geçerli değil');
+      } else if (error.code === 'auth/network-request-failed') {
+        throw new Error('Ağ bağlantısı hatası. İnternet bağlantınızı kontrol edin.');
+      } else {
+        throw new Error('Kimlik doğrulama hatası: ' + (error.message || 'Bilinmeyen hata'));
+      }
     }
   }
   

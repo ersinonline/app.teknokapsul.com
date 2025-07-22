@@ -294,8 +294,12 @@ function App() {
           <div className="min-h-screen bg-gray-50 transition-colors duration-300">
             {/* Mobil uygulamadan gelen kimlik doğrulama token'ını işle */}
             <MobileAuthHandler 
-              onAuthSuccess={() => console.log('Mobil token ile giriş başarılı')} 
-              onAuthFailure={(error) => console.error('Mobil token ile giriş başarısız:', error)} 
+              onAuthSuccess={() => {
+                console.log('✅ Mobil token ile giriş başarılı');
+              }} 
+              onAuthFailure={(error) => {
+                console.error('❌ Mobil token ile giriş başarısız:', error?.message || error);
+              }} 
             />
             <RouterProvider router={router} />
           </div>

@@ -25,22 +25,28 @@ export const MobileAuthHandler: React.FC<MobileAuthHandlerProps> = ({
       return;
     }
 
-    // WebView değilse ve token kontrolü yapılmadıysa
+    // Token kontrolü yapılmadıysa
     if (!authAttempted) {
       setAuthAttempted(true);
 
       // URL'den token kontrolü yap
       mobileAuthService.checkAndSignInWithUrlToken()
         .then(success => {
-          if (success && onAuthSuccess) {
-            onAuthSuccess();
-          } else if (!success && isWebView) {
-            // WebView'da token bulunamadıysa, mobil uygulamadan gelen mesajları dinle
-            console.log('URL token bulunamadı, WebView mesajları bekleniyor...');
+          if (success) {
+            console.log('Mobil token ile giriş başarılı');
+            if (onAuthSuccess) {
+              onAuthSuccess();
+            }
+          } else {
+            if (isWebView) {
+              console.log('URL token bulunamadı, WebView mesajları bekleniyor...');
+            } else {
+              console.log('URL token bulunamadı, normal web tarayıcısı');
+            }
           }
         })
         .catch(error => {
-          console.error('Token kontrolü sırasında hata:', error);
+          console.error('URL token ile giriş başarısız:', error);
           if (onAuthFailure) {
             onAuthFailure(error);
           }
