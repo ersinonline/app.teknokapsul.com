@@ -5,8 +5,8 @@ export default defineConfig({
   plugins: [react()],
   define: {
     'process.env': '{}',
-    'process.stdout': '{ isTTY: false }',
-    'process.stderr': '{ isTTY: false }',
+    'process.stdout': JSON.stringify({ isTTY: false }),
+    'process.stderr': JSON.stringify({ isTTY: false }),
     global: 'globalThis'
   },
   build: {
