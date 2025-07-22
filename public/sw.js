@@ -24,7 +24,8 @@ const STATIC_ASSETS = [
 const API_ENDPOINTS = [
   '/api/',
   'firestore.googleapis.com',
-  'firebase.googleapis.com'
+  'firebase.googleapis.com',
+  '127.0.0.1:5001'
 ];
 
 // Install event - cache static assets
