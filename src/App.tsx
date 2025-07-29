@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { offlineService } from './services/offline.service';
@@ -267,6 +268,20 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><CreditCalculatorPage2 /></ProtectedRoute>
   },
   {
+    path: '/sentry-test',
+    element: <ProtectedRoute>
+      <div className="p-8">
+        <h1 className="text-2xl font-bold mb-4">Sentry Test</h1>
+        <button 
+          onClick={() => {throw new Error("This is your first error!");}} 
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Break the world
+        </button>
+      </div>
+    </ProtectedRoute>
+  },
+  {
     path: '/',
     element: <Navigate to="/dashboard" replace />
   }
@@ -319,4 +334,22 @@ function App() {
   );
 }
 
-export default App;
+export default Sentry.withErrorBoundary(App, {
+  fallback: ({ error, resetError }) => (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center p-8">
+        <h1 className="text-2xl font-bold text-red-600 mb-4">Bir hata oluştu</h1>
+        <p className="text-gray-600 mb-4">{error instanceof Error ? error.message : 'Bilinmeyen hata'}</p>
+        <button 
+          onClick={resetError}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Tekrar Dene
+        </button>
+      </div>
+    </div>
+  ),
+  beforeCapture: (scope) => {
+    scope.setTag('errorBoundary', true);
+  },
+});

@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoginForm } from '../../components/auth/LoginForm';
-import { SocialLogin } from '../../components/auth/SocialLogin';
-import { Package, Mail, Smartphone } from 'lucide-react';
+import { Mail, Package } from 'lucide-react';
 
 export const LoginPage = () => {
   const { user, loading } = useAuth();

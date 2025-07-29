@@ -1,7 +1,22 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import * as Sentry from '@sentry/react';
 import App from './App';
 import './index.css';
+
+// Initialize Sentry
+Sentry.init({
+  dsn: "https://8e4750688773f87de1de590276d818fd@o4509753596248064.ingest.us.sentry.io/4509753604702208",
+  // Setting this option to true will send default PII data to Sentry.
+  // For example, automatic IP address collection on events
+  sendDefaultPii: true,
+  environment: import.meta.env.MODE,
+  integrations: [
+    Sentry.browserTracingIntegration(),
+  ],
+  // Performance Monitoring
+  tracesSampleRate: 1.0,
+});
 
 // Service Worker Registration for PWA support
 const registerServiceWorker = async () => {
