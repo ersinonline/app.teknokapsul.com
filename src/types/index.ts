@@ -10,7 +10,7 @@ export * from './financial';
 export * from './income';
 export * from './notes';
 export * from './portfolio';
-export * from './premium';
+// export * from './premium';
 export * from './subscription';
 export * from './support';
 export * from './work-tracking';

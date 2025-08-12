@@ -8,7 +8,7 @@ import {
   PieChart,
   Zap
 } from 'lucide-react';
-import { usePremium } from '../../contexts/PremiumContext';
+// import { usePremium } from '../../contexts/PremiumContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -31,7 +31,7 @@ const bottomNavigationItems: NavigationItem[] = [
 export const MobileNavigation: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isPremium } = usePremium();
+  // const { isPremium } = usePremium();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -67,9 +67,9 @@ export const MobileNavigation: React.FC = () => {
             </div>
             <div className="flex items-center space-x-2">
               <h1 className="text-lg font-semibold text-gray-900">TeknoKapsül</h1>
-              {isPremium && (
+              {/* {isPremium && (
                 <img src="https://i.hizliresim.com/indgl7s.png" alt="TeknoKapsül" className="h-4 object-contain" />
-              )}
+              )} */}
             </div>
           </div>
           

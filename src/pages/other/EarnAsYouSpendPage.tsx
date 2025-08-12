@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CreditCard } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { createPremiumCheckoutSession } from '../../services/stripe.service';
+// import { createPremiumCheckoutSession } from '../../services/stripe.service';
 
 interface CashbackOffer {
   id: string;
@@ -200,19 +200,19 @@ const EarnAsYouSpendPage: React.FC = () => {
       const successUrl = `${baseUrl}/other/earn-success?offer_id=${offer.id}`;
       const cancelUrl = `${baseUrl}/other/earn-as-you-spend`;
 
-      const session = await createPremiumCheckoutSession({
-        productId: 'cashback_offer',
-        userId: user.uid,
-        customerEmail: user.email || '',
-        successUrl,
-        cancelUrl,
-        amount: cartAmount
-      });
+      // const session = await createPremiumCheckoutSession({
+      //   productId: 'cashback_offer',
+      //   userId: user.uid,
+      //   customerEmail: user.email || '',
+      //   successUrl,
+      //   cancelUrl,
+      //   amount: cartAmount
+      // });
 
       // Stripe checkout sayfasına yönlendir
-      if (session.url) {
-        window.location.href = session.url;
-      }
+      // if (session.url) {
+      //   window.location.href = session.url;
+      // }
     } catch (error) {
       console.error('Ödeme işlemi başlatılırken hata:', error);
       alert('Ödeme işlemi başlatılırken bir hata oluştu. Lütfen tekrar deneyin.');

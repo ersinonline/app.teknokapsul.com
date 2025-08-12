@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator, ShoppingBag, Shield, Target, Crown, UserCog, Menu, X, Briefcase, BarChart3 } from 'lucide-react';
+import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator, Shield, Target, Menu, X, Briefcase, BarChart3 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { usePremium } from '../../contexts/PremiumContext';
+// import { usePremium } from '../../contexts/PremiumContext';
 
 interface SidebarProps {
   onCollapseChange?: (collapsed: boolean) => void;
@@ -13,7 +13,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuth();
-  const { isPremium } = usePremium();
+  // const { isPremium } = usePremium();
 
   const dashboardItems = [
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
@@ -35,15 +35,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
     { id: 'warranty-tracking', path: '/warranty-tracking', label: 'Garanti Takibi', icon: Shield },
   ];
 
-  const premiumMenuItems = [
-    { id: 'premium', path: '/premium', label: 'Premium', icon: Crown },
-    ...(isPremium ? [{ id: 'premium-manage', path: '/premium/manage', label: 'Premium Yönetimi', icon: UserCog }] : [])
-  ];
+  // const premiumMenuItems = [
+  //   { id: 'premium', path: '/premium', label: 'Premium', icon: Crown },
+  //   ...(isPremium ? [{ id: 'premium-manage', path: '/premium/manage', label: 'Premium Yönetimi', icon: UserCog }] : [])
+  // ];
 
   const servicesItems = [
     { id: 'services', path: '/services', label: 'Hizmetler', icon: Apps },
     { id: 'credit-calculator', path: '/credit-calculator', label: 'Kredi Hesaplama', icon: Calculator },
-    { id: 'shop-rewards', path: '/shop-rewards', label: 'Harcadıkça Kazan', icon: ShoppingBag },
+    // { id: 'shop-rewards', path: '/shop-rewards', label: 'Harcadıkça Kazan', icon: ShoppingBag },
     { id: 'cargo-tracking', path: '/cargo-tracking', label: 'Kargo Takip', icon: Package },
   ];
 
@@ -76,9 +76,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
             {!isCollapsed && (
               <div className="flex flex-col items-center gap-2">
                 <h2 className="text-xl font-semibold">TeknoKapsül</h2>
-                {isPremium && (
+                {/* isPremium && (
                   <img src="https://i.hizliresim.com/3g6ahm4.png" alt="TeknoKapsül" className="h-6 object-contain" />
-                )}
+                ) */}
               </div>
             )}
             <button
@@ -188,7 +188,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
           </div>
 
           {/* Premium */}
-          <div className="mb-6">
+          {/* <div className="mb-6">
             {!isCollapsed && (
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
                 Premium
@@ -226,7 +226,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
                 );
               })}
             </ul>
-          </div>
+          </div> */}
 
           {/* Hizmetler */}
           <div className="mb-6">

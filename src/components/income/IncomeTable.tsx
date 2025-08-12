@@ -85,11 +85,11 @@ export const IncomeTable: React.FC<IncomeTableProps> = ({ incomes, onUpdate }) =
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div>
       {editingIncome && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-medium mb-4 text-gray-900">Geliri Düzenle</h3>
+            <h3 className="text-lg font-medium mb-4 text-gray-900">Geliri Düzenle</h3>
             <IncomeForm
               onSubmit={async (data) => {
                 try {
@@ -113,87 +113,162 @@ export const IncomeTable: React.FC<IncomeTableProps> = ({ incomes, onUpdate }) =
         </div>
       )}
 
-      <table className="min-w-full divide-y divide-gray-200">
-      <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Gelir
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Kategori
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Tarih
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Durum
-            </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-              İşlemler
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {sortedIncomes.map((income) => {
-            const { icon, text, className } = getStatusInfo(income);
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Gelir
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Kategori
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Tarih
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Durum
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                İşlemler
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {sortedIncomes.map((income) => {
+              const { icon, text, className } = getStatusInfo(income);
 
-            return (
-              <tr key={income.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{income.title}</div>
-                  <div className="text-sm text-green-600 font-semibold">{formatCurrency(income.amount)}</div>
+              return (
+                <tr key={income.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{income.title}</div>
+                    <div className="text-sm text-green-600 font-semibold">{formatCurrency(income.amount)}</div>
+                    {income.description && (
+                      <div className="text-xs text-gray-600 mt-1">{income.description}</div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      {INCOME_CATEGORIES[income.category]}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-700">
+                      {formatDate(income.date)}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${className}`}>
+                      {icon}
+                      {text}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setEditingIncome(income)}
+                        className="text-yellow-600 hover:text-yellow-900 transition-colors"
+                        title="Düzenle"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleToggleStatus(income.id, income.isActive)}
+                        className={`${income.isActive ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900'} disabled:opacity-50 transition-colors`}
+                        title={income.isActive ? 'Pasif Yap' : 'Aktif Yap'}
+                        disabled={isToggling === income.id}
+                      >
+                        <Power className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(income.id)}
+                        className="text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors"
+                        disabled={isDeleting === income.id}
+                        title="Sil"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {sortedIncomes.map((income) => {
+          const { icon, text, className } = getStatusInfo(income);
+
+          return (
+            <div key={income.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+              {/* Header */}
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-gray-900">{income.title}</h3>
+                  <p className="text-lg font-semibold text-green-600 mt-1">{formatCurrency(income.amount)}</p>
                   {income.description && (
-                    <div className="text-xs text-gray-600 mt-1">{income.description}</div>
+                    <p className="text-xs text-gray-600 mt-1">{income.description}</p>
                   )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                </div>
+                <div className="flex gap-2 ml-2">
+                  <button
+                    onClick={() => setEditingIncome(income)}
+                    className="text-yellow-600 hover:text-yellow-900 transition-colors p-1"
+                    title="Düzenle"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  {/* Mobilde durum düğmesi gizlendi */}
+                  <button
+                    onClick={() => handleToggleStatus(income.id, income.isActive)}
+                    className={`${income.isActive ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900'} disabled:opacity-50 transition-colors p-1 hidden`}
+                    title={income.isActive ? 'Pasif Yap' : 'Aktif Yap'}
+                    disabled={isToggling === income.id}
+                  >
+                    <Power className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(income.id)}
+                    className="text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors p-1"
+                    disabled={isDeleting === income.id}
+                    title="Sil"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Details */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Kategori:</span>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     {INCOME_CATEGORIES[income.category]}
                   </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-700">
-                    {formatDate(income.date)}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${className}`}>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Tarih:</span>
+                  <span className="text-xs text-gray-700">{formatDate(income.date)}</span>
+                </div>
+                
+                {/* Mobilde durum bilgisi gizlendi */}
+                <div className="flex justify-between items-center hidden">
+                  <span className="text-xs text-gray-500">Durum:</span>
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${className}`}>
                     {icon}
                     {text}
                   </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex justify-end gap-2">
-                    <button
-                      onClick={() => setEditingIncome(income)}
-                      className="text-yellow-600 hover:text-yellow-900 transition-colors"
-                      title="Düzenle"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleToggleStatus(income.id, income.isActive)}
-                      className={`${income.isActive ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900'} disabled:opacity-50 transition-colors`}
-                      title={income.isActive ? 'Pasif Yap' : 'Aktif Yap'}
-                      disabled={isToggling === income.id}
-                    >
-                      <Power className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(income.id)}
-                      className="text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors"
-                      disabled={isDeleting === income.id}
-                      title="Sil"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

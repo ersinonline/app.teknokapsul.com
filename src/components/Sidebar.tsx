@@ -65,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       >
         <div className="p-4 border-b">
           <div className="flex items-center justify-center relative">
-            <Logo className="flex-1" showPremium={true} />
+            <Logo className="flex-1" />
             <button
               onClick={onClose}
               className="lg:hidden p-2 hover:bg-gray-100 rounded-lg absolute top-2 right-2"

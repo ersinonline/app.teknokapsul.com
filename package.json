@@ -23,6 +23,7 @@
     "@sentry/vite-plugin": "^4.0.2",
     "@stripe/stripe-js": "^7.4.0",
     "@types/react-beautiful-dnd": "^13.1.8",
+    "appwrite": "^18.2.0",
     "axios": "^1.10.0",
     "chart.js": "^4.5.0",
     "clsx": "^2.1.0",

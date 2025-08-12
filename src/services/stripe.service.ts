@@ -18,49 +18,7 @@ export interface StripeCheckoutSession {
   url: string;
 }
 
-export interface PremiumCheckoutData {
-  userId: string;
-  productId: string;
-  priceId?: string;
-  successUrl: string;
-  cancelUrl: string;
-  customerEmail?: string;
-  amount?: number;
-}
-
-// Teknokapsül Premium için Stripe Checkout Session oluştur
-export const createPremiumCheckoutSession = async (data: PremiumCheckoutData): Promise<StripeCheckoutSession> => {
-  try {
-    const response = await fetch('https://us-central1-superapp-37db4.cloudfunctions.net/createCheckoutSession', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        productId: data.productId,
-        priceId: data.priceId,
-        userId: data.userId,
-        customerEmail: data.customerEmail,
-        successUrl: data.successUrl,
-        cancelUrl: data.cancelUrl,
-        amount: data.amount,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Checkout session oluşturulamadı');
-    }
-
-    const session = await response.json();
-    return {
-      sessionId: session.id,
-      url: session.url,
-    };
-  } catch (error) {
-    console.error('Stripe checkout session error:', error);
-    throw new Error('Ödeme sayfası oluşturulamadı. Lütfen tekrar deneyin.');
-  }
-};
+// Premium checkout interface ve fonksiyonları kaldırıldı
 
 // Stripe Checkout'a yönlendir
 export const redirectToCheckout = async (sessionId: string): Promise<void> => {
@@ -82,24 +40,7 @@ export const redirectToCheckout = async (sessionId: string): Promise<void> => {
   }
 };
 
-// Premium abonelik için Stripe Checkout başlat
-export const startPremiumCheckout = async (userId: string, customerEmail?: string): Promise<void> => {
-  try {
-    const checkoutData: PremiumCheckoutData = {
-      userId,
-      productId: 'prod_SgrNWIaODU87Cq', // Teknokapsül Premium Product ID
-      customerEmail,
-      successUrl: `${window.location.origin}/premium/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${window.location.origin}/premium/cancel`,
-    };
-
-    const session = await createPremiumCheckoutSession(checkoutData);
-    await redirectToCheckout(session.sessionId);
-  } catch (error) {
-    console.error('Premium checkout error:', error);
-    throw error;
-  }
-};
+// Premium checkout fonksiyonu kaldırıldı
 
 // Webhook için session doğrulama
 export const verifyCheckoutSession = async (sessionId: string): Promise<any> => {

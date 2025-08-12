@@ -4,7 +4,7 @@ import { Home, TrendingUp, TrendingDown, Target, Wallet } from 'lucide-react';
 import Sidebar from './Sidebar';
 import { TabletNavigation } from '../navigation/TabletNavigation';
 import { ChatButton } from '../chat/ChatButton';
-import { MaintenanceBanner } from '../common/MaintenanceBanner';
+// import { MaintenanceBanner } from '../common/MaintenanceBanner';
 import { OfflineIndicator } from '../common/OfflineIndicator';
 
 import { useAuth } from '../../contexts/AuthContext';
@@ -40,7 +40,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Maintenance Banner */}
-      <MaintenanceBanner />
+      {/* <MaintenanceBanner /> */}
       
       {/* Tablet Navigation - Medium to Large screens */}
       <TabletNavigation className="hidden md:block xl:hidden fixed top-0 left-0 right-0 z-20" />

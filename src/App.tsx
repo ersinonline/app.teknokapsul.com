@@ -45,17 +45,19 @@ import CreditCalculatorPage2 from './pages/CreditCalculatorPage';
 import { ShopRewardsPage } from './pages/other/ShopRewardsPage';
 import MyOrdersPage from './pages/other/MyOrdersPage';
 
-import EarnAsYouSpendPage from './pages/other/EarnAsYouSpendPage';
+// Harcadıkça kazan sayfası geçici olarak kaldırıldı
+// import EarnAsYouSpendPage from './pages/other/EarnAsYouSpendPage';
 import CheckoutPage from './pages/other/CheckoutPage';
 import OrderSuccessPage from './pages/other/OrderSuccessPage';
 import { GoalsPage } from './pages/goals/GoalsPage';
 import { BudgetPage } from './pages/budget/BudgetPage';
-import PremiumIntroPage from './pages/PremiumIntroPage';
-import PremiumManagePage from './pages/PremiumManagePage';
-import AdminPremiumPage from './pages/AdminPremiumPage';
-import PremiumSuccessPage from './pages/PremiumSuccessPage';
-import PremiumCancelPage from './pages/PremiumCancelPage';
-import { PremiumProvider } from './contexts/PremiumContext';
+// Premium sayfaları geçici olarak kaldırıldı
+// import PremiumIntroPage from './pages/PremiumIntroPage';
+// import PremiumManagePage from './pages/PremiumManagePage';
+// import AdminPremiumPage from './pages/AdminPremiumPage';
+// import PremiumSuccessPage from './pages/PremiumSuccessPage';
+// import PremiumCancelPage from './pages/PremiumCancelPage';
+// import { PremiumProvider } from './contexts/PremiumContext';
 import { ResponsiveTestPage } from './pages/test/ResponsiveTestPage';
 import WorkTrackingPage from './pages/WorkTrackingPage';
 import PharmacyPage from './pages/PharmacyPage';
@@ -195,10 +197,11 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><ShopRewardsPage /></ProtectedRoute>
   },
 
-  {
-    path: '/other/earn-as-you-spend',
-    element: <ProtectedRoute><EarnAsYouSpendPage /></ProtectedRoute>
-  },
+  // Harcadıkça kazan rotası geçici olarak kaldırıldı
+  // {
+  //   path: '/other/earn-as-you-spend',
+  //   element: <ProtectedRoute><EarnAsYouSpendPage /></ProtectedRoute>
+  // },
   {
     path: '/other/shop-rewards',
     element: <ProtectedRoute><ShopRewardsPage /></ProtectedRoute>
@@ -231,26 +234,27 @@ const router = createBrowserRouter([
     path: '/admin',
     element: <ProtectedRoute><AdminPage /></ProtectedRoute>
   },
-  {
-    path: '/premium',
-    element: <ProtectedRoute><PremiumIntroPage /></ProtectedRoute>
-  },
-  {
-    path: '/premium/manage',
-    element: <ProtectedRoute><PremiumManagePage /></ProtectedRoute>
-  },
-  {
-    path: '/premium/success',
-    element: <ProtectedRoute><PremiumSuccessPage /></ProtectedRoute>
-  },
-  {
-    path: '/premium/cancel',
-    element: <ProtectedRoute><PremiumCancelPage /></ProtectedRoute>
-  },
-  {
-    path: '/admin/premium',
-    element: <ProtectedRoute><AdminPremiumPage /></ProtectedRoute>
-  },
+  // Premium rotaları geçici olarak kaldırıldı
+  // {
+  //   path: '/premium',
+  //   element: <ProtectedRoute><PremiumIntroPage /></ProtectedRoute>
+  // },
+  // {
+  //   path: '/premium/manage',
+  //   element: <ProtectedRoute><PremiumManagePage /></ProtectedRoute>
+  // },
+  // {
+  //   path: '/premium/success',
+  //   element: <ProtectedRoute><PremiumSuccessPage /></ProtectedRoute>
+  // },
+  // {
+  //   path: '/premium/cancel',
+  //   element: <ProtectedRoute><PremiumCancelPage /></ProtectedRoute>
+  // },
+  // {
+  //   path: '/admin/premium',
+  //   element: <ProtectedRoute><AdminPremiumPage /></ProtectedRoute>
+  // },
   {
     path: '/test/responsive',
     element: <ProtectedRoute><ResponsiveTestPage /></ProtectedRoute>
@@ -271,13 +275,39 @@ const router = createBrowserRouter([
     path: '/sentry-test',
     element: <ProtectedRoute>
       <div className="p-8">
-        <h1 className="text-2xl font-bold mb-4">Sentry Test</h1>
-        <button 
-          onClick={() => {throw new Error("This is your first error!");}} 
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Break the world
-        </button>
+        <h1 className="text-2xl font-bold mb-4">🧪 Sentry Test Sayfası</h1>
+        <div className="space-y-4">
+          <button 
+            onClick={() => {
+              try {
+                throw new Error("🚨 Bu bir test hatasıdır (TeknoKapsül)!");
+              } catch (err) {
+                Sentry.captureException(err);
+                alert("Test hatası Sentry'ye gönderildi! Dashboard'u kontrol edin.");
+              }
+            }}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4"
+          >
+            📤 Test Hatası Gönder
+          </button>
+          <button 
+            onClick={() => {throw new Error("🚨 Bu direkt hata fırlatma testi!");}} 
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          >
+            💥 Direkt Hata Fırlat
+          </button>
+        </div>
+        <div className="mt-6 p-4 bg-gray-100 rounded">
+          <h3 className="font-semibold mb-2">📊 Sentry Dashboard:</h3>
+          <a 
+            href="https://teknokapsul.sentry.io/issues/?project=4509753604702208" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            Hataları Görüntüle →
+          </a>
+        </div>
       </div>
     </ProtectedRoute>
   },
@@ -315,20 +345,18 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <PremiumProvider>
-          <div className="min-h-screen bg-gray-50 transition-colors duration-300">
-            {/* Mobil uygulamadan gelen kimlik doğrulama token'ını işle */}
-            <MobileAuthHandler 
-              onAuthSuccess={() => {
-                console.log('✅ Mobil token ile giriş başarılı');
-              }} 
-              onAuthFailure={(error) => {
-                console.error('❌ Mobil token ile giriş başarısız:', error?.message || error);
-              }} 
-            />
-            <RouterProvider router={router} />
-          </div>
-        </PremiumProvider>
+        <div className="min-h-screen bg-gray-50 transition-colors duration-300">
+          {/* Mobil uygulamadan gelen kimlik doğrulama token'ını işle */}
+          <MobileAuthHandler 
+            onAuthSuccess={() => {
+              console.log('✅ Mobil token ile giriş başarılı');
+            }} 
+            onAuthFailure={(error) => {
+              console.error('❌ Mobil token ile giriş başarısız:', error?.message || error);
+            }} 
+          />
+          <RouterProvider router={router} />
+        </div>
       </AuthProvider>
     </ThemeProvider>
   );

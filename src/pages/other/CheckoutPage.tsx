@@ -3,7 +3,7 @@ import { ArrowLeft, MapPin, Package, Plus, BookOpen } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getShippingQuote } from '../../../geliver';
 import { useAuth } from '../../contexts/AuthContext';
-import { createPremiumCheckoutSession } from '../../services/stripe.service';
+// import { createPremiumCheckoutSession } from '../../services/stripe.service';
 import { getSavedAddresses, saveAddress, SavedAddress } from '../../services/user.service';
 import AddressAutocomplete from '../../components/AddressAutocomplete';
 
@@ -187,17 +187,17 @@ const CheckoutPage: React.FC = () => {
       localStorage.setItem('pendingOrder', JSON.stringify(orderData));
 
       // Stripe checkout session oluştur
-      const session = await createPremiumCheckoutSession({
-        userId: user.uid,
-        productId: 'order_payment', // Sipariş ödemesi için özel product ID
-        customerEmail: user.email || shippingAddress.email,
-        amount: amountInCents,
-        successUrl: `${window.location.origin}/other/order-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${window.location.origin}/other/checkout`
-      });
+      // const session = await createPremiumCheckoutSession({
+      //   userId: user.uid,
+      //   productId: 'order_payment', // Sipariş ödemesi için özel product ID
+      //   customerEmail: user.email || shippingAddress.email,
+      //   amount: amountInCents,
+      //   successUrl: `${window.location.origin}/other/order-success?session_id={CHECKOUT_SESSION_ID}`,
+      //   cancelUrl: `${window.location.origin}/other/checkout`
+      // });
 
       // Stripe ödeme sayfasına yönlendir
-      window.location.href = session.url;
+      // window.location.href = session.url;
     } catch (error) {
       console.error('❌ Ödeme sayfasına yönlendirilirken hata:', error);
       alert('Ödeme sayfasına yönlendirilirken bir hata oluştu!');

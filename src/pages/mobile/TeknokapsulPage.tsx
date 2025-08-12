@@ -6,16 +6,7 @@ export const TeknokapsulPage: React.FC = () => {
   const navigate = useNavigate();
 
   const teknokapsulItems = [
-    {
-      id: 'premium',
-      title: 'Premium Üyelik',
-      description: 'Premium özelliklerini keşfedin',
-      icon: Crown,
-      path: '/premium',
-      color: 'bg-amber-500',
-      bgColor: 'bg-amber-50',
-      textColor: 'text-amber-700'
-    },
+
     {
       id: 'subscriptions',
       title: 'Aboneliklerim',

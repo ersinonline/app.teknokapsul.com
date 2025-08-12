@@ -114,7 +114,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div>
       {editingExpense && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -142,101 +142,189 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
         </div>
       )}
 
-      <table className="min-w-full divide-y divide-gray-200">
-      <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Gider
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Kategori
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Tarih
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Durum
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              Ödeme
-            </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-              İşlemler
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {sortedExpenses.map((expense) => {
-            const statusInfo = getStatusInfo(expense);
-            const paymentInfo = getPaymentInfo(expense);
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Gider
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Kategori
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Tarih
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Durum
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Ödeme
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                İşlemler
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {sortedExpenses.map((expense) => {
+              const statusInfo = getStatusInfo(expense);
+              const paymentInfo = getPaymentInfo(expense);
 
-            return (
-              <tr key={expense.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{expense.title}</div>
-                  <div className="text-sm text-red-600 font-semibold">{formatCurrency(expense.amount)}</div>
+              return (
+                <tr key={expense.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{expense.title}</div>
+                    <div className="text-sm text-red-600 font-semibold">{formatCurrency(expense.amount)}</div>
+                    {expense.description && (
+                      <div className="text-xs text-gray-600 mt-1">{expense.description}</div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      {EXPENSE_CATEGORIES[expense.category]}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-700">
+                      {formatDate(expense.date)}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${statusInfo.className}`}>
+                      {statusInfo.icon}
+                      {statusInfo.text}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => handleTogglePayment(expense.id, expense.isPaid)}
+                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors ${paymentInfo.className} hover:opacity-80 disabled:opacity-50`}
+                      disabled={isTogglingPayment === expense.id}
+                    >
+                      {paymentInfo.icon}
+                      {paymentInfo.text}
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setEditingExpense(expense)}
+                        className="text-yellow-600 hover:text-yellow-900 transition-colors"
+                        title="Düzenle"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleToggleStatus(expense.id, expense.isActive)}
+                        className={`${expense.isActive ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900'} disabled:opacity-50 transition-colors`}
+                        title={expense.isActive ? 'Pasif Yap' : 'Aktif Yap'}
+                        disabled={isToggling === expense.id}
+                      >
+                        <Power className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(expense.id)}
+                        className="text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors"
+                        disabled={isDeleting === expense.id}
+                        title="Sil"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {sortedExpenses.map((expense) => {
+          const statusInfo = getStatusInfo(expense);
+          const paymentInfo = getPaymentInfo(expense);
+
+          return (
+            <div key={expense.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+              {/* Header */}
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-gray-900">{expense.title}</h3>
+                  <p className="text-lg font-semibold text-red-600 mt-1">{formatCurrency(expense.amount)}</p>
                   {expense.description && (
-                    <div className="text-xs text-gray-600 mt-1">{expense.description}</div>
+                    <p className="text-xs text-gray-600 mt-1">{expense.description}</p>
                   )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                </div>
+                <div className="flex gap-2 ml-2">
+                  <button
+                    onClick={() => setEditingExpense(expense)}
+                    className="text-yellow-600 hover:text-yellow-900 transition-colors p-1"
+                    title="Düzenle"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  {/* Mobilde durum düğmesi gizlendi */}
+                  <button
+                    onClick={() => handleToggleStatus(expense.id, expense.isActive)}
+                    className={`${expense.isActive ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900'} disabled:opacity-50 transition-colors p-1 hidden`}
+                    title={expense.isActive ? 'Pasif Yap' : 'Aktif Yap'}
+                    disabled={isToggling === expense.id}
+                  >
+                    <Power className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(expense.id)}
+                    className="text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors p-1"
+                    disabled={isDeleting === expense.id}
+                    title="Sil"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Details */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Kategori:</span>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                     {EXPENSE_CATEGORIES[expense.category]}
                   </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-700">
-                    {formatDate(expense.date)}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${statusInfo.className}`}>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Tarih:</span>
+                  <span className="text-xs text-gray-700">{formatDate(expense.date)}</span>
+                </div>
+                
+                {/* Mobilde durum bilgisi gizlendi */}
+                <div className="flex justify-between items-center hidden">
+                  <span className="text-xs text-gray-500">Durum:</span>
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusInfo.className}`}>
                     {statusInfo.icon}
                     {statusInfo.text}
                   </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Ödeme:</span>
                   <button
                     onClick={() => handleTogglePayment(expense.id, expense.isPaid)}
-                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors ${paymentInfo.className} hover:opacity-80 disabled:opacity-50`}
+                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${paymentInfo.className} hover:opacity-80 disabled:opacity-50`}
                     disabled={isTogglingPayment === expense.id}
                   >
                     {paymentInfo.icon}
                     {paymentInfo.text}
                   </button>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex justify-end gap-2">
-                    <button
-                      onClick={() => setEditingExpense(expense)}
-                      className="text-yellow-600 hover:text-yellow-900 transition-colors"
-                      title="Düzenle"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleToggleStatus(expense.id, expense.isActive)}
-                      className={`${expense.isActive ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900'} disabled:opacity-50 transition-colors`}
-                      title={expense.isActive ? 'Pasif Yap' : 'Aktif Yap'}
-                      disabled={isToggling === expense.id}
-                    >
-                      <Power className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(expense.id)}
-                      className="text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors"
-                      disabled={isDeleting === expense.id}
-                      title="Sil"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
