@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoginForm } from '../../components/auth/LoginForm';
+import { signInWithGoogle } from '../../services/auth.service';
 import { Mail, Package } from 'lucide-react';
 
 export const LoginPage = () => {
@@ -109,6 +110,25 @@ export const LoginPage = () => {
                         <Mail className="h-10 w-10 mb-3 text-gray-700 group-hover:text-yellow-600" />
                         <span className="text-lg font-medium text-gray-700 group-hover:text-yellow-600">E-posta ile Giriş</span>
                         <span className="text-sm text-gray-500 mt-1">Sihirli link ile hızlı giriş</span>
+                      </button>
+                      
+                      <button
+                        onClick={async () => {
+                          try {
+                            await signInWithGoogle();
+                          } catch (error) {
+                            console.error('Google giriş hatası:', error);
+                          }
+                        }}
+                        className="w-full flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-xl hover:border-red-300 hover:bg-red-50 transition-all duration-200 group"
+                      >
+                        <img
+                          src="https://developers.google.com/identity/images/g-logo.png"
+                          alt="Google"
+                          className="w-10 h-10 mb-3"
+                        />
+                        <span className="text-lg font-medium text-gray-700 group-hover:text-red-600">Google ile Giriş</span>
+                        <span className="text-sm text-gray-500 mt-1">Tek tıkla hızlı giriş</span>
                       </button>
                     </div>
                   </div>
