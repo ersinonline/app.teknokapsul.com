@@ -63,6 +63,7 @@ import WorkTrackingPage from './pages/WorkTrackingPage';
 import PharmacyPage from './pages/PharmacyPage';
 import WebViewAuthPage from './pages/auth/WebViewAuthPage';
 import { VerifyPage } from './pages/auth/VerifyPage';
+import { IsBankCallbackPage } from './pages/auth/IsBankCallbackPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
   <AuthGuard>
@@ -86,6 +87,10 @@ const router = createBrowserRouter([
   {
     path: '/verify',
     element: <AuthProvider><VerifyPage /></AuthProvider>
+  },
+  {
+    path: '/auth/callback/isbank',
+    element: <AuthProvider><IsBankCallbackPage /></AuthProvider>
   },
   {
     path: '/dashboard',

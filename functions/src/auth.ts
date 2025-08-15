@@ -5,6 +5,82 @@ import * as cors from 'cors';
 // CORS ayarları
 const corsHandler = cors({ origin: true });
 
+/**
+  * İş Bankası kullanıcıları için custom token oluşturma endpoint'i
+  */
+ export const createIsBankUser = functions.https.onRequest((req, res) => {
+   corsHandler(req, res, async () => {
+     // Sadece POST isteklerini kabul et
+     if (req.method !== 'POST') {
+       return res.status(405).json({ error: 'Method Not Allowed' });
+     }
+ 
+     try {
+       const { userInfo, tokenResponse } = req.body;
+ 
+       if (!userInfo || !userInfo.id || !userInfo.email) {
+         return res.status(400).json({ error: 'userInfo ve gerekli alanlar (id, email) zorunlu' });
+       }
+ 
+       // İş Bankası kullanıcı ID'sini Firebase UID olarak kullan
+       const uid = `isbank_${userInfo.id}`;
+       
+       try {
+         // Kullanıcının zaten var olup olmadığını kontrol et
+         await admin.auth().getUser(uid);
+         console.log('İş Bankası kullanıcısı zaten mevcut:', uid);
+       } catch (error: any) {
+         if (error.code === 'auth/user-not-found') {
+           // Kullanıcı yoksa oluştur
+            await admin.auth().createUser({
+              uid: uid,
+              email: userInfo.email,
+              displayName: userInfo.name,
+              phoneNumber: userInfo.phone || undefined,
+              emailVerified: userInfo.verified || false
+            });
+            
+            // Kullanıcı için custom claims ayarla
+            await admin.auth().setCustomUserClaims(uid, {
+              isBankUser: true,
+              provider: 'isbank',
+              bankUserId: userInfo.id,
+              verified: userInfo.verified || false
+            });
+           console.log('İş Bankası kullanıcısı oluşturuldu:', uid);
+         } else {
+           throw error;
+         }
+       }
+ 
+       // İş Bankası kullanıcısı için özel claims
+       const customClaims = {
+         isBankUser: true,
+         provider: 'isbank',
+         bankUserId: userInfo.id,
+         verified: userInfo.verified || false
+       };
+ 
+       // Custom token oluştur
+       const customToken = await admin.auth().createCustomToken(uid, customClaims);
+ 
+       return res.status(200).json({ 
+         success: true,
+         customToken,
+         uid: uid,
+         claims: customClaims
+       });
+     } catch (error: any) {
+       console.error('İş Bankası custom token oluşturma hatası:', error);
+       
+       return res.status(500).json({ 
+         success: false,
+         error: 'Sunucu hatası: ' + error.message 
+       });
+     }
+   });
+ });
+
 // Firebase Admin SDK'yı başlat (eğer başlatılmamışsa)
 if (!admin.apps.length) {
   admin.initializeApp();

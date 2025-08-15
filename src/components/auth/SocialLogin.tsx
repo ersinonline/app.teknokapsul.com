@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
-import { AlertCircle, Smartphone, Apple } from 'lucide-react';
+import { AlertCircle, Smartphone, Apple, Building2 } from 'lucide-react';
 import { PopupAuthManager } from './PopupAuthManager';
+import { isBankOAuthService } from '../../services/isbank-oauth.service';
 
 interface SocialLoginProps {
   method?: 'google' | 'apple' | 'sms' | 'all';
