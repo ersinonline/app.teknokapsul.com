@@ -60,26 +60,33 @@ class TokenVerificationService {
         };
       }
 
-      // Firebase Auth ile doğrudan token doğrulama
-      const user = auth.currentUser;
-      if (user) {
+      // Backend API'ye POST request gönder
+      const response = await fetch(`${this.baseUrl}/verifyIdToken`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken: token })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Network error' }));
         return {
-          success: true,
-          tokenValid: true,
-          user: {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName
-          }
+          success: false,
+          tokenValid: false,
+          error: errorData.error || `HTTP ${response.status}`
         };
       }
 
+      const result = await response.json();
       return {
-        success: false,
-        tokenValid: false,
-        error: 'Kullanıcı oturumu bulunamadı'
+        success: result.success || false,
+        tokenValid: result.tokenValid || false,
+        user: result.user,
+        error: result.error
       };
     } catch (error: unknown) {
+      console.error('Token doğrulama hatası:', error);
       return {
         success: false,
         tokenValid: false,
@@ -97,20 +104,38 @@ class TokenVerificationService {
     error?: string;
   }> {
     try {
-      // Firebase Auth ile doğrudan token kullanımı
-      const user = auth.currentUser;
-      if (user && idToken) {
+      if (!idToken) {
         return {
-          success: true,
-          customToken: idToken
+          success: false,
+          error: 'ID token gerekli'
         };
       }
 
+      // Backend API'ye POST request gönder
+      const response = await fetch(`${this.baseUrl}/createCustomToken`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Network error' }));
+        return {
+          success: false,
+          error: errorData.error || `HTTP ${response.status}`
+        };
+      }
+
+      const result = await response.json();
       return {
-        success: false,
-        error: 'Custom token oluşturulamadı'
+        success: result.success || false,
+        customToken: result.customToken,
+        error: result.error
       };
     } catch (error: unknown) {
+      console.error('Custom token oluşturma hatası:', error);
       return {
         success: false,
         error: (error as Error).message || 'Custom token hatası'
@@ -129,23 +154,44 @@ class TokenVerificationService {
     error?: string;
   }> {
     try {
-      const user = auth.currentUser;
+      const token = idToken || await this.getCurrentUserIdToken();
       
-      if (!user) {
+      if (!token) {
         return {
           success: false,
           sessionValid: false,
-          error: 'Kullanıcı oturumu bulunamadı'
+          error: 'Token bulunamadı'
         };
       }
 
+      // Backend API'ye POST request gönder
+      const response = await fetch(`${this.baseUrl}/checkSession`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken: token })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Network error' }));
+        return {
+          success: false,
+          sessionValid: false,
+          error: errorData.error || `HTTP ${response.status}`
+        };
+      }
+
+      const result = await response.json();
       return {
-        success: true,
-        sessionValid: true,
-        uid: user.uid,
-        exp: Math.floor(Date.now() / 1000) + 3600 // 1 saat sonra
+        success: result.success || false,
+        sessionValid: result.sessionValid || false,
+        uid: result.uid,
+        exp: result.exp,
+        error: result.error
       };
     } catch (error: unknown) {
+      console.error('Oturum kontrol hatası:', error);
       return {
         success: false,
         sessionValid: false,
