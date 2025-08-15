@@ -6,7 +6,7 @@ import { PopupAuthManager } from './PopupAuthManager';
 import { isBankOAuthService } from '../../services/isbank-oauth.service';
 
 interface SocialLoginProps {
-  method?: 'google' | 'apple' | 'sms' | 'all';
+  method?: 'google' | 'apple' | 'sms' | 'isbank' | 'all';
 }
 
 export const SocialLogin = ({ method = 'all' }: SocialLoginProps) => { 
@@ -168,6 +168,18 @@ export const SocialLogin = ({ method = 'all' }: SocialLoginProps) => {
             >
               <Smartphone className="h-5 w-5 mr-3" />
               <span>SMS ile Giriş Yap</span>
+            </button>
+          )}
+
+          {(method === 'all' || method === 'isbank') && (
+            <button
+              onClick={() => isBankOAuthService.initiateLogin()}
+              disabled={isLoading}
+              type="button"
+              className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-600 to-blue-700 text-sm font-medium text-white hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            >
+              <Building2 className="h-5 w-5 mr-3" />
+              <span>{isLoading ? 'Yönlendiriliyor...' : 'İş Bankası ile Giriş Yap'}</span>
             </button>
           )}
         </div>

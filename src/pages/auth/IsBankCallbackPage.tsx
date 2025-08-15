@@ -35,7 +35,26 @@ export const IsBankCallbackPage: React.FC = () => {
         if (error) {
           console.error('İş Bankası OAuth hatası:', error, errorDescription);
           setStatus('error');
-          setMessage(errorDescription || 'İş Bankası girişinde bir hata oluştu');
+          
+          // Kullanıcı dostu hata mesajları
+          let userMessage = 'İş Bankası girişinde bir hata oluştu';
+          if (error === 'access_denied') {
+            userMessage = 'İş Bankası girişi iptal edildi. Lütfen tekrar deneyin.';
+          } else if (error === 'invalid_request') {
+            userMessage = 'Geçersiz istek. Lütfen tekrar deneyin.';
+          } else if (error === 'unauthorized_client') {
+            userMessage = 'Yetkisiz istemci. Lütfen daha sonra tekrar deneyin.';
+          } else if (error === 'unsupported_response_type') {
+            userMessage = 'Desteklenmeyen yanıt türü.';
+          } else if (error === 'invalid_scope') {
+            userMessage = 'Geçersiz yetki kapsamı.';
+          } else if (error === 'server_error') {
+            userMessage = 'İş Bankası sunucusunda bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+          } else if (error === 'temporarily_unavailable') {
+            userMessage = 'İş Bankası servisi geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.';
+          }
+          
+          setMessage(userMessage);
           return;
         }
 
