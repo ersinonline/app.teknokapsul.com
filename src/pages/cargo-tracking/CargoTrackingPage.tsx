@@ -57,7 +57,7 @@ export const CargoTrackingPage = () => {
     
     try {
       setLoading(true);
-      const data = await getUserCargoTrackings(user.uid);
+      const data = await getUserCargoTrackings(user.id);
       setCargoList(data);
     } catch (error) {
       console.error('Error loading cargo list:', error);
@@ -71,7 +71,7 @@ export const CargoTrackingPage = () => {
     if (!user || !formData.name || !formData.trackingNumber || !formData.company) return;
 
     try {
-      await addCargoTracking(user.uid, {
+      await addCargoTracking(user.id, {
         name: formData.name,
         trackingNumber: formData.trackingNumber,
         company: formData.company,

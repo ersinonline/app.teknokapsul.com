@@ -1,24 +1,26 @@
 import React, { useState } from 'react';
-import { Settings, User, Lock, Mail, Phone, Save, AlertCircle, CheckCircle, Shield, Trash2, LogOut } from 'lucide-react';
+import { Settings, User, Lock, Mail, Phone, Save, AlertCircle, CheckCircle, Shield, Trash2, LogOut, Database } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { updateUserProfile, updateUserPassword } from '../../services/auth.service';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { DataMigrationPanel } from '../../components/migration/DataMigrationPanel';
+import { useUser } from '@clerk/clerk-react';
 
 
 
-type TabType = 'profile' | 'security';
+type TabType = 'profile' | 'security' | 'migration';
 
 export const SettingsPage = () => {
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
+  const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('profile');
 
   const [formData, setFormData] = useState({
-    displayName: user?.displayName || '',
-    email: user?.email || '',
-    phoneNumber: user?.phoneNumber || '',
+    displayName: user?.fullName || '',
+    email: user?.primaryEmailAddress?.emailAddress || '',
+    phoneNumber: user?.phoneNumbers?.[0]?.phoneNumber || '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
@@ -27,14 +29,27 @@ export const SettingsPage = () => {
   const tabs = [
     { id: 'profile', label: 'Profil', icon: User, color: 'text-blue-600' },
     { id: 'security', label: 'Güvenlik', icon: Shield, color: 'text-green-600' },
+    { id: 'migration', label: 'Veri Aktarımı', icon: Database, color: 'text-purple-600' },
   ];
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
+    
     setLoading(true);
     setError(null);
     try {
-      await updateUserProfile(formData.displayName);
+      // Clerk kullanıcı profilini güncelle
+      await user.update({
+        firstName: formData.displayName.split(' ')[0] || '',
+        lastName: formData.displayName.split(' ').slice(1).join(' ') || ''
+      });
+      
+      // Telefon numarası varsa güncelle
+      if (formData.phoneNumber && formData.phoneNumber !== user.phoneNumbers?.[0]?.phoneNumber) {
+        await user.createPhoneNumber({ phoneNumber: formData.phoneNumber });
+      }
+      
       setSuccess('Profil başarıyla güncellendi.');
     } catch (err) {
       setError('Profil güncellenirken bir hata oluştu.');
@@ -45,6 +60,8 @@ export const SettingsPage = () => {
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
+    
     if (formData.newPassword !== formData.confirmPassword) {
       setError('Yeni şifreler eşleşmiyor.');
       return;
@@ -52,7 +69,12 @@ export const SettingsPage = () => {
     setLoading(true);
     setError(null);
     try {
-      await updateUserPassword(formData.currentPassword, formData.newPassword);
+      // Clerk şifre güncelleme
+      await user.updatePassword({
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword
+      });
+      
       setSuccess('Şifre başarıyla güncellendi.');
       setFormData(prev => ({
         ...prev,
@@ -210,15 +232,6 @@ export const SettingsPage = () => {
             <div className="border-t pt-6 mt-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Hesap İşlemleri</h3>
               <div className="space-y-3">
-                <a
-                  href="https://billing.stripe.com/p/login/7sY6oGezng7111XcFh24000"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium w-full sm:w-auto"
-                >
-                  <Settings className="w-4 h-4" />
-                  Abonelik İptal
-                </a>
                 <button
                   onClick={handleSignOut}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium w-full sm:w-auto"
@@ -235,6 +248,20 @@ export const SettingsPage = () => {
                 </button>
               </div>
             </div>
+          </div>
+        );
+      case 'migration':
+        return (
+          <div className="space-y-6">
+            <DataMigrationPanel 
+              onMigrationComplete={(result) => {
+                if (result.success) {
+                  setSuccess('Veri aktarımı başarıyla tamamlandı!');
+                } else {
+                  setError(result.message);
+                }
+              }}
+            />
           </div>
         );
 

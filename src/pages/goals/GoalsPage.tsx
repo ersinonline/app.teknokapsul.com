@@ -67,7 +67,7 @@ export const GoalsPage = () => {
         ...formData,
         targetAmount: parseFloat(formData.targetAmount),
         currentAmount: parseFloat(formData.currentAmount || '0'),
-        userId: user.uid,
+        userId: user.id,
         status: 'active' as Goal['status'],
         deadline: new Date(formData.targetDate),
         createdAt: new Date()
@@ -75,10 +75,10 @@ export const GoalsPage = () => {
 
       if (editingGoal) {
         // Güncelleme işlemi
-        await updateDoc(doc(db, 'teknokapsul', user.uid, 'goals', editingGoal.id), goalData);
+        await updateDoc(doc(db, 'teknokapsul', user.id, 'goals', editingGoal.id), goalData);
       } else {
         // Yeni hedef ekleme
-        await addDoc(collection(db, 'teknokapsul', user.uid, 'goals'), goalData);
+        await addDoc(collection(db, 'teknokapsul', user.id, 'goals'), goalData);
       }
       
       setIsModalOpen(false);
@@ -120,7 +120,7 @@ export const GoalsPage = () => {
     if (!user) return;
     if (window.confirm('Bu hedefi silmek istediğinizden emin misiniz?')) {
       try {
-        await deleteDoc(doc(db, 'teknokapsul', user.uid, 'goals', goalId));
+        await deleteDoc(doc(db, 'teknokapsul', user.id, 'goals', goalId));
         await reload();
       } catch (error) {
         console.error('Error deleting goal:', error);

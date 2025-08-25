@@ -10,7 +10,7 @@ import {
   orderBy, 
   Timestamp 
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../lib/firebase';
 import { Application } from '../types/application';
 
 class ApplicationService {

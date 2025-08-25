@@ -21,7 +21,7 @@ import {
   getDownloadURL, 
   deleteObject 
 } from 'firebase/storage';
-import { db, storage } from '../config/firebase';
+import { db, storage } from '../lib/firebase';
 
 export interface UserPreferences {
   id?: string;

@@ -137,7 +137,7 @@ export const ExchangeRateModal: React.FC<ExchangeRateModalProps> = ({
         }
         
         // Aynı sembol türündeki tüm portföy öğelerini güncelle
-        await portfolioService.updatePortfolioItemsBySymbol(user.uid, symbol, rate);
+        await portfolioService.updatePortfolioItemsBySymbol(user.id, symbol, rate);
       }
       
       onUpdate();

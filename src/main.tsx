@@ -1,8 +1,17 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
+import { ClerkProvider } from '@clerk/clerk-react';
+import { trTR } from '@clerk/localizations';
 import App from './App';
 import './index.css';
+
+// Clerk publishable key
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_live_Y2xlcmsudGVrbm9rYXBzdWwuaW5mbyQ';
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error('Missing Publishable Key');
+}
 
 // Initialize Sentry
 Sentry.init({
@@ -48,12 +57,18 @@ const registerServiceWorker = async () => {
 // Error boundary for better error handling
 const renderApp = () => {
   try {
-    const root = document.getElementById('root');
-    if (!root) throw new Error('Root element not found');
+    const container = document.getElementById('root');
+    if (!container) throw new Error('Failed to find the root element');
 
-    createRoot(root).render(
+    const root = createRoot(container);
+    root.render(
       <StrictMode>
-        <App />
+        <ClerkProvider 
+          publishableKey={PUBLISHABLE_KEY}
+          localization={trTR}
+        >
+          <App />
+        </ClerkProvider>
       </StrictMode>
     );
     

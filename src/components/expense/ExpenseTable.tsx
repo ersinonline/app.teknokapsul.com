@@ -26,7 +26,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
     
     setIsDeleting(id);
     try {
-      await deleteExpense(user.uid, id);
+      await deleteExpense(user.id, id);
       onUpdate();
     } catch (error) {
       console.error('Error deleting expense:', error);
@@ -39,7 +39,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
     setIsToggling(id);
     try {
-      await toggleExpenseStatus(user.uid, id, !currentStatus);
+      await toggleExpenseStatus(user.id, id, !currentStatus);
       onUpdate();
     } catch (error) {
       console.error('Error toggling expense status:', error);
@@ -52,7 +52,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
   const handleTogglePayment = async (id: string, currentPaymentStatus: boolean) => {
     setIsTogglingPayment(id);
     try {
-      await toggleExpensePayment(user.uid, id, !currentPaymentStatus);
+      await toggleExpensePayment(user.id, id, !currentPaymentStatus);
       onUpdate();
     } catch (error) {
       console.error('Error toggling expense payment:', error);
@@ -122,7 +122,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
             <ExpenseForm
               onSubmit={async (data) => {
                 try {
-                  await updateExpense(user.uid, editingExpense.id, data);
+                  await updateExpense(user.id, editingExpense.id, data);
                   setEditingExpense(null);
                   onUpdate();
                 } catch (error) {

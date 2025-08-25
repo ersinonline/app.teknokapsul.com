@@ -1,5 +1,5 @@
 import { collection, addDoc, query, orderBy, getDocs, doc, updateDoc, arrayUnion, deleteDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../lib/firebase';
 import { SupportTicket, SupportTicketFormData, SupportTicketReply } from '../types/support';
 
 // Destek talebi oluştur

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, RefreshCw, TrendingUp, TrendingDown, Star, Activity } from 'lucide-react';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface StockData {
@@ -119,7 +119,7 @@ const StockMarketPage: React.FC = () => {
           falling: fallingData.data || [],
           marketData: marketDataRes.data?.[0] || null,
           lastUpdate: new Date(),
-          userId: user.uid
+          userId: user.id
         });
       }
     } catch (error) {
@@ -155,7 +155,7 @@ const StockMarketPage: React.FC = () => {
     if (!user) return;
     
     try {
-      const docRef = doc(db, 'userFavorites', user.uid);
+      const docRef = doc(db, 'userFavorites', user.id);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
@@ -176,7 +176,7 @@ const StockMarketPage: React.FC = () => {
     setFavorites(newFavorites);
     
     try {
-      await setDoc(doc(db, 'userFavorites', user.uid), {
+      await setDoc(doc(db, 'userFavorites', user.id), {
         favorites: newFavorites,
         updatedAt: new Date()
       });

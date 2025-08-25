@@ -27,7 +27,7 @@ export const ExpensePage: React.FC = () => {
     
     try {
       setLoading(true);
-      const userExpenses = await getUserExpenses(user.uid, currentYear, currentMonth);
+      const userExpenses = await getUserExpenses(user.id, currentYear, currentMonth);
       setExpenses(userExpenses);
     } catch (error) {
       console.error('Error loading expenses:', error);

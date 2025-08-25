@@ -92,7 +92,7 @@ export const EnhancedAIAssistant: React.FC = () => {
   const loadPortfolioData = async () => {
     if (!user) return;
     try {
-      const items = await portfolioService.getPortfolioItems(user.uid);
+      const items = await portfolioService.getPortfolioItems(user.id);
       setPortfolioItems(items);
     } catch (error) {
       console.error('Error loading portfolio data:', error);
@@ -132,7 +132,7 @@ export const EnhancedAIAssistant: React.FC = () => {
     
     if (user && isStatusQuery) {
       try {
-        return await queryUserStatus(user.uid, userMessage);
+        return await queryUserStatus(user.id, userMessage);
       } catch (error) {
         console.error('Durum sorgulama hatası:', error);
         return 'Üzgünüm, şu anda verilerinizi sorgulayamıyorum. Lütfen daha sonra tekrar deneyin.';
@@ -282,7 +282,7 @@ export const EnhancedAIAssistant: React.FC = () => {
         throw new Error('Kullanıcı oturumu bulunamadı');
       }
 
-      await applicationService.createApplication(user.uid, {
+      await applicationService.createApplication(user.id, {
         serviceType: formData.applicationType,
         serviceName: formData.applicationType,
         serviceCategory: formData.applicationType,

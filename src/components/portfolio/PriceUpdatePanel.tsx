@@ -211,7 +211,7 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
       const itemsWithSameSymbol = portfolioItems.filter(item => item.symbol === symbol);
       const updatePromises = itemsWithSameSymbol.map(item => 
         updateDoc(
-          doc(db, 'teknokapsul', user.uid, 'portfolio', item.id),
+          doc(db, 'teknokapsul', user.id, 'portfolio', item.id),
           {
             currentPrice: price,
             lastUpdated: new Date()
@@ -277,7 +277,7 @@ export const PriceUpdatePanel: React.FC<PriceUpdatePanelProps> = ({ portfolioIte
       // Update Firebase for all items with the same symbol
       const updatePromises = itemsWithSameSymbol.map(item => 
         updateDoc(
-          doc(db, 'teknokapsul', user.uid, 'portfolio', item.id),
+          doc(db, 'teknokapsul', user.id, 'portfolio', item.id),
           {
             currentPrice: newPrice,
             lastUpdated: new Date()

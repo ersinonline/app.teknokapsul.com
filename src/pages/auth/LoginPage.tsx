@@ -1,16 +1,12 @@
-import { useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { LoginForm } from '../../components/auth/LoginForm';
-import { signInWithGoogle } from '../../services/auth.service';
-import { Mail, Package } from 'lucide-react';
+import { SignIn } from '@clerk/clerk-react';
+import { Package } from 'lucide-react';
 
 export const LoginPage = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
   const from = location.state?.from || '/dashboard';
-  const [selectedMethod, setSelectedMethod] = useState<'email' | null>(null);
-  const [isSignUp, setIsSignUp] = useState(false);
 
   if (loading) {
     return (
@@ -77,94 +73,23 @@ export const LoginPage = () => {
           </div>
         </div>
 
-        {/* Right Section - Login Form */}
+        {/* Right Section - Clerk SignIn */}
         <div className="w-full lg:w-1/2 flex items-center justify-center py-8 lg:py-16">
           <div className="w-full max-w-md">
-            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 backdrop-blur-sm">
-              <div className="text-center mb-6 sm:mb-8">
-                <div className="flex justify-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center shadow-lg">
-                    <span className="text-2xl font-bold text-white">TK</span>
-                  </div>
-                </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                  {isSignUp ? 'Hesap Oluşturun' : 'Hoş Geldiniz'}
-                </h2>
-                <p className="text-gray-600 mb-8">
-                  {isSignUp ? 'TeknoKapsül hesabınızı oluşturun' : 'TeknoKapsül hesabınıza giriş yapın'}
-                </p>
-              </div>
-
-              <div className="space-y-6">
-                {!selectedMethod ? (
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900 text-center mb-6">
-                      {isSignUp ? 'Kayıt yönteminizi seçin' : 'Giriş yönteminizi seçin'}
-                    </h3>
-                    
-                    <div className="space-y-3">
-                      <button
-                        onClick={() => setSelectedMethod('email')}
-                        className="w-full flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-xl hover:border-yellow-300 hover:bg-yellow-50 transition-all duration-200 group"
-                      >
-                        <Mail className="h-10 w-10 mb-3 text-gray-700 group-hover:text-yellow-600" />
-                        <span className="text-lg font-medium text-gray-700 group-hover:text-yellow-600">E-posta ile Giriş</span>
-                        <span className="text-sm text-gray-500 mt-1">Sihirli link ile hızlı giriş</span>
-                      </button>
-                      
-                      <button
-                        onClick={async () => {
-                          try {
-                            await signInWithGoogle();
-                          } catch (error) {
-                            console.error('Google giriş hatası:', error);
-                          }
-                        }}
-                        className="w-full flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-xl hover:border-red-300 hover:bg-red-50 transition-all duration-200 group"
-                      >
-                        <img
-                          src="https://developers.google.com/identity/images/g-logo.png"
-                          alt="Google"
-                          className="w-10 h-10 mb-3"
-                        />
-                        <span className="text-lg font-medium text-gray-700 group-hover:text-red-600">Google ile Giriş</span>
-                        <span className="text-sm text-gray-500 mt-1">Tek tıkla hızlı giriş</span>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {selectedMethod === 'email' && (isSignUp ? 'E-posta ile Kayıt' : 'E-posta ile Giriş')}
-                      </h3>
-                      <button
-                        onClick={() => setSelectedMethod(null)}
-                        className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-                      >
-                        Geri
-                      </button>
-                    </div>
-                    
-                    {selectedMethod === 'email' && (
-                      <LoginForm isSignUp={isSignUp} />
-                    )}
-                  </div>
-                )}
-                
-                <div className="text-center">
-                  <p className="text-sm text-gray-600">
-                    {isSignUp ? 'Zaten hesabınız var mı?' : 'Henüz hesabınız yok mu?'}{' '}
-                    <button
-                      onClick={() => setIsSignUp(!isSignUp)}
-                      className="font-semibold text-yellow-600 hover:text-yellow-500 transition-colors underline"
-                    >
-                      {isSignUp ? 'Giriş yapın' : 'Hemen kayıt olun'}
-                    </button>
-                  </p>
-                </div>
-              </div>
-            </div>
+            <SignIn 
+              redirectUrl={from}
+              appearance={{
+                elements: {
+                  rootBox: "mx-auto",
+                  card: "bg-white rounded-2xl shadow-xl",
+                  headerTitle: "text-3xl font-bold text-gray-900",
+                  headerSubtitle: "text-gray-600",
+                  socialButtonsBlockButton: "border-2 border-gray-200 hover:border-yellow-300 hover:bg-yellow-50",
+                  formButtonPrimary: "bg-yellow-600 hover:bg-yellow-700",
+                  footerActionLink: "text-yellow-600 hover:text-yellow-500"
+                }
+              }}
+            />
           </div>
         </div>
       </div>

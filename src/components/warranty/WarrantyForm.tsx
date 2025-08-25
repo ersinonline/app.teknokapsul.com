@@ -91,7 +91,7 @@ export const WarrantyForm: React.FC<WarrantyFormProps> = ({ warranty, onClose, o
       // Fatura dosyası yükleme
       if (selectedFile) {
         setUploading(true);
-        const fileRef = ref(storage, `invoices/${user.uid}/${Date.now()}_${selectedFile.name}`);
+        const fileRef = ref(storage, `invoices/${user.id}/${Date.now()}_${selectedFile.name}`);
         const snapshot = await uploadBytes(fileRef, selectedFile);
         invoiceUrl = await getDownloadURL(snapshot.ref);
         setUploading(false);
@@ -107,15 +107,15 @@ export const WarrantyForm: React.FC<WarrantyFormProps> = ({ warranty, onClose, o
         purchaseDate,
         warrantyEndDate,
         purchasePrice: parseFloat(formData.purchasePrice) || 0,
-        userId: user.uid
+        userId: user.id
       };
 
       if (warranty) {
         // Düzenleme modu - mevcut kaydı güncelle
-        await updateDoc(doc(db, 'teknokapsul', user.uid, 'warranties', warranty.id), warrantyData);
+        await updateDoc(doc(db, 'teknokapsul', user.id, 'warranties', warranty.id), warrantyData);
       } else {
         // Yeni kayıt ekleme
-        await addDoc(collection(db, 'teknokapsul', user.uid, 'warranties'), {
+        await addDoc(collection(db, 'teknokapsul', user.id, 'warranties'), {
           ...warrantyData,
           createdAt: new Date()
         });

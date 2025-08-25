@@ -1,5 +1,5 @@
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, updateDoc, orderBy } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../lib/firebase';
 import { Expense, ExpenseFormData } from '../types/expense';
 
 const calculateNextDate = (recurringDay: number, startDate?: string): Date => {

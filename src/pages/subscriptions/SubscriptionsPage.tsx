@@ -24,8 +24,8 @@ export const SubscriptionsPage = () => {
     
     try {
       setLoading(true);
-      console.log('Loading subscriptions for user:', user.uid);
-      const userSubscriptions = await getUserSubscriptions(user.uid);
+      console.log('Loading subscriptions for user:', user.id);
+      const userSubscriptions = await getUserSubscriptions(user.id);
       console.log('Loaded subscriptions:', userSubscriptions);
       setSubscriptions(userSubscriptions);
       setError(null);
@@ -49,7 +49,7 @@ export const SubscriptionsPage = () => {
 
     try {
       console.log('Adding subscription:', data);
-      await addSubscription(user.uid, data);
+      await addSubscription(user.id, data);
       setSuccessMessage('Abonelik başarıyla eklendi.');
       setShowForm(false);
       await loadSubscriptions();

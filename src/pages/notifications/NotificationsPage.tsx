@@ -16,7 +16,7 @@ export const NotificationsPage: React.FC = () => {
   useEffect(() => {
     if (!user) return;
 
-    const notificationsRef = collection(db, 'teknokapsul', user.uid, 'notifications');
+    const notificationsRef = collection(db, 'teknokapsul', user.id, 'notifications');
     const q = query(notificationsRef, orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -37,7 +37,7 @@ export const NotificationsPage: React.FC = () => {
     if (!user) return;
     
     try {
-      const notificationRef = doc(db, 'teknokapsul', user.uid, 'notifications', notificationId);
+      const notificationRef = doc(db, 'teknokapsul', user.id, 'notifications', notificationId);
       await updateDoc(notificationRef, { read: true });
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -48,7 +48,7 @@ export const NotificationsPage: React.FC = () => {
     if (!user) return;
     
     try {
-      const notificationRef = doc(db, 'teknokapsul', user.uid, 'notifications', notificationId);
+      const notificationRef = doc(db, 'teknokapsul', user.id, 'notifications', notificationId);
       await deleteDoc(notificationRef);
     } catch (error) {
       console.error('Error deleting notification:', error);
@@ -62,7 +62,7 @@ export const NotificationsPage: React.FC = () => {
     
     try {
       const promises = unreadNotifications.map(notification => {
-        const notificationRef = doc(db, 'teknokapsul', user.uid, 'notifications', notification.id);
+        const notificationRef = doc(db, 'teknokapsul', user.id, 'notifications', notification.id);
         return updateDoc(notificationRef, { read: true });
       });
       

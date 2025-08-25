@@ -202,7 +202,7 @@ const EarnAsYouSpendPage: React.FC = () => {
 
       // const session = await createPremiumCheckoutSession({
       //   productId: 'cashback_offer',
-      //   userId: user.uid,
+      //   userId: user.id,
       //   customerEmail: user.email || '',
       //   successUrl,
       //   cancelUrl,

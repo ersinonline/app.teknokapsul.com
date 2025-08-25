@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, query, orderBy, doc, updateDoc, addDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Eye, Calendar, User, FileText, Search, Trash2, MessageSquare, Headphones, Edit, Check, X, Package, ShoppingCart, Plus, Clock, Settings, CheckCircle } from 'lucide-react';
@@ -130,7 +130,7 @@ const AdminPage: React.FC = () => {
   };
 
   // Admin kontrolü
-  if (!user || user.email !== 'clk.ersinnn@gmail.com') {
+  if (!user || user.emailAddresses[0]?.emailAddress !== 'clk.ersinnn@gmail.com') {
     return <Navigate to="/" replace />;
   }
 

@@ -11,7 +11,7 @@ export const NotificationPrompt: React.FC = () => {
     if (!user) return;
 
     try {
-      await initializeNotifications(user.uid);
+      await initializeNotifications(user.id);
       setShowPrompt(false);
     } catch (error) {
       console.error('Error enabling notifications:', error);

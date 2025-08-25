@@ -1,8 +1,8 @@
 import { getMessaging, getToken, onMessage, isSupported, Messaging } from 'firebase/messaging';
 import { doc, setDoc, updateDoc, addDoc, collection } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../lib/firebase';
 import { Event } from '../types/calendar';
-import { app } from '../config/firebase';
+import { app } from '../lib/firebase';
 
 export interface NotificationData {
   id?: string;

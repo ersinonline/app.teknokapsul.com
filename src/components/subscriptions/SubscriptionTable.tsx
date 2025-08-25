@@ -22,7 +22,7 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
     
     setIsDeleting(id);
     try {
-      await deleteSubscription(id, user.uid);
+      await deleteSubscription(id, user.id);
       onUpdate();
     } catch (error) {
       console.error('Error deleting subscription:', error);
@@ -37,7 +37,7 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
     
     setIsToggling(id);
     try {
-      await toggleSubscriptionStatus(id, user.uid, !currentStatus);
+      await toggleSubscriptionStatus(id, user.id, !currentStatus);
       onUpdate();
     } catch (error) {
       console.error('Error toggling subscription status:', error);
@@ -98,7 +98,7 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
               onSubmit={async (data) => {
                 if (!user) return;
                 try {
-                  await updateSubscription(editingSubscription.id, user.uid, data);
+                  await updateSubscription(editingSubscription.id, user.id, data);
                   setEditingSubscription(null);
                   onUpdate();
                 } catch (error) {

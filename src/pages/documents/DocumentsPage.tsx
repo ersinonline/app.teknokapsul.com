@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, FileText, Download, Trash2, Eye, Search, Plus, FolderOpen, File } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { storage, db } from '../../config/firebase';
+import { storage, db } from '../../lib/firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 
@@ -92,7 +92,7 @@ const DocumentsPage: React.FC = () => {
     
     try {
       setLoading(true);
-      const documentsRef = collection(db, 'teknokapsul', user.uid, 'documents');
+      const documentsRef = collection(db, 'teknokapsul', user.id, 'documents');
       const q = query(
         documentsRef,
         orderBy('uploadDate', 'desc')
@@ -140,7 +140,7 @@ const DocumentsPage: React.FC = () => {
       for (let i = 0; i < selectedFiles.length; i++) {
         const file = selectedFiles[i];
         const fileName = `${Date.now()}_${uploadFileName}`;
-        const storagePath = `documents/${user.uid}/${uploadCategory}/${fileName}`;
+        const storagePath = `documents/${user.id}/${uploadCategory}/${fileName}`;
         const storageRef = ref(storage, storagePath);
         
         // Upload file to Firebase Storage
@@ -148,7 +148,7 @@ const DocumentsPage: React.FC = () => {
         const downloadUrl = await getDownloadURL(snapshot.ref);
         
         // Save document metadata to Firestore
-        await addDoc(collection(db, 'teknokapsul', user.uid, 'documents'), {
+        await addDoc(collection(db, 'teknokapsul', user.id, 'documents'), {
           name: uploadFileName,
           type: file.type,
           category: uploadCategory,
@@ -181,7 +181,7 @@ const DocumentsPage: React.FC = () => {
       await deleteObject(storageRef);
       
       // Delete from Firestore
-      await deleteDoc(doc(db, 'teknokapsul', user!.uid, 'documents', document.id));
+      await deleteDoc(doc(db, 'teknokapsul', user!.id, 'documents', document.id));
       
       await fetchDocuments();
     } catch (error) {

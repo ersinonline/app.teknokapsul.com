@@ -28,7 +28,7 @@ export const IncomePage: React.FC = () => {
     
     try {
       setLoading(true);
-      const userIncomes = await getUserIncomes(user.uid, currentYear, currentMonth);
+      const userIncomes = await getUserIncomes(user.id, currentYear, currentMonth);
       setIncomes(userIncomes);
     } catch (error) {
       console.error('Error loading incomes:', error);

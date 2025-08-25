@@ -10,7 +10,7 @@ import {
   orderBy, 
   Timestamp 
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../lib/firebase';
 import { CreditCard, CashAdvanceAccount, Loan, LoanPayment } from '../types/financial';
 import { offlineService } from './offline.service';
 

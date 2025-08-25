@@ -90,10 +90,10 @@ export const ApplicationPage: React.FC = () => {
         notes: formData.notes || ''
       };
 
-      const applicationId = await applicationService.createApplication(user.uid, applicationData);
+      const applicationId = await applicationService.createApplication(user.id, applicationData);
       
       // Get the created application to show the application number
-      const applications = await applicationService.getUserApplications(user.uid);
+      const applications = await applicationService.getUserApplications(user.id);
       const createdApplication = applications.find(app => app.id === applicationId);
       
       // Navigate to services page with application number and success message

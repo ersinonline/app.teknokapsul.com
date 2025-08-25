@@ -11,7 +11,7 @@ import {
   orderBy,
   Timestamp
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../lib/firebase';
 import { WorkEntry, WorkSettings } from '../types/work-tracking';
 
 class WorkTrackingService {

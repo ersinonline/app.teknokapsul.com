@@ -45,8 +45,8 @@ export const PortfolioPage: React.FC = () => {
       // Otomatik güncelleme - sayfa yüklendiğinde ve her 5 dakikada bir
       const updateAllPrices = async () => {
         try {
-          await portfolioService.updateStockPricesFromAPI(user.uid);
-          await portfolioService.updateAllPricesFromAPI(user.uid);
+          await portfolioService.updateStockPricesFromAPI(user.id);
+          await portfolioService.updateAllPricesFromAPI(user.id);
           await loadPortfolioData();
         } catch (error) {
           console.error('Otomatik güncelleme hatası:', error);
@@ -80,7 +80,7 @@ export const PortfolioPage: React.FC = () => {
     
     try {
       setLoading(true);
-      const items = await portfolioService.getPortfolioItems(user.uid);
+      const items = await portfolioService.getPortfolioItems(user.id);
       setPortfolioItems(items);
       
 
@@ -102,9 +102,9 @@ export const PortfolioPage: React.FC = () => {
     setRefreshing(true);
     try {
       // Tüm fiyatları güncelle (hisse, döviz, altın)
-      await portfolioService.updateAllPricesFromAPI(user.uid);
+      await portfolioService.updateAllPricesFromAPI(user.id);
       // Vadeli hesapları güncelle
-      await portfolioService.addDailyReturnToAllDeposits(user.uid);
+      await portfolioService.addDailyReturnToAllDeposits(user.id);
       // Portföy verilerini yeniden yükle
       await loadPortfolioData();
       
@@ -130,13 +130,13 @@ export const PortfolioPage: React.FC = () => {
         // Vadeli hesap için günlük getiri hesapla ve ekle
         const depositItems = portfolioItems.filter(item => item.type === 'deposit' && item.symbol === symbol);
         for (const item of depositItems) {
-          await portfolioService.addDailyReturnToDeposit(user.uid, item.id);
+          await portfolioService.addDailyReturnToDeposit(user.id, item.id);
         }
         await loadPortfolioData();
       } else {
         // Diğer yatırım türleri için normal fiyat güncelleme
-        await portfolioService.updateStockPricesFromAPI(user.uid);
-        await portfolioService.updateAllPricesFromAPI(user.uid);
+        await portfolioService.updateStockPricesFromAPI(user.id);
+        await portfolioService.updateAllPricesFromAPI(user.id);
         await loadPortfolioData();
       }
     } catch (error) {
@@ -148,12 +148,12 @@ export const PortfolioPage: React.FC = () => {
     if (!user) return;
     
     try {
-      const portfolioItem = await portfolioService.addPortfolioItem(user.uid, item);
+      const portfolioItem = await portfolioService.addPortfolioItem(user.id, item);
       
       // Vadeli hesap ise otomatik getiri hesaplamasını başlat (kullanıcıya sormadan)
       if (item.type === 'deposit' && item.metadata?.annualInterestRate && item.metadata?.taxExemptPercentage) {
         try {
-          await depositAutoReturnService.startAutoReturnCalculation(user.uid, portfolioItem);
+          await depositAutoReturnService.startAutoReturnCalculation(user.id, portfolioItem);
           setDepositAutoReturnActive(true);
           
           // Bildirim gönder
@@ -178,7 +178,7 @@ export const PortfolioPage: React.FC = () => {
   const handleUpdateItem = async (id: string, updates: Partial<PortfolioItem>) => {
     if (!user) return;
     try {
-      await portfolioService.updatePortfolioItem(user.uid, id, updates);
+      await portfolioService.updatePortfolioItem(user.id, id, updates);
       await loadPortfolioData();
     } catch (error) {
       console.error('Error updating portfolio item:', error);
@@ -188,7 +188,7 @@ export const PortfolioPage: React.FC = () => {
   const handleDeleteItem = async (id: string) => {
     if (!user) return;
     try {
-      await portfolioService.deletePortfolioItem(user.uid, id);
+      await portfolioService.deletePortfolioItem(user.id, id);
       await loadPortfolioData();
     } catch (error) {
       console.error('Error deleting portfolio item:', error);
@@ -210,7 +210,7 @@ export const PortfolioPage: React.FC = () => {
         return;
       }
 
-      await depositAutoReturnService.startAutoReturnForAllDeposits(user.uid, depositItems);
+      await depositAutoReturnService.startAutoReturnForAllDeposits(user.id, depositItems);
       setDepositAutoReturnActive(true);
       
       // Bildirim gönder

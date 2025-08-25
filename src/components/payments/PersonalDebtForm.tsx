@@ -25,7 +25,7 @@ export const PersonalDebtForm: React.FC<PersonalDebtFormProps> = ({ onClose, onS
     if (!user) return;
 
     try {
-      await addPersonalDebt(user.uid, formData);
+      await addPersonalDebt(user.id, formData);
       onSave();
       onClose();
     } catch (err) {

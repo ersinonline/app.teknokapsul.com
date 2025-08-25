@@ -1,5 +1,5 @@
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../lib/firebase';
 import { Subscription, SubscriptionFormData } from '../types/subscription';
 
 const calculateEndDate = (renewalDay: number): Date => {

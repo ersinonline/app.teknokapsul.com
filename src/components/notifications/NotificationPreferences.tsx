@@ -30,7 +30,7 @@ export const NotificationPreferences = () => {
       if (!user) return;
 
       try {
-        const docRef = doc(db, 'teknokapsul', user.uid, 'notifications', 'settings');
+        const docRef = doc(db, 'teknokapsul', user.id, 'notifications', 'settings');
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -56,7 +56,7 @@ export const NotificationPreferences = () => {
     };
 
     try {
-      await setDoc(doc(db, 'teknokapsul', user.uid, 'notifications', 'settings'), newSettings);
+      await setDoc(doc(db, 'teknokapsul', user.id, 'notifications', 'settings'), newSettings);
       setSettings(newSettings);
       setSuccess('Bildirim ayarları güncellendi');
       setTimeout(() => setSuccess(null), 3000);

@@ -62,7 +62,7 @@ const CheckoutPage: React.FC = () => {
     if (!user) return;
     
     try {
-      const addresses = await getSavedAddresses(user.uid);
+      const addresses = await getSavedAddresses(user.id);
       setSavedAddresses(addresses);
       
       // Default adresi otomatik seç
@@ -102,7 +102,7 @@ const CheckoutPage: React.FC = () => {
     if (!user) return;
     
     try {
-      await saveAddress(user.uid, {
+      await saveAddress(user.id, {
         fullName: shippingAddress.fullName,
         email: shippingAddress.email,
         phone: shippingAddress.phone,
@@ -188,7 +188,7 @@ const CheckoutPage: React.FC = () => {
 
       // Stripe checkout session oluştur
       // const session = await createPremiumCheckoutSession({
-      //   userId: user.uid,
+      //   userId: user.id,
       //   productId: 'order_payment', // Sipariş ödemesi için özel product ID
       //   customerEmail: user.email || shippingAddress.email,
       //   amount: amountInCents,

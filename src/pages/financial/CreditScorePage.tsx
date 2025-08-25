@@ -13,7 +13,7 @@ import {
 import { TrendingUp, Plus, Trash2, Edit3 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { db } from '../../lib/firebase';
 
 ChartJS.register(
   CategoryScale,
@@ -51,7 +51,7 @@ const CreditScorePage: React.FC = () => {
     
     try {
       setLoading(true);
-      const scoresRef = collection(db, `teknokapsul/${user.uid}/creditScores`);
+      const scoresRef = collection(db, `teknokapsul/${user.id}/creditScores`);
       const q = query(scoresRef, orderBy('date', 'asc'));
       const querySnapshot = await getDocs(q);
       
@@ -79,7 +79,7 @@ const CreditScorePage: React.FC = () => {
     
     try {
       setLoading(true);
-      const scoresRef = collection(db, `teknokapsul/${user.uid}/creditScores`);
+      const scoresRef = collection(db, `teknokapsul/${user.id}/creditScores`);
       await addDoc(scoresRef, {
         date: newScore.date,
         score: score,
@@ -106,7 +106,7 @@ const CreditScorePage: React.FC = () => {
     
     try {
       setLoading(true);
-      const scoreRef = doc(db, `teknokapsul/${user.uid}/creditScores`, editingScore.id!);
+      const scoreRef = doc(db, `teknokapsul/${user.id}/creditScores`, editingScore.id!);
       await updateDoc(scoreRef, {
         date: editingScore.date,
         score: editingScore.score
@@ -126,7 +126,7 @@ const CreditScorePage: React.FC = () => {
     
     try {
       setLoading(true);
-      const scoreRef = doc(db, `teknokapsul/${user.uid}/creditScores`, id);
+      const scoreRef = doc(db, `teknokapsul/${user.id}/creditScores`, id);
       await deleteDoc(scoreRef);
       await fetchCreditScores();
     } catch (error) {

@@ -46,7 +46,7 @@ export const MobileNavigation: React.FC = () => {
   useEffect(() => {
     if (!user) return;
 
-    const notificationsRef = collection(db, 'teknokapsul', user.uid, 'notifications');
+    const notificationsRef = collection(db, 'teknokapsul', user.id, 'notifications');
     const q = query(notificationsRef, where('read', '==', false));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {

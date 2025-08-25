@@ -56,11 +56,11 @@ export const AIAssistant: React.FC = () => {
       
       try {
         const [userExpenses, userIncomes, userCreditCards, userCashAdvance, userLoans] = await Promise.all([
-          getUserExpenses(user.uid, currentYear, currentMonth),
-          getUserIncomes(user.uid, currentYear, currentMonth),
-          getCreditCards(user.uid),
-          getCashAdvanceAccounts(user.uid),
-          getLoans(user.uid)
+          getUserExpenses(user.id, currentYear, currentMonth),
+          getUserIncomes(user.id, currentYear, currentMonth),
+          getCreditCards(user.id),
+          getCashAdvanceAccounts(user.id),
+          getLoans(user.id)
         ]);
         
         setExpenses(userExpenses);

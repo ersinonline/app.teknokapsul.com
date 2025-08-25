@@ -9,7 +9,7 @@ import {
   where, 
   orderBy 
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../lib/firebase';
 import { PortfolioItem, PortfolioSummary, AIRecommendation, PortfolioAnalysis, PORTFOLIO_CATEGORIES } from '../types/portfolio';
 import { exchangeRateService } from './exchange-rate.service';
 import { offlineService } from './offline.service';

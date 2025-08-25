@@ -51,6 +51,9 @@ import CheckoutPage from './pages/other/CheckoutPage';
 import OrderSuccessPage from './pages/other/OrderSuccessPage';
 import { GoalsPage } from './pages/goals/GoalsPage';
 import { BudgetPage } from './pages/budget/BudgetPage';
+import TeknoFinansPage from './pages/apps/TeknoFinansPage';
+import TeknoKapsulPage from './pages/apps/TeknoKapsulPage';
+import TeknoHizmetPage from './pages/apps/TeknoHizmetPage';
 // Premium sayfaları geçici olarak kaldırıldı
 // import PremiumIntroPage from './pages/PremiumIntroPage';
 // import PremiumManagePage from './pages/PremiumManagePage';
@@ -277,6 +280,84 @@ const router = createBrowserRouter([
     element: <ProtectedRoute><CreditCalculatorPage2 /></ProtectedRoute>
   },
   {
+    path: '/tekno-finans',
+    element: <ProtectedRoute><TeknoFinansPage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-finans/income',
+    element: <ProtectedRoute><IncomePage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-finans/expenses',
+    element: <ProtectedRoute><ExpensePage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-finans/goals',
+    element: <ProtectedRoute><GoalsPage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-finans/portfolio',
+    element: <ProtectedRoute><PortfolioPage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-finans/stock-market',
+    element: <ProtectedRoute><StockMarketPage /></ProtectedRoute>
+  },
+
+  {
+    path: '/tekno-finans/financial-data',
+    element: <ProtectedRoute><FinancialDataPage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-finans/credit-score',
+    element: <ProtectedRoute><CreditScorePage /></ProtectedRoute>
+  },
+
+  {
+    path: '/tekno-finans/credit-calculator',
+    element: <ProtectedRoute><CreditCalculatorPage2 /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-kapsul',
+    element: <ProtectedRoute><TeknoKapsulPage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-kapsul/services',
+    element: <ProtectedRoute><Services /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-kapsul/cargo-tracking',
+    element: <ProtectedRoute><CargoTrackingPage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-kapsul/work-tracking',
+    element: <ProtectedRoute><WorkTrackingPage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-kapsul/documents',
+    element: <ProtectedRoute><DocumentsPage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-kapsul/notes',
+    element: <ProtectedRoute><NotesPage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-kapsul/calendar',
+    element: <ProtectedRoute><CalendarPage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-kapsul/subscriptions',
+    element: <ProtectedRoute><SubscriptionsPage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-kapsul/warranty-tracking',
+    element: <ProtectedRoute><WarrantyTrackingPage /></ProtectedRoute>
+  },
+  {
+    path: '/tekno-hizmet',
+    element: <ProtectedRoute><TeknoHizmetPage /></ProtectedRoute>
+  },
+  {
     path: '/sentry-test',
     element: <ProtectedRoute>
       <div className="p-8">
@@ -348,8 +429,8 @@ function App() {
   }, []);
   
   return (
-    <ThemeProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <ThemeProvider>
         <div className="min-h-screen bg-gray-50 transition-colors duration-300">
           {/* Mobil uygulamadan gelen kimlik doğrulama token'ını işle */}
           <MobileAuthHandler 
@@ -362,8 +443,8 @@ function App() {
           />
           <RouterProvider router={router} />
         </div>
-      </AuthProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 

@@ -105,21 +105,21 @@ export const useFirebaseData = <T extends DataType>(
           case 'goals':
           case 'budget':
           case 'warranties':
-            collectionRef = collection(db, 'teknokapsul', user.uid, collectionName);
+            collectionRef = collection(db, 'teknokapsul', user.id, collectionName);
             q = query(collectionRef);
             break;
           case 'expenses':
           case 'subscriptions':
             collectionRef = collection(db, collectionName === 'subscriptions' ? 'subscription-end' : collectionName);
-            q = query(collectionRef, where('userId', '==', user.uid));
+            q = query(collectionRef, where('userId', '==', user.id));
             break;
           case 'payments':
-            collectionRef = collection(db, 'teknokapsul', user.uid, collectionName);
+            collectionRef = collection(db, 'teknokapsul', user.id, collectionName);
             q = query(collectionRef);
             break;
           default:
             collectionRef = collection(db, collectionName);
-            q = query(collectionRef, where('userId', '==', user.uid));
+            q = query(collectionRef, where('userId', '==', user.id));
             break;
         }
 

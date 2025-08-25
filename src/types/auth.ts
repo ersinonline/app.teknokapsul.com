@@ -1,7 +1,7 @@
-import { User } from 'firebase/auth';
+import { UserResource } from '@clerk/types';
 
 export interface AuthState {
-  user: User | null;
+  user: UserResource | null;
   loading: boolean;
   error: string | null;
   tokenValid: boolean;
@@ -10,8 +10,8 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   signOut: () => Promise<void>;
-  verifyToken: () => Promise<boolean>;
-  checkSession: () => Promise<boolean>;
-  refreshToken: () => Promise<boolean>;
+  verifyToken: () => Promise<{ success: boolean; tokenValid: boolean; error: string | null }>;
+  checkSession: () => Promise<{ success: boolean; sessionValid: boolean; error: string | null }>;
+  refreshToken: () => Promise<{ success: boolean; tokenValid: boolean; error: string | null }>;
   isWebView: boolean;
 }

@@ -3,7 +3,7 @@ import { getAI, getGenerativeModel, GoogleAIBackend, FunctionDeclaration, Object
 // Export types for use in other services
 export type { ObjectSchemaInterface } from "@firebase/ai";
 
-import { app, db } from "../config/firebase";
+import { app, db } from "../lib/firebase";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { getAllSupportTickets } from "./support.service";
 import { getUserCargoTrackings } from "./cargo.service";

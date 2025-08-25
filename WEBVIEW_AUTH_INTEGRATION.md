@@ -39,7 +39,7 @@ class WebAppInterface(private val context: Context) {
         val user = FirebaseAuth.getInstance().currentUser
         return if (user != null) {
             val idToken = // Token'ı al (asenkron işlem gerektirir)
-            "{\"token\":\"$idToken\", \"uid\":\"${user.uid}\"}"
+            "{\"token\":\"$idToken\", \"uid\":\"${user.id}\"}"
         } else {
             "{}"
         }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CreditCard, Clock, TrendingUp, Target, Calendar, Banknote, PiggyBank, AlertCircle, CheckCircle, Brain, Package, Truck, ExternalLink, DollarSign } from 'lucide-react';
+import { CreditCard, Clock, TrendingUp, Target, Calendar, Banknote, PiggyBank, AlertCircle, CheckCircle, Brain, Package, Truck, ExternalLink, DollarSign, Apple as Apps, Wrench } from 'lucide-react';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { LoadingSpinner } from './common/LoadingSpinner';
 import { ErrorMessage } from './common/ErrorMessage';
@@ -67,13 +67,13 @@ export const Dashboard = () => {
         setCargoLoading(true);
         
         const [userExpenses, userIncomes, userSubscriptions, userCreditCards, userCashAdvanceAccounts, userLoans, userCargos] = await Promise.all([
-          getUserExpenses(user.uid, currentYear, currentMonth),
-          getUserIncomes(user.uid, currentYear, currentMonth),
-          getUserSubscriptions(user.uid),
-          getCreditCards(user.uid),
-          getCashAdvanceAccounts(user.uid),
-          getLoans(user.uid),
-          getUserCargoTrackings(user.uid)
+          getUserExpenses(user.id, currentYear, currentMonth),
+          getUserIncomes(user.id, currentYear, currentMonth),
+          getUserSubscriptions(user.id),
+          getCreditCards(user.id),
+          getCashAdvanceAccounts(user.id),
+          getLoans(user.id),
+          getUserCargoTrackings(user.id)
         ]);
         
         setExpenses(userExpenses);
@@ -116,10 +116,10 @@ export const Dashboard = () => {
 
   useEffect(() => {
     const loadPortfolioData = async () => {
-      if (!user?.uid) return;
+      if (!user?.id) return;
       
       try {
-        const items = await portfolioService.getPortfolioItems(user.uid);
+        const items = await portfolioService.getPortfolioItems(user.id);
         console.log('🔍 Ham portföy verileri:', items);
         setPortfolioItems(items);
         
@@ -138,7 +138,7 @@ export const Dashboard = () => {
     };
 
     loadPortfolioData();
-  }, [user?.uid]);
+  }, [user?.id]);
 
 
 
@@ -297,7 +297,7 @@ export const Dashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-            Hoş Geldin {user?.displayName?.split(' ')[0] || 'Ersin'} 👋
+            Hoş Geldin {user?.fullName?.split(' ')[0] || 'Ersin'} 👋
           </h1>
           <p className="text-sm text-gray-600 mt-1">
             Finansal durumunuzun özeti
@@ -315,6 +315,75 @@ export const Dashboard = () => {
           return daysRemaining <= 7 && daysRemaining > 0;
         })}
       />
+
+      {/* Uygulama Seçici */}
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* TeknoFinans */}
+        <div 
+          onClick={() => navigate('/tekno-finans')}
+          className="bg-white border-2 border-[#ffb700] rounded-xl p-6 text-gray-800 cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#e6a500]"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="bg-[#ffb700] p-3 rounded-lg">
+              <TrendingUp className="w-8 h-8 text-white" />
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold">💰</div>
+            </div>
+          </div>
+          <h3 className="text-xl font-bold mb-2">TeknoFinans</h3>
+          <p className="text-gray-600 text-sm mb-4">Finansal hayatınızı yönetin</p>
+          <div className="flex flex-wrap gap-2">
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Gelir/Gider</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Portföy</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Hedefler</span>
+          </div>
+        </div>
+
+        {/* TeknoKapsül */}
+        <div 
+          onClick={() => navigate('/tekno-kapsul')}
+          className="bg-white border-2 border-[#ffb700] rounded-xl p-6 text-gray-800 cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#e6a500]"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="bg-[#ffb700] p-3 rounded-lg">
+              <Apps className="w-8 h-8 text-white" />
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold">🛠</div>
+            </div>
+          </div>
+          <h3 className="text-xl font-bold mb-2">TeknoKapsül</h3>
+          <p className="text-gray-600 text-sm mb-4">Araçlar ve hizmetler</p>
+          <div className="flex flex-wrap gap-2">
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Kargo Takip</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Abonelikler</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Garanti</span>
+          </div>
+        </div>
+
+        {/* TeknoHizmet */}
+        <div 
+          onClick={() => navigate('/tekno-hizmet')}
+          className="bg-white border-2 border-[#ffb700] rounded-xl p-6 text-gray-800 cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#e6a500]"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="bg-[#ffb700] p-3 rounded-lg">
+              <Wrench className="w-8 h-8 text-white" />
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold">🔧</div>
+            </div>
+          </div>
+          <h3 className="text-xl font-bold mb-2">TeknoHizmet</h3>
+          <p className="text-gray-600 text-sm mb-4">Hizmet sağlayıcıları</p>
+          <div className="flex flex-wrap gap-2">
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Ev Hizmetleri</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Otomotiv</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Güzellik</span>
+          </div>
+        </div>
+      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">

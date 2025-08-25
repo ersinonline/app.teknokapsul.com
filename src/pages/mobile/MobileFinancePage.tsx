@@ -26,8 +26,8 @@ export const MobileFinancePage: React.FC = () => {
         
         // Fetch current month's income and expenses
         const [incomes, expenses] = await Promise.all([
-          getUserIncomes(user.uid),
-          getUserExpenses(user.uid)
+          getUserIncomes(user.id),
+          getUserExpenses(user.id)
         ]);
         
         // Filter for current month

@@ -65,9 +65,9 @@ const WorkTrackingPage: React.FC = () => {
   // Maaş geçmişi verilerini localStorage'dan yükle
   useEffect(() => {
     if (user) {
-      const savedPaidSalary = localStorage.getItem(`paidSalary_${user.uid}_${selectedYear}_${selectedMonth}`);
-      const savedMealAllowance = localStorage.getItem(`mealAllowancePaid_${user.uid}_${selectedYear}_${selectedMonth}`);
-      const savedTransportAllowance = localStorage.getItem(`transportAllowancePaid_${user.uid}_${selectedYear}_${selectedMonth}`);
+      const savedPaidSalary = localStorage.getItem(`paidSalary_${user.id}_${selectedYear}_${selectedMonth}`);
+      const savedMealAllowance = localStorage.getItem(`mealAllowancePaid_${user.id}_${selectedYear}_${selectedMonth}`);
+      const savedTransportAllowance = localStorage.getItem(`transportAllowancePaid_${user.id}_${selectedYear}_${selectedMonth}`);
       
       if (savedPaidSalary) setPaidSalary(savedPaidSalary);
       if (savedMealAllowance) setMealAllowancePaid(savedMealAllowance);
@@ -78,19 +78,19 @@ const WorkTrackingPage: React.FC = () => {
   // Maaş geçmişi verilerini localStorage'a kaydet
   useEffect(() => {
     if (user && paidSalary) {
-      localStorage.setItem(`paidSalary_${user.uid}_${selectedYear}_${selectedMonth}`, paidSalary);
+      localStorage.setItem(`paidSalary_${user.id}_${selectedYear}_${selectedMonth}`, paidSalary);
     }
   }, [user, paidSalary, selectedYear, selectedMonth]);
 
   useEffect(() => {
     if (user && mealAllowancePaid) {
-      localStorage.setItem(`mealAllowancePaid_${user.uid}_${selectedYear}_${selectedMonth}`, mealAllowancePaid);
+      localStorage.setItem(`mealAllowancePaid_${user.id}_${selectedYear}_${selectedMonth}`, mealAllowancePaid);
     }
   }, [user, mealAllowancePaid, selectedYear, selectedMonth]);
 
   useEffect(() => {
     if (user && transportAllowancePaid) {
-      localStorage.setItem(`transportAllowancePaid_${user.uid}_${selectedYear}_${selectedMonth}`, transportAllowancePaid);
+      localStorage.setItem(`transportAllowancePaid_${user.id}_${selectedYear}_${selectedMonth}`, transportAllowancePaid);
     }
   }, [user, transportAllowancePaid, selectedYear, selectedMonth]);
 
@@ -100,8 +100,8 @@ const WorkTrackingPage: React.FC = () => {
     try {
       setLoading(true);
       const [entries, settings] = await Promise.all([
-        workTrackingService.getWorkEntries(user.uid, selectedMonth, selectedYear),
-        workTrackingService.getWorkSettings(user.uid)
+        workTrackingService.getWorkEntries(user.id, selectedMonth, selectedYear),
+        workTrackingService.getWorkSettings(user.id)
       ]);
       
       setWorkEntries(entries);
@@ -127,9 +127,9 @@ const WorkTrackingPage: React.FC = () => {
 
     try {
       console.log('Ayarlar kaydediliyor:', settings);
-      console.log('Kullanıcı ID:', user.uid);
+      console.log('Kullanıcı ID:', user.id);
       
-      const result = await workTrackingService.saveWorkSettings(user.uid, settings);
+      const result = await workTrackingService.saveWorkSettings(user.id, settings);
       console.log('Ayarlar başarıyla kaydedildi, ID:', result);
       
       await loadData();
@@ -168,7 +168,7 @@ const WorkTrackingPage: React.FC = () => {
 
     try {
       const entry: Omit<WorkEntry, 'id'> = {
-        userId: user.uid,
+        userId: user.id,
         date: workDate,
         startTime,
         endTime,

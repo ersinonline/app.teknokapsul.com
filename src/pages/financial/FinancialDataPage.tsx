@@ -59,9 +59,9 @@ export const FinancialDataPage = () => {
     try {
       setLoading(true);
       const [creditCardsData, cashAdvanceData, loansData] = await Promise.all([
-        getCreditCards(user.uid),
-        getCashAdvanceAccounts(user.uid),
-        getLoans(user.uid)
+        getCreditCards(user.id),
+        getCashAdvanceAccounts(user.id),
+        getLoans(user.id)
       ]);
       
       setCreditCards(creditCardsData);

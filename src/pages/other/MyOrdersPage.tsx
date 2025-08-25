@@ -42,7 +42,7 @@ const MyOrdersPage: React.FC = () => {
     
     try {
       setLoading(true);
-      const userOrders = await getUserOrders(user.uid);
+      const userOrders = await getUserOrders(user.id);
       const sortedOrders = userOrders.sort((a, b) => {
         const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt);
         const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt);

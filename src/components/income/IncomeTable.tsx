@@ -25,7 +25,7 @@ export const IncomeTable: React.FC<IncomeTableProps> = ({ incomes, onUpdate }) =
     
     setIsDeleting(id);
     try {
-      await deleteIncome(user.uid, id);
+      await deleteIncome(user.id, id);
       onUpdate();
     } catch (error) {
       console.error('Error deleting income:', error);
@@ -38,7 +38,7 @@ export const IncomeTable: React.FC<IncomeTableProps> = ({ incomes, onUpdate }) =
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
     setIsToggling(id);
     try {
-      await toggleIncomeStatus(user.uid, id, !currentStatus);
+      await toggleIncomeStatus(user.id, id, !currentStatus);
       onUpdate();
     } catch (error) {
       console.error('Error toggling income status:', error);
@@ -93,7 +93,7 @@ export const IncomeTable: React.FC<IncomeTableProps> = ({ incomes, onUpdate }) =
             <IncomeForm
               onSubmit={async (data) => {
                 try {
-                  await updateIncome(user.uid, editingIncome.id, data);
+                  await updateIncome(user.id, editingIncome.id, data);
                   setEditingIncome(null);
                   onUpdate();
                 } catch (error) {
