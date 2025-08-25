@@ -8,7 +8,6 @@ const TeknoHizmetPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const RESELLER_ID = "123456";
-  const REFID = "54108";
   const BAYI_ID = "54108";
 
   const hizmetFeatures = [

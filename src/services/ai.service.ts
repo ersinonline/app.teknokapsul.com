@@ -1,21 +1,35 @@
-import { xai } from "@ai-sdk/xai";
-import { generateText as aiGenerateText, streamText, generateObject } from "ai";
-import { z } from "zod";
+import { createXai } from '@ai-sdk/xai';
+import { generateText as aiGenerateText, streamText, generateObject } from 'ai';
+import { z } from 'zod';
+import { db } from "../lib/firebase";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { getAllSupportTickets } from "./support.service";
+import { getUserCargoTrackings } from "./cargo.service";
 
 // Export types for use in other services
+export interface AIResponse {
+  text: string;
+  confidence?: number;
+}
+
+export interface AIError {
+  message: string;
+  code?: string;
+}
+
 export interface ObjectSchemaInterface {
   type: string;
   properties: Record<string, any>;
   required?: string[];
 }
 
-import { app, db } from "../lib/firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import { getAllSupportTickets } from "./support.service";
-import { getUserCargoTrackings } from "./cargo.service";
+// Initialize XAI with API key
+const xaiClient = createXai({
+  apiKey: import.meta.env.VITE_XAI_API_KEY || process.env.XAI_API_KEY || ''
+});
 
-// XAI Grok-2 modelini oluştur
-const model = xai("grok-2-1212");
+// Initialize model
+const model = xaiClient('grok-2-1212');
 
 export const generateText = async (prompt: string): Promise<string> => {
   try {

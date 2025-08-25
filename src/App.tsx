@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { offlineService } from './services/offline.service';
@@ -442,6 +444,8 @@ function App() {
             }} 
           />
           <RouterProvider router={router} />
+          <Analytics />
+          <SpeedInsights />
         </div>
       </ThemeProvider>
     </AuthProvider>
