@@ -13,6 +13,8 @@ export const DataMigrationPanel: React.FC<DataMigrationPanelProps> = ({ onMigrat
   const [isLoading, setIsLoading] = useState(false);
   const [migrationResult, setMigrationResult] = useState<MigrationResult | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [manualUid, setManualUid] = useState('');
+  const [isManualMigration, setIsManualMigration] = useState(false);
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -51,6 +53,33 @@ export const DataMigrationPanel: React.FC<DataMigrationPanelProps> = ({ onMigrat
       setMigrationResult({
         success: false,
         message: `Migration sırasında hata oluştu: ${error}`
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleManualMigration = async () => {
+    if (!user || !user.primaryEmailAddress || !manualUid.trim()) return;
+    
+    setIsLoading(true);
+    setMigrationResult(null);
+    
+    try {
+      const result = await userMigrationService.migrateUserByUid(
+        user.id,
+        manualUid.trim(),
+        user.primaryEmailAddress.emailAddress,
+        user.fullName || undefined
+      );
+      
+      setMigrationResult(result);
+      await checkMigrationStatus();
+      onMigrationComplete?.(result);
+    } catch (error) {
+      setMigrationResult({
+        success: false,
+        message: `Manuel migration sırasında hata oluştu: ${error}`
       });
     } finally {
       setIsLoading(false);
@@ -184,41 +213,88 @@ export const DataMigrationPanel: React.FC<DataMigrationPanelProps> = ({ onMigrat
             </div>
           )}
 
-          {/* Migration Butonu */}
-          <div className="flex items-center justify-between pt-4 border-t">
-            <div className="text-sm text-gray-600">
-              {migrationStatus?.status === 'completed' ? (
-                'Verileriniz başarıyla aktarıldı'
-              ) : (
-                'Firebase verilerinizi Clerk hesabınıza aktarmak için butona tıklayın'
-              )}
+          {/* Migration Seçenekleri */}
+          <div className="pt-4 border-t space-y-4">
+            {/* Otomatik Migration */}
+            <div className="space-y-2">
+              <h4 className="font-medium text-gray-900">Otomatik Migration</h4>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  {migrationStatus?.status === 'completed' ? (
+                    'Verileriniz başarıyla aktarıldı'
+                  ) : (
+                    'Email adresiniz ile Firebase verilerinizi otomatik olarak bulup aktarır'
+                  )}
+                </div>
+                <button 
+                  onClick={handleMigration}
+                  disabled={isLoading || migrationStatus?.status === 'completed' || isManualMigration}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors ${
+                    isLoading || migrationStatus?.status === 'completed' || isManualMigration
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  {isLoading && !isManualMigration ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Migration Yapılıyor...
+                    </>
+                  ) : migrationStatus?.status === 'completed' ? (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      Tamamlandı
+                    </>
+                  ) : (
+                    <>
+                      <ArrowRight className="w-4 h-4" />
+                      Otomatik Aktar
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-            <button 
-              onClick={handleMigration}
-              disabled={isLoading || migrationStatus?.status === 'completed'}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors ${
-                isLoading || migrationStatus?.status === 'completed'
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Migration Yapılıyor...
-                </>
-              ) : migrationStatus?.status === 'completed' ? (
-                <>
-                  <CheckCircle className="w-4 h-4" />
-                  Tamamlandı
-                </>
-              ) : (
-                <>
-                  <ArrowRight className="w-4 h-4" />
-                  Verileri Aktar
-                </>
-              )}
-            </button>
+
+            {/* Manuel Migration */}
+            <div className="space-y-2">
+              <h4 className="font-medium text-gray-900">Manuel Migration (UID ile)</h4>
+              <p className="text-sm text-gray-600">
+                Firebase UID'nizi biliyorsanız, direkt olarak verilerinizi aktarabilirsiniz
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={manualUid}
+                  onChange={(e) => setManualUid(e.target.value)}
+                  placeholder="Firebase UID'nizi girin (örn: abc123def456...)"
+                  disabled={isLoading || migrationStatus?.status === 'completed'}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+                <button 
+                  onClick={handleManualMigration}
+                  disabled={isLoading || migrationStatus?.status === 'completed' || !manualUid.trim()}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors whitespace-nowrap ${
+                    isLoading || migrationStatus?.status === 'completed' || !manualUid.trim()
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                  }`}
+                  onMouseEnter={() => setIsManualMigration(true)}
+                  onMouseLeave={() => setIsManualMigration(false)}
+                >
+                  {isLoading && isManualMigration ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Migration Yapılıyor...
+                    </>
+                  ) : (
+                    <>
+                      <ArrowRight className="w-4 h-4" />
+                      UID ile Aktar
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,25 +1,32 @@
-import { getAI, getGenerativeModel, GoogleAIBackend, FunctionDeclaration, ObjectSchemaInterface } from "@firebase/ai";
+import { xai } from "@ai-sdk/xai";
+import { generateText as aiGenerateText, streamText, generateObject } from "ai";
+import { z } from "zod";
 
 // Export types for use in other services
-export type { ObjectSchemaInterface } from "@firebase/ai";
+export interface ObjectSchemaInterface {
+  type: string;
+  properties: Record<string, any>;
+  required?: string[];
+}
 
 import { app, db } from "../lib/firebase";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { getAllSupportTickets } from "./support.service";
 import { getUserCargoTrackings } from "./cargo.service";
 
-// AI servisini başlat
-const ai = getAI(app, { backend: new GoogleAIBackend() });
-
-// Gemini modelini oluştur
-const model = getGenerativeModel(ai, { model: "gemini-2.0-flash" });
+// XAI Grok-2 modelini oluştur
+const model = xai("grok-2-1212");
 
 export const generateText = async (prompt: string): Promise<string> => {
   try {
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+    const result = await aiGenerateText({
+      model,
+      prompt,
+      temperature: 0.7,
+    });
+    return result.text;
   } catch (error) {
-    console.error("AI metin üretme hatası:", error);
+    console.error("Error generating text:", error);
     throw error;
   }
 };
@@ -29,51 +36,48 @@ export const generateStructuredOutput = async <T>(
   schema: ObjectSchemaInterface
 ): Promise<T> => {
   try {
-    const functionDeclaration: FunctionDeclaration = {
-      name: "getStructuredOutput",
-      description: "Get structured output based on the schema",
-      parameters: schema
-    };
+    // Convert schema to Zod schema
+    const zodSchema = z.object(
+      Object.keys(schema.properties).reduce((acc, key) => {
+        const prop = schema.properties[key];
+        if (prop.type === 'string') {
+          acc[key] = z.string();
+        } else if (prop.type === 'number') {
+          acc[key] = z.number();
+        } else if (prop.type === 'boolean') {
+          acc[key] = z.boolean();
+        } else if (prop.type === 'array') {
+          acc[key] = z.array(z.any());
+        } else {
+          acc[key] = z.any();
+        }
+        return acc;
+      }, {} as any)
+    );
 
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      },
-      tools: [{
-        functionDeclarations: [functionDeclaration]
-      }]
+    const result = await generateObject({
+      model,
+      prompt,
+      schema: zodSchema,
     });
     
-    const candidates = result.response.candidates;
-    if (!candidates || candidates.length === 0) {
-      throw new Error("No response from AI model");
-    }
-
-    return candidates[0].content.parts[0].functionCall?.args as T;
+    return result.object as T;
   } catch (error) {
     console.error("AI yapılandırılmış çıktı üretme hatası:", error);
     throw error;
   }
 };
 
-export const startChat = async () => {
+export const startChat = async (prompt: string) => {
   try {
-    const chat = model.startChat({
-      history: [],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      }
+    const result = streamText({
+      model,
+      prompt,
+      temperature: 0.7,
     });
-    return chat;
+    return result;
   } catch (error) {
-    console.error("AI sohbet başlatma hatası:", error);
+    console.error("Error starting chat:", error);
     throw error;
   }
 };

@@ -283,6 +283,71 @@ class UserMigrationService {
   }
 
   /**
+   * UID ile manuel migration - Kullanıcı Firebase UID'sini biliyorsa direkt migration yapar
+   */
+  async migrateUserByUid(clerkUserId: string, firebaseUid: string, email: string, displayName?: string): Promise<MigrationResult> {
+    try {
+      // Daha önce migration yapılmış mı kontrol et
+      const existingMapping = await getDoc(doc(db, this.MIGRATION_COLLECTION, clerkUserId));
+      if (existingMapping.exists() && existingMapping.data().status === 'completed') {
+        return {
+          success: true,
+          message: 'Kullanıcı verileri daha önce migrate edilmiş'
+        };
+      }
+
+      // Firebase UID'sinin geçerli olup olmadığını kontrol et
+      const hasData = await this.checkFirebaseUidHasData(firebaseUid);
+      if (!hasData) {
+        return {
+          success: false,
+          message: 'Bu Firebase UID ile kullanıcı verisi bulunamadı'
+        };
+      }
+
+      // Mapping oluştur
+      const mappingCreated = await this.createUserMapping(clerkUserId, firebaseUid, email, displayName);
+      if (!mappingCreated) {
+        return {
+          success: false,
+          message: 'Kullanıcı eşleştirmesi oluşturulamadı'
+        };
+      }
+
+      // Verileri migrate et
+      return await this.migrateUserData(clerkUserId, firebaseUid);
+    } catch (error) {
+      console.error('Error in UID migration:', error);
+      return {
+        success: false,
+        message: `UID migration sırasında hata oluştu: ${error}`
+      };
+    }
+  }
+
+  /**
+   * Firebase UID'sinin veri içerip içermediğini kontrol eder
+   */
+  private async checkFirebaseUidHasData(firebaseUid: string): Promise<boolean> {
+    try {
+      for (const collectionName of this.USER_DATA_COLLECTIONS) {
+        const userQuery = query(
+          collection(db, collectionName),
+          where('userId', '==', firebaseUid)
+        );
+        const snapshot = await getDocs(userQuery);
+        if (!snapshot.empty) {
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking Firebase UID data:', error);
+      return false;
+    }
+  }
+
+  /**
    * Migration durumunu kontrol eder
    */
   async getMigrationStatus(clerkUserId: string): Promise<UserMigrationMapping | null> {
