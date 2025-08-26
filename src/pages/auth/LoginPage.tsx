@@ -6,7 +6,14 @@ import { Package } from 'lucide-react';
 export const LoginPage = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
-  const from = location.state?.from || '/dashboard';
+  
+  // Mobilde dashboard'a, masaüstünde anasayfaya yönlendir
+  const getDefaultRedirect = () => {
+    const isMobile = window.innerWidth < 1024; // lg breakpoint
+    return isMobile ? '/dashboard' : '/';
+  };
+  
+  const from = location.state?.from || getDefaultRedirect();
 
   if (loading) {
     return (

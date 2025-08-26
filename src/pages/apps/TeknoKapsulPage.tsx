@@ -1,19 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Briefcase, FolderOpen, StickyNote, Calendar, Shield, Clock } from 'lucide-react';
+import { Package, Briefcase, FolderOpen, StickyNote, Calendar, Shield, Clock } from 'lucide-react';
 
 const TeknoKapsulPage: React.FC = () => {
   const navigate = useNavigate();
 
   const kapsulFeatures = [
-    {
-      id: 'services',
-      title: 'Hizmetler',
-      description: 'Çeşitli dijital hizmetlere erişim sağlayın',
-      icon: Package,
-      path: '/tekno-kapsul/services',
-      color: 'bg-blue-500'
-    },
     {
       id: 'subscriptions',
       title: 'Aboneliklerim',
@@ -47,14 +39,6 @@ const TeknoKapsulPage: React.FC = () => {
       color: 'bg-green-500'
     },
     {
-      id: 'notes',
-      title: 'Notlar',
-      description: 'Önemli notlarınızı kaydedin ve organize edin',
-      icon: StickyNote,
-      path: '/tekno-kapsul/notes',
-      color: 'bg-yellow-500'
-    },
-    {
       id: 'calendar',
       title: 'Takvim',
       description: 'Randevularınızı ve etkinliklerinizi planlayın',
@@ -76,58 +60,37 @@ const TeknoKapsulPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with Back Button */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">Anasayfaya Dön</span>
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="bg-[#ffb700] p-2 rounded-lg">
-                <Package className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-xl font-bold text-gray-800">TeknoKapsül</h1>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <div className="bg-[#ffb700] p-4 rounded-full mr-4">
-              <Package className="w-10 h-10 text-white" />
+          <div className="text-center mb-6 sm:mb-8">
+          <div className="flex items-center justify-center mb-3">
+            <div className="bg-[#ffb700] p-3 rounded-full mr-3">
+              <Package className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-800">🛠 TeknoKapsül</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">TeknoKapsül</h1>
           </div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
             Günlük iş süreçlerinizi kolaylaştıran araçlar ve hizmetler. Verimlilik ve organizasyon için her şey burada.
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {kapsulFeatures.map((feature) => {
             const Icon = feature.icon;
             return (
               <div
                 key={feature.id}
                 onClick={() => navigate(feature.path)}
-                className="bg-white border-2 border-[#ffb700] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 hover:border-[#e6a500]"
+                className="bg-white border-2 border-[#ffb700] rounded-[10px] shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 hover:border-[#e6a500]"
               >
-                <div className="p-6">
-                  <div className={`${feature.color} p-3 rounded-lg inline-block mb-4`}>
-                    <Icon className="w-6 h-6 text-white" />
+                <div className="p-5">
+                  <div className={`${feature.color} p-2 rounded-lg inline-block mb-3`}>
+                    <Icon className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{feature.description}</p>
+                  <h3 className="text-lg font-bold text-gray-800 mb-2">{feature.title}</h3>
+                  <p className="text-gray-600 text-sm mb-3">{feature.description}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-[#ffb700] font-medium text-sm">Başla →</span>
                   </div>

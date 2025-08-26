@@ -301,16 +301,21 @@ export const Dashboard = () => {
 
 
   return (
-    <div className="space-y-4 sm:space-y-6 animate-fade-in">
+    <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 lg:p-6 max-w-7xl mx-auto animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-            Hoş Geldin {user?.fullName?.split(' ')[0] || 'Ersin'} 👋
-          </h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Finansal durumunuzun özeti
-          </p>
+      <div className="bg-gradient-to-br from-[#ffb700] via-[#ff8f00] to-[#e6a500] rounded-2xl p-4 sm:p-6 text-white shadow-xl border border-[#ffb700]/20 mt-6">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 leading-tight">
+              Hoş Geldin {user?.fullName?.split(' ')[0] || 'Ersin'} 👋
+            </h1>
+            <p className="text-white/90 text-sm sm:text-base">
+              Finansal durumunuzun özeti
+            </p>
+          </div>
+          <div className="hidden sm:flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 bg-white/10 rounded-full backdrop-blur-sm">
+            <div className="text-2xl lg:text-4xl">📊</div>
+          </div>
         </div>
       </div>
 
@@ -326,87 +331,87 @@ export const Dashboard = () => {
       />
 
       {/* Uygulama Seçici */}
-      <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-8">
         {/* TeknoFinans */}
         <div 
           onClick={() => navigate('/tekno-finans')}
-          className="bg-white border-2 border-[#ffb700] rounded-xl p-6 text-gray-800 cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#e6a500]"
+          className="group bg-white border-2 border-[#ffb700] rounded-2xl p-4 sm:p-6 text-gray-800 cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:border-[#e6a500] hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="bg-[#ffb700] p-3 rounded-lg">
-              <TrendingUp className="w-8 h-8 text-white" />
+            <div className="bg-gradient-to-br from-[#ffb700] to-[#e6a500] p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-shadow">
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold">💰</div>
+              <div className="text-xl sm:text-2xl font-bold group-hover:scale-110 transition-transform">💰</div>
             </div>
           </div>
-          <h3 className="text-xl font-bold mb-2">TeknoFinans</h3>
-          <p className="text-gray-600 text-sm mb-4">Finansal hayatınızı yönetin</p>
-          <div className="flex flex-wrap gap-2">
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Gelir/Gider</span>
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Portföy</span>
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Hedefler</span>
+          <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-[#e6a500] transition-colors">TeknoFinans</h3>
+          <p className="text-gray-600 text-xs sm:text-sm mb-4">Finansal hayatınızı yönetin</p>
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Gelir/Gider</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Portföy</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Hedefler</span>
           </div>
         </div>
 
         {/* TeknoKapsül */}
         <div 
           onClick={() => navigate('/tekno-kapsul')}
-          className="bg-white border-2 border-[#ffb700] rounded-xl p-6 text-gray-800 cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#e6a500]"
+          className="group bg-white border-2 border-[#ffb700] rounded-2xl p-4 sm:p-6 text-gray-800 cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:border-[#e6a500] hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="bg-[#ffb700] p-3 rounded-lg">
-              <Apps className="w-8 h-8 text-white" />
+            <div className="bg-gradient-to-br from-[#ffb700] to-[#e6a500] p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-shadow">
+              <Apps className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold">🛠</div>
+              <div className="text-xl sm:text-2xl font-bold group-hover:scale-110 transition-transform">🛠</div>
             </div>
           </div>
-          <h3 className="text-xl font-bold mb-2">TeknoKapsül</h3>
-          <p className="text-gray-600 text-sm mb-4">Araçlar ve hizmetler</p>
-          <div className="flex flex-wrap gap-2">
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Kargo Takip</span>
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Abonelikler</span>
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Garanti</span>
+          <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-[#e6a500] transition-colors">TeknoKapsül</h3>
+          <p className="text-gray-600 text-xs sm:text-sm mb-4">Araçlar ve hizmetler</p>
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Kargo Takip</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Abonelikler</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Garanti</span>
           </div>
         </div>
 
         {/* TeknoHizmet */}
         <div 
           onClick={() => navigate('/tekno-hizmet')}
-          className="bg-white border-2 border-[#ffb700] rounded-xl p-6 text-gray-800 cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:border-[#e6a500]"
+          className="group bg-white border-2 border-[#ffb700] rounded-2xl p-4 sm:p-6 text-gray-800 cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:border-[#e6a500] hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5"
         >
           <div className="flex items-center justify-between mb-4">
-            <div className="bg-[#ffb700] p-3 rounded-lg">
-              <Wrench className="w-8 h-8 text-white" />
+            <div className="bg-gradient-to-br from-[#ffb700] to-[#e6a500] p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-shadow">
+              <Wrench className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold">🔧</div>
+              <div className="text-xl sm:text-2xl font-bold group-hover:scale-110 transition-transform">🔧</div>
             </div>
           </div>
-          <h3 className="text-xl font-bold mb-2">TeknoHizmet</h3>
-          <p className="text-gray-600 text-sm mb-4">Hizmet sağlayıcıları</p>
-          <div className="flex flex-wrap gap-2">
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Ev Hizmetleri</span>
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Otomotiv</span>
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded text-xs">Güzellik</span>
+          <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-[#e6a500] transition-colors">TeknoHizmet</h3>
+          <p className="text-gray-600 text-xs sm:text-sm mb-4">Hizmet sağlayıcıları</p>
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Ev Hizmetleri</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Otomotiv</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Güzellik</span>
           </div>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4">
         {stats.map((stat, index) => (
-          <div key={index} className="card card-interactive p-4 animate-bounce-in" style={{ animationDelay: `${index * 0.1}s` }}>
+          <div key={index} className="group bg-white rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-lg border border-gray-100 hover:border-[#ffb700]/30 transition-all duration-300 animate-bounce-in cursor-pointer" style={{ animationDelay: `${index * 0.1}s` }}>
             <div className="flex items-center justify-between mb-2">
-              <div className={`p-2 rounded-lg ${stat.color} text-white`}>
-                <stat.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className={`p-2 rounded-xl ${stat.color} text-white shadow-sm group-hover:shadow-md transition-shadow`}>
+                <stat.icon className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
               </div>
             </div>
             <div>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-1">{stat.label}</p>
-              <p className="text-lg sm:text-xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-xs text-muted-foreground mt-1">{stat.trend}</p>
+              <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium">{stat.label}</p>
+              <p className="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 group-hover:text-[#e6a500] transition-colors">{stat.value}</p>
+              <p className="text-xs text-gray-500 mt-1">{stat.trend}</p>
             </div>
           </div>
         ))}
@@ -415,23 +420,25 @@ export const Dashboard = () => {
 
 
       {/* Portföy - Tam Genişlik */}
-      <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/portfolio')}>
+      <div className="group bg-white rounded-2xl p-4 sm:p-6 cursor-pointer hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ffb700]/30 hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5" onClick={() => navigate('/portfolio')}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium">Portföy</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-[#e6a500] transition-colors">Portföy</h2>
           <div className="flex items-center gap-2">
             <button 
               onClick={(e) => {
                 e.stopPropagation();
                 navigate('/portfolio');
               }}
-              className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+              className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium hover:bg-blue-50 px-2 py-1 rounded-full transition-colors"
             >
               Tümünü Gör <ExternalLink className="w-3 h-3" />
             </button>
-            <DollarSign className="w-5 h-5" style={{ color: '#ffb700' }} />
+            <div className="p-2 bg-gradient-to-br from-[#ffb700] to-[#e6a500] rounded-xl shadow-sm">
+              <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
           {portfolioItems.length > 0 ? (
             <>
               {/* Toplam TL Değeri */}
@@ -549,22 +556,24 @@ export const Dashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Kredi Kartları */}
-        <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/financial')}>
+        <div className="group bg-white rounded-2xl p-4 sm:p-6 cursor-pointer hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ffb700]/30 hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5" onClick={() => navigate('/financial')}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Kredi Kartları</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-[#e6a500] transition-colors">Kredi Kartları</h2>
             <div className="flex items-center gap-2">
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   navigate('/financial');
                 }}
-                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium hover:bg-blue-50 px-2 py-1 rounded-full transition-colors"
               >
                 Tümünü Gör <ExternalLink className="w-3 h-3" />
               </button>
-              <CreditCard className="w-5 h-5" style={{ color: '#ffb700' }} />
+              <div className="p-2 bg-gradient-to-br from-[#ffb700] to-[#e6a500] rounded-xl shadow-sm">
+                <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
             </div>
           </div>
           <div className="space-y-3">
@@ -616,20 +625,22 @@ export const Dashboard = () => {
         </div>
 
         {/* Avans Hesapları */}
-        <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/financial')}>
+        <div className="group bg-white rounded-2xl p-4 sm:p-6 cursor-pointer hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ffb700]/30 hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5" onClick={() => navigate('/financial')}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Avans Hesapları</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-[#e6a500] transition-colors">Avans Hesapları</h2>
             <div className="flex items-center gap-2">
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   navigate('/financial');
                 }}
-                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium hover:bg-blue-50 px-2 py-1 rounded-full transition-colors"
               >
                 Tümünü Gör <ExternalLink className="w-3 h-3" />
               </button>
-              <Banknote className="w-5 h-5" style={{ color: '#ffb700' }} />
+              <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-sm">
+                <Banknote className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
             </div>
           </div>
           <div className="space-y-3">
@@ -675,20 +686,22 @@ export const Dashboard = () => {
         </div>
 
         {/* Krediler */}
-        <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/financial')}>
+        <div className="group bg-white rounded-2xl p-4 sm:p-6 cursor-pointer hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ffb700]/30 hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5" onClick={() => navigate('/financial')}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Krediler</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-[#e6a500] transition-colors">Krediler</h2>
             <div className="flex items-center gap-2">
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   navigate('/financial');
                 }}
-                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium hover:bg-blue-50 px-2 py-1 rounded-full transition-colors"
               >
                 Tümünü Gör <ExternalLink className="w-3 h-3" />
               </button>
-              <PiggyBank className="w-5 h-5" style={{ color: '#ffb700' }} />
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-sm">
+                <PiggyBank className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
             </div>
           </div>
           <div className="space-y-3">
@@ -737,20 +750,22 @@ export const Dashboard = () => {
       {/* Yaklaşan Ödemeler ve Abonelikler */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Yaklaşan Ödemeler */}
-        <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/expenses')}>
+        <div className="group bg-white rounded-2xl p-4 sm:p-6 cursor-pointer hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ffb700]/30 hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5" onClick={() => navigate('/expenses')}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Yaklaşan Ödemeler</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-[#e6a500] transition-colors">Yaklaşan Ödemeler</h2>
             <div className="flex items-center gap-2">
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   navigate('/expenses');
                 }}
-                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium hover:bg-blue-50 px-2 py-1 rounded-full transition-colors"
               >
                 Tümünü Gör <ExternalLink className="w-3 h-3" />
               </button>
-              <AlertCircle className="w-5 h-5" style={{ color: '#ef4444' }} />
+              <div className="p-2 bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-sm">
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
             </div>
           </div>
          
@@ -780,20 +795,22 @@ export const Dashboard = () => {
        </div>
 
         {/* Yaklaşan Abonelikler */}
-        <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/subscriptions')}>
+        <div className="group bg-white rounded-2xl p-4 sm:p-6 cursor-pointer hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ffb700]/30 hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5" onClick={() => navigate('/subscriptions')}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Yaklaşan Abonelikler</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-[#e6a500] transition-colors">Yaklaşan Abonelikler</h2>
             <div className="flex items-center gap-2">
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   navigate('/subscriptions');
                 }}
-                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium hover:bg-blue-50 px-2 py-1 rounded-full transition-colors"
               >
                 Tümünü Gör <ExternalLink className="w-3 h-3" />
               </button>
-              <Calendar className="w-5 h-5" style={{ color: '#8b5cf6' }} />
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-sm">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
             </div>
           </div>
          
@@ -835,20 +852,22 @@ export const Dashboard = () => {
       {/* Son Kargolar ve Kargo Durumu */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Son Kargolarınız */}
-        <div className="card p-4 sm:p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/cargo-tracking')}>
+        <div className="group bg-white rounded-2xl p-4 sm:p-6 cursor-pointer hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ffb700]/30 hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5" onClick={() => navigate('/cargo-tracking')}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Son Kargolarınız</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-[#e6a500] transition-colors">Son Kargolarınız</h2>
             <div className="flex items-center gap-2">
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
                   navigate('/cargo-tracking');
                 }}
-                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium hover:bg-blue-50 px-2 py-1 rounded-full transition-colors"
               >
                 Tümünü Gör <ExternalLink className="w-3 h-3" />
               </button>
-              <Package className="w-5 h-5" style={{ color: '#ffb700' }} />
+              <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl shadow-sm">
+                <Package className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
             </div>
           </div>
          
@@ -903,17 +922,19 @@ export const Dashboard = () => {
        </div>
 
         {/* Kargo Durumu */}
-        <div className="card p-4 sm:p-6">
+        <div className="group bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 hover:border-[#ffb700]/30 hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5 transition-all duration-300">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Kargo Durumu</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-[#e6a500] transition-colors">Kargo Durumu</h2>
             <div className="flex items-center gap-2">
               <button 
                 onClick={() => navigate('/cargo-tracking')}
-                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium hover:bg-blue-50 px-2 py-1 rounded-full transition-colors"
               >
                 Tümünü Gör <ExternalLink className="w-3 h-3" />
               </button>
-              <Truck className="w-5 h-5" style={{ color: '#10b981' }} />
+              <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-sm">
+                <Truck className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
             </div>
           </div>
          
@@ -955,10 +976,12 @@ export const Dashboard = () => {
       </div>
 
       {/* AI Önerileri - Tam Genişlik */}
-      <div className="card p-4 sm:p-6 min-h-[300px]">
+      <div className="group bg-white rounded-2xl p-4 sm:p-6 min-h-[300px] border border-gray-100 hover:border-[#ffb700]/30 hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5 transition-all duration-300">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-medium">AI Önerileri</h2>
-          <Brain className="w-5 h-5" style={{ color: '#ffb700' }} />
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-[#e6a500] transition-colors">AI Önerileri</h2>
+          <div className="p-2 bg-gradient-to-br from-[#ffb700] to-[#e6a500] rounded-xl shadow-sm">
+            <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+          </div>
         </div>
         <div className="space-y-4 min-h-[200px]">
           {aiLoading ? (

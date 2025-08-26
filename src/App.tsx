@@ -13,6 +13,7 @@ import { AuthGuard } from './components/auth/AuthGuard';
 
 // Route components
 import { Dashboard } from './components/Dashboard';
+import { HomePage } from './components/HomePage';
 import Services from './pages/services/ServicesPage';
 
 import { SubscriptionsPage } from './pages/subscriptions/SubscriptionsPage';
@@ -69,6 +70,8 @@ import PharmacyPage from './pages/PharmacyPage';
 import WebViewAuthPage from './pages/auth/WebViewAuthPage';
 import { VerifyPage } from './pages/auth/VerifyPage';
 import { IsBankCallbackPage } from './pages/auth/IsBankCallbackPage';
+import AppTabs from './components/common/AppTabs';
+import { useLocation } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
   <AuthGuard>
@@ -79,6 +82,37 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
     </AppLayout>
   </AuthGuard>
 );
+
+const TeknoRoute = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  
+  const getCurrentApp = (): 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' => {
+    if (location.pathname.startsWith('/tekno-finans')) return 'tekno-finans';
+    if (location.pathname.startsWith('/tekno-hizmet')) return 'tekno-hizmet';
+    return 'tekno-kapsul';
+  };
+
+  return (
+    <AuthGuard>
+      <div className="min-h-screen bg-gray-50">
+        <AppTabs currentApp={getCurrentApp()} />
+        <MobileNavigation />
+        <OfflineIndicator />
+        {children}
+      </div>
+    </AuthGuard>
+  );
+};
+
+const MobileHomeRedirect = ({ children }: { children: React.ReactNode }) => {
+  const isMobile = window.innerWidth < 1024; // lg breakpoint
+  
+  if (isMobile) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
 const router = createBrowserRouter([
   {
@@ -99,73 +133,73 @@ const router = createBrowserRouter([
   },
   {
     path: '/dashboard',
-    element: <ProtectedRoute><Dashboard /></ProtectedRoute>
+    element: <TeknoRoute><Dashboard /></TeknoRoute>
   },
   {
     path: '/services',
-    element: <ProtectedRoute><Services /></ProtectedRoute>
+    element: <TeknoRoute><Services /></TeknoRoute>
   },
 
   {
     path: '/subscriptions',
-    element: <ProtectedRoute><SubscriptionsPage /></ProtectedRoute>
+    element: <TeknoRoute><SubscriptionsPage /></TeknoRoute>
   },
   {
     path: '/analytics',
-    element: <ProtectedRoute><FinancialAnalytics /></ProtectedRoute>
+    element: <TeknoRoute><FinancialAnalytics /></TeknoRoute>
   },
 
   {
     path: '/income',
-    element: <ProtectedRoute><IncomePage /></ProtectedRoute>
+    element: <TeknoRoute><IncomePage /></TeknoRoute>
   },
   {
     path: '/expenses',
-    element: <ProtectedRoute><ExpensePage /></ProtectedRoute>
+    element: <TeknoRoute><ExpensePage /></TeknoRoute>
   },
   {
     path: '/financial-data',
-    element: <ProtectedRoute><FinancialDataPage /></ProtectedRoute>
+    element: <TeknoRoute><FinancialDataPage /></TeknoRoute>
   },
   {
     path: '/settings',
-    element: <ProtectedRoute><SettingsPage /></ProtectedRoute>
+    element: <TeknoRoute><SettingsPage /></TeknoRoute>
   },
   {
     path: '/notes',
-    element: <ProtectedRoute><NotesPage /></ProtectedRoute>
+    element: <TeknoRoute><NotesPage /></TeknoRoute>
   },
   {
     path: '/calendar',
-    element: <ProtectedRoute><CalendarPage /></ProtectedRoute>
+    element: <TeknoRoute><CalendarPage /></TeknoRoute>
   },
   {
     path: '/notifications',
-    element: <ProtectedRoute><NotificationsPage /></ProtectedRoute>
+    element: <TeknoRoute><NotificationsPage /></TeknoRoute>
   },
   {
     path: '/faq',
-    element: <ProtectedRoute><FAQPage /></ProtectedRoute>
+    element: <TeknoRoute><FAQPage /></TeknoRoute>
   },
   {
     path: '/other',
-    element: <ProtectedRoute><OtherPage /></ProtectedRoute>
+    element: <TeknoRoute><OtherPage /></TeknoRoute>
   },
   {
     path: '/cargo-tracking',
-    element: <ProtectedRoute><CargoTrackingPage /></ProtectedRoute>
+    element: <TeknoRoute><CargoTrackingPage /></TeknoRoute>
   },
   {
     path: '/ai-assistant',
-    element: <ProtectedRoute><AIAssistantPage /></ProtectedRoute>
+    element: <TeknoRoute><AIAssistantPage /></TeknoRoute>
   },
   {
     path: '/services-list',
-    element: <ProtectedRoute><ServicesListPage /></ProtectedRoute>
+    element: <TeknoRoute><ServicesListPage /></TeknoRoute>
   },
   {
     path: '/application/:serviceId',
-    element: <ProtectedRoute><ApplicationPage /></ProtectedRoute>
+    element: <TeknoRoute><ApplicationPage /></TeknoRoute>
   },
   {
     path: '/application',
@@ -173,38 +207,38 @@ const router = createBrowserRouter([
   },
   {
     path: '/financial',
-    element: <ProtectedRoute><FinancialDataPage /></ProtectedRoute>
+    element: <TeknoRoute><FinancialDataPage /></TeknoRoute>
   },
   {
     path: '/credit-score',
-    element: <ProtectedRoute><CreditScorePage /></ProtectedRoute>
+    element: <TeknoRoute><CreditScorePage /></TeknoRoute>
   },
   {
     path: '/warranty-tracking',
-    element: <ProtectedRoute><WarrantyTrackingPage /></ProtectedRoute>
+    element: <TeknoRoute><WarrantyTrackingPage /></TeknoRoute>
   },
 
   {
     path: '/portfolio',
-    element: <ProtectedRoute><PortfolioPage /></ProtectedRoute>
+    element: <TeknoRoute><PortfolioPage /></TeknoRoute>
   },
   {
     path: '/stock-market',
-    element: <ProtectedRoute><StockMarketPage /></ProtectedRoute>
+    element: <TeknoRoute><StockMarketPage /></TeknoRoute>
   },
   {
     path: '/mobile-finance',
-    element: <ProtectedRoute><MobileFinancePage /></ProtectedRoute>
+    element: <TeknoRoute><MobileFinancePage /></TeknoRoute>
   },
   {
     path: '/teknokapsul',
-    element: <ProtectedRoute><TeknokapsulPage /></ProtectedRoute>
+    element: <TeknoRoute><TeknokapsulPage /></TeknoRoute>
   },
 
 
   {
     path: '/shop-rewards',
-    element: <ProtectedRoute><ShopRewardsPage /></ProtectedRoute>
+    element: <TeknoRoute><ShopRewardsPage /></TeknoRoute>
   },
 
   // Harcadıkça kazan rotası geçici olarak kaldırıldı
@@ -214,35 +248,35 @@ const router = createBrowserRouter([
   // },
   {
     path: '/other/shop-rewards',
-    element: <ProtectedRoute><ShopRewardsPage /></ProtectedRoute>
+    element: <TeknoRoute><ShopRewardsPage /></TeknoRoute>
   },
   {
     path: '/other/checkout',
-    element: <ProtectedRoute><CheckoutPage /></ProtectedRoute>
+    element: <TeknoRoute><CheckoutPage /></TeknoRoute>
   },
   {
     path: '/other/order-success',
-    element: <ProtectedRoute><OrderSuccessPage /></ProtectedRoute>
+    element: <TeknoRoute><OrderSuccessPage /></TeknoRoute>
   },
   {
     path: '/other/my-orders',
-    element: <ProtectedRoute><MyOrdersPage /></ProtectedRoute>
+    element: <TeknoRoute><MyOrdersPage /></TeknoRoute>
   },
   {
     path: '/goals',
-    element: <ProtectedRoute><GoalsPage /></ProtectedRoute>
+    element: <TeknoRoute><GoalsPage /></TeknoRoute>
   },
   {
     path: '/budget',
-    element: <ProtectedRoute><BudgetPage /></ProtectedRoute>
+    element: <TeknoRoute><BudgetPage /></TeknoRoute>
   },
   {
     path: '/documents',
-    element: <ProtectedRoute><DocumentsPage /></ProtectedRoute>
+    element: <TeknoRoute><DocumentsPage /></TeknoRoute>
   },
   {
     path: '/admin',
-    element: <ProtectedRoute><AdminPage /></ProtectedRoute>
+    element: <TeknoRoute><AdminPage /></TeknoRoute>
   },
   // Premium rotaları geçici olarak kaldırıldı
   // {
@@ -267,101 +301,101 @@ const router = createBrowserRouter([
   // },
   {
     path: '/test/responsive',
-    element: <ProtectedRoute><ResponsiveTestPage /></ProtectedRoute>
+    element: <TeknoRoute><ResponsiveTestPage /></TeknoRoute>
   },
   {
     path: '/work-tracking',
-    element: <ProtectedRoute><WorkTrackingPage /></ProtectedRoute>
+    element: <TeknoRoute><WorkTrackingPage /></TeknoRoute>
   },
   {
     path: '/pharmacy',
-    element: <ProtectedRoute><PharmacyPage /></ProtectedRoute>
+    element: <TeknoRoute><PharmacyPage /></TeknoRoute>
   },
   {
     path: '/credit-calculator',
-    element: <ProtectedRoute><CreditCalculatorPage2 /></ProtectedRoute>
+    element: <TeknoRoute><CreditCalculatorPage2 /></TeknoRoute>
   },
   {
     path: '/tekno-finans',
-    element: <ProtectedRoute><TeknoFinansPage /></ProtectedRoute>
+    element: <TeknoRoute><TeknoFinansPage /></TeknoRoute>
   },
   {
     path: '/tekno-finans/income',
-    element: <ProtectedRoute><IncomePage /></ProtectedRoute>
+    element: <TeknoRoute><IncomePage /></TeknoRoute>
   },
   {
     path: '/tekno-finans/expenses',
-    element: <ProtectedRoute><ExpensePage /></ProtectedRoute>
+    element: <TeknoRoute><ExpensePage /></TeknoRoute>
   },
   {
     path: '/tekno-finans/goals',
-    element: <ProtectedRoute><GoalsPage /></ProtectedRoute>
+    element: <TeknoRoute><GoalsPage /></TeknoRoute>
   },
   {
     path: '/tekno-finans/portfolio',
-    element: <ProtectedRoute><PortfolioPage /></ProtectedRoute>
+    element: <TeknoRoute><PortfolioPage /></TeknoRoute>
   },
   {
     path: '/tekno-finans/stock-market',
-    element: <ProtectedRoute><StockMarketPage /></ProtectedRoute>
+    element: <TeknoRoute><StockMarketPage /></TeknoRoute>
   },
 
   {
     path: '/tekno-finans/financial-data',
-    element: <ProtectedRoute><FinancialDataPage /></ProtectedRoute>
+    element: <TeknoRoute><FinancialDataPage /></TeknoRoute>
   },
   {
     path: '/tekno-finans/credit-score',
-    element: <ProtectedRoute><CreditScorePage /></ProtectedRoute>
+    element: <TeknoRoute><CreditScorePage /></TeknoRoute>
   },
 
   {
     path: '/tekno-finans/credit-calculator',
-    element: <ProtectedRoute><CreditCalculatorPage2 /></ProtectedRoute>
+    element: <TeknoRoute><CreditCalculatorPage2 /></TeknoRoute>
   },
   {
     path: '/tekno-kapsul',
-    element: <ProtectedRoute><TeknoKapsulPage /></ProtectedRoute>
+    element: <TeknoRoute><TeknoKapsulPage /></TeknoRoute>
   },
   {
     path: '/tekno-kapsul/services',
-    element: <ProtectedRoute><Services /></ProtectedRoute>
+    element: <TeknoRoute><Services /></TeknoRoute>
   },
   {
     path: '/tekno-kapsul/cargo-tracking',
-    element: <ProtectedRoute><CargoTrackingPage /></ProtectedRoute>
+    element: <TeknoRoute><CargoTrackingPage /></TeknoRoute>
   },
   {
     path: '/tekno-kapsul/work-tracking',
-    element: <ProtectedRoute><WorkTrackingPage /></ProtectedRoute>
+    element: <TeknoRoute><WorkTrackingPage /></TeknoRoute>
   },
   {
     path: '/tekno-kapsul/documents',
-    element: <ProtectedRoute><DocumentsPage /></ProtectedRoute>
+    element: <TeknoRoute><DocumentsPage /></TeknoRoute>
   },
   {
     path: '/tekno-kapsul/notes',
-    element: <ProtectedRoute><NotesPage /></ProtectedRoute>
+    element: <TeknoRoute><NotesPage /></TeknoRoute>
   },
   {
     path: '/tekno-kapsul/calendar',
-    element: <ProtectedRoute><CalendarPage /></ProtectedRoute>
+    element: <TeknoRoute><CalendarPage /></TeknoRoute>
   },
   {
     path: '/tekno-kapsul/subscriptions',
-    element: <ProtectedRoute><SubscriptionsPage /></ProtectedRoute>
+    element: <TeknoRoute><SubscriptionsPage /></TeknoRoute>
   },
   {
     path: '/tekno-kapsul/warranty-tracking',
-    element: <ProtectedRoute><WarrantyTrackingPage /></ProtectedRoute>
+    element: <TeknoRoute><WarrantyTrackingPage /></TeknoRoute>
   },
   {
     path: '/tekno-hizmet',
-    element: <ProtectedRoute><TeknoHizmetPage /></ProtectedRoute>
+    element: <TeknoRoute><TeknoHizmetPage /></TeknoRoute>
   },
   {
     path: '/sentry-test',
-    element: <ProtectedRoute>
+    element: <TeknoRoute>
       <div className="p-8">
         <h1 className="text-2xl font-bold mb-4">🧪 Sentry Test Sayfası</h1>
         <div className="space-y-4">
@@ -397,11 +431,15 @@ const router = createBrowserRouter([
           </a>
         </div>
       </div>
-    </ProtectedRoute>
+    </TeknoRoute>
   },
   {
     path: '/',
-    element: <Navigate to="/dashboard" replace />
+    element: <AuthGuard>
+      <MobileHomeRedirect>
+        <HomePage />
+      </MobileHomeRedirect>
+    </AuthGuard>
   }
 ]);
 

@@ -463,7 +463,7 @@ const Services = () => {
       </div>
 
       <div className="px-4 py-6 -mt-4">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
 
         {/* Success Message Display */}
         {successMessage && (

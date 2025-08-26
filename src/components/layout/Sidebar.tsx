@@ -15,45 +15,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
   const { signOut } = useAuth();
   // const { isPremium } = usePremium();
 
-  // Hangi uygulamada olduğumuzu belirle
-  const isInTeknoFinans = location.pathname.startsWith('/tekno-finans');
-  const isInTeknoKapsul = location.pathname.startsWith('/tekno-kapsul');
-  const isInMainApp = !isInTeknoFinans && !isInTeknoKapsul;
-
   const dashboardItems = [
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
   ];
 
-  // TeknoFinans menü öğeleri
-  const teknoFinansItems = [
-    { id: 'tekno-finans', path: '/tekno-finans', label: '🏠 Ana Sayfa', icon: Home },
-    { id: 'income', path: '/tekno-finans/income', label: 'Gelirlerim', icon: TrendingUp },
-    { id: 'expenses', path: '/tekno-finans/expenses', label: 'Giderlerim', icon: TrendingDown },
-    { id: 'goals', path: '/tekno-finans/goals', label: 'Hedeflerim', icon: Target },
-    { id: 'portfolio', path: '/tekno-finans/portfolio', label: 'Portföyüm', icon: PieChart },
-    { id: 'stock-market', path: '/tekno-finans/stock-market', label: 'Borsa', icon: BarChart3 },
-    { id: 'financial-data', path: '/tekno-finans/financial-data', label: 'Finansal Verilerim', icon: CreditCard },
-    { id: 'credit-score', path: '/tekno-finans/credit-score', label: 'Findeks Kredi Notu', icon: TrendingUp },
-    { id: 'credit-calculator', path: '/tekno-finans/credit-calculator', label: 'Kredi Hesaplama', icon: Calculator },
-  ];
-
-  // TeknoKapsül menü öğeleri
-  const teknoKapsulItems = [
-    { id: 'tekno-kapsul', path: '/tekno-kapsul', label: '🏠 Ana Sayfa', icon: Home },
-    { id: 'services', path: '/tekno-kapsul/services', label: 'Hizmetler', icon: Apps },
-    { id: 'subscriptions', path: '/tekno-kapsul/subscriptions', label: 'Aboneliklerim', icon: Clock },
-    { id: 'cargo-tracking', path: '/tekno-kapsul/cargo-tracking', label: 'Kargo Takip', icon: Package },
-    { id: 'work-tracking', path: '/tekno-kapsul/work-tracking', label: 'İş Takibi', icon: Briefcase },
-    { id: 'documents', path: '/tekno-kapsul/documents', label: 'Dosyalarım', icon: FolderOpen },
-    { id: 'notes', path: '/tekno-kapsul/notes', label: 'Notlar', icon: StickyNote },
-    { id: 'calendar', path: '/tekno-kapsul/calendar', label: 'Takvim', icon: Calendar },
-    { id: 'warranty-tracking', path: '/tekno-kapsul/warranty-tracking', label: 'Garanti Takibi', icon: Shield },
-  ];
-
-  // Ana uygulama menü öğeleri (eski sistem)
   const financeItems = [
     { id: 'income', path: '/income', label: 'Gelirlerim', icon: TrendingUp },
     { id: 'expenses', path: '/expenses', label: 'Giderlerim', icon: TrendingDown },
+    // { id: 'budget', path: '/budget', label: 'Bütçe Planlama', icon: Wallet }, // Geçici olarak gizlendi
     { id: 'goals', path: '/goals', label: 'Hedeflerim', icon: Target },
     { id: 'portfolio', path: '/portfolio', label: 'Portföyüm', icon: PieChart },
     { id: 'stock-market', path: '/stock-market', label: 'Borsa', icon: BarChart3 },
@@ -127,186 +96,96 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4">
-          {/* Uygulama Geçiş Butonu */}
-          {(isInTeknoFinans || isInTeknoKapsul) && (
-            <div className="mb-6">
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
-              >
-                <Apps className="w-6 h-6" />
-                {!isCollapsed && <span className="font-medium">← Uygulamalar</span>}
-              </button>
-            </div>
-          )}
+          {/* Dashboard */}
+          <div className="mb-6">
+            <ul className="space-y-1">
+              {dashboardItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => navigate(item.path)}
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                      title={isCollapsed ? item.label : undefined}
+                    >
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && <span className="font-medium">{item.label}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
 
-          {/* TeknoFinans Menüsü */}
-          {isInTeknoFinans && (
-            <div className="mb-6">
-              {!isCollapsed && (
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-                  💰 TeknoFinans
-                </h3>
-              )}
-              <ul className="space-y-1">
-                {teknoFinansItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  
-                  return (
-                    <li key={item.id}>
-                      <button
-                        onClick={() => navigate(item.path)}
-                        className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
-                          isActive 
-                            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                        title={isCollapsed ? item.label : undefined}
-                      >
-                        <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
-                        {!isCollapsed && <span className="font-medium">{item.label}</span>}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
+          {/* Finansal Yönetim */}
+          <div className="mb-6">
+            {!isCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+                Finansal Yönetim
+              </h3>
+            )}
+            <ul className="space-y-1">
+              {financeItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => navigate(item.path)}
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                      title={isCollapsed ? item.label : undefined}
+                    >
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && <span className="font-medium">{item.label}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
 
-          {/* TeknoKapsül Menüsü */}
-          {isInTeknoKapsul && (
-            <div className="mb-6">
-              {!isCollapsed && (
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-                  🛠 TeknoKapsül
-                </h3>
-              )}
-              <ul className="space-y-1">
-                {teknoKapsulItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  
-                  return (
-                    <li key={item.id}>
-                      <button
-                        onClick={() => navigate(item.path)}
-                        className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
-                          isActive 
-                            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                        title={isCollapsed ? item.label : undefined}
-                      >
-                        <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
-                        {!isCollapsed && <span className="font-medium">{item.label}</span>}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-
-          {/* Ana Uygulama Menüsü */}
-          {isInMainApp && (
-            <>
-              {/* Dashboard */}
-              <div className="mb-6">
-                <ul className="space-y-1">
-                  {dashboardItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = location.pathname === item.path;
-                    
-                    return (
-                      <li key={item.id}>
-                        <button
-                          onClick={() => navigate(item.path)}
-                          className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
-                            isActive 
-                              ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                          }`}
-                          title={isCollapsed ? item.label : undefined}
-                        >
-                          <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
-                          {!isCollapsed && <span className="font-medium">{item.label}</span>}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </>
-          )}
-
-          {/* Main App - Finansal Yönetim */}
-          {isInMainApp && (
-            <div className="mb-6">
-              {!isCollapsed && (
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-                  Finansal Yönetim
-                </h3>
-              )}
-              <ul className="space-y-1">
-                {financeItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  
-                  return (
-                    <li key={item.id}>
-                      <button
-                        onClick={() => navigate(item.path)}
-                        className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
-                          isActive 
-                            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                        title={isCollapsed ? item.label : undefined}
-                      >
-                        <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
-                        {!isCollapsed && <span className="font-medium">{item.label}</span>}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-
-          {/* Main App - Veri Analizi */}
-          {isInMainApp && (
-            <div className="mb-6">
-              {!isCollapsed && (
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-                  Veri Analizi
-                </h3>
-              )}
-              <ul className="space-y-1">
-                {dataItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  
-                  return (
-                    <li key={item.id}>
-                      <button
-                        onClick={() => navigate(item.path)}
-                        className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
-                          isActive 
-                            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                        title={isCollapsed ? item.label : undefined}
-                      >
-                        <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
-                        {!isCollapsed && <span className="font-medium">{item.label}</span>}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
+          {/* Veri Analizi */}
+          <div className="mb-6">
+            {!isCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+                Veri Analizi
+              </h3>
+            )}
+            <ul className="space-y-1">
+              {dataItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => navigate(item.path)}
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                      title={isCollapsed ? item.label : undefined}
+                    >
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && <span className="font-medium">{item.label}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
 
           {/* Premium */}
           {/* <div className="mb-6">
@@ -349,107 +228,101 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
             </ul>
           </div> */}
 
-          {/* Main App - Hizmetler */}
-          {isInMainApp && (
-            <div className="mb-6">
-              {!isCollapsed && (
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-                  Hizmetler
-                </h3>
-              )}
-              <ul className="space-y-1">
-                {servicesItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  
-                  return (
-                    <li key={item.id}>
-                      <button
-                        onClick={() => navigate(item.path)}
-                        className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
-                          isActive 
-                            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                        title={isCollapsed ? item.label : undefined}
-                      >
-                        <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
-                        {!isCollapsed && <span>{item.label}</span>}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
+          {/* Hizmetler */}
+          <div className="mb-6">
+            {!isCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+                Hizmetler
+              </h3>
+            )}
+            <ul className="space-y-1">
+              {servicesItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => navigate(item.path)}
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                      title={isCollapsed ? item.label : undefined}
+                    >
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && <span>{item.label}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
 
-          {/* Main App - Araçlar */}
-          {isInMainApp && (
-            <div className="mb-6">
-              {!isCollapsed && (
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-                  Araçlar
-                </h3>
-              )}
-              <ul className="space-y-1">
-                {toolsItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  
-                  return (
-                    <li key={item.id}>
-                      <button
-                        onClick={() => navigate(item.path)}
-                        className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
-                          isActive 
-                            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                        title={isCollapsed ? item.label : undefined}
-                      >
-                        <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
-                        {!isCollapsed && <span>{item.label}</span>}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
+          {/* Araçlar */}
+          <div className="mb-6">
+            {!isCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+                Araçlar
+              </h3>
+            )}
+            <ul className="space-y-1">
+              {toolsItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => navigate(item.path)}
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                      title={isCollapsed ? item.label : undefined}
+                    >
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && <span>{item.label}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
 
-          {/* Main App - Destek */}
-          {isInMainApp && (
-            <div>
-              {!isCollapsed && (
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
-                  Destek
-                </h3>
-              )}
-              <ul className="space-y-1">
-                {supportItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  
-                  return (
-                    <li key={item.id}>
-                      <button
-                        onClick={() => navigate(item.path)}
-                        className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
-                          isActive 
-                            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                        title={isCollapsed ? item.label : undefined}
-                      >
-                        <Icon className={`w-6 h-6 ${isActive ? 'text-yellow-600' : ''}`} />
-                        {!isCollapsed && <span>{item.label}</span>}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
+          {/* Destek */}
+          <div>
+            {!isCollapsed && (
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-4">
+                Destek
+              </h3>
+            )}
+            <ul className="space-y-1">
+              {supportItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => navigate(item.path)}
+                      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                      title={isCollapsed ? item.label : undefined}
+                    >
+                      <Icon className={`w-6 h-6 ${isActive ? 'text-yellow-600' : ''}`} />
+                      {!isCollapsed && <span>{item.label}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </nav>
 
         <div className="p-4 border-t">

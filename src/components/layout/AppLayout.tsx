@@ -18,11 +18,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  
-  // Anasayfada, dashboard'da ve uygulama sayfalarında sidebar'ı gizle
-  const isHomePage = location.pathname === '/' || location.pathname === '/dashboard' || 
-                     location.pathname === '/tekno-finans' || location.pathname === '/tekno-kapsul' || 
-                     location.pathname === '/tekno-hizmet';
 
   // Scroll position management
   useEffect(() => {
@@ -65,11 +60,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         </div>
       </div>
 
-      {/* Sidebar - Masaüstü ve büyük tabletlerde görünür (anasayfa hariç) */}
-      {!isHomePage && <Sidebar onCollapseChange={setSidebarCollapsed} />}
+      {/* Sidebar - Masaüstü ve büyük tabletlerde görünür */}
+      <Sidebar onCollapseChange={setSidebarCollapsed} />
 
       {/* Ana İçerik - Responsive padding */}
-      <div className={`${!isHomePage ? (sidebarCollapsed ? 'xl:pl-20' : 'xl:pl-64') : ''} pb-16 md:pb-0 xl:pb-0 pt-16 md:pt-16 xl:pt-0 transition-all duration-300`}>
+      <div className={`${sidebarCollapsed ? 'xl:pl-20' : 'xl:pl-64'} pb-16 md:pb-0 xl:pb-0 pt-16 md:pt-16 xl:pt-0 transition-all duration-300`}>
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-8">
           {children}
         </div>

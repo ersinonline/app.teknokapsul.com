@@ -77,8 +77,8 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
               </div>
           </div>
           
-          {/* Ana Menü - Tablet Landscape */}
-          <div className="hidden lg:flex items-center gap-1">
+          {/* Ana Menü - Sadece Desktop */}
+          <div className="hidden xl:flex items-center gap-1">
             {mainMenuItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -94,7 +94,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
                   }`}
                 >
                   <Icon className="w-4 h-4" />
-                  <span className="hidden xl:block">{item.label}</span>
+                  <span>{item.label}</span>
                 </button>
               );
             })}
@@ -102,7 +102,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
 
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-600 hidden sm:block">
-              {user?.displayName || user?.email}
+              {user?.fullName || user?.primaryEmailAddress?.emailAddress}
             </span>
             <button
               onClick={handleSignOut}
