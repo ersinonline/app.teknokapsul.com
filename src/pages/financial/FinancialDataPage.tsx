@@ -55,11 +55,57 @@ const formatNumberWithCommas = (value: string): string => {
   return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
+const formatNumberWithDecimal = (value: string): string => {
+  // Rakamları ve virgülü al
+  const cleanValue = value.replace(/[^0-9,]/g, '');
+  
+  // Virgül sayısını kontrol et
+  const commaCount = (cleanValue.match(/,/g) || []).length;
+  if (commaCount > 1) {
+    // Birden fazla virgül varsa, son virgülden sonrasını al
+    const lastCommaIndex = cleanValue.lastIndexOf(',');
+    const beforeComma = cleanValue.substring(0, lastCommaIndex).replace(/,/g, '');
+    const afterComma = cleanValue.substring(lastCommaIndex + 1);
+    return formatDecimalPart(beforeComma, afterComma);
+  }
+  
+  if (cleanValue.includes(',')) {
+    const [integerPart, decimalPart] = cleanValue.split(',');
+    return formatDecimalPart(integerPart, decimalPart);
+  }
+  
+  // Virgül yoksa sadece tam sayı formatla
+  return cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
+const formatDecimalPart = (integerPart: string, decimalPart: string): string => {
+  // Tam sayı kısmını formatla
+  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  // Ondalık kısmını maksimum 2 haneyle sınırla
+  const limitedDecimal = decimalPart.substring(0, 2);
+  return formattedInteger + (limitedDecimal ? ',' + limitedDecimal : '');
+};
+
 const handleNumberInput = (e: React.ChangeEvent<HTMLInputElement>) => {
   const input = e.target;
   const cursorPosition = input.selectionStart;
   const oldValue = input.value;
   const newValue = formatNumberWithCommas(oldValue);
+  
+  input.value = newValue;
+  
+  // Cursor pozisyonunu ayarla
+  if (cursorPosition !== null) {
+    const diff = newValue.length - oldValue.length;
+    input.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
+  }
+};
+
+const handleDecimalInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const input = e.target;
+  const cursorPosition = input.selectionStart;
+  const oldValue = input.value;
+  const newValue = formatNumberWithDecimal(oldValue);
   
   input.value = newValue;
   
@@ -1225,9 +1271,11 @@ export const FinancialDataPage = () => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
               const parseNumber = (value: string | null) => {
-                if (!value) return 0;
-                // Binlik ayırıcıları temizle ve virgülü noktaya çevir
-                return Number(value.replace(/\./g, '').replace(',', '.'));
+                if (!value || typeof value !== 'string') return 0;
+                // Binlik ayırıcıları, boşlukları temizle ve virgülü noktaya çevir
+                const cleanValue = value.trim().replace(/\./g, '').replace(/\s/g, '').replace(',', '.');
+                const parsed = parseFloat(cleanValue);
+                return isNaN(parsed) ? 0 : parsed;
               };
               handleAddCashAdvance({
                 name: formData.get('name'),
@@ -1359,9 +1407,11 @@ export const FinancialDataPage = () => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
               const parseNumber = (value: string | null) => {
-                if (!value) return 0;
-                // Binlik ayırıcıları temizle ve virgülü noktaya çevir
-                return Number(value.replace(/\./g, '').replace(',', '.'));
+                if (!value || typeof value !== 'string') return 0;
+                // Binlik ayırıcıları, boşlukları temizle ve virgülü noktaya çevir
+                const cleanValue = value.trim().replace(/\./g, '').replace(/\s/g, '').replace(',', '.');
+                const parsed = parseFloat(cleanValue);
+                return isNaN(parsed) ? 0 : parsed;
               };
               const startDate = new Date(formData.get('startDate') as string);
               const totalInstallments = Number(formData.get('totalInstallments'));
@@ -1516,9 +1566,10 @@ export const FinancialDataPage = () => {
                       name="interestRate" 
                       type="text" 
                       step="0.01" 
-                      placeholder="2.5" 
-                      defaultValue={editingLoan?.interestRate || ''} 
+                      placeholder="2,50" 
+                      defaultValue={editingLoan?.interestRate ? formatNumberWithDecimal(editingLoan.interestRate.toString()) : ''} 
                       className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
+                      onInput={handleDecimalInput}
                     />
                   </div>
                 </div>
