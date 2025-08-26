@@ -78,7 +78,7 @@ export const useFirebaseData = <T extends DataType>(
   const { user } = useAuth();
 
   const fetchData = async () => {
-    if (!user?.uid) {
+    if (!user?.id) {
       setData([]);
       setLoading(false);
       return;

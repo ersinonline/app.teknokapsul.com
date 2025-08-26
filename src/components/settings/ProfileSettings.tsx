@@ -4,8 +4,8 @@ import { useAuth } from '../../contexts/AuthContext';
 
 export const ProfileSettings = () => {
   const { user } = useAuth();
-  const [avatarUrl, setAvatarUrl] = useState(user?.photoURL || '');
-  const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [avatarUrl, setAvatarUrl] = useState(user?.imageUrl || '');
+  const [displayName, setDisplayName] = useState(user?.fullName || '');
 
   const handleProfileUpdate = async () => {
     // Profil güncelleme işlemleri

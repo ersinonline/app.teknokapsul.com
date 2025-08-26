@@ -68,7 +68,7 @@ export const AIChatPage: React.FC = () => {
     const welcomeMessage: Message = {
       id: '1',
       type: 'ai',
-      content: `Merhaba ${user?.displayName || 'Kullanıcı'}! Ben TeknoKapsül AI asistanınızım. Finansal sorularınızda size yardımcı olmak için buradayım. Size nasıl yardımcı olabilirim?`,
+      content: `Merhaba ${user?.fullName || 'Kullanıcı'}! Ben TeknoKapsül AI asistanınızım. Finansal sorularınızda size yardımcı olmak için buradayım. Size nasıl yardımcı olabilirim?`,
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);

@@ -60,7 +60,7 @@ const OrderSuccessPage: React.FC = () => {
             postalCode: orderInfo.shippingAddress.postalCode
           };
 
-          await createOrder(user!.uid, {
+          await createOrder(user!.id, {
             orderNumber,
             items: orderItems,
             total: orderInfo.cartTotal,
@@ -96,7 +96,7 @@ const OrderSuccessPage: React.FC = () => {
 
           // Puanları kullan
           if (orderInfo.pointsToUse > 0) {
-            await usePointsFunction(user!.uid, orderInfo.pointsToUse);
+            await usePointsFunction(user!.id, orderInfo.pointsToUse);
           }
 
           // Sipariş bilgilerini state'e kaydet

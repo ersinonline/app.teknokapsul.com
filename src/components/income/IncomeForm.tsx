@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Income, IncomeFormData, INCOME_CATEGORIES } from '../../types/income';
-import { formatNumberWithThousandsSeparator, parseFormattedNumber } from '../../utils/numberFormat';
 
 interface IncomeFormProps {
   onSubmit: (data: IncomeFormData) => Promise<void>;
@@ -51,14 +50,13 @@ export const IncomeForm: React.FC<IncomeFormProps> = ({ onSubmit, initialData, i
           Tutar (TL) *
         </label>
         <input
-          type="text"
-          value={formData.amount ? formatNumberWithThousandsSeparator(formData.amount) : ''}
-          onChange={(e) => {
-            const numericValue = parseFormattedNumber(e.target.value);
-            handleChange('amount', numericValue);
-          }}
+          type="number"
+          value={formData.amount}
+          onChange={(e) => handleChange('amount', parseFloat(e.target.value) || 0)}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-          placeholder="0"
+          placeholder="0.00"
+          min="0"
+          step="0.01"
           required
         />
       </div>

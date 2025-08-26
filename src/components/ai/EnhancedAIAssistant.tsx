@@ -71,7 +71,7 @@ export const EnhancedAIAssistant: React.FC = () => {
     // Hoş geldin mesajı göster
     setMessages([{
       id: 'welcome',
-      text: `Merhaba ${user?.displayName?.split(' ')[0] || 'Kullanıcı'}! Ben TeknoBOT, size finansal konularda yardımcı olacağım. Portföy analizi, başvuru işlemleri, destek talepleri ve daha fazlası için buradayım!`,
+      text: `Merhaba ${user?.firstName || 'Kullanıcı'}! Ben TeknoBOT, size finansal konularda yardımcı olacağım. Portföy analizi, başvuru işlemleri, destek talepleri ve daha fazlası için buradayım!`,
       sender: 'ai',
       timestamp: new Date()
     }]);
@@ -82,7 +82,7 @@ export const EnhancedAIAssistant: React.FC = () => {
   const clearChatHistory = () => {
     setMessages([{
       id: 'welcome',
-      text: `Merhaba ${user?.displayName?.split(' ')[0] || 'Kullanıcı'}! Ben TeknoBOT, size finansal konularda yardımcı olacağım. Portföy analizi, başvuru işlemleri, destek talepleri ve daha fazlası için buradayım!`,
+      text: `Merhaba ${user?.firstName || 'Kullanıcı'}! Ben TeknoBOT, size finansal konularda yardımcı olacağım. Portföy analizi, başvuru işlemleri, destek talepleri ve daha fazlası için buradayım!`,
       sender: 'ai',
       timestamp: new Date()
     }]);
@@ -331,8 +331,8 @@ export const EnhancedAIAssistant: React.FC = () => {
         category: formData.category,
         priority: formData.priority,
         description: formData.description,
-        email: user.email || '',
-        name: user.displayName || 'Kullanıcı'
+        email: user.primaryEmailAddress?.emailAddress || '',
+        name: user.fullName || 'Kullanıcı'
       });
 
       const successMessage: Message = {
@@ -368,7 +368,7 @@ export const EnhancedAIAssistant: React.FC = () => {
     const [formData, setFormData] = useState({
       firstName: '',
       lastName: '',
-      email: user?.email || '',
+      email: user?.primaryEmailAddress?.emailAddress || '',
       phone: '',
       applicationType: '',
       message: ''

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { ExpenseFormData, EXPENSE_CATEGORIES } from '../../types/expense';
 import { useAuth } from '../../contexts/AuthContext';
-import { formatNumberWithThousandsSeparator, parseFormattedNumber } from '../../utils/numberFormat';
 
 interface ExpenseFormProps {
   onSubmit: (data: ExpenseFormData) => void | Promise<void>;
@@ -60,14 +59,13 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, initialData 
           Tutar (₺) *
         </label>
         <input
-          type="text"
-          value={formData.amount ? formatNumberWithThousandsSeparator(formData.amount) : ''}
-          onChange={(e) => {
-            const numericValue = parseFormattedNumber(e.target.value);
-            setFormData({ ...formData, amount: numericValue });
-          }}
-          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-          placeholder="0"
+          type="number"
+          step="0.01"
+          min="0"
+          value={formData.amount}
+          onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-red-500 focus:ring-red-500"
+          placeholder="0.00"
           required
         />
       </div>

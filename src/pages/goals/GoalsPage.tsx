@@ -54,7 +54,7 @@ export const GoalsPage = () => {
     priority: 'medium' as Goal['priority']
   });
 
-  const userGoals = goals.filter(goal => goal.userId === user?.uid);
+  const userGoals = goals.filter(goal => goal.userId === user?.id);
   const activeGoals = userGoals.filter(goal => goal.status !== 'completed');
   const completedGoals = userGoals.filter(goal => goal.status === 'completed');
 

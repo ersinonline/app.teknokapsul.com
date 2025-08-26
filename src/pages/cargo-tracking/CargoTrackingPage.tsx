@@ -90,7 +90,7 @@ export const CargoTrackingPage = () => {
     if (!user || !window.confirm('Bu kargo takibini silmek istediğinizden emin misiniz?')) return;
     
     try {
-      await deleteCargoTracking(user!.uid, id);
+      await deleteCargoTracking(user!.id, id);
       loadCargoList();
     } catch (error) {
       console.error('Error deleting cargo:', error);
@@ -124,7 +124,7 @@ export const CargoTrackingPage = () => {
     if (!user) return;
     
     try {
-      await updateCargoTracking(user!.uid, cargo.id, {
+      await updateCargoTracking(user!.id, cargo.id, {
         isDelivered: !cargo.isDelivered
       });
       loadCargoList();

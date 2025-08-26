@@ -66,16 +66,14 @@ const renderApp = () => {
         <ClerkProvider 
           publishableKey={PUBLISHABLE_KEY}
           localization={trTR}
-          signInFallbackRedirectUrl="/dashboard"
-          signUpFallbackRedirectUrl="/dashboard"
         >
           <App />
         </ClerkProvider>
       </StrictMode>
     );
     
-    // Service Worker kaydı - geçici olarak devre dışı
-    // registerServiceWorker();
+    // Register service worker after app is rendered
+    registerServiceWorker();
   } catch (error) {
     console.error('Error rendering app:', error);
     // Fallback UI in case of an error

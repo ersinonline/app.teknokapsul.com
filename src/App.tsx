@@ -73,7 +73,15 @@ import { IsBankCallbackPage } from './pages/auth/IsBankCallbackPage';
 import AppTabs from './components/common/AppTabs';
 import { useLocation } from 'react-router-dom';
 
-
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
+  <AuthGuard>
+    <AppLayout>
+      <MobileNavigation />
+      <OfflineIndicator />
+      {children}
+    </AppLayout>
+  </AuthGuard>
+);
 
 const TeknoRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();

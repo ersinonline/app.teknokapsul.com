@@ -194,7 +194,7 @@ export const IncomePage: React.FC = () => {
               <h3 className="text-base lg:text-lg font-medium mb-4 text-gray-900">Yeni Gelir Ekle</h3>
               <IncomeForm onSubmit={async (data) => {
                 try {
-                  await addIncome(user!.uid, data);
+                  await addIncome(user!.id, data);
                   handleFormSubmit();
                 } catch (error) {
                   console.error('Error adding income:', error);

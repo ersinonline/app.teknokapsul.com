@@ -206,7 +206,7 @@ export const ExpensePage: React.FC = () => {
               <h3 className="text-base lg:text-lg font-medium mb-4 text-gray-900">Yeni Gider Ekle</h3>
               <ExpenseForm onSubmit={async (data) => {
                 try {
-                  await addExpense(user!.uid, data);
+                  await addExpense(user!.id, data);
                   handleFormSubmit();
                 } catch (error) {
                   console.error('Error adding expense:', error);

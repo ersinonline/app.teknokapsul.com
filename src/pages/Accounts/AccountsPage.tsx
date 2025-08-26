@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Key } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { getPlatformCredentialsByEmail, PlatformCredential } from '../../services/platformCredentials.service';
+import { getPlatformCredentialsByUserId, PlatformCredential } from '../../services/platformCredentials.service';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorMessage } from '../../components/common/ErrorMessage';
 import { EmptyState } from '../../components/common/EmptyState';
@@ -16,10 +16,10 @@ export const AccountsPage = () => {
 
   useEffect(() => {
     const fetchCredentials = async () => {
-      if (!user?.email) return;
+      if (!user?.id) return;
       setLoading(true);
       try {
-        const data = await getPlatformCredentialsByEmail(user.email);
+        const data = await getPlatformCredentialsByUserId(user.id);
         setCredentials(data);
       } catch (err) {
         setError('Veriler yüklenirken bir hata oluştu.');

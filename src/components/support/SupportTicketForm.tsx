@@ -22,7 +22,7 @@ export const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onSuccess,
     category: 'general',
     priority: 'medium',
     email: user?.primaryEmailAddress?.emailAddress || '',
-    name: user?.fullName || user?.firstName || '',
+    name: user?.fullName || '',
     phone: ''
   });
 

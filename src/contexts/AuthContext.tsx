@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useAuth as useClerkAuth, useUser } from '@clerk/clerk-react';
 import { AuthContextType } from '../types/auth';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -10,17 +10,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { isLoaded, isSignedIn, signOut: clerkSignOut } = useClerkAuth();
   const { user: clerkUser } = useUser();
-  const [authReady, setAuthReady] = useState(false);
-
-  useEffect(() => {
-    if (isLoaded) {
-      // Clerk yüklendikten sonra kısa bir gecikme ekle
-      const timer = setTimeout(() => {
-        setAuthReady(true);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoaded]);
 
   const signOut = async () => {
     try {
@@ -59,10 +48,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const value = {
     user: clerkUser || null,
-    loading: !authReady,
+    loading: !isLoaded,
     error: null,
     tokenValid: isSignedIn || false,
-    sessionChecked: authReady,
+    sessionChecked: isLoaded,
     signOut,
     verifyToken,
     checkSession,
@@ -72,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <AuthContext.Provider value={value}>
-      {authReady ? children : <LoadingSpinner />}
+      {isLoaded ? children : <LoadingSpinner />}
     </AuthContext.Provider>
   );
 };
