@@ -195,7 +195,45 @@ export const FinancialDataPage = () => {
     })).sort((a, b) => b.totalLimit - a.totalLimit); // Toplam limite göre sırala
   };
 
+  // Nakit avans hesaplarını bankaya göre grupla
+  const groupCashAdvanceByBank = (accounts: CashAdvanceAccount[]) => {
+    const grouped = accounts.reduce((acc, account) => {
+      if (!acc[account.bank]) {
+        acc[account.bank] = [];
+      }
+      acc[account.bank].push(account);
+      return acc;
+    }, {} as Record<string, CashAdvanceAccount[]>);
+    
+    return Object.entries(grouped).map(([bank, accounts]) => ({
+      bank,
+      accounts: accounts.sort((a, b) => b.limit - a.limit), // Limite göre sırala
+      totalLimit: accounts.reduce((sum, account) => sum + account.limit, 0),
+      totalDebt: accounts.reduce((sum, account) => sum + account.currentDebt, 0)
+    })).sort((a, b) => b.totalLimit - a.totalLimit); // Toplam limite göre sırala
+  };
+
+  // Kredileri bankaya göre grupla
+  const groupLoansByBank = (loans: Loan[]) => {
+    const grouped = loans.reduce((acc, loan) => {
+      if (!acc[loan.bank]) {
+        acc[loan.bank] = [];
+      }
+      acc[loan.bank].push(loan);
+      return acc;
+    }, {} as Record<string, Loan[]>);
+    
+    return Object.entries(grouped).map(([bank, loans]) => ({
+      bank,
+      loans: loans.sort((a, b) => b.totalAmount - a.totalAmount), // Toplam tutara göre sırala
+      totalAmount: loans.reduce((sum, loan) => sum + loan.totalAmount, 0),
+      totalRemaining: loans.reduce((sum, loan) => sum + loan.remainingAmount, 0)
+    })).sort((a, b) => b.totalAmount - a.totalAmount); // Toplam tutara göre sırala
+  };
+
   const groupedCreditCards = groupCardsByBank(creditCards);
+  const groupedCashAdvanceAccounts = groupCashAdvanceByBank(cashAdvanceAccounts);
+  const groupedLoans = groupLoansByBank(loans);
 
   return (
     <div className="p-3 sm:p-6 w-full">
@@ -252,7 +290,7 @@ export const FinancialDataPage = () => {
             {/* Kredi Kartı Özeti - Mobile Responsive */}
             {creditCards.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                <div className="bg-gradient-to-r from-orange-50 to-yellow-100 rounded-lg p-3 sm:p-4 border border-orange-200">
+                <div className="bg-orange-50 rounded-lg p-3 sm:p-4 border border-orange-200">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs sm:text-sm text-orange-600 font-medium">Toplam Limit</p>
@@ -261,7 +299,7 @@ export const FinancialDataPage = () => {
                     <CreditCardIcon className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
                   </div>
                 </div>
-                <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-3 sm:p-4 border border-red-200">
+                <div className="bg-red-50 rounded-lg p-3 sm:p-4 border border-red-200">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs sm:text-sm text-red-600 font-medium">Toplam Borç</p>
@@ -270,7 +308,7 @@ export const FinancialDataPage = () => {
                     <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
                   </div>
                 </div>
-                <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-3 sm:p-4 border border-green-200 sm:col-span-2 lg:col-span-1">
+                <div className="bg-green-50 rounded-lg p-3 sm:p-4 border border-green-200 sm:col-span-2 lg:col-span-1">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs sm:text-sm text-green-600 font-medium">Borç Oranı</p>
@@ -290,7 +328,7 @@ export const FinancialDataPage = () => {
             ) : (
               <div className="space-y-6">
                 {groupedCreditCards.map((bankGroup) => (
-                  <div key={bankGroup.bank} className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 sm:p-6 border-2 border-blue-200 shadow-lg">
+                  <div key={bankGroup.bank} className="bg-white rounded-lg p-4 sm:p-6 border border-blue-200">
                     {/* Banka Başlığı */}
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3">
@@ -450,93 +488,82 @@ export const FinancialDataPage = () => {
                 <p className="text-gray-500">Henüz avans hesabı eklenmemiş</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {cashAdvanceAccounts
-                  .sort((a, b) => {
-                    const availableRatioA = ((a.limit - a.currentDebt) / a.limit) * 100;
-                    const availableRatioB = ((b.limit - b.currentDebt) / b.limit) * 100;
-                    return availableRatioA - availableRatioB;
-                  })
-                  .map((account) => {
-                  const debtRatio = calculateDebtRatio(account.currentDebt, account.limit);
-                  const availableLimit = calculateAvailableLimit(account.limit, account.currentDebt);
-                  
-                  return (
-                    <div key={account.id} className="bg-white border-2 border-purple-300 rounded-xl p-6 hover:shadow-xl transition-all duration-300 hover:border-purple-400 hover:scale-105 shadow-md">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{account.name}</h3>
-                          <p className="text-sm text-gray-600">{account.bank}</p>
-                          <p className="text-xs text-gray-500">**** {account.accountNumber}</p>
-                        </div>
-                        <div className="flex flex-row gap-1 ml-2">
-                          <button 
-                            onClick={() => {
-                              setEditingCashAdvance(account);
-                              setShowCashAdvanceForm(true);
-                            }}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteCashAdvance(account.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4">
-                        {/* Limit Kutusu */}
-                        <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-2 border-indigo-300 rounded-xl p-3 sm:p-4 shadow-sm">
-                          <span className="text-xs text-indigo-700 font-semibold block mb-1">💰 Limit</span>
-                          <span className="text-sm sm:text-lg font-bold text-indigo-900">{formatCurrency(account.limit)}</span>
-                        </div>
-                        
-                        {/* Borç Kutusu */}
-                        <div className="bg-gradient-to-br from-rose-50 to-rose-100 border-2 border-rose-300 rounded-xl p-3 sm:p-4 shadow-sm">
-                          <span className="text-xs text-rose-700 font-semibold block mb-1">💸 Borç</span>
-                          <span className="text-sm sm:text-lg font-bold text-rose-900">{formatCurrency(account.currentDebt)}</span>
-                        </div>
-                        
-                        {/* Kullanılabilir Kutusu */}
-                        <div className="bg-gradient-to-br from-teal-50 to-teal-100 border-2 border-teal-300 rounded-xl p-3 sm:p-4 shadow-sm">
-                          <span className="text-xs text-teal-700 font-semibold block mb-1">✅ Uygun Limit</span>
-                          <span className="text-sm sm:text-lg font-bold text-teal-900">{formatCurrency(availableLimit)}</span>
-                        </div>
-                        
-                        {/* Kullanılabilir Oran Kutusu */}
-                        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-300 rounded-xl p-3 sm:p-4 shadow-sm">
-                          <span className="text-xs text-emerald-700 font-semibold block mb-1">📈 Oran</span>
-                          <div className="flex items-center gap-2">
-                            <span className={`text-sm sm:text-lg font-bold ${
-                              (100 - debtRatio) >= 80 ? 'text-green-600' : (100 - debtRatio) >= 50 ? 'text-orange-600' : 'text-red-600'
-                            }`}>
-                              %{Math.round(100 - debtRatio)}
-                            </span>
-                            <div className="flex-1 bg-gray-200 rounded-full h-2">
-                              <div 
-                                className={`h-2 rounded-full transition-all duration-300 ${
-                                  (100 - debtRatio) >= 80 ? 'bg-green-500' : (100 - debtRatio) >= 50 ? 'bg-orange-500' : 'bg-red-500'
-                                }`}
-                                style={{ width: `${Math.min(100 - debtRatio, 100)}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-between items-center pt-2 border-t">
-                        <div className="flex items-center space-x-1">
-                          <Percent className="w-4 h-4 text-gray-400" />
-                          <span className="text-xs text-gray-600">Faiz: %{account.interestRate}</span>
-                        </div>
+              <div className="space-y-8">
+                {Object.entries(groupedCashAdvanceAccounts).map(([bank, bankData]) => (
+                  <div key={bank} className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">{bank}</h3>
+                      <div className="flex space-x-4 text-sm text-gray-600">
+                        <span>Toplam Limit: <span className="font-semibold text-purple-600">{formatCurrency(bankData.totalLimit)}</span></span>
+                        <span>Toplam Borç: <span className="font-semibold text-red-600">{formatCurrency(bankData.totalDebt)}</span></span>
                       </div>
                     </div>
-                  );
-                })}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {bankData.accounts
+                        .sort((a, b) => b.limit - a.limit)
+                        .map((account) => {
+                        const debtRatio = calculateDebtRatio(account.currentDebt, account.limit);
+                        const availableLimit = calculateAvailableLimit(account.limit, account.currentDebt);
+                        
+                        return (
+                          <div key={account.id} className="bg-white border border-purple-200 rounded-lg p-4 hover:border-purple-300 transition-colors">
+                            <div className="flex justify-between items-start mb-3">
+                              <div>
+                                <h4 className="font-medium text-gray-900">{account.name}</h4>
+                              </div>
+                              <div className="flex gap-1">
+                                <button 
+                                  onClick={() => {
+                                    setEditingCashAdvance(account);
+                                    setShowCashAdvanceForm(true);
+                                  }}
+                                  className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteCashAdvance(account.id)}
+                                  className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 mb-3">
+                              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                                <span className="text-xs text-indigo-700 font-medium block mb-1">💰 Limit</span>
+                                <span className="text-lg font-bold text-indigo-900">{formatCurrency(account.limit)}</span>
+                              </div>
+                              
+                              <div className="bg-rose-50 border border-rose-200 rounded-lg p-3">
+                                <span className="text-xs text-rose-700 font-medium block mb-1">💸 Borç</span>
+                                <span className="text-lg font-bold text-rose-900">{formatCurrency(account.currentDebt)}</span>
+                              </div>
+                              
+                              <div className="bg-teal-50 border border-teal-200 rounded-lg p-3">
+                                <span className="text-xs text-teal-700 font-medium block mb-1">✅ Uygun</span>
+                                <span className="text-lg font-bold text-teal-900">{formatCurrency(availableLimit)}</span>
+                              </div>
+                              
+                              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                                <span className="text-xs text-emerald-700 font-medium block mb-1">📈 Oran</span>
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-lg font-bold ${
+                                    (100 - debtRatio) >= 80 ? 'text-green-600' : (100 - debtRatio) >= 50 ? 'text-orange-600' : 'text-red-600'
+                                  }`}>
+                                    %{Math.round(100 - debtRatio)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -562,123 +589,102 @@ export const FinancialDataPage = () => {
                 <p className="text-gray-500">Henüz kredi eklenmemiş</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {loans
-                  .sort((a, b) => {
-                    // Ödeme yüzdesine göre sırala (yüksek ödeme yüzdesi önce)
-                    const paymentRatioA = a.totalAmount > 0 ? ((a.totalAmount - a.remainingAmount) / a.totalAmount) * 100 : 0;
-                    const paymentRatioB = b.totalAmount > 0 ? ((b.totalAmount - b.remainingAmount) / b.totalAmount) * 100 : 0;
-                    return paymentRatioB - paymentRatioA;
-                  })
-                  .map((loan) => {
-                  const progress = calculateLoanProgress(loan.totalInstallments, loan.remainingInstallments);
-                  
-                  return (
-                    <div key={loan.id} className="bg-white border-2 border-green-300 rounded-xl p-6 hover:shadow-xl transition-all duration-300 hover:border-green-400 hover:scale-105 shadow-md">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{loan.name}</h3>
-                          <p className="text-sm text-gray-600">{loan.bank}</p>
-                          <p className="text-xs text-gray-500">{LOAN_TYPES[loan.loanType]}</p>
-                        </div>
-                        <div className="flex space-x-2">
-                          <button 
-                            onClick={() => {
-                              setEditingLoan(loan);
-                              setShowLoanForm(true);
-                            }}
-                            className="text-gray-400 hover:text-blue-600"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteLoan(loan.id)}
-                            className="text-gray-400 hover:text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4">
-                        {/* Toplam Tutar Kutusu */}
-                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-3 sm:p-4 shadow-sm">
-                          <span className="text-xs text-purple-700 font-semibold block mb-1">💰 Toplam Tutar</span>
-                          <span className="text-sm sm:text-lg font-bold text-purple-900">{formatCurrency(loan.totalAmount)}</span>
-                        </div>
-                        
-                        {/* Kalan Borç Kutusu */}
-                        <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-3 sm:p-4 shadow-sm">
-                          <span className="text-xs text-red-700 font-semibold block mb-1">💸 Kalan Borç</span>
-                          <span className="text-sm sm:text-lg font-bold text-red-900">{formatCurrency(loan.remainingAmount)}</span>
-                        </div>
-                        
-                        {/* Aylık Ödeme Kutusu */}
-                        <div className="bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300 rounded-xl p-3 sm:p-4 shadow-sm">
-                          <span className="text-xs text-amber-700 font-semibold block mb-1">📅 Aylık Ödeme</span>
-                          <span className="text-sm sm:text-lg font-bold text-amber-900">{formatCurrency(loan.monthlyPayment)}</span>
-                        </div>
-                        
-                        {/* İlerleme Kutusu */}
-                        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-300 rounded-xl p-3 sm:p-4 shadow-sm">
-                          <span className="text-xs text-emerald-700 font-semibold block mb-1">📊 İlerleme</span>
-                          <div className="flex items-center gap-2">
-                            <span className={`text-sm sm:text-lg font-bold ${
-                              progress > 80 ? 'text-green-600' : progress > 50 ? 'text-orange-600' : 'text-red-600'
-                            }`}>
-                              %{progress}
-                            </span>
-                            <div className="flex-1 bg-gray-200 rounded-full h-2">
-                              <div 
-                                className={`h-2 rounded-full transition-all duration-300 ${
-                                  progress > 80 ? 'bg-green-500' : progress > 50 ? 'bg-orange-500' : 'bg-red-500'
-                                }`}
-                                style={{ width: `${Math.min(progress, 100)}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-
-                        <div className="bg-white border-2 border-indigo-300 rounded-xl p-3 sm:p-4 shadow-sm">
-                          <span className="text-xs text-indigo-700 font-semibold block mb-1">📈 İlerleme</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm sm:text-lg font-bold text-indigo-900">%{progress}</span>
-                            <div className="flex-1 bg-gray-200 rounded-full h-2">
-                              <div 
-                                className={`h-2 rounded-full transition-all duration-300 ${
-                                  progress > 80 ? 'bg-green-500' : progress > 50 ? 'bg-orange-500' : 'bg-red-500'
-                                }`}
-                                style={{ width: `${progress}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Taksit Sayısı Kutusu */}
-                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-3 sm:p-4 shadow-sm">
-                          <span className="text-xs text-blue-700 font-semibold block mb-1">📊 Taksit Sayısı</span>
-                          <span className="text-sm sm:text-lg font-bold text-blue-900">{loan.remainingInstallments}/{loan.totalInstallments}</span>
-                        </div>
-
-                        <div className="flex justify-between items-center pt-2 border-t">
-                          <div className="flex items-center space-x-1">
-                            <Calendar className="w-4 h-4 text-gray-400" />
-                            <span className="text-xs text-gray-600">
-                              Sonraki: {loan.nextPaymentDate.toLocaleDateString('tr-TR')}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Percent className="w-4 h-4 text-gray-400" />
-                            <span className="text-xs text-gray-600">%{loan.interestRate}</span>
-                          </div>
-                        </div>
+              <div className="space-y-8">
+                {groupedLoans.map((bankGroup) => (
+                  <div key={bankGroup.bank} className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">{bankGroup.bank}</h3>
+                      <div className="flex space-x-4 text-sm text-gray-600">
+                        <span>Toplam Tutar: <span className="font-semibold text-green-600">{formatCurrency(bankGroup.totalAmount)}</span></span>
+                        <span>Kalan Borç: <span className="font-semibold text-red-600">{formatCurrency(bankGroup.totalRemaining)}</span></span>
                       </div>
                     </div>
-                  );
-                })}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {bankGroup.loans
+                        .sort((a, b) => {
+                          const progressA = calculateLoanProgress(a.totalInstallments, a.remainingInstallments);
+                          const progressB = calculateLoanProgress(b.totalInstallments, b.remainingInstallments);
+                          return progressB - progressA;
+                        })
+                        .map((loan) => {
+                        const progress = calculateLoanProgress(loan.totalInstallments, loan.remainingInstallments);
+                        
+                        return (
+                          <div key={loan.id} className="bg-white border border-green-200 rounded-lg p-4 hover:border-green-300 transition-colors">
+                            <div className="flex justify-between items-start mb-3">
+                              <div>
+                                <h4 className="font-medium text-gray-900">{loan.name}</h4>
+                                <p className="text-xs text-gray-500">{LOAN_TYPES[loan.loanType]}</p>
+                              </div>
+                              <div className="flex gap-1">
+                                <button 
+                                  onClick={() => {
+                                    setEditingLoan(loan);
+                                    setShowLoanForm(true);
+                                  }}
+                                  className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteLoan(loan.id)}
+                                  className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 mb-3">
+                              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                                <span className="text-xs text-purple-700 font-medium block mb-1">💰 Toplam</span>
+                                <span className="text-lg font-bold text-purple-900">{formatCurrency(loan.totalAmount)}</span>
+                              </div>
+                              
+                              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                                <span className="text-xs text-red-700 font-medium block mb-1">💸 Kalan</span>
+                                <span className="text-lg font-bold text-red-900">{formatCurrency(loan.remainingAmount)}</span>
+                              </div>
+                              
+                              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                <span className="text-xs text-amber-700 font-medium block mb-1">📅 Aylık</span>
+                                <span className="text-lg font-bold text-amber-900">{formatCurrency(loan.monthlyPayment)}</span>
+                              </div>
+                              
+                              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                                <span className="text-xs text-emerald-700 font-medium block mb-1">📊 İlerleme</span>
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-lg font-bold ${
+                                    progress > 80 ? 'text-green-600' : progress > 50 ? 'text-orange-600' : 'text-red-600'
+                                  }`}>
+                                    %{progress}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                              <span className="text-xs text-blue-700 font-medium block mb-1">📊 Taksit</span>
+                              <span className="text-lg font-bold text-blue-900">{loan.remainingInstallments}/{loan.totalInstallments}</span>
+                            </div>
+
+                            <div className="flex justify-between items-center pt-2 border-t text-xs text-gray-600">
+                              <div className="flex items-center space-x-1">
+                                <Calendar className="w-3 h-3" />
+                                <span>Sonraki: {loan.nextPaymentDate.toLocaleDateString('tr-TR')}</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <Percent className="w-3 h-3" />
+                                <span>%{loan.interestRate}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -687,11 +693,11 @@ export const FinancialDataPage = () => {
 
       {/* Credit Card Form Modal */}
       {showCreditCardForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-gray-200 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full border border-gray-200 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-xl">
+                <div className="bg-blue-600 text-white p-3 rounded-lg">
                   <CreditCardIcon className="w-6 h-6" />
                 </div>
                 <div>
@@ -878,7 +884,7 @@ export const FinancialDataPage = () => {
               <div className="flex gap-3 mt-8 pt-6 border-t border-gray-200">
                 <button 
                   type="submit" 
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                  className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
                 >
                   <CreditCardIcon className="w-5 h-5" />
                   <span>{editingCreditCard ? 'Kartı Güncelle' : 'Kartı Ekle'}</span>
@@ -889,7 +895,7 @@ export const FinancialDataPage = () => {
                     setShowCreditCardForm(false);
                     setEditingCreditCard(null);
                   }} 
-                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2"
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 transition-colors flex items-center justify-center space-x-2"
                 >
                   <span>İptal</span>
                 </button>
@@ -901,12 +907,12 @@ export const FinancialDataPage = () => {
 
       {/* Cash Advance Form Modal */}
       {showCashAdvanceForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-gray-100">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 rounded-t-2xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto border border-gray-200">
+            <div className="bg-green-600 p-6 rounded-t-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="bg-white/20 p-2 rounded-xl">
+                  <div className="bg-white bg-opacity-20 p-2 rounded-lg">
                     <Banknote className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -924,7 +930,7 @@ export const FinancialDataPage = () => {
                     setShowCashAdvanceForm(false);
                     setEditingCashAdvance(null);
                   }}
-                  className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-xl transition-all duration-200"
+                  className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors"
                 >
                   ×
                 </button>
@@ -1010,7 +1016,7 @@ export const FinancialDataPage = () => {
               <div className="flex gap-3 mt-8 pt-6 border-t border-gray-200">
                 <button 
                   type="submit" 
-                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                  className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
                 >
                   <Banknote className="w-5 h-5" />
                   <span>{editingCashAdvance ? 'Hesabı Güncelle' : 'Hesabı Ekle'}</span>
@@ -1021,7 +1027,7 @@ export const FinancialDataPage = () => {
                     setShowCashAdvanceForm(false);
                     setEditingCashAdvance(null);
                   }} 
-                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2"
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 transition-colors flex items-center justify-center space-x-2"
                 >
                   <span>İptal</span>
                 </button>
@@ -1034,12 +1040,12 @@ export const FinancialDataPage = () => {
 
       {/* Loan Form Modal */}
       {showLoanForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-100">
-            <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-t-2xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-purple-600 p-6 rounded-t-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="bg-white/20 p-2 rounded-xl">
+                  <div className="bg-white bg-opacity-20 p-2 rounded-lg">
                     <PiggyBank className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -1057,7 +1063,7 @@ export const FinancialDataPage = () => {
                     setShowLoanForm(false);
                     setEditingLoan(null);
                   }}
-                  className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-xl transition-all duration-200"
+                  className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors"
                 >
                   ×
                 </button>
@@ -1283,7 +1289,7 @@ export const FinancialDataPage = () => {
               <div className="flex gap-3 mt-8 pt-6 border-t border-gray-200">
                 <button 
                   type="submit" 
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-indigo-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                  className="flex-1 bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"
                 >
                   <PiggyBank className="w-5 h-5" />
                   <span>{editingLoan ? 'Krediyi Güncelle' : 'Krediyi Ekle'}</span>
@@ -1294,7 +1300,7 @@ export const FinancialDataPage = () => {
                     setShowLoanForm(false);
                     setEditingLoan(null);
                   }}
-                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2"
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 transition-colors flex items-center justify-center space-x-2"
                 >
                   <span>İptal</span>
                 </button>
