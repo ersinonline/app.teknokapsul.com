@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Edit2, Trash2, Power, Calendar, TrendingUp } from 'lucide-react';
+import { Edit2, Trash2, Power, CheckCircle, XCircle, Clock, TrendingUp, Calendar } from 'lucide-react';
 import { Income, INCOME_CATEGORIES } from '../../types/income';
 import { updateIncome, deleteIncome, toggleIncomeStatus } from '../../services/income.service';
 import { IncomeForm } from './IncomeForm';
@@ -113,157 +113,87 @@ export const IncomeTable: React.FC<IncomeTableProps> = ({ incomes, onUpdate }) =
         </div>
       )}
 
-      {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Gelir
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Kategori
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Tarih
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Durum
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                İşlemler
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sortedIncomes.map((income) => {
-              const { icon, text, className } = getStatusInfo(income);
-
-              return (
-                <tr key={income.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{income.title}</div>
-                    <div className="text-sm text-green-600 font-semibold">{formatCurrency(income.amount)}</div>
-                    {income.description && (
-                      <div className="text-xs text-gray-600 mt-1">{income.description}</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      {INCOME_CATEGORIES[income.category]}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-700">
-                      {formatDate(income.date)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${className}`}>
-                      {icon}
-                      {text}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setEditingIncome(income)}
-                        className="text-yellow-600 hover:text-yellow-900 transition-colors"
-                        title="Düzenle"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleToggleStatus(income.id, income.isActive)}
-                        className={`${income.isActive ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900'} disabled:opacity-50 transition-colors`}
-                        title={income.isActive ? 'Pasif Yap' : 'Aktif Yap'}
-                        disabled={isToggling === income.id}
-                      >
-                        <Power className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(income.id)}
-                        className="text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors"
-                        disabled={isDeleting === income.id}
-                        title="Sil"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile Card View */}
-      <div className="md:hidden space-y-4">
+      {/* Modern Card View - Tüm Ekranlar İçin */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {sortedIncomes.map((income) => {
           const { icon, text, className } = getStatusInfo(income);
 
           return (
-            <div key={income.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+            <div key={income.id} className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
               {/* Header */}
-              <div className="flex justify-between items-start mb-3">
+              <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
-                  <h3 className="text-sm font-medium text-gray-900">{income.title}</h3>
-                  <p className="text-lg font-semibold text-green-600 mt-1">{formatCurrency(income.amount)}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="w-5 h-5 text-green-500" />
+                    <h3 className="text-lg font-semibold text-gray-900">{income.title}</h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold text-green-600">{formatCurrency(income.amount)}</span>
+                    {income.isRecurring && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                        <Calendar className="w-3 h-3" />
+                        Düzenli
+                      </span>
+                    )}
+                  </div>
                   {income.description && (
-                    <p className="text-xs text-gray-600 mt-1">{income.description}</p>
+                    <p className="text-sm text-gray-600 mt-2">{income.description}</p>
                   )}
-                </div>
-                <div className="flex gap-2 ml-2">
-                  <button
-                    onClick={() => setEditingIncome(income)}
-                    className="text-yellow-600 hover:text-yellow-900 transition-colors p-1"
-                    title="Düzenle"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  {/* Mobilde durum düğmesi gizlendi */}
-                  <button
-                    onClick={() => handleToggleStatus(income.id, income.isActive)}
-                    className={`${income.isActive ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900'} disabled:opacity-50 transition-colors p-1 hidden`}
-                    title={income.isActive ? 'Pasif Yap' : 'Aktif Yap'}
-                    disabled={isToggling === income.id}
-                  >
-                    <Power className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(income.id)}
-                    className="text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors p-1"
-                    disabled={isDeleting === income.id}
-                    title="Sil"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                 </div>
               </div>
 
-              {/* Details */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500">Kategori:</span>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              {/* Details Grid */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-xs font-medium text-gray-500 mb-1">Kategori</div>
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     {INCOME_CATEGORIES[income.category]}
                   </span>
                 </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500">Tarih:</span>
-                  <span className="text-xs text-gray-700">{formatDate(income.date)}</span>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-xs font-medium text-gray-500 mb-1">Tarih</div>
+                  <div className="text-sm font-medium text-gray-900">{formatDate(income.date)}</div>
                 </div>
-                
-                {/* Mobilde durum bilgisi gizlendi */}
-                <div className="flex justify-between items-center hidden">
-                  <span className="text-xs text-gray-500">Durum:</span>
+                <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                  <div className="text-xs font-medium text-gray-500 mb-1">Durum</div>
                   <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${className}`}>
                     {icon}
                     {text}
                   </span>
                 </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setEditingIncome(income)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-lg hover:bg-yellow-200 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    Düzenle
+                  </button>
+                  <button
+                    onClick={() => handleDelete(income.id)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50"
+                    disabled={isDeleting === income.id}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Sil
+                  </button>
+                </div>
+                <button
+                  onClick={() => handleToggleStatus(income.id, income.isActive)}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 ${
+                    income.isActive 
+                      ? 'text-red-700 bg-red-100 hover:bg-red-200' 
+                      : 'text-green-700 bg-green-100 hover:bg-green-200'
+                  }`}
+                  disabled={isToggling === income.id}
+                >
+                  <Power className="w-4 h-4" />
+                  {income.isActive ? 'Pasif Yap' : 'Aktif Yap'}
+                </button>
               </div>
             </div>
           );

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Edit2, Trash2, Power, Calendar, CreditCard, CheckCircle, XCircle } from 'lucide-react';
+import { Edit2, Trash2, Power, Calendar, CreditCard, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Expense, EXPENSE_CATEGORIES } from '../../types/expense';
 import { updateExpense, deleteExpense, toggleExpenseStatus, toggleExpensePayment } from '../../services/expense.service';
 import { ExpenseForm } from './ExpenseForm';
@@ -142,175 +142,57 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
         </div>
       )}
 
-      {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Gider
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Kategori
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Tarih
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Durum
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Ödeme
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                İşlemler
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sortedExpenses.map((expense) => {
-              const statusInfo = getStatusInfo(expense);
-              const paymentInfo = getPaymentInfo(expense);
-
-              return (
-                <tr key={expense.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{expense.title}</div>
-                    <div className="text-sm text-red-600 font-semibold">{formatCurrency(expense.amount)}</div>
-                    {expense.description && (
-                      <div className="text-xs text-gray-600 mt-1">{expense.description}</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      {EXPENSE_CATEGORIES[expense.category]}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-700">
-                      {formatDate(expense.date)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${statusInfo.className}`}>
-                      {statusInfo.icon}
-                      {statusInfo.text}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => handleTogglePayment(expense.id, expense.isPaid)}
-                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors ${paymentInfo.className} hover:opacity-80 disabled:opacity-50`}
-                      disabled={isTogglingPayment === expense.id}
-                    >
-                      {paymentInfo.icon}
-                      {paymentInfo.text}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setEditingExpense(expense)}
-                        className="text-yellow-600 hover:text-yellow-900 transition-colors"
-                        title="Düzenle"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleToggleStatus(expense.id, expense.isActive)}
-                        className={`${expense.isActive ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900'} disabled:opacity-50 transition-colors`}
-                        title={expense.isActive ? 'Pasif Yap' : 'Aktif Yap'}
-                        disabled={isToggling === expense.id}
-                      >
-                        <Power className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(expense.id)}
-                        className="text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors"
-                        disabled={isDeleting === expense.id}
-                        title="Sil"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile Card View */}
-      <div className="md:hidden space-y-4">
+      {/* Modern Card View - Tüm Ekranlar İçin */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {sortedExpenses.map((expense) => {
           const statusInfo = getStatusInfo(expense);
           const paymentInfo = getPaymentInfo(expense);
 
           return (
-            <div key={expense.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+            <div key={expense.id} className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
               {/* Header */}
-              <div className="flex justify-between items-start mb-3">
+              <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
-                  <h3 className="text-sm font-medium text-gray-900">{expense.title}</h3>
-                  <p className="text-lg font-semibold text-red-600 mt-1">{formatCurrency(expense.amount)}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <CreditCard className="w-5 h-5 text-red-500" />
+                    <h3 className="text-lg font-semibold text-gray-900">{expense.title}</h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold text-red-600">{formatCurrency(expense.amount)}</span>
+                    {expense.isRecurring && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                        <Calendar className="w-3 h-3" />
+                        Düzenli
+                      </span>
+                    )}
+                  </div>
                   {expense.description && (
-                    <p className="text-xs text-gray-600 mt-1">{expense.description}</p>
+                    <p className="text-sm text-gray-600 mt-2">{expense.description}</p>
                   )}
-                </div>
-                <div className="flex gap-2 ml-2">
-                  <button
-                    onClick={() => setEditingExpense(expense)}
-                    className="text-yellow-600 hover:text-yellow-900 transition-colors p-1"
-                    title="Düzenle"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  {/* Mobilde durum düğmesi gizlendi */}
-                  <button
-                    onClick={() => handleToggleStatus(expense.id, expense.isActive)}
-                    className={`${expense.isActive ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900'} disabled:opacity-50 transition-colors p-1 hidden`}
-                    title={expense.isActive ? 'Pasif Yap' : 'Aktif Yap'}
-                    disabled={isToggling === expense.id}
-                  >
-                    <Power className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(expense.id)}
-                    className="text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors p-1"
-                    disabled={isDeleting === expense.id}
-                    title="Sil"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                 </div>
               </div>
 
-              {/* Details */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500">Kategori:</span>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              {/* Details Grid */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-xs font-medium text-gray-500 mb-1">Kategori</div>
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                     {EXPENSE_CATEGORIES[expense.category]}
                   </span>
                 </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500">Tarih:</span>
-                  <span className="text-xs text-gray-700">{formatDate(expense.date)}</span>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-xs font-medium text-gray-500 mb-1">Tarih</div>
+                  <div className="text-sm font-medium text-gray-900">{formatDate(expense.date)}</div>
                 </div>
-                
-                {/* Mobilde durum bilgisi gizlendi */}
-                <div className="flex justify-between items-center hidden">
-                  <span className="text-xs text-gray-500">Durum:</span>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-xs font-medium text-gray-500 mb-1">Durum</div>
                   <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusInfo.className}`}>
                     {statusInfo.icon}
                     {statusInfo.text}
                   </span>
                 </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500">Ödeme:</span>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-xs font-medium text-gray-500 mb-1">Ödeme</div>
                   <button
                     onClick={() => handleTogglePayment(expense.id, expense.isPaid)}
                     className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${paymentInfo.className} hover:opacity-80 disabled:opacity-50`}
@@ -320,6 +202,39 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
                     {paymentInfo.text}
                   </button>
                 </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setEditingExpense(expense)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-lg hover:bg-yellow-200 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    Düzenle
+                  </button>
+                  <button
+                    onClick={() => handleDelete(expense.id)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50"
+                    disabled={isDeleting === expense.id}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Sil
+                  </button>
+                </div>
+                <button
+                  onClick={() => handleToggleStatus(expense.id, expense.isActive)}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 ${
+                    expense.isActive 
+                      ? 'text-red-700 bg-red-100 hover:bg-red-200' 
+                      : 'text-green-700 bg-green-100 hover:bg-green-200'
+                  }`}
+                  disabled={isToggling === expense.id}
+                >
+                  <Power className="w-4 h-4" />
+                  {expense.isActive ? 'Pasif Yap' : 'Aktif Yap'}
+                </button>
               </div>
             </div>
           );

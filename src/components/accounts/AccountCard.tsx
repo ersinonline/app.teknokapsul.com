@@ -8,12 +8,33 @@ interface AccountCardProps {
 }
 
 export const AccountCard: React.FC<AccountCardProps> = ({ credential, onCopy }) => {
+  // Debug: Konsola credential bilgilerini yazdır
+  console.log('Credential data:', credential);
+  
+  // Platform adını düzelt - eğer sayı ise banka isimlerine çevir
+  const getPlatformDisplayName = (platformName: string) => {
+    const bankNames: { [key: string]: string } = {
+      '0': 'Ziraat Bankası',
+      '1': 'İş Bankası',
+      '2': 'Garanti BBVA',
+      '3': 'Akbank',
+      '4': 'Yapı Kredi',
+      '5': 'Halkbank',
+      '6': 'VakıfBank',
+      '7': 'Denizbank',
+      '8': 'QNB Finansbank',
+      '9': 'TEB'
+    };
+    
+    return bankNames[platformName] || platformName;
+  };
+  
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">
-            {credential.platformName}
+            {getPlatformDisplayName(credential.platformName)}
           </h3>
           <a
             href={`https://${credential.platformName.toLowerCase()}.com`}
