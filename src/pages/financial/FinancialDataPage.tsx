@@ -47,6 +47,29 @@ import {
 import { CreditCard, CashAdvanceAccount, Loan, LOAN_TYPES } from '../../types/financial';
 import { formatCurrency } from '../../utils/currency';
 
+// Binlik ayırıcı fonksiyonları
+const formatNumberWithCommas = (value: string): string => {
+  // Sadece rakamları al
+  const numericValue = value.replace(/[^0-9]/g, '');
+  // Binlik ayırıcı ekle
+  return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
+const handleNumberInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const input = e.target;
+  const cursorPosition = input.selectionStart;
+  const oldValue = input.value;
+  const newValue = formatNumberWithCommas(oldValue);
+  
+  input.value = newValue;
+  
+  // Cursor pozisyonunu ayarla
+  if (cursorPosition !== null) {
+    const diff = newValue.length - oldValue.length;
+    input.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
+  }
+};
+
 type TabType = 'creditCards' | 'cashAdvance' | 'loans';
 
 // Chart colors
@@ -239,7 +262,7 @@ export const FinancialDataPage = () => {
       cards: cards.sort((a, b) => b.limit - a.limit), // Limite göre sırala
       totalLimit: cards.reduce((sum, card) => sum + card.limit, 0),
       totalDebt: cards.reduce((sum, card) => sum + card.currentDebt, 0)
-    })).sort((a, b) => b.totalLimit - a.totalLimit); // Toplam limite göre sırala
+    })).sort((a, b) => a.bank.localeCompare(b.bank, 'tr')); // Banka adına göre alfabetik sırala
   };
 
   // Nakit avans hesaplarını bankaya göre grupla
@@ -257,7 +280,7 @@ export const FinancialDataPage = () => {
       accounts: accounts.sort((a, b) => b.limit - a.limit), // Limite göre sırala
       totalLimit: accounts.reduce((sum, account) => sum + account.limit, 0),
       totalDebt: accounts.reduce((sum, account) => sum + account.currentDebt, 0)
-    })).sort((a, b) => b.totalLimit - a.totalLimit); // Toplam limite göre sırala
+    })).sort((a, b) => a.bank.localeCompare(b.bank, 'tr')); // Banka adına göre alfabetik sırala
   };
 
   // Kredileri bankaya göre grupla
@@ -275,7 +298,7 @@ export const FinancialDataPage = () => {
       loans: loans.sort((a, b) => b.totalAmount - a.totalAmount), // Toplam tutara göre sırala
       totalAmount: loans.reduce((sum, loan) => sum + loan.totalAmount, 0),
       totalRemaining: loans.reduce((sum, loan) => sum + loan.remainingAmount, 0)
-    })).sort((a, b) => b.totalAmount - a.totalAmount); // Toplam tutara göre sırala
+    })).sort((a, b) => a.bank.localeCompare(b.bank, 'tr')); // Banka adına göre alfabetik sırala
   };
 
   const groupedCreditCards = groupCardsByBank(creditCards);
@@ -987,8 +1010,8 @@ export const FinancialDataPage = () => {
               const formData = new FormData(e.target as HTMLFormElement);
               const parseNumber = (value: string | null) => {
                 if (!value || typeof value !== 'string') return 0;
-                // Boşlukları temizle ve virgülü noktaya çevir
-                const cleanValue = value.trim().replace(/\s/g, '').replace(',', '.');
+                // Binlik ayırıcıları, boşlukları temizle ve virgülü noktaya çevir
+                const cleanValue = value.trim().replace(/\./g, '').replace(/\s/g, '').replace(',', '.');
                 const parsed = parseFloat(cleanValue);
                 return isNaN(parsed) ? 0 : parsed;
               };
@@ -1054,9 +1077,10 @@ export const FinancialDataPage = () => {
                     <input 
                       name="limit" 
                       type="text" 
-                      placeholder="50000" 
-                      defaultValue={editingCreditCard?.limit || ''} 
+                      placeholder="50.000" 
+                      defaultValue={editingCreditCard?.limit ? formatNumberWithCommas(editingCreditCard.limit.toString()) : ''} 
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      onInput={handleNumberInput}
                       required 
                     />
                   </div>
@@ -1070,17 +1094,18 @@ export const FinancialDataPage = () => {
                     name="availableLimit" 
                     type="text" 
                     placeholder="Kullanılabilir limit" 
-                    defaultValue={editingCreditCard ? (editingCreditCard.limit - editingCreditCard.currentDebt).toString() : ''} 
+                    defaultValue={editingCreditCard ? formatNumberWithCommas((editingCreditCard.limit - editingCreditCard.currentDebt).toString()) : ''} 
                     className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
                     required 
+                    onInput={handleNumberInput}
                     onChange={(e) => {
                       const availableLimitInput = e.target;
                       const limitInput = availableLimitInput.form?.querySelector('input[name="limit"]') as HTMLInputElement;
                       const currentDebtInput = availableLimitInput.form?.querySelector('input[name="currentDebt"]') as HTMLInputElement;
                       
                       if (limitInput && currentDebtInput) {
-                        const totalLimit = parseFloat(limitInput.value.replace(',', '.')) || 0;
-                        const availableLimit = parseFloat(availableLimitInput.value.replace(',', '.')) || 0;
+                        const totalLimit = parseFloat(limitInput.value.replace(/\./g, '').replace(',', '.')) || 0;
+                        const availableLimit = parseFloat(availableLimitInput.value.replace(/\./g, '').replace(',', '.')) || 0;
                         const debt = totalLimit - availableLimit;
                         currentDebtInput.value = debt >= 0 ? debt.toString() : '0';
                       }
@@ -1173,41 +1198,36 @@ export const FinancialDataPage = () => {
       {/* Cash Advance Form Modal */}
       {showCashAdvanceForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-sm sm:max-w-lg w-full mx-4 sm:mx-0 max-h-[90vh] overflow-y-auto border border-gray-200">
-            <div className="bg-green-600 p-6 rounded-t-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-white bg-opacity-20 p-2 rounded-lg">
-                    <Banknote className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">
-                      {editingCashAdvance ? 'Avans Hesabını Düzenle' : 'Yeni Avans Hesabı'}
-                    </h3>
-                    <p className="text-green-100 text-sm">
-                      {editingCashAdvance ? 'Mevcut hesap bilgilerini güncelleyin' : 'Nakit avans hesabı bilgilerini girin'}
-                    </p>
-                  </div>
+          <div className="bg-white rounded-lg p-4 sm:p-6 max-w-sm sm:max-w-lg w-full mx-4 sm:mx-0 border border-gray-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="bg-green-600 text-white p-3 rounded-lg">
+                  <Banknote className="w-6 h-6" />
                 </div>
-                <button 
-                  type="button" 
-                  onClick={() => {
-                    setShowCashAdvanceForm(false);
-                    setEditingCashAdvance(null);
-                  }}
-                  className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors"
-                >
-                  ×
-                </button>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">{editingCashAdvance ? 'Avans Hesabını Düzenle' : 'Yeni Avans Hesabı Ekle'}</h3>
+                  <p className="text-sm text-gray-500">Nakit avans hesabı bilgilerinizi girin</p>
+                </div>
               </div>
+              <button 
+                onClick={() => {
+                  setShowCashAdvanceForm(false);
+                  setEditingCashAdvance(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <div className="p-6">
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
               const parseNumber = (value: string | null) => {
                 if (!value) return 0;
-                return Number(value.replace(',', '.'));
+                // Binlik ayırıcıları temizle ve virgülü noktaya çevir
+                return Number(value.replace(/\./g, '').replace(',', '.'));
               };
               handleAddCashAdvance({
                 name: formData.get('name'),
@@ -1219,7 +1239,7 @@ export const FinancialDataPage = () => {
                 isActive: true
               });
             }}>
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
@@ -1230,7 +1250,7 @@ export const FinancialDataPage = () => {
                       name="name" 
                       placeholder="Nakit Avans Hesabı" 
                       defaultValue={editingCashAdvance?.name || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>
@@ -1243,7 +1263,7 @@ export const FinancialDataPage = () => {
                       name="bank" 
                       placeholder="Ziraat Bankası" 
                       defaultValue={editingCashAdvance?.bank || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>
@@ -1251,30 +1271,32 @@ export const FinancialDataPage = () => {
                 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                    <DollarSign className="w-4 h-4 text-orange-500" />
+                    <DollarSign className="w-4 h-4 text-green-500" />
                     <span>Limit</span>
                   </label>
                   <input 
                     name="limit" 
                     type="text" 
-                    placeholder="50000" 
-                    defaultValue={editingCashAdvance?.limit || ''} 
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    placeholder="50.000" 
+                    defaultValue={editingCashAdvance?.limit ? formatNumberWithCommas(editingCashAdvance.limit.toString()) : ''} 
+                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
+                    onInput={handleNumberInput}
                     required 
                   />
                 </div>
                 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                    <span className="text-red-500">💳</span>
+                    <span className="text-green-500">💳</span>
                     <span>Mevcut Borç</span>
                   </label>
                   <input 
                     name="currentDebt" 
                     type="text" 
-                    placeholder="15000" 
-                    defaultValue={editingCashAdvance?.currentDebt || ''} 
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    placeholder="15.000" 
+                    defaultValue={editingCashAdvance?.currentDebt ? formatNumberWithCommas(editingCashAdvance.currentDebt.toString()) : ''} 
+                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
+                    onInput={handleNumberInput}
                   />
                 </div>
               </div>
@@ -1298,7 +1320,6 @@ export const FinancialDataPage = () => {
                 </button>
               </div>
             </form>
-            </div>
           </div>
         </div>
       )}
@@ -1307,17 +1328,17 @@ export const FinancialDataPage = () => {
       {showLoanForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg border max-w-sm sm:max-w-2xl w-full mx-4 sm:mx-0 max-h-[90vh] overflow-y-auto">
-            <div className="bg-purple-600 p-6 rounded-t-lg">
+            <div className="bg-white border-b border-gray-200 p-4 rounded-t-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="bg-white bg-opacity-20 p-2 rounded-lg">
-                    <PiggyBank className="w-6 h-6 text-white" />
+                  <div className="bg-green-100 p-2 rounded-lg">
+                    <PiggyBank className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">
+                    <h3 className="text-xl font-bold text-gray-800">
                       {editingLoan ? 'Krediyi Düzenle' : 'Yeni Kredi Ekle'}
                     </h3>
-                    <p className="text-purple-100 text-sm">
+                    <p className="text-gray-600 text-sm">
                       {editingLoan ? 'Mevcut kredi bilgilerini güncelleyin' : 'Kredi bilgilerini girin'}
                     </p>
                   </div>
@@ -1328,19 +1349,19 @@ export const FinancialDataPage = () => {
                     setShowLoanForm(false);
                     setEditingLoan(null);
                   }}
-                  className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors"
+                  className="text-gray-400 hover:text-gray-600 p-2 rounded-lg transition-colors"
                 >
                   ×
                 </button>
               </div>
             </div>
-            <div className="p-6">
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
               const parseNumber = (value: string | null) => {
                 if (!value) return 0;
-                return Number(value.replace(',', '.'));
+                // Binlik ayırıcıları temizle ve virgülü noktaya çevir
+                return Number(value.replace(/\./g, '').replace(',', '.'));
               };
               const startDate = new Date(formData.get('startDate') as string);
               const totalInstallments = Number(formData.get('totalInstallments'));
@@ -1376,31 +1397,31 @@ export const FinancialDataPage = () => {
                 isActive: true
               });
             }}>
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <PiggyBank className="w-4 h-4 text-purple-500" />
+                      <PiggyBank className="w-4 h-4 text-green-500" />
                       <span>Kredi Adı</span>
                     </label>
                     <input 
                       name="name" 
                       placeholder="İhtiyaç Kredisi" 
                       defaultValue={editingLoan?.name || ''} 
-                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-200 transition-colors bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <span className="text-blue-500">🏦</span>
+                      <span className="text-green-500">🏦</span>
                       <span>Banka</span>
                     </label>
                     <input 
                       name="bank" 
                       placeholder="Garanti BBVA" 
                       defaultValue={editingLoan?.bank || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>
@@ -1408,13 +1429,13 @@ export const FinancialDataPage = () => {
 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                    <span className="text-indigo-500">📋</span>
+                    <span className="text-green-500">📋</span>
                     <span>Kredi Türü</span>
                   </label>
                   <select 
                     name="loanType" 
                     defaultValue={editingLoan?.loanType || ''} 
-                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 transition-colors bg-gray-50 focus:bg-white" 
+                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
                     required
                   >
                     <option value="">Kredi Türü Seçin</option>
@@ -1435,29 +1456,31 @@ export const FinancialDataPage = () => {
                     <input 
                       name="totalAmount" 
                       type="text" 
-                      placeholder="100000" 
-                      defaultValue={editingLoan?.totalAmount || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      placeholder="100.000" 
+                      defaultValue={editingLoan?.totalAmount ? formatNumberWithCommas(editingLoan.totalAmount.toString()) : ''} 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
+                      onInput={handleNumberInput}
                       required 
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <span className="text-red-500">💳</span>
+                      <span className="text-green-500">💳</span>
                       <span>Kalan Borç</span>
                     </label>
                     <input 
                       name="remainingAmount" 
                       type="text" 
-                      placeholder="75000" 
-                      defaultValue={editingLoan?.remainingAmount || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      placeholder="75.000" 
+                      defaultValue={editingLoan?.remainingAmount ? formatNumberWithCommas(editingLoan.remainingAmount.toString()) : ''} 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
+                      onInput={handleNumberInput}
                       onChange={(e) => {
                         const remainingAmountInput = e.target;
                         const remainingInstallmentsInput = remainingAmountInput.form?.querySelector('input[name="remainingInstallments"]') as HTMLInputElement;
                         if (remainingInstallmentsInput) {
-                          const value = remainingAmountInput.value.replace(',', '.');
+                          const value = remainingAmountInput.value.replace(/\./g, '').replace(',', '.');
                           const amount = parseFloat(value) || 0;
                           if (amount === 0) {
                             remainingInstallmentsInput.value = '0';
@@ -1471,21 +1494,22 @@ export const FinancialDataPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <Calendar className="w-4 h-4 text-orange-500" />
+                      <Calendar className="w-4 h-4 text-green-500" />
                       <span>Aylık Ödeme</span>
                     </label>
                     <input 
                       name="monthlyPayment" 
                       type="text" 
-                      placeholder="2500" 
-                      defaultValue={editingLoan?.monthlyPayment || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      placeholder="2.500" 
+                      defaultValue={editingLoan?.monthlyPayment ? formatNumberWithCommas(editingLoan.monthlyPayment.toString()) : ''} 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
+                      onInput={handleNumberInput}
                       required 
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <Percent className="w-4 h-4 text-indigo-500" />
+                      <Percent className="w-4 h-4 text-green-500" />
                       <span>Faiz Oranı (%)</span>
                     </label>
                     <input 
@@ -1494,7 +1518,7 @@ export const FinancialDataPage = () => {
                       step="0.01" 
                       placeholder="2.5" 
                       defaultValue={editingLoan?.interestRate || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
                     />
                   </div>
                 </div>
@@ -1502,7 +1526,7 @@ export const FinancialDataPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <span className="text-teal-500">#️⃣</span>
+                      <span className="text-green-500">#️⃣</span>
                       <span>Toplam Taksit</span>
                     </label>
                     <input 
@@ -1510,13 +1534,13 @@ export const FinancialDataPage = () => {
                       type="number" 
                       placeholder="48" 
                       defaultValue={editingLoan?.totalInstallments || ''} 
-                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-200 transition-colors bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <span className="text-amber-500">⏳</span>
+                      <span className="text-green-500">⏳</span>
                       <span>Kalan Taksit</span>
                     </label>
                     <input 
@@ -1524,7 +1548,7 @@ export const FinancialDataPage = () => {
                       type="number" 
                       placeholder="36" 
                       defaultValue={editingLoan?.remainingInstallments || ''} 
-                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-amber-500 focus:ring-1 focus:ring-amber-200 transition-colors bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>
@@ -1571,7 +1595,6 @@ export const FinancialDataPage = () => {
                 </button>
               </div>
             </form>
-            </div>
           </div>
         </div>
       )}
