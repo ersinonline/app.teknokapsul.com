@@ -7,7 +7,7 @@ import App from './App';
 import './index.css';
 
 // Clerk publishable key
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_Y29udGVudC10ZXJtaXRlLTQ4LmNsZXJrLmFjY291bnRzLmRldiQ';
+const PUBLISHABLE_KEY = import.meta.env.VITE_NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_live_Y2xlcmsudGVrbm9rYXBzdWwuaW5mbyQ';
 
 if (!PUBLISHABLE_KEY) {
   throw new Error('Missing Publishable Key');

@@ -7,6 +7,7 @@ export default defineConfig({
     org: "teknokapsul",
     project: "teknokapsul"
   })],
+  envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
   define: {
     'process.env': '{}',
     'process.stdout': JSON.stringify({ isTTY: false }),
