@@ -77,7 +77,7 @@ export const FinancialDataPage = () => {
   const handleDeleteCreditCard = async (id: string) => {
     if (window.confirm('Bu kredi kartını silmek istediğinizden emin misiniz?')) {
       try {
-        await deleteCreditCard(user!.uid, id);
+        await deleteCreditCard(user!.id, id);
         setCreditCards(prev => prev.filter(card => card.id !== id));
       } catch (error) {
         console.error('Error deleting credit card:', error);
@@ -88,7 +88,7 @@ export const FinancialDataPage = () => {
   const handleDeleteCashAdvance = async (id: string) => {
     if (window.confirm('Bu avans hesabını silmek istediğinizden emin misiniz?')) {
       try {
-        await deleteCashAdvanceAccount(user!.uid, id);
+        await deleteCashAdvanceAccount(user!.id, id);
         setCashAdvanceAccounts(prev => prev.filter(account => account.id !== id));
       } catch (error) {
         console.error('Error deleting cash advance account:', error);
@@ -99,7 +99,7 @@ export const FinancialDataPage = () => {
   const handleDeleteLoan = async (id: string) => {
     if (window.confirm('Bu krediyi silmek istediğinizden emin misiniz?')) {
       try {
-        await deleteLoan(user!.uid, id);
+        await deleteLoan(user!.id, id);
         setLoans(prev => prev.filter(loan => loan.id !== id));
       } catch (error) {
         console.error('Error deleting loan:', error);
@@ -110,10 +110,10 @@ export const FinancialDataPage = () => {
   const handleAddCreditCard = async (formData: any) => {
     try {
       if (editingCreditCard) {
-        await updateCreditCard(user!.uid, editingCreditCard.id, formData);
+        await updateCreditCard(user!.id, editingCreditCard.id, formData);
         setEditingCreditCard(null);
       } else {
-        await addCreditCard(user!.uid, formData);
+        await addCreditCard(user!.id, formData);
       }
       setShowCreditCardForm(false);
       loadData();
@@ -126,10 +126,10 @@ export const FinancialDataPage = () => {
   const handleAddCashAdvance = async (formData: any) => {
     try {
       if (editingCashAdvance) {
-        await updateCashAdvanceAccount(user!.uid, editingCashAdvance.id, formData);
+        await updateCashAdvanceAccount(user!.id, editingCashAdvance.id, formData);
         setEditingCashAdvance(null);
       } else {
-        await addCashAdvanceAccount(user!.uid, formData);
+        await addCashAdvanceAccount(user!.id, formData);
       }
       setShowCashAdvanceForm(false);
       loadData();
@@ -142,10 +142,10 @@ export const FinancialDataPage = () => {
   const handleAddLoan = async (formData: any) => {
     try {
       if (editingLoan) {
-        await updateLoan(user!.uid, editingLoan.id, formData);
+        await updateLoan(user!.id, editingLoan.id, formData);
         setEditingLoan(null);
       } else {
-        await addLoan(user!.uid, formData);
+        await addLoan(user!.id, formData);
       }
       setShowLoanForm(false);
       loadData();
@@ -159,7 +159,7 @@ export const FinancialDataPage = () => {
 
   const tabs = [
     { id: 'creditCards', label: 'Kredi Kartları', icon: CreditCardIcon, count: creditCards.length },
-    { id: 'cashAdvance', label: 'Avans Hesapları', icon: Banknote, count: cashAdvanceAccounts.length },
+    { id: 'cashAdvance', label: 'Ek Hesapları', icon: Banknote, count: cashAdvanceAccounts.length },
     { id: 'loans', label: 'Krediler', icon: PiggyBank, count: loans.length }
   ];
 
@@ -177,11 +177,31 @@ export const FinancialDataPage = () => {
   const totalCashAdvanceLimit = cashAdvanceAccounts.reduce((sum, acc) => sum + acc.limit, 0);
   const totalCashAdvanceDebt = cashAdvanceAccounts.reduce((sum, acc) => sum + acc.currentDebt, 0);
 
+  // Kartları bankaya göre grupla
+  const groupCardsByBank = (cards: CreditCard[]) => {
+    const grouped = cards.reduce((acc, card) => {
+      if (!acc[card.bank]) {
+        acc[card.bank] = [];
+      }
+      acc[card.bank].push(card);
+      return acc;
+    }, {} as Record<string, CreditCard[]>);
+    
+    return Object.entries(grouped).map(([bank, cards]) => ({
+      bank,
+      cards: cards.sort((a, b) => b.limit - a.limit), // Limite göre sırala
+      totalLimit: cards.reduce((sum, card) => sum + card.limit, 0),
+      totalDebt: cards.reduce((sum, card) => sum + card.currentDebt, 0)
+    })).sort((a, b) => b.totalLimit - a.totalLimit); // Toplam limite göre sırala
+  };
+
+  const groupedCreditCards = groupCardsByBank(creditCards);
+
   return (
     <div className="p-3 sm:p-6 w-full">
       <div className="mb-4 sm:mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Finansal Verilerim</h1>
-        <p className="text-sm sm:text-base text-gray-600">Kredi kartları, avans hesapları ve kredilerinizi yönetin</p>
+        <p className="text-sm sm:text-base text-gray-600">Kredi kartları, ek hesapları ve kredilerinizi yönetin</p>
       </div>
 
       {/* Tabs - Mobile Responsive */}
@@ -213,6 +233,8 @@ export const FinancialDataPage = () => {
 
       {/* Content */}
       <div className="space-y-6">
+
+        {/* Content Area */}
         {/* Kredi Kartları */}
         {activeTab === 'creditCards' && (
           <div>
@@ -266,15 +288,29 @@ export const FinancialDataPage = () => {
                 <p className="text-sm sm:text-base text-gray-500">Henüz kredi kartı eklenmemiş</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                {creditCards
-                  .sort((a, b) => {
-                    // Borç oranına göre sırala (yüksek borç oranı önce)
-                    const debtRatioA = (a.currentDebt / a.limit) * 100;
-                    const debtRatioB = (b.currentDebt / b.limit) * 100;
-                    return debtRatioB - debtRatioA;
-                  })
-                  .map((card) => {
+              <div className="space-y-6">
+                {groupedCreditCards.map((bankGroup) => (
+                  <div key={bankGroup.bank} className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 sm:p-6 border-2 border-blue-200 shadow-lg">
+                    {/* Banka Başlığı */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-blue-600 text-white p-2 rounded-lg">
+                          <CreditCardIcon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-blue-900">{bankGroup.bank}</h3>
+                          <p className="text-sm text-blue-600">{bankGroup.cards.length} kart</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-blue-600 font-medium">Toplam Limit</p>
+                        <p className="text-lg font-bold text-blue-900">{formatCurrency(bankGroup.totalLimit)}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Kartlar Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {bankGroup.cards.map((card) => {
                   const debtRatio = calculateDebtRatio(card.currentDebt, card.limit);
                   const availableLimit = calculateAvailableLimit(card.limit, card.currentDebt);
                   
@@ -353,16 +389,19 @@ export const FinancialDataPage = () => {
                     </div>
                   );
                 })}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         )}
 
-        {/* Avans Hesapları */}
+        {/* Ek Hesapları */}
         {activeTab === 'cashAdvance' && (
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Avans Hesapları</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Ek Hesapları</h2>
               <button 
                 onClick={() => setShowCashAdvanceForm(true)}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
@@ -372,7 +411,7 @@ export const FinancialDataPage = () => {
               </button>
             </div>
 
-            {/* Avans Hesap Özeti */}
+            {/* Ek Hesap Özeti */}
             {cashAdvanceAccounts.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-yellow-50 rounded-lg p-4">
@@ -648,9 +687,30 @@ export const FinancialDataPage = () => {
 
       {/* Credit Card Form Modal */}
       {showCreditCardForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-medium mb-4">{editingCreditCard ? 'Kredi Kartını Düzenle' : 'Yeni Kredi Kartı Ekle'}</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-gray-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-xl">
+                  <CreditCardIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">{editingCreditCard ? 'Kredi Kartını Düzenle' : 'Yeni Kredi Kartı Ekle'}</h3>
+                  <p className="text-sm text-gray-500">Kredi kartı bilgilerinizi girin</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  setShowCreditCardForm(false);
+                  setEditingCreditCard(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
@@ -675,51 +735,194 @@ export const FinancialDataPage = () => {
                 isActive: true
               });
             }}>
-              <div className="space-y-4">
-                <input name="name" placeholder="Kart Adı" defaultValue={editingCreditCard?.name || ''} className="w-full p-2 border rounded" required />
-                <input name="bank" placeholder="Banka" defaultValue={editingCreditCard?.bank || ''} className="w-full p-2 border rounded" required />
-                <input name="cardNumber" placeholder="Son 4 Hane" defaultValue={editingCreditCard?.cardNumber || ''} className="w-full p-2 border rounded" required />
-                <input name="limit" type="text" placeholder="Toplam Limit" defaultValue={editingCreditCard?.limit || ''} className="w-full p-2 border rounded" required />
-                <input 
-                  name="availableLimit" 
-                  type="text" 
-                  placeholder="Kullanılabilir Limit" 
-                  defaultValue={editingCreditCard ? (editingCreditCard.limit - editingCreditCard.currentDebt).toString() : ''} 
-                  className="w-full p-2 border rounded" 
-                  required 
-                  onChange={(e) => {
-                    const availableLimitInput = e.target;
-                    const limitInput = availableLimitInput.form?.querySelector('input[name="limit"]') as HTMLInputElement;
-                    const currentDebtInput = availableLimitInput.form?.querySelector('input[name="currentDebt"]') as HTMLInputElement;
-                    
-                    if (limitInput && currentDebtInput) {
-                      const totalLimit = parseFloat(limitInput.value.replace(',', '.')) || 0;
-                      const availableLimit = parseFloat(availableLimitInput.value.replace(',', '.')) || 0;
-                      const debt = totalLimit - availableLimit;
-                      currentDebtInput.value = debt >= 0 ? debt.toString() : '0';
-                    }
-                  }}
-                />
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <CreditCardIcon className="w-4 h-4 text-blue-500" />
+                      <span>Kart Adı</span>
+                    </label>
+                    <input 
+                      name="name" 
+                      placeholder="Örn: İş Bankası Platinum" 
+                      defaultValue={editingCreditCard?.name || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <Banknote className="w-4 h-4 text-green-500" />
+                      <span>Banka</span>
+                    </label>
+                    <input 
+                      name="bank" 
+                      placeholder="Örn: İş Bankası" 
+                      defaultValue={editingCreditCard?.bank || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Son 4 Hane</label>
+                    <input 
+                      name="cardNumber" 
+                      placeholder="1234" 
+                      defaultValue={editingCreditCard?.cardNumber || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      maxLength={4}
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <DollarSign className="w-4 h-4 text-purple-500" />
+                      <span>Toplam Limit</span>
+                    </label>
+                    <input 
+                      name="limit" 
+                      type="text" 
+                      placeholder="50000" 
+                      defaultValue={editingCreditCard?.limit || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                    <span className="text-green-500">✅</span>
+                    <span>Kullanılabilir Limit</span>
+                  </label>
+                  <input 
+                    name="availableLimit" 
+                    type="text" 
+                    placeholder="Kullanılabilir limit" 
+                    defaultValue={editingCreditCard ? (editingCreditCard.limit - editingCreditCard.currentDebt).toString() : ''} 
+                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    required 
+                    onChange={(e) => {
+                      const availableLimitInput = e.target;
+                      const limitInput = availableLimitInput.form?.querySelector('input[name="limit"]') as HTMLInputElement;
+                      const currentDebtInput = availableLimitInput.form?.querySelector('input[name="currentDebt"]') as HTMLInputElement;
+                      
+                      if (limitInput && currentDebtInput) {
+                        const totalLimit = parseFloat(limitInput.value.replace(',', '.')) || 0;
+                        const availableLimit = parseFloat(availableLimitInput.value.replace(',', '.')) || 0;
+                        const debt = totalLimit - availableLimit;
+                        currentDebtInput.value = debt >= 0 ? debt.toString() : '0';
+                      }
+                    }}
+                  />
+                </div>
                 <input name="currentDebt" type="hidden" defaultValue={editingCreditCard?.currentDebt || ''} />
-                <input name="statementDate" type="number" placeholder="Ekstre Günü (1-31)" defaultValue={editingCreditCard?.statementDate || ''} className="w-full p-2 border rounded" required />
-                <input name="dueDate" type="number" placeholder="Son Ödeme Günü (1-31)" defaultValue={editingCreditCard?.dueDate || ''} className="w-full p-2 border rounded" required />
-                <input name="minimumPayment" type="text" placeholder="Minimum Ödeme" defaultValue={editingCreditCard?.minimumPayment || ''} className="w-full p-2 border rounded" />
-                <input name="interestRate" type="text" step="0.01" placeholder="Faiz Oranı (%)" defaultValue={editingCreditCard?.interestRate || ''} className="w-full p-2 border rounded" />
-                <input name="annualFeeDate" type="date" placeholder="Yıllık Aidat Tarihi" defaultValue={editingCreditCard?.annualFeeDate ? (() => {
-                  try {
-                    const date = new Date(editingCreditCard.annualFeeDate);
-                    return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
-                  } catch {
-                    return '';
-                  }
-                })() : ''} className="w-full p-2 border rounded" />
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <Calendar className="w-4 h-4 text-orange-500" />
+                      <span>Ekstre Günü</span>
+                    </label>
+                    <input 
+                      name="statementDate" 
+                      type="number" 
+                      placeholder="15" 
+                      min="1" 
+                      max="31" 
+                      defaultValue={editingCreditCard?.statementDate || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <Calendar className="w-4 h-4 text-red-500" />
+                      <span>Son Ödeme Günü</span>
+                    </label>
+                    <input 
+                      name="dueDate" 
+                      type="number" 
+                      placeholder="25" 
+                      min="1" 
+                      max="31" 
+                      defaultValue={editingCreditCard?.dueDate || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <DollarSign className="w-4 h-4 text-yellow-500" />
+                      <span>Minimum Ödeme</span>
+                    </label>
+                    <input 
+                      name="minimumPayment" 
+                      type="text" 
+                      placeholder="500" 
+                      defaultValue={editingCreditCard?.minimumPayment || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <Percent className="w-4 h-4 text-indigo-500" />
+                      <span>Faiz Oranı (%)</span>
+                    </label>
+                    <input 
+                      name="interestRate" 
+                      type="text" 
+                      step="0.01" 
+                      placeholder="2.5" 
+                      defaultValue={editingCreditCard?.interestRate || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                    <Calendar className="w-4 h-4 text-pink-500" />
+                    <span>Yıllık Aidat Tarihi</span>
+                  </label>
+                  <input 
+                    name="annualFeeDate" 
+                    type="date" 
+                    defaultValue={editingCreditCard?.annualFeeDate ? (() => {
+                      try {
+                        const date = new Date(editingCreditCard.annualFeeDate);
+                        return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
+                      } catch {
+                        return '';
+                      }
+                    })() : ''} 
+                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                  />
+                </div>
               </div>
-              <div className="flex gap-2 mt-6">
-                <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Ekle</button>
-                <button type="button" onClick={() => {
-                  setShowCreditCardForm(false);
-                  setEditingCreditCard(null);
-                }} className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400">İptal</button>
+              <div className="flex gap-3 mt-8 pt-6 border-t border-gray-200">
+                <button 
+                  type="submit" 
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <CreditCardIcon className="w-5 h-5" />
+                  <span>{editingCreditCard ? 'Kartı Güncelle' : 'Kartı Ekle'}</span>
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setShowCreditCardForm(false);
+                    setEditingCreditCard(null);
+                  }} 
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <span>İptal</span>
+                </button>
               </div>
             </form>
           </div>
@@ -728,9 +931,36 @@ export const FinancialDataPage = () => {
 
       {/* Cash Advance Form Modal */}
       {showCashAdvanceForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-medium mb-4">{editingCashAdvance ? 'Avans Hesabını Düzenle' : 'Yeni Avans Hesabı Ekle'}</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-gray-100">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-white/20 p-2 rounded-xl">
+                    <Banknote className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">
+                      {editingCashAdvance ? 'Avans Hesabını Düzenle' : 'Yeni Avans Hesabı'}
+                    </h3>
+                    <p className="text-green-100 text-sm">
+                      {editingCashAdvance ? 'Mevcut hesap bilgilerini güncelleyin' : 'Nakit avans hesabı bilgilerini girin'}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setShowCashAdvanceForm(false);
+                    setEditingCashAdvance(null);
+                  }}
+                  className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-xl transition-all duration-200"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
@@ -748,31 +978,154 @@ export const FinancialDataPage = () => {
                 isActive: true
               });
             }}>
-              <div className="space-y-4">
-                <input name="name" placeholder="Hesap Adı" defaultValue={editingCashAdvance?.name || ''} className="w-full p-2 border rounded" required />
-                <input name="bank" placeholder="Banka" defaultValue={editingCashAdvance?.bank || ''} className="w-full p-2 border rounded" required />
-                <input name="accountNumber" placeholder="Son 4 Hane" defaultValue={editingCashAdvance?.accountNumber || ''} className="w-full p-2 border rounded" required />
-                <input name="limit" type="text" placeholder="Limit" defaultValue={editingCashAdvance?.limit || ''} className="w-full p-2 border rounded" required />
-                <input name="currentDebt" type="text" placeholder="Mevcut Borç" defaultValue={editingCashAdvance?.currentDebt || ''} className="w-full p-2 border rounded" />
-                <input name="interestRate" type="text" step="0.01" placeholder="Faiz Oranı (%)" defaultValue={editingCashAdvance?.interestRate || ''} className="w-full p-2 border rounded" />
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <Banknote className="w-4 h-4 text-green-500" />
+                      <span>Hesap Adı</span>
+                    </label>
+                    <input 
+                      name="name" 
+                      placeholder="Nakit Avans Hesabı" 
+                      defaultValue={editingCashAdvance?.name || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <span className="text-blue-500">🏦</span>
+                      <span>Banka</span>
+                    </label>
+                    <input 
+                      name="bank" 
+                      placeholder="Ziraat Bankası" 
+                      defaultValue={editingCashAdvance?.bank || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <span className="text-purple-500">#️⃣</span>
+                      <span>Son 4 Hane</span>
+                    </label>
+                    <input 
+                      name="accountNumber" 
+                      placeholder="1234" 
+                      maxLength={4} 
+                      defaultValue={editingCashAdvance?.accountNumber || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <DollarSign className="w-4 h-4 text-orange-500" />
+                      <span>Limit</span>
+                    </label>
+                    <input 
+                      name="limit" 
+                      type="text" 
+                      placeholder="50000" 
+                      defaultValue={editingCashAdvance?.limit || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <span className="text-red-500">💳</span>
+                      <span>Mevcut Borç</span>
+                    </label>
+                    <input 
+                      name="currentDebt" 
+                      type="text" 
+                      placeholder="15000" 
+                      defaultValue={editingCashAdvance?.currentDebt || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <Percent className="w-4 h-4 text-indigo-500" />
+                      <span>Faiz Oranı (%)</span>
+                    </label>
+                    <input 
+                      name="interestRate" 
+                      type="text" 
+                      step="0.01" 
+                      placeholder="3.5" 
+                      defaultValue={editingCashAdvance?.interestRate || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="flex gap-2 mt-6">
-                <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Ekle</button>
-                <button type="button" onClick={() => {
-                  setShowCashAdvanceForm(false);
-                  setEditingCashAdvance(null);
-                }} className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400">İptal</button>
+              <div className="flex gap-3 mt-8 pt-6 border-t border-gray-200">
+                <button 
+                  type="submit" 
+                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <Banknote className="w-5 h-5" />
+                  <span>{editingCashAdvance ? 'Hesabı Güncelle' : 'Hesabı Ekle'}</span>
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setShowCashAdvanceForm(false);
+                    setEditingCashAdvance(null);
+                  }} 
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <span>İptal</span>
+                </button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Loan Form Modal */}
       {showLoanForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-medium mb-4">{editingLoan ? 'Krediyi Düzenle' : 'Yeni Kredi Ekle'}</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-100">
+            <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-white/20 p-2 rounded-xl">
+                    <PiggyBank className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">
+                      {editingLoan ? 'Krediyi Düzenle' : 'Yeni Kredi Ekle'}
+                    </h3>
+                    <p className="text-purple-100 text-sm">
+                      {editingLoan ? 'Mevcut kredi bilgilerini güncelleyin' : 'Kredi bilgilerini girin'}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setShowLoanForm(false);
+                    setEditingLoan(null);
+                  }}
+                  className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-xl transition-all duration-200"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
@@ -814,61 +1167,207 @@ export const FinancialDataPage = () => {
                 isActive: true
               });
             }}>
-              <div className="space-y-4">
-                <input name="name" placeholder="Kredi Adı" defaultValue={editingLoan?.name || ''} className="w-full p-2 border rounded" required />
-                <input name="bank" placeholder="Banka" defaultValue={editingLoan?.bank || ''} className="w-full p-2 border rounded" required />
-                <select name="loanType" defaultValue={editingLoan?.loanType || ''} className="w-full p-2 border rounded" required>
-                  <option value="">Kredi Türü Seçin</option>
-                  <option value="personal">Bireysel Kredi</option>
-                  <option value="vehicle">Araç Kredisi</option>
-                  <option value="housing">Konut Kredisi</option>
-                  <option value="commercial">Ticari Kredi</option>
-                  <option value="other">Diğer</option>
-                </select>
-                <input name="totalAmount" type="text" placeholder="Toplam Tutar" defaultValue={editingLoan?.totalAmount || ''} className="w-full p-2 border rounded" required />
-                <input 
-                  name="remainingAmount" 
-                  type="text" 
-                  placeholder="Kalan Borç" 
-                  defaultValue={editingLoan?.remainingAmount || ''} 
-                  className="w-full p-2 border rounded" 
-                  required 
-                  onChange={(e) => {
-                    const remainingAmountInput = e.target;
-                    const remainingInstallmentsInput = remainingAmountInput.form?.querySelector('input[name="remainingInstallments"]') as HTMLInputElement;
-                    if (remainingInstallmentsInput) {
-                      const value = remainingAmountInput.value.replace(',', '.');
-                      const amount = parseFloat(value) || 0;
-                      if (amount === 0) {
-                        remainingInstallmentsInput.value = '0';
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <PiggyBank className="w-4 h-4 text-purple-500" />
+                      <span>Kredi Adı</span>
+                    </label>
+                    <input 
+                      name="name" 
+                      placeholder="İhtiyaç Kredisi" 
+                      defaultValue={editingLoan?.name || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <span className="text-blue-500">🏦</span>
+                      <span>Banka</span>
+                    </label>
+                    <input 
+                      name="bank" 
+                      placeholder="Garanti BBVA" 
+                      defaultValue={editingLoan?.bank || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                    <span className="text-indigo-500">📋</span>
+                    <span>Kredi Türü</span>
+                  </label>
+                  <select 
+                    name="loanType" 
+                    defaultValue={editingLoan?.loanType || ''} 
+                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    required
+                  >
+                    <option value="">Kredi Türü Seçin</option>
+                    <option value="personal">Bireysel Kredi</option>
+                    <option value="vehicle">Araç Kredisi</option>
+                    <option value="housing">Konut Kredisi</option>
+                    <option value="commercial">Ticari Kredi</option>
+                    <option value="other">Diğer</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <DollarSign className="w-4 h-4 text-green-500" />
+                      <span>Toplam Tutar</span>
+                    </label>
+                    <input 
+                      name="totalAmount" 
+                      type="text" 
+                      placeholder="100000" 
+                      defaultValue={editingLoan?.totalAmount || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <span className="text-red-500">💳</span>
+                      <span>Kalan Borç</span>
+                    </label>
+                    <input 
+                      name="remainingAmount" 
+                      type="text" 
+                      placeholder="75000" 
+                      defaultValue={editingLoan?.remainingAmount || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                      onChange={(e) => {
+                        const remainingAmountInput = e.target;
+                        const remainingInstallmentsInput = remainingAmountInput.form?.querySelector('input[name="remainingInstallments"]') as HTMLInputElement;
+                        if (remainingInstallmentsInput) {
+                          const value = remainingAmountInput.value.replace(',', '.');
+                          const amount = parseFloat(value) || 0;
+                          if (amount === 0) {
+                            remainingInstallmentsInput.value = '0';
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <Calendar className="w-4 h-4 text-orange-500" />
+                      <span>Aylık Ödeme</span>
+                    </label>
+                    <input 
+                      name="monthlyPayment" 
+                      type="text" 
+                      placeholder="2500" 
+                      defaultValue={editingLoan?.monthlyPayment || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <Percent className="w-4 h-4 text-indigo-500" />
+                      <span>Faiz Oranı (%)</span>
+                    </label>
+                    <input 
+                      name="interestRate" 
+                      type="text" 
+                      step="0.01" 
+                      placeholder="2.5" 
+                      defaultValue={editingLoan?.interestRate || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <span className="text-teal-500">#️⃣</span>
+                      <span>Toplam Taksit</span>
+                    </label>
+                    <input 
+                      name="totalInstallments" 
+                      type="number" 
+                      placeholder="48" 
+                      defaultValue={editingLoan?.totalInstallments || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                      <span className="text-amber-500">⏳</span>
+                      <span>Kalan Taksit</span>
+                    </label>
+                    <input 
+                      name="remainingInstallments" 
+                      type="number" 
+                      placeholder="36" 
+                      defaultValue={editingLoan?.remainingInstallments || ''} 
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      required 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                    <Calendar className="w-4 h-4 text-pink-500" />
+                    <span>Başlangıç Tarihi</span>
+                  </label>
+                  <input 
+                    name="startDate" 
+                    type="date" 
+                    defaultValue={editingLoan?.startDate ? (() => {
+                      try {
+                        const date = new Date(editingLoan.startDate);
+                        return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
+                      } catch {
+                        return '';
                       }
-                    }
-                  }}
-                />
-                <input name="monthlyPayment" type="text" placeholder="Aylık Ödeme" defaultValue={editingLoan?.monthlyPayment || ''} className="w-full p-2 border rounded" required />
-                <input name="totalInstallments" type="number" placeholder="Toplam Taksit Sayısı" defaultValue={editingLoan?.totalInstallments || ''} className="w-full p-2 border rounded" required />
-                <input name="remainingInstallments" type="number" placeholder="Kalan Taksit Sayısı" defaultValue={editingLoan?.remainingInstallments || ''} className="w-full p-2 border rounded" required />
-                <input name="interestRate" type="text" step="0.01" placeholder="Faiz Oranı (%)" defaultValue={editingLoan?.interestRate || ''} className="w-full p-2 border rounded" />
-                <input name="startDate" type="date" placeholder="Başlangıç Tarihi" defaultValue={editingLoan?.startDate ? (() => {
-                  try {
-                    const date = new Date(editingLoan.startDate);
-                    return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
-                  } catch {
-                    return '';
-                  }
-                })() : ''} className="w-full p-2 border rounded" required />
+                    })() : ''} 
+                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    required 
+                  />
+                </div>
               </div>
-              <div className="flex gap-2 mt-6">
-                <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Ekle</button>
-                <button type="button" onClick={() => {
-                  setShowLoanForm(false);
-                  setEditingLoan(null);
-                }} className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400">İptal</button>
+              <div className="flex gap-3 mt-8 pt-6 border-t border-gray-200">
+                <button 
+                  type="submit" 
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-indigo-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <PiggyBank className="w-5 h-5" />
+                  <span>{editingLoan ? 'Krediyi Güncelle' : 'Krediyi Ekle'}</span>
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setShowLoanForm(false);
+                    setEditingLoan(null);
+                  }}
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <span>İptal</span>
+                </button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       )}
     </div>
   );
 };
+
+export default FinancialDataPage;

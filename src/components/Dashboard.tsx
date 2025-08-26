@@ -203,7 +203,7 @@ export const Dashboard = () => {
       return availableRatioA - availableRatioB; // En düşük kullanılabilir oran önce
     });
     
-  // Avans hesaplarını sırala: en düşük kullanılabilir orana göre
+  // Ek hesaplarını sırala: en düşük kullanılabilir orana göre
   const sortedCashAdvanceAccounts = [...cashAdvanceAccounts]
     .sort((a, b) => {
       const availableRatioA = a.limit > 0 ? ((a.limit - a.currentDebt) / a.limit) * 100 : 0;
@@ -624,10 +624,10 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Avans Hesapları */}
+        {/* Ek Hesapları */}
         <div className="group bg-white rounded-2xl p-4 sm:p-6 cursor-pointer hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#ffb700]/30 hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5" onClick={() => navigate('/financial')}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-[#e6a500] transition-colors">Avans Hesapları</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-[#e6a500] transition-colors">Ek Hesapları</h2>
             <div className="flex items-center gap-2">
               <button 
                 onClick={(e) => {

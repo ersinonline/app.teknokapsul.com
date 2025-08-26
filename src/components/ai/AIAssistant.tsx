@@ -88,7 +88,7 @@ export const AIAssistant: React.FC = () => {
     const welcomeMessage: Message = {
       id: Date.now().toString(),
       type: 'ai',
-      content: `Merhaba ${user?.displayName || 'Kullanıcı'}! 👋 Ben TeknoKapsül AI asistanınızım. Finansal yönetim konularında size yardımcı olmak için buradayım. Aşağıdaki hazır sorulardan birini seçebilir veya kendi sorunuzu yazabilirsiniz.`,
+      content: `Merhaba ${user?.firstName || 'Kullanıcı'}! 👋 Ben TeknoKapsül AI asistanınızım. Finansal yönetim konularında size yardımcı olmak için buradayım. Aşağıdaki hazır sorulardan birini seçebilir veya kendi sorunuzu yazabilirsiniz.`,
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
@@ -123,7 +123,7 @@ export const AIAssistant: React.FC = () => {
     
     // Akıllı cevap sistemi - gerçek verilerle
     if (message.includes('durum') || message.includes('özet') || message.includes('analiz')) {
-      response = `📊 **Finansal Durumunuz:**\n\n• Aylık Gelir: ${formatCurrency(totalIncome)}\n• Aylık Gider: ${formatCurrency(totalExpenses)}\n• Net Durum: ${formatCurrency(netBalance)} ${netBalance >= 0 ? '✅' : '⚠️'}\n• Ödenmemiş Gider: ${formatCurrency(totalUnpaid)}\n\n💳 **Borç Durumu:**\n• Toplam Borç: ${formatCurrency(totalDebt)}\n• Kredi Kartı Borcu: ${formatCurrency(totalCreditDebt)}\n• Avans Hesap Borcu: ${formatCurrency(totalCashAdvanceDebt)}\n• Kredi Borcu: ${formatCurrency(totalLoanDebt)}\n\n${netBalance >= 0 ? 'Finansal durumunuz pozitif görünüyor!' : 'Giderlerinizi gözden geçirmenizi öneririm.'}`;
+      response = `📊 **Finansal Durumunuz:**\n\n• Aylık Gelir: ${formatCurrency(totalIncome)}\n• Aylık Gider: ${formatCurrency(totalExpenses)}\n• Net Durum: ${formatCurrency(netBalance)} ${netBalance >= 0 ? '✅' : '⚠️'}\n• Ödenmemiş Gider: ${formatCurrency(totalUnpaid)}\n\n💳 **Borç Durumu:**\n• Toplam Borç: ${formatCurrency(totalDebt)}\n• Kredi Kartı Borcu: ${formatCurrency(totalCreditDebt)}\n• Ek Hesap Borcu: ${formatCurrency(totalCashAdvanceDebt)}\n• Kredi Borcu: ${formatCurrency(totalLoanDebt)}\n\n${netBalance >= 0 ? 'Finansal durumunuz pozitif görünüyor!' : 'Giderlerinizi gözden geçirmenizi öneririm.'}`;
     } else if (message.includes('gider') && (message.includes('en') || message.includes('yüksek') || message.includes('fazla'))) {
       const sortedExpenses = expenses.sort((a, b) => b.amount - a.amount).slice(0, 5);
       response = `💰 **En Yüksek Giderleriniz:**\n\n${sortedExpenses.map((expense, index) => `${index + 1}. ${expense.title}: ${formatCurrency(expense.amount)}`).join('\n')}\n\nBu alanlarda tasarruf fırsatları arayabilirsiniz.`;
@@ -141,7 +141,7 @@ export const AIAssistant: React.FC = () => {
       }
     } else if (message.includes('avans') || message.includes('nakit')) {
       if (cashAdvanceAccounts.length > 0) {
-        response = `💰 **Avans Hesaplarınız:**\n\n${cashAdvanceAccounts.map(acc => `• ${acc.name} (${acc.bank})\n  Limit: ${formatCurrency(acc.limit)}\n  Borç: ${formatCurrency(acc.currentDebt)}\n  Kullanılabilir: ${formatCurrency(acc.limit - acc.currentDebt)}`).join('\n\n')}\n\n**Toplam:**\n• Limit: ${formatCurrency(totalCashAdvanceLimit)}\n• Borç: ${formatCurrency(totalCashAdvanceDebt)}`;
+        response = `💰 **Ek Hesaplarınız:**\n\n${cashAdvanceAccounts.map(acc => `• ${acc.name} (${acc.bank})\n  Limit: ${formatCurrency(acc.limit)}\n  Borç: ${formatCurrency(acc.currentDebt)}\n  Kullanılabilir: ${formatCurrency(acc.limit - acc.currentDebt)}`).join('\n\n')}\n\n**Toplam:**\n• Limit: ${formatCurrency(totalCashAdvanceLimit)}\n• Borç: ${formatCurrency(totalCashAdvanceDebt)}`;
       } else {
         response = `💰 Kayıtlı avans hesabınız bulunmuyor.`;
       }
@@ -166,11 +166,11 @@ export const AIAssistant: React.FC = () => {
       const savingPotential = Math.max(0, totalIncome * 0.2);
       response = `💰 **Tasarruf Önerileri:**\n\n• Hedef tasarruf: ${formatCurrency(savingPotential)} (gelirin %20'si)\n• Mevcut net durum: ${formatCurrency(netBalance)}\n\n**Stratejiler:**\n• Gereksiz abonelikleri iptal edin\n• Gıda harcamalarını optimize edin\n• Ulaşım maliyetlerini azaltın\n• Otomatik tasarruf planı oluşturun`;
     } else if (message.includes('merhaba') || message.includes('selam')) {
-      response = `Merhaba ${user?.displayName || 'Kullanıcı'}! 👋 Finansal verilerinizi analiz edebilir, öneriler sunabilirim. Size nasıl yardımcı olabilirim?`;
+      response = `Merhaba ${user?.firstName || 'Kullanıcı'}! 👋 Finansal verilerinizi analiz edebilir, öneriler sunabilirim. Size nasıl yardımcı olabilirim?`;
     } else if (message.includes('teşekkür') || message.includes('sağol')) {
       response = `Rica ederim! 😊 Finansal hedeflerinize ulaşmanızda yardımcı olmaktan mutluluk duyarım.`;
     } else {
-      response = `Bu konuda size yardımcı olmaya çalışayım. Finansal durumunuz hakkında şunları sorabilirsiniz:\n\n• "Finansal durumum nasıl?"\n• "En yüksek giderlerim neler?"\n• "Ödenmemiş giderlerim var mı?"\n• "Kredi kartlarım nasıl?"\n• "Avans hesaplarım"\n• "Kredilerim"\n• "Bütçe önerisi ver"\n• "Tasarruf nasıl yapabilirim?"`;
+      response = `Bu konuda size yardımcı olmaya çalışayım. Finansal durumunuz hakkında şunları sorabilirsiniz:\n\n• "Finansal durumum nasıl?"\n• "En yüksek giderlerim neler?"\n• "Ödenmemiş giderlerim var mı?"\n• "Kredi kartlarım nasıl?"\n• "Ek hesaplarım"\n• "Kredilerim"\n• "Bütçe önerisi ver"\n• "Tasarruf nasıl yapabilirim?"`;
     }
     
     return {
