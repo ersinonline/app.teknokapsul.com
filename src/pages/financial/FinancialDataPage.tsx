@@ -729,8 +729,6 @@ export const FinancialDataPage = () => {
                 currentDebt: parseNumber(formData.get('currentDebt') as string),
                 statementDate: Number(formData.get('statementDate')),
                 dueDate: Number(formData.get('dueDate')),
-                minimumPayment: parseNumber(formData.get('minimumPayment') as string),
-                interestRate: parseNumber(formData.get('interestRate') as string),
                 annualFeeDate: formData.get('annualFeeDate') ? new Date(formData.get('annualFeeDate') as string) : null,
                 isActive: true
               });
@@ -855,35 +853,7 @@ export const FinancialDataPage = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <DollarSign className="w-4 h-4 text-yellow-500" />
-                      <span>Minimum Ödeme</span>
-                    </label>
-                    <input 
-                      name="minimumPayment" 
-                      type="text" 
-                      placeholder="500" 
-                      defaultValue={editingCreditCard?.minimumPayment || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <Percent className="w-4 h-4 text-indigo-500" />
-                      <span>Faiz Oranı (%)</span>
-                    </label>
-                    <input 
-                      name="interestRate" 
-                      type="text" 
-                      step="0.01" 
-                      placeholder="2.5" 
-                      defaultValue={editingCreditCard?.interestRate || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
-                    />
-                  </div>
-                </div>
+
                 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
@@ -1008,65 +978,33 @@ export const FinancialDataPage = () => {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <span className="text-purple-500">#️⃣</span>
-                      <span>Son 4 Hane</span>
-                    </label>
-                    <input 
-                      name="accountNumber" 
-                      placeholder="1234" 
-                      maxLength={4} 
-                      defaultValue={editingCashAdvance?.accountNumber || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <DollarSign className="w-4 h-4 text-orange-500" />
-                      <span>Limit</span>
-                    </label>
-                    <input 
-                      name="limit" 
-                      type="text" 
-                      placeholder="50000" 
-                      defaultValue={editingCashAdvance?.limit || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
-                      required 
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                    <DollarSign className="w-4 h-4 text-orange-500" />
+                    <span>Limit</span>
+                  </label>
+                  <input 
+                    name="limit" 
+                    type="text" 
+                    placeholder="50000" 
+                    defaultValue={editingCashAdvance?.limit || ''} 
+                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    required 
+                  />
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <span className="text-red-500">💳</span>
-                      <span>Mevcut Borç</span>
-                    </label>
-                    <input 
-                      name="currentDebt" 
-                      type="text" 
-                      placeholder="15000" 
-                      defaultValue={editingCashAdvance?.currentDebt || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
-                      <Percent className="w-4 h-4 text-indigo-500" />
-                      <span>Faiz Oranı (%)</span>
-                    </label>
-                    <input 
-                      name="interestRate" 
-                      type="text" 
-                      step="0.01" 
-                      placeholder="3.5" 
-                      defaultValue={editingCashAdvance?.interestRate || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                    <span className="text-red-500">💳</span>
+                    <span>Mevcut Borç</span>
+                  </label>
+                  <input 
+                    name="currentDebt" 
+                    type="text" 
+                    placeholder="15000" 
+                    defaultValue={editingCashAdvance?.currentDebt || ''} 
+                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                  />
                 </div>
               </div>
               <div className="flex gap-3 mt-8 pt-6 border-t border-gray-200">
