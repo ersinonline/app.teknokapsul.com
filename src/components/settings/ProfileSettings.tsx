@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { User } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const ProfileSettings = () => {
   const { user } = useAuth();
-  const [avatarUrl, setAvatarUrl] = useState(user?.imageUrl || '');
+  const avatarUrl = user?.imageUrl || '';
   const [displayName, setDisplayName] = useState(user?.fullName || '');
 
   const handleProfileUpdate = async () => {

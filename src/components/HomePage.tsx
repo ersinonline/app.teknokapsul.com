@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, Target, PiggyBank, DollarSign, Clock, Calendar, Package, Wrench, CreditCard } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';

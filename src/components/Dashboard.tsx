@@ -121,7 +121,7 @@ export const Dashboard = () => {
     };
     
     loadData();
-  }, [user, currentYear, currentMonth]);
+  }, [user, currentYear, currentMonth, checkAndMigrate]);
 
   useEffect(() => {
     const loadPortfolioData = async () => {
@@ -259,42 +259,48 @@ export const Dashboard = () => {
       value: formatCurrency(monthlyIncomeAmount),
       icon: TrendingUp,
       color: 'bg-green-500',
-      trend: `${incomes.filter(i => i.isActive).length} kaynak`
+      trend: `${incomes.filter(i => i.isActive).length} kaynak`,
+      onClick: () => navigate('/incomes')
     },
     {
       label: 'Aylık Gider',
       value: formatCurrency(monthlyExpenseAmount),
       icon: Target,
       color: 'bg-red-500',
-      trend: `${expenses.filter(e => e.isActive).length} kalem`
+      trend: `${expenses.filter(e => e.isActive).length} kalem`,
+      onClick: () => navigate('/expenses')
     },
     {
       label: 'Kullanılabilir Limit',
       value: formatCurrency(totalLimit - totalCreditCardDebt - totalCashAdvanceDebt),
       icon: PiggyBank,
       color: 'bg-orange-500',
-      trend: `${creditCards.length + cashAdvanceAccounts.length} kart/hesap`
+      trend: `${creditCards.length + cashAdvanceAccounts.length} kart/hesap`,
+      onClick: () => navigate('/financial')
     },
     {
       label: 'Portföy Değeri',
       value: portfolioSummary ? formatCurrency(portfolioSummary.totalValue) : '₺0',
       icon: DollarSign,
       color: portfolioSummary && portfolioSummary.totalGainLoss >= 0 ? 'bg-green-600' : 'bg-red-600',
-      trend: portfolioSummary ? `${portfolioItems.length} yatırım` : 'Yatırım yok'
+      trend: portfolioSummary ? `${portfolioItems.length} yatırım` : 'Yatırım yok',
+      onClick: () => navigate('/portfolio')
     },
     {
       label: 'Net Durum',
       value: formatCurrency(monthlyIncomeAmount - monthlyExpenseAmount),
       icon: Clock,
       color: monthlyIncomeAmount >= monthlyExpenseAmount ? 'bg-green-600' : 'bg-red-600',
-      trend: monthlyIncomeAmount >= monthlyExpenseAmount ? 'Pozitif' : 'Negatif'
+      trend: monthlyIncomeAmount >= monthlyExpenseAmount ? 'Pozitif' : 'Negatif',
+      onClick: () => navigate('/dashboard') // Net durum için dashboard'da kalır
     },
     {
       label: 'Aktif Abonelik',
       value: subscriptions.length.toString(),
       icon: Calendar,
       color: 'bg-yellow-500',
-      trend: formatCurrency(subscriptions.reduce((sum, sub) => sum + sub.price, 0))
+      trend: formatCurrency(subscriptions.reduce((sum, sub) => sum + sub.price, 0)),
+      onClick: () => navigate('/subscriptions')
     }
   ];
 
@@ -334,7 +340,7 @@ export const Dashboard = () => {
       <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-8">
         {/* TeknoFinans */}
         <div 
-          onClick={() => navigate('/tekno-finans')}
+          onClick={() => navigate('/financial')}
           className="group bg-white border-2 border-[#ffb700] rounded-2xl p-4 sm:p-6 text-gray-800 cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:border-[#e6a500] hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5"
         >
           <div className="flex items-center justify-between mb-4">
@@ -346,17 +352,17 @@ export const Dashboard = () => {
             </div>
           </div>
           <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-[#e6a500] transition-colors">TeknoFinans</h3>
-          <p className="text-gray-600 text-xs sm:text-sm mb-4">Finansal hayatınızı yönetin</p>
+          <p className="text-gray-600 text-xs sm:text-sm mb-4">Finansal verilerinizi analiz edin</p>
           <div className="flex flex-wrap gap-1.5 sm:gap-2">
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Gelir/Gider</span>
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Portföy</span>
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Hedefler</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Kredi Kartları</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Avans Hesapları</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Krediler</span>
           </div>
         </div>
 
         {/* TeknoKapsül */}
         <div 
-          onClick={() => navigate('/tekno-kapsul')}
+          onClick={() => navigate('/teknokapsul')}
           className="group bg-white border-2 border-[#ffb700] rounded-2xl p-4 sm:p-6 text-gray-800 cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:border-[#e6a500] hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5"
         >
           <div className="flex items-center justify-between mb-4">
@@ -364,21 +370,21 @@ export const Dashboard = () => {
               <Apps className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
             <div className="text-right">
-              <div className="text-xl sm:text-2xl font-bold group-hover:scale-110 transition-transform">🛠</div>
+              <div className="text-xl sm:text-2xl font-bold group-hover:scale-110 transition-transform">📦</div>
             </div>
           </div>
           <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-[#e6a500] transition-colors">TeknoKapsül</h3>
-          <p className="text-gray-600 text-xs sm:text-sm mb-4">Araçlar ve hizmetler</p>
+          <p className="text-gray-600 text-xs sm:text-sm mb-4">Dijital yaşam araçları</p>
           <div className="flex flex-wrap gap-1.5 sm:gap-2">
             <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Kargo Takip</span>
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Abonelikler</span>
-            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Garanti</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Abonelik Yönetimi</span>
+            <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Garanti Takip</span>
           </div>
         </div>
 
         {/* TeknoHizmet */}
         <div 
-          onClick={() => navigate('/tekno-hizmet')}
+          onClick={() => navigate('/services')}
           className="group bg-white border-2 border-[#ffb700] rounded-2xl p-4 sm:p-6 text-gray-800 cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:border-[#e6a500] hover:bg-gradient-to-br hover:from-white hover:to-[#ffb700]/5"
         >
           <div className="flex items-center justify-between mb-4">
@@ -390,7 +396,7 @@ export const Dashboard = () => {
             </div>
           </div>
           <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-[#e6a500] transition-colors">TeknoHizmet</h3>
-          <p className="text-gray-600 text-xs sm:text-sm mb-4">Hizmet sağlayıcıları</p>
+          <p className="text-gray-600 text-xs sm:text-sm mb-4">Profesyonel hizmet ağı</p>
           <div className="flex flex-wrap gap-1.5 sm:gap-2">
             <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Ev Hizmetleri</span>
             <span className="bg-[#ffb700]/20 text-[#ffb700] px-2 py-1 rounded-full text-xs font-medium">Otomotiv</span>
@@ -402,7 +408,7 @@ export const Dashboard = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4">
         {stats.map((stat, index) => (
-          <div key={index} className="group bg-white rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-lg border border-gray-100 hover:border-[#ffb700]/30 transition-all duration-300 animate-bounce-in cursor-pointer" style={{ animationDelay: `${index * 0.1}s` }}>
+          <div key={index} onClick={stat.onClick} className="group bg-white rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-lg border border-gray-100 hover:border-[#ffb700]/30 transition-all duration-300 animate-bounce-in cursor-pointer" style={{ animationDelay: `${index * 0.1}s` }}>
             <div className="flex items-center justify-between mb-2">
               <div className={`p-2 rounded-xl ${stat.color} text-white shadow-sm group-hover:shadow-md transition-shadow`}>
                 <stat.icon className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />

@@ -4,11 +4,10 @@ import { cn } from '../../utils/cn';
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'destructive' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg';
-  isLoading?: boolean;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'default', isLoading, children, ...props }, ref) => {
+  ({ className, variant = 'default', size = 'default', children, ...props }, ref) => {
     const baseStyles = 'btn inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50';
     
     const variants = {

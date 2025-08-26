@@ -65,12 +65,16 @@ export const MobileNavigation: React.FC = () => {
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">T</span>
             </div>
-            <div className="flex items-center space-x-2">
+            <button 
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+            >
               <h1 className="text-lg font-semibold text-gray-900">TeknoKapsül</h1>
+              <p className="text-xs text-gray-500">Dijital Çözümler</p>
               {/* {isPremium && (
                 <img src="https://i.hizliresim.com/indgl7s.png" alt="TeknoKapsül" className="h-4 object-contain" />
               )} */}
-            </div>
+            </button>
           </div>
           
           <div className="flex items-center space-x-2">

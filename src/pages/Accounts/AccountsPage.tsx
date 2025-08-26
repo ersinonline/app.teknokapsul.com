@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Key } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getPlatformCredentialsByUserId, PlatformCredential } from '../../services/platformCredentials.service';

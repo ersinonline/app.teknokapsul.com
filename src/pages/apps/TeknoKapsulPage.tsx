@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Briefcase, FolderOpen, StickyNote, Calendar, Shield, Clock } from 'lucide-react';
+import { Package, Briefcase, FolderOpen, Calendar, Shield, Clock } from 'lucide-react';
 
 const TeknoKapsulPage: React.FC = () => {
   const navigate = useNavigate();

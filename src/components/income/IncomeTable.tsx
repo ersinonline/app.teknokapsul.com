@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Edit2, Trash2, Power, CheckCircle, XCircle, Clock, TrendingUp, Calendar } from 'lucide-react';
+import { Edit2, Trash2, Power, TrendingUp, Calendar } from 'lucide-react';
 import { Income, INCOME_CATEGORIES } from '../../types/income';
 import { updateIncome, deleteIncome, toggleIncomeStatus } from '../../services/income.service';
 import { IncomeForm } from './IncomeForm';

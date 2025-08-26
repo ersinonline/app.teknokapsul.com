@@ -94,6 +94,24 @@ export const FinancialDataPage = () => {
   const [editingCashAdvance, setEditingCashAdvance] = useState<CashAdvanceAccount | null>(null);
   const [editingLoan, setEditingLoan] = useState<Loan | null>(null);
 
+  // Platform adını düzelt - eğer sayı ise banka isimlerine çevir
+  const getPlatformDisplayName = (platformName: string) => {
+    const bankNames: { [key: string]: string } = {
+      '0': 'Ziraat Bankası',
+      '1': 'İş Bankası', 
+      '2': 'Garanti BBVA',
+      '3': 'Akbank',
+      '4': 'Yapı Kredi',
+      '5': 'Halkbank',
+      '6': 'VakıfBank',
+      '7': 'Denizbank',
+      '8': 'QNB Finansbank',
+      '9': 'TEB'
+    };
+    
+    return bankNames[platformName] || platformName;
+  };
+
   useEffect(() => {
     if (user) {
       loadData();
@@ -380,8 +398,8 @@ export const FinancialDataPage = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
                         <Pie
-                          data={groupedCreditCards.map((group, index) => ({
-                            name: group.bank,
+                          data={groupedCreditCards.map((group) => ({
+                            name: getPlatformDisplayName(group.bank),
                             value: group.totalLimit,
                             count: group.cards.length
                           }))}
@@ -412,7 +430,7 @@ export const FinancialDataPage = () => {
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={groupedCreditCards.map(group => ({
-                        name: group.bank,
+                        name: getPlatformDisplayName(group.bank),
                         limit: group.totalLimit,
                         debt: group.totalDebt
                       }))}>
@@ -446,7 +464,7 @@ export const FinancialDataPage = () => {
                           <CreditCardIcon className="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-blue-900">{bankGroup.bank}</h3>
+                          <h3 className="text-lg font-bold text-blue-900">{getPlatformDisplayName(bankGroup.bank)}</h3>
                           <p className="text-sm text-blue-600">{bankGroup.cards.length} kart</p>
                         </div>
                       </div>
@@ -605,8 +623,8 @@ export const FinancialDataPage = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
                         <Pie
-                          data={groupedCashAdvanceAccounts.map((group, index) => ({
-                            name: group.bank,
+                          data={groupedCashAdvanceAccounts.map((group) => ({
+                            name: getPlatformDisplayName(group.bank),
                             value: group.totalLimit,
                             count: group.accounts.length
                           }))}
@@ -637,7 +655,7 @@ export const FinancialDataPage = () => {
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={groupedCashAdvanceAccounts.map(group => ({
-                        name: group.bank,
+                        name: getPlatformDisplayName(group.bank),
                         limit: group.totalLimit,
                         debt: group.totalDebt
                       }))}>
@@ -665,7 +683,7 @@ export const FinancialDataPage = () => {
                 {Object.entries(groupedCashAdvanceAccounts).map(([bank, bankData]) => (
                   <div key={bank} className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{bank}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">{getPlatformDisplayName(bank)}</h3>
                       <div className="flex space-x-4 text-sm text-gray-600">
                         <span>Toplam Limit: <span className="font-semibold text-purple-600">{formatCurrency(bankData.totalLimit)}</span></span>
                         <span>Toplam Borç: <span className="font-semibold text-red-600">{formatCurrency(bankData.totalDebt)}</span></span>
@@ -800,7 +818,7 @@ export const FinancialDataPage = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
                         <Pie
-                          data={groupedLoans.map((group, index) => ({
+                          data={groupedLoans.map((group) => ({
                             name: group.bank,
                             value: group.totalAmount,
                             count: group.loans.length
@@ -860,7 +878,7 @@ export const FinancialDataPage = () => {
                 {groupedLoans.map((bankGroup) => (
                   <div key={bankGroup.bank} className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{bankGroup.bank}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">{getPlatformDisplayName(bankGroup.bank)}</h3>
                       <div className="flex space-x-4 text-sm text-gray-600">
                         <span>Toplam Tutar: <span className="font-semibold text-green-600">{formatCurrency(bankGroup.totalAmount)}</span></span>
                         <span>Kalan Borç: <span className="font-semibold text-red-600">{formatCurrency(bankGroup.totalRemaining)}</span></span>

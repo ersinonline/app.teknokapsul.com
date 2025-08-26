@@ -13,8 +13,7 @@ import {
   Menu,
   X,
   Briefcase,
-  Zap,
-  Crown
+  Zap
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 // import { usePremium } from '../../contexts/PremiumContext';
@@ -72,7 +71,13 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
             <div className="flex items-center gap-2">
-                <h1 className="text-lg font-semibold text-gray-900">TeknoKapsül</h1>
+                <button 
+                  onClick={() => navigate('/dashboard')}
+                  className="hover:opacity-80 transition-opacity"
+                >
+                  <h1 className="text-lg font-semibold text-gray-900">TeknoKapsül</h1>
+                  <p className="text-xs text-gray-500">Dijital Çözümler</p>
+                </button>
                 {/* <PremiumBadge size="lg" className="scale-[2] ml-6" showText={false} /> */}
               </div>
           </div>

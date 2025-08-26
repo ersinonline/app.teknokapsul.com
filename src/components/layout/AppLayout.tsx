@@ -48,7 +48,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       {/* Mobile Header - Small screens only */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-white border-b">
         <div className="flex items-center justify-between p-4">
-          <h1 className="text-lg font-semibold">TeknoKapsül</h1>
+          <button 
+            onClick={() => navigate('/dashboard')}
+            className="hover:opacity-80 transition-opacity"
+          >
+            <h1 className="text-lg font-semibold">TeknoKapsül</h1>
+            <p className="text-xs text-gray-500">Dijital Çözümler</p>
+          </button>
           <div className="flex items-center gap-4">
             <button
               onClick={handleSignOut}

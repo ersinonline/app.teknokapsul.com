@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Edit2, Trash2, Power, Calendar, CreditCard, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Edit2, Trash2, Calendar, CreditCard, CheckCircle, XCircle, Power } from 'lucide-react';
 import { Expense, EXPENSE_CATEGORIES } from '../../types/expense';
 import { updateExpense, deleteExpense, toggleExpenseStatus, toggleExpensePayment } from '../../services/expense.service';
 import { ExpenseForm } from './ExpenseForm';
@@ -16,7 +16,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
   const { user } = useAuth();
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const [isToggling, setIsToggling] = useState<string | null>(null);
+
   const [isTogglingPayment, setIsTogglingPayment] = useState<string | null>(null);
 
   if (!user) return null;
@@ -36,18 +36,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
     }
   };
 
-  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
-    setIsToggling(id);
-    try {
-      await toggleExpenseStatus(user.id, id, !currentStatus);
-      onUpdate();
-    } catch (error) {
-      console.error('Error toggling expense status:', error);
-      alert('Gider durumu güncellenirken bir hata oluştu.');
-    } finally {
-      setIsToggling(null);
-    }
-  };
+
 
   const handleTogglePayment = async (id: string, currentPaymentStatus: boolean) => {
     setIsTogglingPayment(id);
@@ -149,9 +138,28 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
           const paymentInfo = getPaymentInfo(expense);
 
           return (
-            <div key={expense.id} className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div key={expense.id} className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative">
+              {/* Action Buttons - Top Right */}
+              <div className="absolute top-4 right-4 flex gap-2">
+                <button
+                  onClick={() => setEditingExpense(expense)}
+                  className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+                  title="Düzenle"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => handleDelete(expense.id)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                  disabled={isDeleting === expense.id}
+                  title="Sil"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+
               {/* Header */}
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex justify-between items-start mb-4 pr-20">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <CreditCard className="w-5 h-5 text-red-500" />
@@ -162,7 +170,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
                     {expense.isRecurring && (
                       <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                         <Calendar className="w-3 h-3" />
-                        Düzenli
+                        Düzenli (Her ayın {expense.recurringDay}. günü)
                       </span>
                     )}
                   </div>
@@ -204,38 +212,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setEditingExpense(expense)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-lg hover:bg-yellow-200 transition-colors"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                    Düzenle
-                  </button>
-                  <button
-                    onClick={() => handleDelete(expense.id)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50"
-                    disabled={isDeleting === expense.id}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Sil
-                  </button>
-                </div>
-                <button
-                  onClick={() => handleToggleStatus(expense.id, expense.isActive)}
-                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 ${
-                    expense.isActive 
-                      ? 'text-red-700 bg-red-100 hover:bg-red-200' 
-                      : 'text-green-700 bg-green-100 hover:bg-green-200'
-                  }`}
-                  disabled={isToggling === expense.id}
-                >
-                  <Power className="w-4 h-4" />
-                  {expense.isActive ? 'Pasif Yap' : 'Aktif Yap'}
-                </button>
-              </div>
+
             </div>
           );
         })}

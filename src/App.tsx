@@ -8,7 +8,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { offlineService } from './services/offline.service';
 import { MobileAuthHandler } from './components/auth/MobileAuthHandler';
 import { LoginPage } from './pages/auth/LoginPage';
-import { AppLayout } from './components/layout/AppLayout';
+
 import { AuthGuard } from './components/auth/AuthGuard';
 
 // Route components
@@ -73,15 +73,7 @@ import { IsBankCallbackPage } from './pages/auth/IsBankCallbackPage';
 import AppTabs from './components/common/AppTabs';
 import { useLocation } from 'react-router-dom';
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
-  <AuthGuard>
-    <AppLayout>
-      <MobileNavigation />
-      <OfflineIndicator />
-      {children}
-    </AppLayout>
-  </AuthGuard>
-);
+
 
 const TeknoRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
