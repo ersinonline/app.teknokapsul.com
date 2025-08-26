@@ -74,8 +74,8 @@ const renderApp = () => {
       </StrictMode>
     );
     
-    // Register service worker after app is rendered
-    registerServiceWorker();
+    // Service Worker kaydı - geçici olarak devre dışı
+    // registerServiceWorker();
   } catch (error) {
     console.error('Error rendering app:', error);
     // Fallback UI in case of an error

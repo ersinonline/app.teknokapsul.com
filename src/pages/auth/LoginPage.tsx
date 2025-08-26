@@ -85,6 +85,9 @@ export const LoginPage = () => {
           <div className="w-full max-w-md">
             <SignIn 
               fallbackRedirectUrl={from}
+              forceRedirectUrl={from}
+              signUpFallbackRedirectUrl={from}
+              signUpForceRedirectUrl={from}
               appearance={{
                 elements: {
                   rootBox: "mx-auto",
