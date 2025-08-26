@@ -84,7 +84,7 @@ export const LoginPage = () => {
         <div className="w-full lg:w-1/2 flex items-center justify-center py-8 lg:py-16">
           <div className="w-full max-w-md">
             <SignIn 
-              redirectUrl={from}
+              fallbackRedirectUrl={from}
               appearance={{
                 elements: {
                   rootBox: "mx-auto",

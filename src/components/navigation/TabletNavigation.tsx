@@ -13,8 +13,7 @@ import {
   Menu,
   X,
   Briefcase,
-  Zap,
-  Crown
+  Zap
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 // import { usePremium } from '../../contexts/PremiumContext';

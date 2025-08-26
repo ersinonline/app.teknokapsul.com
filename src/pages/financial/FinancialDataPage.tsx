@@ -662,18 +662,18 @@ export const FinancialDataPage = () => {
               </div>
             ) : (
               <div className="space-y-8">
-                {Object.entries(groupedCashAdvanceAccounts).map(([bank, bankData]) => (
-                  <div key={bank} className="bg-white border border-gray-200 rounded-lg p-6">
+                {groupedCashAdvanceAccounts.map((bankGroup) => (
+                  <div key={bankGroup.bank} className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{bank}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">{bankGroup.bank}</h3>
                       <div className="flex space-x-4 text-sm text-gray-600">
-                        <span>Toplam Limit: <span className="font-semibold text-purple-600">{formatCurrency(bankData.totalLimit)}</span></span>
-                        <span>Toplam Borç: <span className="font-semibold text-red-600">{formatCurrency(bankData.totalDebt)}</span></span>
+                        <span>Toplam Limit: <span className="font-semibold text-purple-600">{formatCurrency(bankGroup.totalLimit)}</span></span>
+                        <span>Toplam Borç: <span className="font-semibold text-red-600">{formatCurrency(bankGroup.totalDebt)}</span></span>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {bankData.accounts
+                      {bankGroup.accounts
                         .sort((a, b) => b.limit - a.limit)
                         .map((account) => {
                         const debtRatio = calculateDebtRatio(account.currentDebt, account.limit);

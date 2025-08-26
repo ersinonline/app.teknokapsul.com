@@ -66,8 +66,8 @@ const renderApp = () => {
         <ClerkProvider 
           publishableKey={PUBLISHABLE_KEY}
           localization={trTR}
-          afterSignInUrl="/dashboard"
-          afterSignUpUrl="/dashboard"
+          signInFallbackRedirectUrl="/dashboard"
+          signUpFallbackRedirectUrl="/dashboard"
         >
           <App />
         </ClerkProvider>
