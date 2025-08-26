@@ -172,7 +172,7 @@ export const ApplicationPage: React.FC = () => {
                   value={formData.fullName}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
                   placeholder="Adınız ve soyadınız"
                 />
               </div>
@@ -191,7 +191,7 @@ export const ApplicationPage: React.FC = () => {
                     required={requiresIdentityNumber}
                     maxLength={11}
                     pattern="[0-9]{11}"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
                     placeholder="12345678901"
                   />
                 </div>

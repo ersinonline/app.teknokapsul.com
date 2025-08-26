@@ -67,7 +67,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors lg:hidden"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors md:hidden"
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -116,7 +116,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
 
       {/* Dropdown Menu - Tablet Portrait */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-50 md:hidden">
           <div className="fixed inset-0 bg-black bg-opacity-25" onClick={() => setIsMenuOpen(false)} />
           <div className="fixed top-0 left-0 right-0 bg-white border-b shadow-lg">
             <div className="p-4">

@@ -12,6 +12,7 @@ import { getUserExpenses } from '../../services/expense.service';
 import { getUserIncomes } from '../../services/income.service';
 import { Expense } from '../../types/expense';
 import { Income } from '../../types/income';
+import { formatNumberWithThousandsSeparator, parseFormattedNumber } from '../../utils/numberFormat';
 
 interface BudgetCategory {
   id: string;
@@ -81,7 +82,7 @@ export const BudgetPage = () => {
     icon: '📦'
   });
 
-  const userBudgetPlans = budgetPlans.filter(plan => plan.userId === user?.uid);
+  const userBudgetPlans = budgetPlans.filter(plan => plan.userId === user?.id);
   const currentPlan = userBudgetPlans.find(plan => 
     plan.month === currentDate.getMonth() + 1 && 
     plan.year === currentDate.getFullYear()
@@ -155,7 +156,7 @@ export const BudgetPage = () => {
         spentAmount: 0,
         color: CATEGORY_COLORS[Object.keys(selectedPlan.categories).length % CATEGORY_COLORS.length],
         icon: categoryFormData.icon,
-        userId: user!.uid,
+        userId: user!.id,
         month: selectedPlan.month,
         year: selectedPlan.year
       };
@@ -481,7 +482,7 @@ export const BudgetPage = () => {
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:ring-1 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Örn: Aylık Bütçe Planı"
                     required
                   />
@@ -492,13 +493,14 @@ export const BudgetPage = () => {
                     Toplam Bütçe (₺)
                   </label>
                   <input
-                    type="number"
-                    value={formData.totalBudget}
-                    onChange={(e) => setFormData(prev => ({ ...prev, totalBudget: e.target.value }))}
+                    type="text"
+                    value={formatNumberWithThousandsSeparator(formData.totalBudget)}
+                    onChange={(e) => {
+                      const numericValue = parseFormattedNumber(e.target.value);
+                      setFormData(prev => ({ ...prev, totalBudget: numericValue.toString() }));
+                    }}
                     className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="0"
-                    min="0"
-                    step="0.01"
                     required
                   />
                 </div>
@@ -591,13 +593,14 @@ export const BudgetPage = () => {
                     Bütçe Tutarı (₺)
                   </label>
                   <input
-                    type="number"
-                    value={categoryFormData.budgetAmount}
-                    onChange={(e) => setCategoryFormData(prev => ({ ...prev, budgetAmount: e.target.value }))}
+                    type="text"
+                    value={formatNumberWithThousandsSeparator(categoryFormData.budgetAmount)}
+                    onChange={(e) => {
+                      const numericValue = parseFormattedNumber(e.target.value);
+                      setCategoryFormData(prev => ({ ...prev, budgetAmount: numericValue.toString() }));
+                    }}
                     className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="0"
-                    min="0"
-                    step="0.01"
                     required
                   />
                 </div>

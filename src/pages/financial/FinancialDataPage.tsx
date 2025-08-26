@@ -8,8 +8,24 @@ import {
   Trash2,
   Calendar,
   Percent,
-  DollarSign
+  DollarSign,
+  PieChart,
+  BarChart3,
+  TrendingUp
 } from 'lucide-react';
+import {
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend
+} from 'recharts';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   getCreditCards,
@@ -32,6 +48,37 @@ import { CreditCard, CashAdvanceAccount, Loan, LOAN_TYPES } from '../../types/fi
 import { formatCurrency } from '../../utils/currency';
 
 type TabType = 'creditCards' | 'cashAdvance' | 'loans';
+
+// Chart colors
+const CHART_COLORS = [
+  '#3B82F6', // Blue
+  '#10B981', // Green
+  '#F59E0B', // Yellow
+  '#EF4444', // Red
+  '#8B5CF6', // Purple
+  '#06B6D4', // Cyan
+  '#F97316', // Orange
+  '#84CC16', // Lime
+  '#EC4899', // Pink
+  '#6B7280'  // Gray
+];
+
+// Custom tooltip component
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+        <p className="font-medium text-gray-900">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} className="text-sm" style={{ color: entry.color }}>
+            {entry.name}: {formatCurrency(entry.value)}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 
 export const FinancialDataPage = () => {
   const { user } = useAuth();
@@ -244,14 +291,14 @@ export const FinancialDataPage = () => {
 
       {/* Tabs - Mobile Responsive */}
       <div className="border-b border-gray-200 mb-4 sm:mb-6">
-        <nav className="-mb-px flex flex-wrap sm:space-x-8">
+          <nav className="-mb-px flex overflow-x-auto sm:space-x-8 scrollbar-hide">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`flex items-center space-x-1 sm:space-x-2 py-2 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm flex-1 sm:flex-none justify-center sm:justify-start ${
+                className={`flex items-center space-x-1 sm:space-x-2 py-2 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 sm:flex-none justify-center sm:justify-start ${
                   activeTab === tab.id
                     ? 'border-yellow-500 text-yellow-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -320,6 +367,69 @@ export const FinancialDataPage = () => {
               </div>
             )}
 
+            {/* Kredi Kartı Grafikleri */}
+            {creditCards.length > 0 && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                {/* Banka Dağılımı - Pie Chart */}
+                <div className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <PieChart className="w-5 h-5 text-blue-600" />
+                    <h3 className="text-lg font-semibold text-gray-900">Banka Dağılımı</h3>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RechartsPieChart>
+                        <Pie
+                          data={groupedCreditCards.map((group, index) => ({
+                            name: group.bank,
+                            value: group.totalLimit,
+                            count: group.cards.length
+                          }))}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name} (${(percent * 100).toFixed(1)}%)`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {groupedCreditCards.map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<CustomTooltip />} />
+                      </RechartsPieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Limit vs Borç Karşılaştırması - Bar Chart */}
+                <div className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <BarChart3 className="w-5 h-5 text-green-600" />
+                    <h3 className="text-lg font-semibold text-gray-900">Limit vs Borç</h3>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={groupedCreditCards.map(group => ({
+                        name: group.bank,
+                        limit: group.totalLimit,
+                        debt: group.totalDebt
+                      }))}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend />
+                        <Bar dataKey="limit" fill="#3B82F6" name="Limit" />
+                        <Bar dataKey="debt" fill="#EF4444" name="Borç" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {creditCards.length === 0 ? (
               <div className="text-center py-8 sm:py-12 bg-gray-50 rounded-lg">
                 <CreditCardIcon className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-4" />
@@ -347,14 +457,14 @@ export const FinancialDataPage = () => {
                     </div>
                     
                     {/* Kartlar Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                       {bankGroup.cards.map((card) => {
                   const debtRatio = calculateDebtRatio(card.currentDebt, card.limit);
                   const availableLimit = calculateAvailableLimit(card.limit, card.currentDebt);
                   
                   return (
-                    <div key={card.id} className="bg-white border-2 border-blue-300 rounded-xl p-4 sm:p-6 hover:shadow-xl transition-all duration-300 hover:border-blue-400 hover:scale-105 shadow-md">
-                      <div className="flex justify-between items-start mb-3 sm:mb-4">
+                    <div key={card.id} className="bg-white border border-blue-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                      <div className="flex justify-between items-start mb-3">
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{card.name}</h3>
                           <p className="text-xs sm:text-sm text-gray-600">{card.bank}</p>
@@ -380,20 +490,20 @@ export const FinancialDataPage = () => {
                       </div>
 
                       <div className="space-y-2 sm:space-y-3">
-                        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                          <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="bg-purple-50 border border-purple-200 rounded-lg p-2 sm:p-3">
                             <span className="text-xs text-purple-700 font-semibold block mb-1">💳 Limit</span>
                             <span className="text-sm sm:text-lg font-bold text-purple-900">{formatCurrency(card.limit)}</span>
                           </div>
-                          <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <div className="bg-red-50 border border-red-200 rounded-lg p-2 sm:p-3">
                             <span className="text-xs text-red-700 font-semibold block mb-1">💸 Borç</span>
                             <span className="text-sm sm:text-lg font-bold text-red-900">{formatCurrency(card.currentDebt)}</span>
                           </div>
-                          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2 sm:p-3">
                             <span className="text-xs text-emerald-700 font-semibold block mb-1">✅ Kullanılabilir</span>
                             <span className="text-sm sm:text-lg font-bold text-emerald-900">{formatCurrency(availableLimit)}</span>
                           </div>
-                          <div className="bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300 rounded-xl p-3 sm:p-4 shadow-sm">
+                          <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 sm:p-3">
                             <span className="text-xs text-amber-700 font-semibold block mb-1">📊 Borç Oranı</span>
                             <div className="flex items-center gap-2">
                               <span className={`text-sm sm:text-lg font-bold ${
@@ -482,6 +592,69 @@ export const FinancialDataPage = () => {
               </div>
             )}
 
+            {/* Nakit Avans Grafikleri */}
+            {cashAdvanceAccounts.length > 0 && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                {/* Banka Dağılımı - Pie Chart */}
+                <div className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <PieChart className="w-5 h-5 text-purple-600" />
+                    <h3 className="text-lg font-semibold text-gray-900">Banka Dağılımı</h3>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RechartsPieChart>
+                        <Pie
+                          data={groupedCashAdvanceAccounts.map((group, index) => ({
+                            name: group.bank,
+                            value: group.totalLimit,
+                            count: group.accounts.length
+                          }))}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name} (${(percent * 100).toFixed(1)}%)`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {groupedCashAdvanceAccounts.map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<CustomTooltip />} />
+                      </RechartsPieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Limit vs Borç Karşılaştırması - Bar Chart */}
+                <div className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <BarChart3 className="w-5 h-5 text-yellow-600" />
+                    <h3 className="text-lg font-semibold text-gray-900">Limit vs Borç</h3>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={groupedCashAdvanceAccounts.map(group => ({
+                        name: group.bank,
+                        limit: group.totalLimit,
+                        debt: group.totalDebt
+                      }))}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend />
+                        <Bar dataKey="limit" fill="#F59E0B" name="Limit" />
+                        <Bar dataKey="debt" fill="#EF4444" name="Borç" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {cashAdvanceAccounts.length === 0 ? (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
                 <Banknote className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -531,31 +704,29 @@ export const FinancialDataPage = () => {
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 mb-3">
-                              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                            <div className="grid grid-cols-2 gap-2 mb-3">
+                              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-2">
                                 <span className="text-xs text-indigo-700 font-medium block mb-1">💰 Limit</span>
-                                <span className="text-lg font-bold text-indigo-900">{formatCurrency(account.limit)}</span>
+                                <span className="text-sm font-bold text-indigo-900">{formatCurrency(account.limit)}</span>
                               </div>
                               
-                              <div className="bg-rose-50 border border-rose-200 rounded-lg p-3">
+                              <div className="bg-rose-50 border border-rose-200 rounded-lg p-2">
                                 <span className="text-xs text-rose-700 font-medium block mb-1">💸 Borç</span>
-                                <span className="text-lg font-bold text-rose-900">{formatCurrency(account.currentDebt)}</span>
+                                <span className="text-sm font-bold text-rose-900">{formatCurrency(account.currentDebt)}</span>
                               </div>
                               
-                              <div className="bg-teal-50 border border-teal-200 rounded-lg p-3">
+                              <div className="bg-teal-50 border border-teal-200 rounded-lg p-2">
                                 <span className="text-xs text-teal-700 font-medium block mb-1">✅ Uygun</span>
-                                <span className="text-lg font-bold text-teal-900">{formatCurrency(availableLimit)}</span>
+                                <span className="text-sm font-bold text-teal-900">{formatCurrency(availableLimit)}</span>
                               </div>
                               
-                              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2">
                                 <span className="text-xs text-emerald-700 font-medium block mb-1">📈 Oran</span>
-                                <div className="flex items-center gap-2">
-                                  <span className={`text-lg font-bold ${
-                                    (100 - debtRatio) >= 80 ? 'text-green-600' : (100 - debtRatio) >= 50 ? 'text-orange-600' : 'text-red-600'
-                                  }`}>
-                                    %{Math.round(100 - debtRatio)}
-                                  </span>
-                                </div>
+                                <span className={`text-sm font-bold ${
+                                  (100 - debtRatio) >= 80 ? 'text-green-600' : (100 - debtRatio) >= 50 ? 'text-orange-600' : 'text-red-600'
+                                }`}>
+                                  %{Math.round(100 - debtRatio)}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -582,6 +753,102 @@ export const FinancialDataPage = () => {
                 <span>Yeni Kredi Ekle</span>
               </button>
             </div>
+
+            {/* Kredi Özeti */}
+            {loans.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <div className="bg-green-50 rounded-lg p-3 sm:p-4 border border-green-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm text-green-600 font-medium">Toplam Kredi</p>
+                      <p className="text-lg sm:text-xl font-bold text-green-900">{formatCurrency(loans.reduce((sum, loan) => sum + loan.totalAmount, 0))}</p>
+                    </div>
+                    <PiggyBank className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" />
+                  </div>
+                </div>
+                <div className="bg-red-50 rounded-lg p-3 sm:p-4 border border-red-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm text-red-600 font-medium">Kalan Borç</p>
+                      <p className="text-lg sm:text-xl font-bold text-red-900">{formatCurrency(loans.reduce((sum, loan) => sum + loan.remainingAmount, 0))}</p>
+                    </div>
+                    <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
+                  </div>
+                </div>
+                <div className="bg-blue-50 rounded-lg p-3 sm:p-4 border border-blue-200 sm:col-span-2 lg:col-span-1">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs sm:text-sm text-blue-600 font-medium">Ödeme Oranı</p>
+                      <p className="text-lg sm:text-xl font-bold text-blue-900">%{loans.length > 0 ? Math.round(((loans.reduce((sum, loan) => sum + loan.totalAmount, 0) - loans.reduce((sum, loan) => sum + loan.remainingAmount, 0)) / loans.reduce((sum, loan) => sum + loan.totalAmount, 0)) * 100) : 0}</p>
+                    </div>
+                    <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Kredi Grafikleri */}
+            {loans.length > 0 && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                {/* Banka Dağılımı - Pie Chart */}
+                <div className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <PieChart className="w-5 h-5 text-green-600" />
+                    <h3 className="text-lg font-semibold text-gray-900">Banka Dağılımı</h3>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RechartsPieChart>
+                        <Pie
+                          data={groupedLoans.map((group, index) => ({
+                            name: group.bank,
+                            value: group.totalAmount,
+                            count: group.loans.length
+                          }))}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name} (${(percent * 100).toFixed(1)}%)`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {groupedLoans.map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<CustomTooltip />} />
+                      </RechartsPieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Toplam vs Kalan Karşılaştırması - Bar Chart */}
+                <div className="bg-white rounded-lg p-4 sm:p-6 border border-gray-200">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <BarChart3 className="w-5 h-5 text-purple-600" />
+                    <h3 className="text-lg font-semibold text-gray-900">Toplam vs Kalan</h3>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={groupedLoans.map(group => ({
+                        name: group.bank,
+                        total: group.totalAmount,
+                        remaining: group.totalRemaining
+                      }))}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend />
+                        <Bar dataKey="total" fill="#10B981" name="Toplam" />
+                        <Bar dataKey="remaining" fill="#EF4444" name="Kalan" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {loans.length === 0 ? (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
@@ -636,37 +903,35 @@ export const FinancialDataPage = () => {
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 mb-3">
-                              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                            <div className="grid grid-cols-2 gap-2 mb-3">
+                              <div className="bg-purple-50 border border-purple-200 rounded-lg p-2">
                                 <span className="text-xs text-purple-700 font-medium block mb-1">💰 Toplam</span>
-                                <span className="text-lg font-bold text-purple-900">{formatCurrency(loan.totalAmount)}</span>
+                                <span className="text-sm font-bold text-purple-900">{formatCurrency(loan.totalAmount)}</span>
                               </div>
                               
-                              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                              <div className="bg-red-50 border border-red-200 rounded-lg p-2">
                                 <span className="text-xs text-red-700 font-medium block mb-1">💸 Kalan</span>
-                                <span className="text-lg font-bold text-red-900">{formatCurrency(loan.remainingAmount)}</span>
+                                <span className="text-sm font-bold text-red-900">{formatCurrency(loan.remainingAmount)}</span>
                               </div>
                               
-                              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                              <div className="bg-amber-50 border border-amber-200 rounded-lg p-2">
                                 <span className="text-xs text-amber-700 font-medium block mb-1">📅 Aylık</span>
-                                <span className="text-lg font-bold text-amber-900">{formatCurrency(loan.monthlyPayment)}</span>
+                                <span className="text-sm font-bold text-amber-900">{formatCurrency(loan.monthlyPayment)}</span>
                               </div>
                               
-                              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2">
                                 <span className="text-xs text-emerald-700 font-medium block mb-1">📊 İlerleme</span>
-                                <div className="flex items-center gap-2">
-                                  <span className={`text-lg font-bold ${
-                                    progress > 80 ? 'text-green-600' : progress > 50 ? 'text-orange-600' : 'text-red-600'
-                                  }`}>
-                                    %{progress}
-                                  </span>
-                                </div>
+                                <span className={`text-sm font-bold ${
+                                  progress > 80 ? 'text-green-600' : progress > 50 ? 'text-orange-600' : 'text-red-600'
+                                }`}>
+                                  %{progress}
+                                </span>
                               </div>
                             </div>
 
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mb-3">
                               <span className="text-xs text-blue-700 font-medium block mb-1">📊 Taksit</span>
-                              <span className="text-lg font-bold text-blue-900">{loan.remainingInstallments}/{loan.totalInstallments}</span>
+                              <span className="text-sm font-bold text-blue-900">{loan.remainingInstallments}/{loan.totalInstallments}</span>
                             </div>
 
                             <div className="flex justify-between items-center pt-2 border-t text-xs text-gray-600">
@@ -694,7 +959,7 @@ export const FinancialDataPage = () => {
       {/* Credit Card Form Modal */}
       {showCreditCardForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full border border-gray-200 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg p-4 sm:p-6 max-w-sm sm:max-w-lg w-full mx-4 sm:mx-0 border border-gray-200 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
                 <div className="bg-blue-600 text-white p-3 rounded-lg">
@@ -750,7 +1015,7 @@ export const FinancialDataPage = () => {
                       name="name" 
                       placeholder="Örn: İş Bankası Platinum" 
                       defaultValue={editingCreditCard?.name || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>
@@ -763,7 +1028,7 @@ export const FinancialDataPage = () => {
                       name="bank" 
                       placeholder="Örn: İş Bankası" 
                       defaultValue={editingCreditCard?.bank || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>
@@ -806,7 +1071,7 @@ export const FinancialDataPage = () => {
                     type="text" 
                     placeholder="Kullanılabilir limit" 
                     defaultValue={editingCreditCard ? (editingCreditCard.limit - editingCreditCard.currentDebt).toString() : ''} 
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-200 transition-colors bg-gray-50 focus:bg-white" 
                     required 
                     onChange={(e) => {
                       const availableLimitInput = e.target;
@@ -837,7 +1102,7 @@ export const FinancialDataPage = () => {
                       min="1" 
                       max="31" 
                       defaultValue={editingCreditCard?.statementDate || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-orange-500 focus:ring-1 focus:ring-orange-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>
@@ -853,7 +1118,7 @@ export const FinancialDataPage = () => {
                       min="1" 
                       max="31" 
                       defaultValue={editingCreditCard?.dueDate || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-red-500 focus:ring-1 focus:ring-red-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>
@@ -877,7 +1142,7 @@ export const FinancialDataPage = () => {
                         return '';
                       }
                     })() : ''} 
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-pink-500 focus:ring-1 focus:ring-pink-200 transition-colors bg-gray-50 focus:bg-white" 
                   />
                 </div>
               </div>
@@ -908,7 +1173,7 @@ export const FinancialDataPage = () => {
       {/* Cash Advance Form Modal */}
       {showCashAdvanceForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto border border-gray-200">
+          <div className="bg-white rounded-lg max-w-sm sm:max-w-lg w-full mx-4 sm:mx-0 max-h-[90vh] overflow-y-auto border border-gray-200">
             <div className="bg-green-600 p-6 rounded-t-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -1041,7 +1306,7 @@ export const FinancialDataPage = () => {
       {/* Loan Form Modal */}
       {showLoanForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg border max-w-sm sm:max-w-2xl w-full mx-4 sm:mx-0 max-h-[90vh] overflow-y-auto">
             <div className="bg-purple-600 p-6 rounded-t-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -1122,7 +1387,7 @@ export const FinancialDataPage = () => {
                       name="name" 
                       placeholder="İhtiyaç Kredisi" 
                       defaultValue={editingLoan?.name || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>
@@ -1149,7 +1414,7 @@ export const FinancialDataPage = () => {
                   <select 
                     name="loanType" 
                     defaultValue={editingLoan?.loanType || ''} 
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                    className="w-full p-2 border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 transition-colors bg-gray-50 focus:bg-white" 
                     required
                   >
                     <option value="">Kredi Türü Seçin</option>
@@ -1245,7 +1510,7 @@ export const FinancialDataPage = () => {
                       type="number" 
                       placeholder="48" 
                       defaultValue={editingLoan?.totalInstallments || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>
@@ -1259,7 +1524,7 @@ export const FinancialDataPage = () => {
                       type="number" 
                       placeholder="36" 
                       defaultValue={editingLoan?.remainingInstallments || ''} 
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all duration-200 bg-gray-50 focus:bg-white" 
+                      className="w-full p-2 border border-gray-200 rounded-lg focus:border-amber-500 focus:ring-1 focus:ring-amber-200 transition-colors bg-gray-50 focus:bg-white" 
                       required 
                     />
                   </div>

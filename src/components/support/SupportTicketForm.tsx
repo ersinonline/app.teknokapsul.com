@@ -21,8 +21,8 @@ export const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onSuccess,
     description: '',
     category: 'general',
     priority: 'medium',
-    email: user?.email || '',
-    name: user?.displayName || '',
+    email: user?.primaryEmailAddress?.emailAddress || '',
+    name: user?.fullName || user?.firstName || '',
     phone: ''
   });
 
@@ -113,7 +113,7 @@ export const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onSuccess,
               type="text"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#ffb700] focus:border-transparent"
               placeholder="Adınız ve soyadınız"
               required
             />
