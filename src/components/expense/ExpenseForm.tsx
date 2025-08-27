@@ -110,7 +110,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, initialData 
           className="rounded border-gray-300 text-red-600 focus:ring-red-500"
         />
         <label htmlFor="isRecurring" className="text-sm font-medium text-gray-700">
-          Düzenli gider (her ay tekrarlanır)
+          Taksit (her ay tekrarlanır)
         </label>
       </div>
 

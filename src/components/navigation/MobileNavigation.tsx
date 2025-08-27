@@ -23,9 +23,6 @@ interface NavigationItem {
 
 const bottomNavigationItems: NavigationItem[] = [
   { path: '/dashboard', label: 'Ana Sayfa', icon: Home },
-  { path: '/mobile-finance', label: 'TeknoFinans', icon: PieChart },
-  { path: '/teknokapsul', label: 'TeknoKapsül', icon: Zap },
-  { path: '/services', label: 'TeknoHizmet', icon: Grid3X3 },
 ];
 
 export const MobileNavigation: React.FC = () => {

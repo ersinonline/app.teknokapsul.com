@@ -114,7 +114,7 @@ export const ExpensePage: React.FC = () => {
                 Giderlerim
               </h1>
               <p className="text-gray-600 mt-1 text-sm lg:text-base">
-                Düzenli ve tek seferlik giderlerinizi yönetin
+                Taksitli ve tek seferlik giderlerinizi yönetin
               </p>
             </div>
             <button
@@ -167,7 +167,7 @@ export const ExpensePage: React.FC = () => {
           <div className="bg-white rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1">
-                <p className="text-xs lg:text-sm font-medium text-gray-600">Düzenli Giderler</p>
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Taksitler</p>
                 <p className="text-lg lg:text-2xl font-bold text-blue-600">{recurringExpenseCount}</p>
               </div>
               <div className="p-2 lg:p-3 bg-blue-100 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">

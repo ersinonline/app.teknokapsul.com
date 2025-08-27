@@ -806,7 +806,11 @@ export const FinancialDataPage = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {cashAdvanceAccounts
-                  .sort((a, b) => b.limit - a.limit)
+                  .sort((a, b) => {
+                    const ratioA = calculateDebtRatio(a.currentDebt, a.limit);
+                    const ratioB = calculateDebtRatio(b.currentDebt, b.limit);
+                    return ratioA - ratioB; // 0'dan 100'e doğru sırala
+                  })
                   .map((account) => {
                   const debtRatio = calculateDebtRatio(account.currentDebt, account.limit);
                   const availableLimit = calculateAvailableLimit(account.limit, account.currentDebt);
@@ -816,6 +820,7 @@ export const FinancialDataPage = () => {
                             <div className="flex justify-between items-start mb-3">
                               <div>
                                 <h4 className="font-medium text-gray-900">{account.name}</h4>
+                                <p className="text-sm text-gray-600">{account.bank}</p>
                               </div>
                               <div className="flex gap-1">
                                 <button 

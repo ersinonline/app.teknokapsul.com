@@ -65,6 +65,29 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
+  const getInstallmentInfo = (expense: Expense) => {
+    if (!expense.isRecurring || !expense.recurringMonths) return null;
+    
+    const expenseDate = new Date(expense.date);
+    const currentDate = new Date();
+    const startDate = new Date(expense.createdAt);
+    
+    // Kaç ay geçtiğini hesapla
+    const monthsDiff = (expenseDate.getFullYear() - startDate.getFullYear()) * 12 + 
+                      (expenseDate.getMonth() - startDate.getMonth());
+    
+    const installmentNumber = monthsDiff + 1;
+    const totalInstallments = expense.recurringMonths;
+    
+    if (installmentNumber === 1) {
+      return '1. taksit';
+    } else if (installmentNumber === totalInstallments) {
+      return 'son taksit';
+    } else {
+      return `${installmentNumber}. taksit`;
+    }
+  };
+
   const getStatusInfo = (expense: Expense) => {
     if (!expense.isActive) {
       return {
@@ -74,9 +97,10 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
       };
     }
     if (expense.isRecurring) {
+      const installmentInfo = getInstallmentInfo(expense);
       return {
         icon: <Calendar className="w-4 h-4" />,
-        text: `Düzenli (${expense.recurringDay}. gün)`,
+        text: installmentInfo ? `Taksit (${installmentInfo})` : `Taksit (${expense.recurringDay}. gün)`,
         className: 'bg-blue-100 text-blue-800'
       };
     }
@@ -170,7 +194,7 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
                     {expense.isRecurring && (
                       <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                         <Calendar className="w-3 h-3" />
-                        Düzenli (Her ayın {expense.recurringDay}. günü)
+                        Taksit (Her ayın {expense.recurringDay}. günü)
                       </span>
                     )}
                   </div>
