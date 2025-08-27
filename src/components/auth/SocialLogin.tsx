@@ -4,12 +4,14 @@ import { auth } from '../../lib/firebase';
 import { AlertCircle, Smartphone, Apple, Building2 } from 'lucide-react';
 import { PopupAuthManager } from './PopupAuthManager';
 import { isBankOAuthService } from '../../services/isbank-oauth.service';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface SocialLoginProps {
   method?: 'google' | 'apple' | 'sms' | 'isbank' | 'all';
 }
 
 export const SocialLogin = ({ method = 'all' }: SocialLoginProps) => { 
+  const { isMobile } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPhoneInput, setShowPhoneInput] = useState(false);
@@ -20,6 +22,13 @@ export const SocialLogin = ({ method = 'all' }: SocialLoginProps) => {
   const handleAuthSuccess = (user: any) => {
     console.log('✅ Giriş başarılı:', user.email);
     setError(null);
+    
+    // Mobil cihazlarda anında yönlendirme yap
+    if (isMobile) {
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 500);
+    }
   };
 
   const handleAuthError = (errorMessage: string) => {

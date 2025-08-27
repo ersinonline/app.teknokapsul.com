@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth as useClerkAuth, useUser } from '@clerk/clerk-react';
 import { AuthContextType } from '../types/auth';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -10,6 +10,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { isLoaded, isSignedIn, signOut: clerkSignOut } = useClerkAuth();
   const { user: clerkUser } = useUser();
+  const [isMobile, setIsMobile] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
+
+  // Mobil cihaz algılama
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent) || 
+                           window.innerWidth < 768;
+      setIsMobile(isMobileDevice);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Mobil cihazlarda auth state'ini zorla güncelleme
+  useEffect(() => {
+    if (isMobile) {
+      const handleVisibilityChange = () => {
+        if (!document.hidden) {
+          // Sayfa görünür olduğunda state'i güncelle
+          setForceUpdate(prev => prev + 1);
+        }
+      };
+
+      const handleFocus = () => {
+        // Sayfa focus aldığında state'i güncelle
+        setForceUpdate(prev => prev + 1);
+      };
+
+      const handlePageShow = () => {
+        // Sayfa gösterildiğinde state'i güncelle (back/forward navigation)
+        setForceUpdate(prev => prev + 1);
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('focus', handleFocus);
+      window.addEventListener('pageshow', handlePageShow);
+
+      return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('focus', handleFocus);
+        window.removeEventListener('pageshow', handlePageShow);
+      };
+    }
+  }, [isMobile]);
 
   const signOut = async () => {
     try {
@@ -56,7 +104,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     verifyToken,
     checkSession,
     refreshToken,
-    isWebView: false // Clerk için WebView desteği şimdilik false
+    isWebView: isMobile && /webview|wv/i.test(navigator.userAgent),
+    isMobile,
+    forceUpdate // Mobil cihazlarda state güncellemesi için
   };
 
   return (

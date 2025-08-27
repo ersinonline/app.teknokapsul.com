@@ -16,8 +16,23 @@ export const MobileAuthHandler: React.FC<MobileAuthHandlerProps> = ({
   onAuthSuccess,
   onAuthFailure
 }) => {
-  const { user, isWebView } = useAuth();
+  const { user, isWebView, isMobile, forceUpdate } = useAuth();
   const [authAttempted, setAuthAttempted] = useState(false);
+  const [lastForceUpdate, setLastForceUpdate] = useState(0);
+
+  // Mobil cihazlarda forceUpdate değiştiğinde auth state'ini kontrol et
+  useEffect(() => {
+    if (isMobile && forceUpdate !== lastForceUpdate) {
+      setLastForceUpdate(forceUpdate);
+      
+      // Auth state değişikliklerini kontrol et
+      setTimeout(() => {
+        if (user && onAuthSuccess) {
+          onAuthSuccess();
+        }
+      }, 100);
+    }
+  }, [forceUpdate, lastForceUpdate, isMobile, user, onAuthSuccess]);
 
   useEffect(() => {
     // Kullanıcı zaten giriş yapmışsa işlem yapma
@@ -53,6 +68,37 @@ export const MobileAuthHandler: React.FC<MobileAuthHandlerProps> = ({
         });
     }
   }, [user, isWebView, authAttempted, onAuthSuccess, onAuthFailure]);
+
+  // Mobil cihazlarda sayfa görünürlük değişikliklerini dinle
+  useEffect(() => {
+    if (isMobile) {
+      const handleStorageChange = (e: StorageEvent) => {
+        // LocalStorage değişikliklerini dinle (auth state değişiklikleri için)
+        if (e.key && e.key.includes('clerk') && e.newValue !== e.oldValue) {
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        }
+      };
+
+      const handleMessage = (event: MessageEvent) => {
+        // WebView'dan gelen mesajları dinle
+        if (event.data && event.data.type === 'AUTH_STATE_CHANGED') {
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        }
+      };
+
+      window.addEventListener('storage', handleStorageChange);
+      window.addEventListener('message', handleMessage);
+
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('message', handleMessage);
+      };
+    }
+  }, [isMobile]);
 
   // Bileşen görünmez, sadece işlevsellik sağlar
   return null;

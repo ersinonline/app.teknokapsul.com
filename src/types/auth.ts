@@ -14,4 +14,6 @@ export interface AuthContextType extends AuthState {
   checkSession: () => Promise<{ success: boolean; sessionValid: boolean; error: string | null }>;
   refreshToken: () => Promise<{ success: boolean; tokenValid: boolean; error: string | null }>;
   isWebView: boolean;
+  isMobile: boolean;
+  forceUpdate: number;
 }
