@@ -42,8 +42,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       {/* Maintenance Banner */}
       {/* <MaintenanceBanner /> */}
       
-      {/* Tablet Navigation - Medium to Large screens */}
-      <TabletNavigation className="hidden md:block xl:hidden fixed top-0 left-0 right-0 z-20" />
+      {/* Tablet Navigation - Large screens only */}
+      <TabletNavigation className="hidden lg:block xl:hidden fixed top-0 left-0 right-0 z-20" />
       
       {/* Mobile Header - Small screens only */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-white border-b">

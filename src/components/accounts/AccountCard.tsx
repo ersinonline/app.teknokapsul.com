@@ -32,35 +32,99 @@ export const AccountCard: React.FC<AccountCardProps> = ({ credential, onCopy }) 
     }
     
     // Eğer platformName zaten bir banka adı ise, doğru formatta göster
-    const normalizedName = platformName.toLowerCase();
+    const normalizedName = platformName.toLowerCase().trim();
     
     // Yaygın banka adı varyasyonlarını standart forma çevir
     const bankNameMappings: { [key: string]: string } = {
+      // Ziraat Bankası varyasyonları
       'ziraat': 'Ziraat Bankası',
       'ziraat bankası': 'Ziraat Bankası',
       'ziraatbankası': 'Ziraat Bankası',
+      'ziraat-bankasi': 'Ziraat Bankası',
+      'tc ziraat bankası': 'Ziraat Bankası',
+      'tc ziraat': 'Ziraat Bankası',
+      
+      // İş Bankası varyasyonları
       'is bankası': 'İş Bankası',
       'iş bankası': 'İş Bankası',
       'isbankası': 'İş Bankası',
       'işbankası': 'İş Bankası',
+      'isbank': 'İş Bankası',
+      'türkiye iş bankası': 'İş Bankası',
+      'iş bankası a.ş.': 'İş Bankası',
+      
+      // Garanti BBVA varyasyonları
       'garanti': 'Garanti BBVA',
       'garanti bbva': 'Garanti BBVA',
       'garantibbva': 'Garanti BBVA',
+      'garanti bankası': 'Garanti BBVA',
+      'türkiye garanti bankası': 'Garanti BBVA',
+      
+      // Akbank varyasyonları
       'akbank': 'Akbank',
+      'ak bank': 'Akbank',
+      'akbank t.a.ş.': 'Akbank',
+      
+      // Yapı Kredi varyasyonları
       'yapı kredi': 'Yapı Kredi',
       'yapıkredi': 'Yapı Kredi',
       'yapikredi': 'Yapı Kredi',
+      'yapı ve kredi bankası': 'Yapı Kredi',
+      'yapı kredi bankası': 'Yapı Kredi',
+      
+      // Halkbank varyasyonları
       'halkbank': 'Halkbank',
+      'halk bankası': 'Halkbank',
+      'türkiye halk bankası': 'Halkbank',
+      'halk bank': 'Halkbank',
+      
+      // VakıfBank varyasyonları
       'vakıfbank': 'VakıfBank',
       'vakifbank': 'VakıfBank',
+      'vakıf bankası': 'VakıfBank',
+      'vakif bankası': 'VakıfBank',
+      'türkiye vakıflar bankası': 'VakıfBank',
+      
+      // Denizbank varyasyonları
       'denizbank': 'Denizbank',
+      'deniz bank': 'Denizbank',
+      'deniz bankası': 'Denizbank',
+      
+      // QNB Finansbank varyasyonları
       'qnb finansbank': 'QNB Finansbank',
       'qnbfinansbank': 'QNB Finansbank',
       'finansbank': 'QNB Finansbank',
-      'teb': 'TEB'
+      'qnb finans bank': 'QNB Finansbank',
+      'qnb': 'QNB Finansbank',
+      
+      // TEB varyasyonları
+      'teb': 'TEB',
+      'türk ekonomi bankası': 'TEB',
+      'teb bankası': 'TEB',
+      
+      // Diğer bankalar
+      'ing': 'ING Bank',
+      'ing bank': 'ING Bank',
+      'ing bankası': 'ING Bank',
+      'burgan': 'Burgan Bank',
+      'burgan bank': 'Burgan Bank',
+      'aktif': 'Aktif Bank',
+      'aktif bank': 'Aktif Bank',
+      'fibabanka': 'Fibabanka',
+      'fiba': 'Fibabanka',
+      'odeabank': 'Odeabank',
+      'odea': 'Odeabank',
+      'şekerbank': 'Şekerbank',
+      'sekerbank': 'Şekerbank',
+      'şeker bank': 'Şekerbank'
     };
     
-    // Normalize edilmiş isimde eşleşme ara
+    // Tam eşleşme ara
+    if (bankNameMappings[normalizedName]) {
+      return bankNameMappings[normalizedName];
+    }
+    
+    // Kısmi eşleşme ara
     for (const [key, value] of Object.entries(bankNameMappings)) {
       if (normalizedName.includes(key)) {
         return value;
