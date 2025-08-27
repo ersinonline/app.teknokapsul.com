@@ -2,9 +2,10 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { SignIn } from '@clerk/clerk-react';
 import { Package } from 'lucide-react';
+import WebViewSafeAuth from '../../components/auth/WebViewSafeAuth';
 
 export const LoginPage = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, isWebView } = useAuth();
   const location = useLocation();
   
   // Mobilde dashboard'a, masaüstünde anasayfaya yönlendir
@@ -80,23 +81,34 @@ export const LoginPage = () => {
           </div>
         </div>
 
-        {/* Right Section - Clerk SignIn */}
+        {/* Right Section - Auth */}
         <div className="w-full lg:w-1/2 flex items-center justify-center py-8 lg:py-16">
           <div className="w-full max-w-md">
-            <SignIn 
-              afterSignInUrl={from}
-              appearance={{
-                elements: {
-                  rootBox: "mx-auto",
-                  card: "bg-white rounded-2xl shadow-xl",
-                  headerTitle: "text-3xl font-bold text-gray-900",
-                  headerSubtitle: "text-gray-600",
-                  socialButtonsBlockButton: "border-2 border-gray-200 hover:border-yellow-300 hover:bg-yellow-50",
-                  formButtonPrimary: "bg-yellow-600 hover:bg-yellow-700",
-                  footerActionLink: "text-yellow-600 hover:text-yellow-500"
-                }
-              }}
-            />
+            {isWebView ? (
+              <div className="bg-white rounded-2xl shadow-xl p-6">
+                <h2 className="text-3xl font-bold text-gray-900 text-center mb-6">Giriş Yap</h2>
+                <WebViewSafeAuth 
+                  mode="sign-in"
+                  onSuccess={() => window.location.href = from}
+                  onError={(error) => console.error('Auth error:', error)}
+                />
+              </div>
+            ) : (
+              <SignIn 
+                afterSignInUrl={from}
+                appearance={{
+                  elements: {
+                    rootBox: "mx-auto",
+                    card: "bg-white rounded-2xl shadow-xl",
+                    headerTitle: "text-3xl font-bold text-gray-900",
+                    headerSubtitle: "text-gray-600",
+                    socialButtonsBlockButton: "border-2 border-gray-200 hover:border-yellow-300 hover:bg-yellow-50",
+                    formButtonPrimary: "bg-yellow-600 hover:bg-yellow-700",
+                    footerActionLink: "text-yellow-600 hover:text-yellow-500"
+                  }
+                }}
+              />
+            )}
           </div>
         </div>
       </div>

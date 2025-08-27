@@ -71,6 +71,7 @@ import PharmacyPage from './pages/PharmacyPage';
 import WebViewAuthPage from './pages/auth/WebViewAuthPage';
 import { VerifyPage } from './pages/auth/VerifyPage';
 import { IsBankCallbackPage } from './pages/auth/IsBankCallbackPage';
+import OAuthCallbackPage from './pages/auth/OAuthCallbackPage';
 import AppTabs from './components/common/AppTabs';
 import { useLocation } from 'react-router-dom';
 
@@ -124,6 +125,10 @@ const router = createBrowserRouter([
   {
     path: '/auth/callback/isbank',
     element: <AuthProvider><IsBankCallbackPage /></AuthProvider>
+  },
+  {
+    path: '/auth/callback',
+    element: <AuthProvider><OAuthCallbackPage /></AuthProvider>
   },
   {
     path: '/dashboard',
