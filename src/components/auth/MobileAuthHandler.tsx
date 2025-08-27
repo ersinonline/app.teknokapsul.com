@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { mobileAuthService } from '../../services/mobile-auth.service';
+
+// Extend Window interface for Clerk
+declare global {
+  interface Window {
+    Clerk?: {
+      user?: any;
+    };
+  }
+}
 
 interface MobileAuthHandlerProps {
   onAuthSuccess?: () => void;
@@ -29,6 +37,10 @@ export const MobileAuthHandler: React.FC<MobileAuthHandlerProps> = ({
       setTimeout(() => {
         if (user && onAuthSuccess) {
           onAuthSuccess();
+          // Force redirect to dashboard after successful auth
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 1000);
         }
       }, 100);
     }
@@ -44,58 +56,48 @@ export const MobileAuthHandler: React.FC<MobileAuthHandlerProps> = ({
     if (!authAttempted) {
       setAuthAttempted(true);
 
-      // URL'den token kontrolü yap
-      mobileAuthService.checkAndSignInWithUrlToken()
-        .then(success => {
-          if (success) {
-            console.log('Mobil token ile giriş başarılı');
-            if (onAuthSuccess) {
-              onAuthSuccess();
-            }
-          } else {
-            if (isWebView) {
-              console.log('URL token bulunamadı, WebView mesajları bekleniyor...');
-            } else {
-              console.log('URL token bulunamadı, normal web tarayıcısı');
-            }
-          }
-        })
-        .catch(error => {
-          console.error('URL token ile giriş başarısız:', error);
-          if (onAuthFailure) {
-            onAuthFailure(error);
-          }
-        });
+      // URL'den token kontrolü yap (Clerk otomatik olarak handle eder)
+      console.log('Mobil auth handler başlatıldı');
     }
   }, [user, isWebView, authAttempted, onAuthSuccess, onAuthFailure]);
 
-  // Mobil cihazlarda sayfa görünürlük değişikliklerini dinle
+  // Listen for storage and message events for authentication state changes
   useEffect(() => {
     if (isMobile) {
       const handleStorageChange = (e: StorageEvent) => {
-        // LocalStorage değişikliklerini dinle (auth state değişiklikleri için)
-        if (e.key && e.key.includes('clerk') && e.newValue !== e.oldValue) {
+        if (e.key === 'clerk-db-jwt' || e.key?.includes('clerk')) {
+          console.log('Clerk storage changed on mobile, reloading page');
+          window.location.reload();
+        }
+      };
+
+      const handleMessage = (e: MessageEvent<any>) => {
+        if (e.data === 'AUTH_STATE_CHANGED' || e.data?.type === 'clerk:oauth:success') {
+          console.log('Auth state changed message received on mobile');
           setTimeout(() => {
-            window.location.reload();
+            window.location.href = '/dashboard';
           }, 500);
         }
       };
 
-      const handleMessage = (event: MessageEvent) => {
-        // WebView'dan gelen mesajları dinle
-        if (event.data && event.data.type === 'AUTH_STATE_CHANGED') {
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
-        }
+      // Listen for OAuth popup close events
+      const handlePopupClose = () => {
+        setTimeout(() => {
+          if (window.Clerk?.user) {
+            console.log('OAuth popup closed, user authenticated');
+            window.location.href = '/dashboard';
+          }
+        }, 1000);
       };
 
       window.addEventListener('storage', handleStorageChange);
       window.addEventListener('message', handleMessage);
+      window.addEventListener('focus', handlePopupClose);
 
       return () => {
         window.removeEventListener('storage', handleStorageChange);
         window.removeEventListener('message', handleMessage);
+        window.removeEventListener('focus', handlePopupClose);
       };
     }
   }, [isMobile]);
