@@ -421,6 +421,32 @@ export const FinancialDataPage = () => {
     })).sort((a, b) => a.bank.localeCompare(b.bank, 'tr', { sensitivity: 'base' })); // Alfabetik sırala
   };
 
+  // %2'den küçük olan bankaları 'Diğer' kategorisinde birleştir
+  const consolidateSmallBanks = (data: any[], valueKey: string = 'totalLimit') => {
+    const totalValue = data.reduce((sum, item) => sum + item[valueKey], 0);
+    const threshold = totalValue * 0.02; // %2 eşiği
+    
+    const largeBanks = data.filter(item => item[valueKey] >= threshold);
+    const smallBanks = data.filter(item => item[valueKey] < threshold);
+    
+    if (smallBanks.length === 0) {
+      return data;
+    }
+    
+    const otherCategory = {
+      bank: 'Diğer',
+      [valueKey]: smallBanks.reduce((sum, item) => sum + item[valueKey], 0),
+      cards: smallBanks.flatMap(item => item.cards || []),
+      accounts: smallBanks.flatMap(item => item.accounts || []),
+      loans: smallBanks.flatMap(item => item.loans || []),
+      totalDebt: smallBanks.reduce((sum, item) => sum + (item.totalDebt || 0), 0),
+      totalAmount: smallBanks.reduce((sum, item) => sum + (item.totalAmount || 0), 0),
+      totalRemaining: smallBanks.reduce((sum, item) => sum + (item.totalRemaining || 0), 0)
+    };
+    
+    return [...largeBanks, otherCategory];
+  };
+
   const groupedCreditCards = groupCardsByBank(creditCards);
   const groupedCashAdvanceAccounts = groupCashAdvanceByBank(cashAdvanceAccounts);
   const groupedLoans = groupLoansByBank(loans);
@@ -523,7 +549,7 @@ export const FinancialDataPage = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
                         <Pie
-                          data={groupedCreditCards.map((group) => ({
+                          data={consolidateSmallBanks(groupedCreditCards, 'totalLimit').map((group) => ({
                             name: getPlatformDisplayName(group.bank),
                             value: group.totalLimit,
                             count: group.cards.length
@@ -536,7 +562,7 @@ export const FinancialDataPage = () => {
                           fill="#8884d8"
                           dataKey="value"
                         >
-                          {groupedCreditCards.map((_, index) => (
+                          {consolidateSmallBanks(groupedCreditCards, 'totalLimit').map((_, index) => (
                             <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                           ))}
                         </Pie>
@@ -554,7 +580,7 @@ export const FinancialDataPage = () => {
                   </div>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={groupedCreditCards.map(group => ({
+                      <BarChart data={consolidateSmallBanks(groupedCreditCards, 'totalLimit').map(group => ({
                         name: getPlatformDisplayName(group.bank),
                         limit: group.totalLimit,
                         debt: group.totalDebt

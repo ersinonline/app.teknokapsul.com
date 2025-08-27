@@ -42,22 +42,26 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
   ];
 
   return (
-    <div className="flex items-center w-full bg-white border-b border-gray-200 shadow-sm">
+    <div className="flex items-center justify-between w-full max-w-full bg-white border-b border-gray-200 shadow-sm overflow-x-hidden">
       {/* Logo/Brand Section */}
-      <div className="flex items-center px-4 py-3 border-r border-gray-200">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-orange-500 rounded-[10px] flex items-center justify-center">
-            <ShoppingCart className="w-4 h-4 text-white" />
+      <div className="flex items-center px-3 sm:px-4 py-4 sm:py-3 sm:border-r sm:border-gray-200">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-3 hover:opacity-90 active:opacity-80 focus:outline-none"
+          aria-label="Anasayfa - TeknoKapsül"
+        >
+          <div className="w-9 h-9 bg-orange-500 rounded-[12px] flex items-center justify-center">
+            <ShoppingCart className="w-5 h-5 text-white" />
           </div>
-          <div className="flex flex-col">
-            <span className="text-base font-bold text-gray-800">TeknoKapsül</span>
-            <span className="text-xs text-gray-500">Dijital Çözümler</span>
+          <div className="flex flex-col text-left">
+            <span className="text-base sm:text-base font-bold text-gray-800">TeknoKapsül</span>
+            <span className="text-xs sm:block text-gray-500">Dijital Çözümler</span>
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center flex-1">
+      <div className="hidden lg:flex items-center flex-1">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = currentApp === tab.id;
@@ -100,22 +104,22 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
       </div>
 
       {/* Right Section - User Info or Actions */}
-      <div className="flex items-center px-4 py-3 border-l border-gray-200">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center px-3 sm:px-4 py-4 sm:py-3 sm:border-l sm:border-gray-200">
+        <div className="flex items-center gap-3">
           <UserButton 
             appearance={{
               elements: {
-                avatarBox: "w-7 h-7 rounded-[10px]",
-                userButtonPopoverCard: "rounded-[10px]",
-                userButtonPopoverActionButton: "rounded-[8px]"
+                avatarBox: "w-9 h-9 rounded-[12px]",
+                userButtonPopoverCard: "rounded-[12px]",
+                userButtonPopoverActionButton: "rounded-[10px]"
               }
             }}
           />
           <div className="hidden md:flex flex-col">
-            <span className="text-sm font-semibold text-gray-800">
+            <span className="text-base font-semibold text-gray-800">
               {user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || 'Kullanıcı'}
             </span>
-            <span className="text-xs text-gray-500">Tekno Üye</span>
+            <span className="text-sm text-gray-500">Tekno Üye</span>
           </div>
         </div>
       </div>

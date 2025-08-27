@@ -62,11 +62,12 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
     <>
       {/* Tablet Header */}
       <div className={`bg-white border-b shadow-sm ${className}`}>
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors md:block lg:hidden hidden"
+              style={{ display: 'none' }}
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -75,15 +76,15 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
                   onClick={() => navigate('/dashboard')}
                   className="hover:opacity-80 transition-opacity"
                 >
-                  <h1 className="text-lg font-semibold text-gray-900">TeknoKapsül</h1>
-                  <p className="text-xs text-gray-500">Dijital Çözümler</p>
+                  <h1 className="text-base sm:text-lg font-semibold text-gray-900">TeknoKapsül</h1>
+                  <p className="text-xs text-gray-500 hidden sm:block">Dijital Çözümler</p>
                 </button>
                 {/* <PremiumBadge size="lg" className="scale-[2] ml-6" showText={false} /> */}
               </div>
           </div>
           
-          {/* Ana Menü - Tamamen gizli */}
-          <div className="hidden">
+          {/* Ana Menü - Mobilde tamamen gizli */}
+          <div className="hidden lg:flex items-center gap-2">
             {mainMenuItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -105,13 +106,13 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
             })}
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600 hidden sm:block">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600 hidden md:block truncate max-w-32">
               {user?.fullName || user?.primaryEmailAddress?.emailAddress}
             </span>
             <button
               onClick={handleSignOut}
-              className="text-sm text-red-600 hover:text-red-700 px-3 py-1 rounded-lg hover:bg-red-50 transition-colors"
+              className="text-sm text-red-600 hover:text-red-700 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors whitespace-nowrap"
             >
               Çıkış
             </button>

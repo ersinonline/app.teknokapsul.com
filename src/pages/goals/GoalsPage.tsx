@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Target, Plus, Calendar, TrendingUp, CheckCircle, Clock, Edit, Trash2, DollarSign } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Target, Plus, Calendar, TrendingUp, CheckCircle, Clock, Edit, Trash2, DollarSign, Pause, PlusCircle } from 'lucide-react';
 import { addDoc, collection, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -16,6 +16,7 @@ interface Goal {
   description?: string;
   targetAmount: number;
   currentAmount: number;
+  currency: 'TL' | 'USD' | 'EUR';
   category: string;
   priority: 'low' | 'medium' | 'high';
   status: 'active' | 'completed' | 'paused';
@@ -42,16 +43,67 @@ const PRIORITY_COLORS = {
 export const GoalsPage = () => {
   const { user } = useAuth();
   const { data: goals = [], loading, error, reload } = useFirebaseData<Goal>('goals');
+
+  // Anlık kurları al
+  useEffect(() => {
+    const fetchCurrentRates = async () => {
+      try {
+        const response = await fetch('https://doviz-api.onrender.com/api');
+        const data = await response.json();
+        if (data.success && data.data && data.data.length > 0) {
+          setCurrentRates(data.data[0]);
+        }
+      } catch (error) {
+        console.error('Anlık kurlar alınamadı:', error);
+      }
+    };
+
+    fetchCurrentRates();
+    // Her 30 saniyede bir kurları güncelle
+    const interval = setInterval(fetchCurrentRates, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Kur hesaplaması yapan fonksiyon
+  const calculateRealTimeProgress = (goal: Goal) => {
+    if (!currentRates || goal.currency === 'TL') {
+      return calculateProgress(goal.currentAmount, goal.targetAmount);
+    }
+
+    let currentAmountInTL = goal.currentAmount;
+    let targetAmountInTL = goal.targetAmount;
+
+    if (goal.currency === 'USD' && currentRates.Dolar) {
+      const usdRate = parseFloat(currentRates.Dolar.replace(',', '.'));
+      currentAmountInTL = goal.currentAmount * usdRate;
+      targetAmountInTL = goal.targetAmount * usdRate;
+    } else if (goal.currency === 'EUR' && currentRates.Euro) {
+      const eurRate = parseFloat(currentRates.Euro.replace(',', '.'));
+      currentAmountInTL = goal.currentAmount * eurRate;
+      targetAmountInTL = goal.targetAmount * eurRate;
+    }
+
+    return calculateProgress(currentAmountInTL, targetAmountInTL);
+  };
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const [depositData, setDepositData] = useState({
+    amount: '',
+    currency: 'TL' as 'TL' | 'USD' | 'EUR',
+    description: ''
+  });
+  const [exchangeRates, setExchangeRates] = useState<any>(null);
+  const [currentRates, setCurrentRates] = useState<any>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     targetAmount: '',
-    currentAmount: '',
     targetDate: '',
     category: 'savings' as Goal['category'],
-    priority: 'medium' as Goal['priority']
+    priority: 'medium' as Goal['priority'],
+    currency: 'TL' as Goal['currency']
   });
 
   const userGoals = goals.filter(goal => goal.userId === user?.id);
@@ -66,7 +118,7 @@ export const GoalsPage = () => {
       const goalData = {
         ...formData,
         targetAmount: parseFloat(formData.targetAmount),
-        currentAmount: parseFloat(formData.currentAmount || '0'),
+        currentAmount: 0,
         userId: user.id,
         status: 'active' as Goal['status'],
         deadline: new Date(formData.targetDate),
@@ -95,10 +147,10 @@ export const GoalsPage = () => {
       title: '',
       description: '',
       targetAmount: '',
-      currentAmount: '',
       targetDate: '',
       category: 'savings',
-      priority: 'medium'
+      priority: 'medium',
+      currency: 'TL'
     });
   };
 
@@ -108,24 +160,90 @@ export const GoalsPage = () => {
       title: goal.title,
       description: goal.description || '',
       targetAmount: goal.targetAmount.toString(),
-      currentAmount: goal.currentAmount.toString(),
       targetDate: goal.targetDate ? goal.targetDate.toISOString().split('T')[0] : goal.deadline.toISOString().split('T')[0],
       category: goal.category,
-      priority: goal.priority
+      priority: goal.priority,
+      currency: goal.currency || 'TL'
     });
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (goalId: string) => {
-    if (!user) return;
-    if (window.confirm('Bu hedefi silmek istediğinizden emin misiniz?')) {
-      try {
-        await deleteDoc(doc(db, 'teknokapsul', user.id, 'goals', goalId));
-        await reload();
-      } catch (error) {
-        console.error('Error deleting goal:', error);
-      }
+  const handlePause = async (goalId: string) => {
+    if (!user || !window.confirm('Bu hedefi pasife almak istediğinizden emin misiniz?')) return;
+
+    try {
+      await updateDoc(doc(db, 'teknokapsul', user.id, 'goals', goalId), {
+        status: 'paused',
+        updatedAt: new Date()
+      });
+      await reload();
+    } catch (error) {
+      console.error('Error pausing goal:', error);
     }
+  };
+
+  const handleDeposit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !selectedGoal) return;
+
+    try {
+      let depositAmount = parseFloat(depositData.amount);
+      
+      // Döviz kurunu al ve TL'ye çevir
+       if (depositData.currency !== 'TL') {
+         try {
+           const response = await fetch('https://doviz-api.onrender.com/api');
+           const data = await response.json();
+           
+           if (data.success && data.data && data.data.length > 0) {
+             const rates = data.data[0];
+             if (depositData.currency === 'USD' && rates.Dolar) {
+               const usdRate = parseFloat(rates.Dolar.replace(',', '.'));
+               depositAmount = depositAmount * usdRate;
+             } else if (depositData.currency === 'EUR' && rates.Euro) {
+               const eurRate = parseFloat(rates.Euro.replace(',', '.'));
+               depositAmount = depositAmount * eurRate;
+             }
+           }
+         } catch (error) {
+           console.error('Döviz kuru alınamadı:', error);
+           alert('Döviz kuru alınamadı. Lütfen tekrar deneyin.');
+           return;
+         }
+       }
+
+      const newCurrentAmount = selectedGoal.currentAmount + depositAmount;
+      const newStatus = newCurrentAmount >= selectedGoal.targetAmount ? 'completed' : 'active';
+
+      await updateDoc(doc(db, 'teknokapsul', user.id, 'goals', selectedGoal.id), {
+        currentAmount: newCurrentAmount,
+        status: newStatus,
+        updatedAt: new Date()
+      });
+      
+      setIsDepositModalOpen(false);
+      setSelectedGoal(null);
+      setDepositData({ amount: '', currency: 'TL', description: '' });
+      await reload();
+    } catch (error) {
+      console.error('Error depositing to goal:', error);
+    }
+  };
+
+  const openDepositModal = async (goal: Goal) => {
+    setSelectedGoal(goal);
+    setIsDepositModalOpen(true);
+    
+    // Döviz kurlarını al
+     try {
+       const response = await fetch('https://doviz-api.onrender.com/api');
+       const data = await response.json();
+       if (data.success && data.data && data.data.length > 0) {
+         setExchangeRates(data.data[0]);
+       }
+     } catch (error) {
+       console.error('Error fetching exchange rates:', error);
+     }
   };
 
 
@@ -224,7 +342,7 @@ export const GoalsPage = () => {
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {activeGoals.map(goal => {
-                  const progress = calculateProgress(goal.currentAmount, goal.targetAmount);
+                  const progress = calculateRealTimeProgress(goal);
                   const targetDateStr = goal.targetDate instanceof Date ? goal.targetDate.toISOString().split('T')[0] : goal.targetDate;
                   const deadlineStr = goal.deadline instanceof Date ? goal.deadline.toISOString().split('T')[0] : goal.deadline;
                   const daysRemaining = calculateDaysRemaining(targetDateStr || deadlineStr || '');
@@ -247,16 +365,18 @@ export const GoalsPage = () => {
                         </div>
                         <div className="flex gap-1">
                           <button
-                            onClick={() => handleEdit(goal)}
-                            className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                            onClick={() => openDepositModal(goal)}
+                            className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+                            title="Para Yatır"
                           >
-                            <Edit className="w-4 h-4" />
+                            <PlusCircle className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(goal.id)}
-                            className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                            onClick={() => handlePause(goal.id)}
+                            className="p-1 text-gray-400 hover:text-orange-600 transition-colors"
+                            title="Pasife Al"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Pause className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
@@ -275,9 +395,21 @@ export const GoalsPage = () => {
                           ></div>
                         </div>
                         <div className="flex justify-between text-xs text-gray-600">
-                          <span>{formatCurrency(goal.currentAmount)}</span>
-                          <span>{formatCurrency(goal.targetAmount)}</span>
+                          <span>{goal.currentAmount.toFixed(2)} {goal.currency}</span>
+                          <span>{goal.targetAmount.toFixed(2)} {goal.currency}</span>
                         </div>
+                        
+                        {/* Anlık Kur Bilgisi */}
+                        {currentRates && goal.currency !== 'TL' && (
+                          <div className="mt-1 text-xs text-blue-600">
+                            {goal.currency === 'USD' && currentRates.Dolar && (
+                              <span>1 USD = {currentRates.Dolar} TL</span>
+                            )}
+                            {goal.currency === 'EUR' && currentRates.Euro && (
+                              <span>1 EUR = {currentRates.Euro} TL</span>
+                            )}
+                          </div>
+                        )}
                       </div>
                       
                       <div className="mt-3 pt-3 border-t border-gray-100">
@@ -383,7 +515,7 @@ export const GoalsPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Hedef Tutar (₺)
+                      Hedef Tutar
                     </label>
                     <input
                       type="number"
@@ -399,17 +531,17 @@ export const GoalsPage = () => {
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Mevcut Tutar (₺)
+                      Para Birimi
                     </label>
-                    <input
-                      type="number"
-                      value={formData.currentAmount}
-                      onChange={(e) => setFormData(prev => ({ ...prev, currentAmount: e.target.value }))}
+                    <select
+                      value={formData.currency}
+                      onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value as Goal['currency'] }))}
                       className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0"
-                      min="0"
-                      step="0.01"
-                    />
+                    >
+                      <option value="TL">Türk Lirası (TL)</option>
+                      <option value="USD">Amerikan Doları (USD)</option>
+                      <option value="EUR">Euro (EUR)</option>
+                    </select>
                   </div>
                 </div>
                 
@@ -479,6 +611,97 @@ export const GoalsPage = () => {
               </form>
             </div>
           </Modal>
+        )}
+
+        {/* Para Yatırma Modalı */}
+        {isDepositModalOpen && selectedGoal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+              <h2 className="text-xl font-bold mb-4">Para Yatır - {selectedGoal.title}</h2>
+              
+              <form onSubmit={handleDeposit} className="space-y-4">
+                <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                     Para Birimi
+                   </label>
+                   <select
+                     value={depositData.currency}
+                     onChange={(e) => setDepositData({ ...depositData, currency: e.target.value as 'TL' | 'USD' | 'EUR' })}
+                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   >
+                     <option value="TL">Türk Lirası (TL)</option>
+                     <option value="USD">Amerikan Doları (USD)</option>
+                     <option value="EUR">Euro (EUR)</option>
+                   </select>
+                   
+                   {/* Anlık Kur Bilgisi */}
+                   {exchangeRates && depositData.currency !== 'TL' && (
+                     <div className="mt-2 p-2 bg-blue-50 rounded-md text-sm">
+                       <div className="font-medium text-blue-800">Anlık Kur:</div>
+                       {depositData.currency === 'USD' && exchangeRates.Dolar && (
+                         <div className="text-blue-700">
+                           1 USD = {exchangeRates.Dolar} TL
+                         </div>
+                       )}
+                       {depositData.currency === 'EUR' && exchangeRates.Euro && (
+                         <div className="text-blue-700">
+                           1 EUR = {exchangeRates.Euro} TL
+                         </div>
+                       )}
+                     </div>
+                   )}
+                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tutar
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={depositData.amount}
+                    onChange={(e) => setDepositData({ ...depositData, amount: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Yatırılacak tutar"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Açıklama (İsteğe bağlı)
+                  </label>
+                  <input
+                    type="text"
+                    value={depositData.description}
+                    onChange={(e) => setDepositData({ ...depositData, description: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Para yatırma açıklaması"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsDepositModalOpen(false);
+                      setSelectedGoal(null);
+                      setDepositData({ amount: '', currency: 'TL', description: '' });
+                    }}
+                    className="flex-1 px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    İptal
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    Para Yatır
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
       </div>
     </div>

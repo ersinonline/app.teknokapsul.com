@@ -111,7 +111,7 @@ export const ExpensePage: React.FC = () => {
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-3">
                 <CreditCard className="w-6 h-6 lg:w-8 lg:h-8 text-red-500" />
-                Taksitler
+                Giderler
               </h1>
               <p className="text-gray-600 mt-1 text-sm lg:text-base">
                 Taksitli ve tek seferlik ödemelerinizi yönetin
@@ -122,7 +122,7 @@ export const ExpensePage: React.FC = () => {
               className="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-lg font-medium transition-colors shadow-lg hover:shadow-xl text-sm lg:text-base w-full sm:w-auto"
             >
               <Plus className="w-4 h-4 lg:w-5 lg:h-5" />
-              <span>Yeni Taksit Ekle</span>
+              <span>Yeni Gider Ekle</span>
             </button>
           </div>
           
@@ -292,7 +292,7 @@ export const ExpensePage: React.FC = () => {
         {/* Giderler Tablosu */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200">
           <div className="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-200">
-            <h2 className="text-base lg:text-lg font-semibold text-gray-900">Taksit Listesi</h2>
+            <h2 className="text-base lg:text-lg font-semibold text-gray-900">Gider Listesi</h2>
           </div>
           <div className="p-3 lg:p-6">
             <ExpenseTable expenses={expenses} onUpdate={loadExpenses} />
@@ -303,7 +303,7 @@ export const ExpensePage: React.FC = () => {
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg p-4 lg:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-              <h3 className="text-base lg:text-lg font-medium mb-4 text-gray-900">Yeni Taksit Ekle</h3>
+              <h3 className="text-base lg:text-lg font-medium mb-4 text-gray-900">Yeni Gider Ekle</h3>
               <ExpenseForm onSubmit={async (data) => {
                 try {
                   await addExpense(user!.id, data);

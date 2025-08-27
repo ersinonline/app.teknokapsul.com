@@ -143,7 +143,7 @@ export const HomePage = () => {
       color: 'text-red-600',
       bgColor: 'bg-red-50',
       hoverBgColor: 'hover:bg-red-100',
-      route: '/expenses'
+      route: '/tekno-finans/expenses'
     },
     {
       id: 'add-income',
@@ -153,17 +153,17 @@ export const HomePage = () => {
       color: 'text-green-600',
       bgColor: 'bg-green-50',
       hoverBgColor: 'hover:bg-green-100',
-      route: '/incomes'
+      route: '/tekno-finans/income'
     },
     {
       id: 'view-reports',
-      title: 'Raporları Görüntüle',
-      description: 'Finansal raporlarınızı inceleyin',
+      title: 'Portöyünü Görüntüle',
+      description: 'Finansal varlığınızı inceleyin',
       icon: BarChart3,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       hoverBgColor: 'hover:bg-blue-100',
-      route: '/financial'
+      route: '/tekno-finans/portfolio'
     },
     {
       id: 'manage-subscriptions',
@@ -173,7 +173,7 @@ export const HomePage = () => {
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
       hoverBgColor: 'hover:bg-purple-100',
-      route: '/subscriptions'
+      route: '/tekno-kapsul/subscriptions'
     }
   ];
 
@@ -181,12 +181,11 @@ export const HomePage = () => {
     {
       id: 'teknokapsul',
       title: 'TeknoKapsül',
-      description: 'Kargo takibi ve lojistik yönetimi',
+      description: 'Gündelik işlerin yönetimi',
       icon: Package,
       gradient: 'from-orange-500 to-red-500',
       hoverGradient: 'hover:from-orange-600 hover:to-red-600',
       route: '/tekno-kapsul',
-      features: ['Kargo Takibi', 'Teslimat Bildirimleri', 'Çoklu Kargo Firması']
     },
     {
       id: 'teknohizmet',
@@ -196,7 +195,6 @@ export const HomePage = () => {
       gradient: 'from-blue-500 to-indigo-500',
       hoverGradient: 'hover:from-blue-600 hover:to-indigo-600',
       route: '/tekno-hizmet',
-      features: ['Destek Talepleri', 'Hizmet Takibi', 'Teknik Yardım']
     },
     {
       id: 'teknofinans',
@@ -206,7 +204,6 @@ export const HomePage = () => {
       gradient: 'from-green-500 to-teal-500',
       hoverGradient: 'hover:from-green-600 hover:to-teal-600',
       route: '/tekno-finans',
-      features: ['Portföy Analizi', 'Gelir-Gider Takibi', 'Yatırım Önerileri']
     }
   ];
 
@@ -221,42 +218,63 @@ export const HomePage = () => {
   return (
     <div className="h-screen overflow-hidden bg-[#ffb700] flex flex-col">
       {/* Header */}
-      <div className="bg-gradient-to-r from-black/60 to-black/40 backdrop-blur-md border-b border-white/10 px-6 py-6 flex-shrink-0">
+      <div className="bg-gradient-to-r from-black/60 to-black/40 backdrop-blur-md border-b border-white/10 px-4 py-4 sm:px-6 sm:py-6 flex-shrink-0">
         <div className="w-full">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-white mb-3 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-3 tracking-tight">
               Hoş Geldiniz, <span className="text-[#ffb700]">{user?.firstName || 'Kullanıcı'}</span>
             </h1>
-            <p className="text-white/90 text-base leading-relaxed">
+            <p className="text-white/90 text-sm sm:text-base leading-relaxed">
               TeknoKapsül ekosisteminde finansal durumunuzu takip edin ve hizmetlerimizi keşfedin
             </p>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col justify-between overflow-hidden max-w-7xl mx-auto">
+      <div className="flex-1 w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col justify-between sm:justify-start overflow-y-auto sm:overflow-visible max-w-7xl mx-auto">
         {/* Financial Stats Section */}
         <div className="mb-6 sm:mb-8">
-          <div className="text-center mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight">Finansal Durum</h2>
-            <p className="text-white/80 text-base">Güncel finansal verilerinizin özeti</p>
+          <div className="text-center mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-2xl font-bold text-white mb-2 sm:mb-3 tracking-tight">Finansal Durum</h2>
           </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {/* Mobile - horizontal scroll */}
+          <div className="sm:hidden -mx-4 px-4 overflow-x-auto">
+            <div className="flex gap-3 snap-x snap-mandatory">
+              {financialStats.map((stat, index) => {
+                const IconComponent = stat.icon;
+                return (
+                  <div
+                    key={index}
+                    className="min-w-[160px] bg-white/95 backdrop-blur-sm border border-white/20 rounded-xl p-4 text-center hover:bg-white hover:shadow-lg transition-all duration-300 cursor-pointer snap-start"
+                    onClick={() => navigate('/tekno-finans/financial-data')}
+                  >
+                    <div className={`inline-flex items-center justify-center w-9 h-9 ${stat.color} bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg mb-2`}>
+                      <IconComponent className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-xs font-semibold text-gray-800 mb-1 leading-tight">{stat.title}</h3>
+                    <p className="text-sm font-bold text-gray-900 mb-1">{stat.value}</p>
+                    <p className={`text-[10px] font-medium text-[#ffb700] bg-[#ffb700]/10 px-2 py-0.5 rounded-full`}>{stat.change}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          {/* Desktop/Tablet - grid */}
+          <div className="hidden sm:grid grid-cols-3 lg:grid-cols-6 gap-3">
             {financialStats.map((stat, index) => {
               const IconComponent = stat.icon;
               return (
                 <div
                   key={index}
                   className="bg-white/95 backdrop-blur-sm border border-white/20 rounded-xl p-4 text-center hover:bg-white hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer group"
-                  onClick={() => navigate('/financial')}
+                  onClick={() => navigate('/tekno-finans/financial-data')}
                 >
                   <div className={`inline-flex items-center justify-center w-10 h-10 ${stat.color} bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg mb-2 group-hover:scale-110 transition-transform duration-300`}>
-                     <IconComponent className="w-5 h-5" />
-                   </div>
-                   <h3 className="text-xs font-semibold text-gray-800 mb-2 leading-tight">{stat.title}</h3>
-                   <p className="text-base font-bold text-gray-900 mb-1">{stat.value}</p>
-                   <p className={`text-xs font-medium text-[#ffb700] bg-[#ffb700]/10 px-2 py-1 rounded-full`}>{stat.change}</p>
+                    <IconComponent className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-xs font-semibold text-gray-800 mb-2 leading-tight">{stat.title}</h3>
+                  <p className="text-base font-bold text-gray-900 mb-1">{stat.value}</p>
+                  <p className={`text-xs font-medium text-[#ffb700] bg-[#ffb700]/10 px-2 py-1 rounded-full`}>{stat.change}</p>
                 </div>
               );
             })}
@@ -265,12 +283,32 @@ export const HomePage = () => {
 
         {/* Quick Actions Section */}
         <div className="mb-6 sm:mb-8">
-          <div className="text-center mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight">Hızlı İşlemler</h2>
-            <p className="text-white/80 text-base">Sık kullanılan işlemlerinizi hızlıca gerçekleştirin</p>
+          <div className="text-center mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-2xl font-bold text-white mb-2 sm:mb-3 tracking-tight">Hızlı İşlemler</h2>
           </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          {/* Mobile - horizontal scroll */}
+          <div className="sm:hidden -mx-4 px-4 overflow-x-auto">
+            <div className="flex gap-3 snap-x snap-mandatory">
+              {quickActions.map((action) => {
+                const IconComponent = action.icon;
+                return (
+                  <div
+                    key={action.id}
+                    className={`${action.bgColor} ${action.hoverBgColor} min-w-[150px] border border-white/20 rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 cursor-pointer snap-start`}
+                    onClick={() => navigate(action.route)}
+                  >
+                    <div className={`inline-flex items-center justify-center w-9 h-9 ${action.color} bg-white rounded-lg mb-2`}>
+                      <IconComponent className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-gray-800 mb-0.5 leading-tight">{action.title}</h3>
+                    <p className="text-xs text-gray-600">{action.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          {/* Desktop/Tablet - grid */}
+          <div className="hidden sm:grid grid-cols-4 gap-3 sm:gap-4">
             {quickActions.map((action) => {
               const IconComponent = action.icon;
               return (
@@ -292,38 +330,47 @@ export const HomePage = () => {
 
         {/* Applications Section */}
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="text-center mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight">Hizmetlerimiz</h2>
-            <p className="text-white/80 text-base">İhtiyacınıza uygun hizmeti seçin ve hemen başlayın</p>
+          <div className="text-center mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-2xl font-bold text-white mb-2 sm:mb-3 tracking-tight">Uygulamalarımız</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 flex-1 min-h-0">
+          {/* Mobile - horizontal scroll for 3 main apps */}
+          <div className="md:hidden -mx-4 px-4 overflow-x-auto">
+            <div className="flex gap-4 snap-x snap-mandatory">
+              {applications.map((app) => {
+                const IconComponent = app.icon;
+                return (
+                  <div
+                    key={app.id}
+                    className="min-w-[220px] group bg-white/95 backdrop-blur-sm border border-white/20 rounded-xl p-3 hover:bg-white hover:shadow-xl transition-all duration-300 cursor-pointer snap-start flex flex-col justify-center"
+                    onClick={() => navigate(app.route)}
+                  >
+                    <div className="bg-gradient-to-br from-[#ffb700] to-[#e6a500] rounded-lg p-4 mx-auto text-center shadow-lg w-full">
+                      <IconComponent className="w-8 h-8 text-white mx-auto mb-2" />
+                      <h3 className="text-sm font-bold text-white mb-1 leading-tight">{app.title}</h3>
+                      <p className="text-white/90 text-xs leading-relaxed">{app.description}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Desktop/Tablet - grid */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 flex-1 min-h-0">
             {applications.map((app) => {
               const IconComponent = app.icon;
               return (
                 <div
                   key={app.id}
-                  className="group bg-white/95 backdrop-blur-sm border border-white/20 rounded-xl p-6 hover:bg-white hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col min-h-0"
+                  className="group bg-white/95 backdrop-blur-sm border border-white/20 rounded-xl p-4 hover:bg-white hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col justify-center min-h-[180px]"
                   onClick={() => navigate(app.route)}
                 >
-                  <div className="bg-gradient-to-br from-[#ffb700] to-[#e6a500] rounded-xl p-5 mb-4 text-center shadow-lg">
+                  <div className="bg-gradient-to-br from-[#ffb700] to-[#e6a500] rounded-xl p-5 mx-auto text-center shadow-lg w-full">
                     <IconComponent className="w-10 h-10 text-white mx-auto mb-3 group-hover:scale-110 transition-transform duration-300" />
                     <h3 className="text-base font-bold text-white mb-2 leading-tight">{app.title}</h3>
                     <p className="text-white/90 text-sm leading-relaxed">{app.description}</p>
                   </div>
-                  
-                  <div className="space-y-3 flex-1 min-h-0 overflow-hidden">
-                    <h4 className="font-semibold text-gray-800 mb-3 text-base">Özellikler:</h4>
-                    <div className="space-y-2 max-h-24 overflow-hidden">
-                      {app.features.slice(0, 3).map((feature, index) => (
-                        <div key={index} className="flex items-start text-gray-600">
-                          <div className="w-2 h-2 bg-[#ffb700] rounded-full mr-3 mt-2 flex-shrink-0"></div>
-                          <span className="text-sm leading-relaxed">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
                 </div>
               );
             })}

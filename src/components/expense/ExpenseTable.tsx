@@ -74,9 +74,12 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
       };
     }
     if (expense.isInstallment) {
+      const taksitText = expense.installmentNumber && expense.totalInstallments 
+        ? `${expense.installmentNumber}. Taksit (${expense.totalInstallments} taksit)`
+        : `Taksit (Her ayın ${expense.installmentDay}. günü)`;
       return {
         icon: <Calendar className="w-4 h-4" />,
-        text: `Taksit (${expense.installmentDay}. gün)`,
+        text: taksitText,
         className: 'bg-blue-100 text-blue-800'
       };
     }
@@ -167,15 +170,6 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold text-red-600">{formatCurrency(expense.amount)}</span>
-                    {expense.isInstallment && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                        <Calendar className="w-3 h-3" />
-                        {expense.installmentNumber && expense.totalInstallments 
-                          ? `${expense.installmentNumber}. Taksit (${expense.totalInstallments} taksit)`
-                          : `Taksit (Her ayın ${expense.installmentDay}. günü)`
-                        }
-                      </span>
-                    )}
                   </div>
                   {expense.description && (
                     <p className="text-sm text-gray-600 mt-2">{expense.description}</p>

@@ -62,13 +62,6 @@ export const Dashboard = () => {
     const loadData = async () => {
       if (!user) return;
       
-      // Otomatik migration kontrolü
-      try {
-        await checkAndMigrate();
-      } catch (migrationError) {
-        console.warn('Migration kontrolü sırasında hata:', migrationError);
-      }
-      
       try {
         setExpensesLoading(true);
         setIncomesLoading(true);
@@ -121,7 +114,7 @@ export const Dashboard = () => {
     };
     
     loadData();
-  }, [user, currentYear, currentMonth, checkAndMigrate]);
+  }, [user?.id, currentYear, currentMonth]);
 
   useEffect(() => {
     const loadPortfolioData = async () => {

@@ -50,7 +50,20 @@ export const PortfolioDetailsModal: React.FC<PortfolioDetailsModalProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
             <h2 className="text-xl font-bold text-gray-900">{displayName} Detayları</h2>
-            <p className="text-sm text-gray-600 mt-1">{symbol} • {items.length} adet yatırım</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {firstItem?.type === 'fund' ? (
+                <a 
+                  href={`https://fintables.com/fonlar/${symbol}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                >
+                  {symbol}
+                </a>
+              ) : (
+                symbol
+              )} • {items.length} adet yatırım
+            </p>
           </div>
           <button
             onClick={onClose}

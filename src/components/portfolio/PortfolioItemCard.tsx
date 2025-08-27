@@ -95,7 +95,18 @@ export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
                 {PORTFOLIO_CATEGORIES[item.type as keyof typeof PORTFOLIO_CATEGORIES]}
               </span>
               <span className="hidden sm:inline">•</span>
-              <span className="truncate">{item.symbol}</span>
+              {item.type === 'fund' ? (
+                <a 
+                  href={`https://fintables.com/fonlar/${item.symbol}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="truncate text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                >
+                  {item.symbol}
+                </a>
+              ) : (
+                <span className="truncate">{item.symbol}</span>
+              )}
             </div>
           </div>
         </div>

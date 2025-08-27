@@ -26,7 +26,7 @@ export const PortfolioPage: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'analytics' | 'investments' | 'returns' | 'prices'>('investments');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'investments' | 'returns' | 'prices'>('analytics');
 
   const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
   const [showValues, setShowValues] = useState(true);
@@ -469,7 +469,18 @@ export const PortfolioPage: React.FC = () => {
                           {index + 1}
                         </div>
                         <div>
-                          <h3 className="font-medium text-gray-900">{item.symbol}</h3>
+                          {item.type === 'fund' ? (
+                            <a 
+                              href={`https://fintables.com/fonlar/${item.symbol}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                            >
+                              {item.symbol}
+                            </a>
+                          ) : (
+                            <h3 className="font-medium text-gray-900">{item.symbol}</h3>
+                          )}
                           <p className="text-sm text-gray-600">{item.name}</p>
                         </div>
                       </div>
