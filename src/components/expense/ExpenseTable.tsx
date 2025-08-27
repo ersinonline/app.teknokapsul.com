@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Edit2, Trash2, Calendar, CreditCard, CheckCircle, XCircle, Power } from 'lucide-react';
 import { Expense, EXPENSE_CATEGORIES } from '../../types/expense';
-import { updateExpense, deleteExpense, toggleExpenseStatus, toggleExpensePayment } from '../../services/expense.service';
+import { updateExpense, deleteExpense, toggleExpensePayment } from '../../services/expense.service';
 import { ExpenseForm } from './ExpenseForm';
 import { formatCurrency } from '../../utils/currency';
 import { formatDate } from '../../utils/date';

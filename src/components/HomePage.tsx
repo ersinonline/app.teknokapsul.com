@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Target, PiggyBank, DollarSign, Clock, Calendar, Package, Wrench, CreditCard } from 'lucide-react';
+import { TrendingUp, Target, PiggyBank, DollarSign, Clock, Calendar, Package, Wrench, CreditCard, Plus, BarChart3 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserExpenses } from '../services/expense.service';
 import { getUserIncomes } from '../services/income.service';
@@ -134,6 +134,49 @@ export const HomePage = () => {
     }
   ];
 
+  const quickActions = [
+    {
+      id: 'add-expense',
+      title: 'Hızlı Gider Ekle',
+      description: 'Yeni gider kaydı oluştur',
+      icon: Plus,
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      hoverBgColor: 'hover:bg-red-100',
+      route: '/expenses'
+    },
+    {
+      id: 'add-income',
+      title: 'Gelir Ekle',
+      description: 'Yeni gelir kaydı oluştur',
+      icon: TrendingUp,
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+      hoverBgColor: 'hover:bg-green-100',
+      route: '/incomes'
+    },
+    {
+      id: 'view-reports',
+      title: 'Raporları Görüntüle',
+      description: 'Finansal raporlarınızı inceleyin',
+      icon: BarChart3,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      hoverBgColor: 'hover:bg-blue-100',
+      route: '/financial'
+    },
+    {
+      id: 'manage-subscriptions',
+      title: 'Abonelikler',
+      description: 'Aboneliklerinizi yönetin',
+      icon: Calendar,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+      hoverBgColor: 'hover:bg-purple-100',
+      route: '/subscriptions'
+    }
+  ];
+
   const applications = [
     {
       id: 'teknokapsul',
@@ -214,6 +257,33 @@ export const HomePage = () => {
                    <h3 className="text-xs font-semibold text-gray-800 mb-2 leading-tight">{stat.title}</h3>
                    <p className="text-base font-bold text-gray-900 mb-1">{stat.value}</p>
                    <p className={`text-xs font-medium text-[#ffb700] bg-[#ffb700]/10 px-2 py-1 rounded-full`}>{stat.change}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Quick Actions Section */}
+        <div className="mb-6 sm:mb-8">
+          <div className="text-center mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight">Hızlı İşlemler</h2>
+            <p className="text-white/80 text-base">Sık kullanılan işlemlerinizi hızlıca gerçekleştirin</p>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            {quickActions.map((action) => {
+              const IconComponent = action.icon;
+              return (
+                <div
+                  key={action.id}
+                  className={`${action.bgColor} ${action.hoverBgColor} border border-white/20 rounded-xl p-4 text-center hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer group`}
+                  onClick={() => navigate(action.route)}
+                >
+                  <div className={`inline-flex items-center justify-center w-10 h-10 ${action.color} bg-white rounded-lg mb-3 group-hover:scale-110 transition-transform duration-300`}>
+                    <IconComponent className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-800 mb-1 leading-tight">{action.title}</h3>
+                  <p className="text-xs text-gray-600">{action.description}</p>
                 </div>
               );
             })}

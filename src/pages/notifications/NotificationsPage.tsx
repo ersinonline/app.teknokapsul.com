@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Check, ExternalLink, Trash2 } from 'lucide-react';
+import { Bell, Check, Trash2, Filter, Settings, Mail, Smartphone, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -9,9 +9,20 @@ import { tr } from 'date-fns/locale';
 
 export const NotificationsPage: React.FC = () => {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<(NotificationData & { id: string })[]>([]);
+  const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const [showSettings, setShowSettings] = useState(false);
+  const [notificationSettings, setNotificationSettings] = useState({
+    email: true,
+    push: true,
+    sms: false,
+    expenses: true,
+    income: true,
+    subscriptions: true,
+    portfolio: true,
+    reminders: true
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -33,8 +44,8 @@ export const NotificationsPage: React.FC = () => {
     return () => unsubscribe();
   }, [user]);
 
-  const markAsRead = async (notificationId: string) => {
-    if (!user) return;
+  const markAsRead = async (notificationId: string | undefined) => {
+    if (!user?.id || !notificationId) return;
     
     try {
       const notificationRef = doc(db, 'teknokapsul', user.id, 'notifications', notificationId);
@@ -44,8 +55,8 @@ export const NotificationsPage: React.FC = () => {
     }
   };
 
-  const deleteNotification = async (notificationId: string) => {
-    if (!user) return;
+  const deleteNotification = async (notificationId: string | undefined) => {
+    if (!user?.id || !notificationId) return;
     
     try {
       const notificationRef = doc(db, 'teknokapsul', user.id, 'notifications', notificationId);
@@ -56,12 +67,13 @@ export const NotificationsPage: React.FC = () => {
   };
 
   const markAllAsRead = async () => {
-    if (!user) return;
+    if (!user?.id) return;
     
-    const unreadNotifications = notifications.filter(n => !n.read);
+    const unreadNotifications = notifications.filter(n => !n.read && n.id);
     
     try {
       const promises = unreadNotifications.map(notification => {
+        if (!notification.id) return Promise.resolve();
         const notificationRef = doc(db, 'teknokapsul', user.id, 'notifications', notification.id);
         return updateDoc(notificationRef, { read: true });
       });
@@ -70,6 +82,15 @@ export const NotificationsPage: React.FC = () => {
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
     }
+  };
+
+  const updateNotificationSettings = (key: string, value: boolean) => {
+    setNotificationSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+    // Here you would typically save to Firebase or your backend
+    console.log('Notification settings updated:', { [key]: value });
   };
 
   const filteredNotifications = notifications.filter(notification => {
@@ -129,15 +150,132 @@ export const NotificationsPage: React.FC = () => {
             </div>
           </div>
           
-          {unreadCount > 0 && (
+          <div className="flex items-center space-x-3">
             <button
-              onClick={markAllAsRead}
-              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm"
+              onClick={() => setShowSettings(!showSettings)}
+              className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors"
+              title="Bildirim Ayarları"
             >
-              Tümünü Okundu İşaretle
+              <Settings className="w-5 h-5" />
             </button>
-          )}
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllAsRead}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm"
+              >
+                Tümünü Okundu İşaretle
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Notification Settings Panel */}
+        {showSettings && (
+          <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <Settings className="w-5 h-5 mr-2" />
+              Bildirim Ayarları
+            </h2>
+            
+            <div className="space-y-6">
+              {/* Delivery Methods */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Bildirim Yöntemleri</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Mail className="w-4 h-4 text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-700">E-posta Bildirimleri</span>
+                    </div>
+                    <button
+                      onClick={() => updateNotificationSettings('email', !notificationSettings.email)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        notificationSettings.email ? 'bg-primary' : 'bg-gray-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          notificationSettings.email ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Smartphone className="w-4 h-4 text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-700">Push Bildirimleri</span>
+                    </div>
+                    <button
+                      onClick={() => updateNotificationSettings('push', !notificationSettings.push)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        notificationSettings.push ? 'bg-primary' : 'bg-gray-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          notificationSettings.push ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Smartphone className="w-4 h-4 text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-700">SMS Bildirimleri</span>
+                    </div>
+                    <button
+                      onClick={() => updateNotificationSettings('sms', !notificationSettings.sms)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        notificationSettings.sms ? 'bg-primary' : 'bg-gray-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          notificationSettings.sms ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Notification Types */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Bildirim Türleri</h3>
+                <div className="space-y-3">
+                  {[
+                    { key: 'expenses', label: 'Gider Bildirimleri', icon: '💰' },
+                    { key: 'income', label: 'Gelir Bildirimleri', icon: '💵' },
+                    { key: 'subscriptions', label: 'Abonelik Bildirimleri', icon: '📱' },
+                    { key: 'portfolio', label: 'Portföy Bildirimleri', icon: '📊' },
+                    { key: 'reminders', label: 'Hatırlatmalar', icon: '⏰' }
+                  ].map(item => (
+                    <div key={item.key} className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <span className="text-sm mr-2">{item.icon}</span>
+                        <span className="text-sm text-gray-700">{item.label}</span>
+                      </div>
+                      <button
+                        onClick={() => updateNotificationSettings(item.key, !notificationSettings[item.key as keyof typeof notificationSettings])}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          notificationSettings[item.key as keyof typeof notificationSettings] ? 'bg-primary' : 'bg-gray-200'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            notificationSettings[item.key as keyof typeof notificationSettings] ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Filter Tabs */}
         <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
@@ -231,16 +369,16 @@ export const NotificationsPage: React.FC = () => {
                     
                     {!notification.read && (
                       <button
-                        onClick={() => markAsRead(notification.id)}
-                        className="p-2 text-gray-400 hover:text-green-600 transition-colors"
-                        title="Okundu İşaretle"
-                      >
-                        <Check className="w-4 h-4" />
-                      </button>
+                      onClick={() => notification.id && markAsRead(notification.id)}
+                      className="p-2 text-gray-400 hover:text-green-600 transition-colors"
+                      title="Okundu İşaretle"
+                    >
+                      <Check className="w-4 h-4" />
+                    </button>
                     )}
                     
                     <button
-                      onClick={() => deleteNotification(notification.id)}
+                      onClick={() => notification.id && deleteNotification(notification.id)}
                       className="p-2 text-gray-400 hover:text-red-600 transition-colors"
                       title="Sil"
                     >

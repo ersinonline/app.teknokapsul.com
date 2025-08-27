@@ -26,7 +26,49 @@ export const AccountCard: React.FC<AccountCardProps> = ({ credential, onCopy }) 
       '9': 'TEB'
     };
     
-    return bankNames[platformName] || platformName;
+    // Eğer platformName sayısal bir ID ise, banka adına çevir
+    if (bankNames[platformName]) {
+      return bankNames[platformName];
+    }
+    
+    // Eğer platformName zaten bir banka adı ise, doğru formatta göster
+    const normalizedName = platformName.toLowerCase();
+    
+    // Yaygın banka adı varyasyonlarını standart forma çevir
+    const bankNameMappings: { [key: string]: string } = {
+      'ziraat': 'Ziraat Bankası',
+      'ziraat bankası': 'Ziraat Bankası',
+      'ziraatbankası': 'Ziraat Bankası',
+      'is bankası': 'İş Bankası',
+      'iş bankası': 'İş Bankası',
+      'isbankası': 'İş Bankası',
+      'işbankası': 'İş Bankası',
+      'garanti': 'Garanti BBVA',
+      'garanti bbva': 'Garanti BBVA',
+      'garantibbva': 'Garanti BBVA',
+      'akbank': 'Akbank',
+      'yapı kredi': 'Yapı Kredi',
+      'yapıkredi': 'Yapı Kredi',
+      'yapikredi': 'Yapı Kredi',
+      'halkbank': 'Halkbank',
+      'vakıfbank': 'VakıfBank',
+      'vakifbank': 'VakıfBank',
+      'denizbank': 'Denizbank',
+      'qnb finansbank': 'QNB Finansbank',
+      'qnbfinansbank': 'QNB Finansbank',
+      'finansbank': 'QNB Finansbank',
+      'teb': 'TEB'
+    };
+    
+    // Normalize edilmiş isimde eşleşme ara
+    for (const [key, value] of Object.entries(bankNameMappings)) {
+      if (normalizedName.includes(key)) {
+        return value;
+      }
+    }
+    
+    // Eğer hiçbir eşleşme bulunamazsa, orijinal değeri döndür (ilk harfi büyük yap)
+    return platformName.charAt(0).toUpperCase() + platformName.slice(1);
   };
   
   return (

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, CreditCard, Calendar, DollarSign, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, CreditCard, Calendar, DollarSign, AlertTriangle, ChevronLeft, ChevronRight, PieChart, TrendingUp } from 'lucide-react';
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { Expense } from '../../types/expense';
 import { getUserExpenses, addExpense } from '../../services/expense.service';
 import { ExpenseForm } from '../../components/expense/ExpenseForm';
@@ -63,6 +64,35 @@ export const ExpensePage: React.FC = () => {
   const unpaidExpenses = activeExpenses.filter(expense => !expense.isPaid);
   const unpaidAmount = unpaidExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   const recurringExpenseCount = activeExpenses.filter(expense => expense.isRecurring).length;
+
+  // Kategori analizi için veri hazırla
+  const categoryData = activeExpenses.reduce((acc, expense) => {
+    const category = expense.category || 'Diğer';
+    if (!acc[category]) {
+      acc[category] = { name: category, value: 0, count: 0 };
+    }
+    acc[category].value += expense.amount;
+    acc[category].count += 1;
+    return acc;
+  }, {} as Record<string, { name: string; value: number; count: number }>);
+
+  const categoryChartData = Object.values(categoryData).sort((a, b) => b.value - a.value);
+  
+  // Grafik renkleri
+  const CHART_COLORS = ['#EF4444', '#F97316', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#6B7280'];
+  
+  // Aylık trend verisi (son 6 ay)
+  const monthlyTrendData = [];
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date(currentYear, currentMonth - 1 - i, 1);
+    const monthName = monthNames[date.getMonth()];
+    const monthExpenses = expenses.filter(expense => {
+      const expenseDate = new Date(expense.date);
+      return expenseDate.getMonth() === date.getMonth() && expenseDate.getFullYear() === date.getFullYear();
+    });
+    const totalAmount = monthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+    monthlyTrendData.push({ month: monthName, amount: totalAmount });
+  }
 
   if (loading) {
     return (
@@ -184,6 +214,76 @@ export const ExpensePage: React.FC = () => {
                 <p className="text-sm text-orange-700">
                   {unpaidExpenses.length} adet gideriniz ödenmemiş durumda. Toplam tutar: {formatCurrency(unpaidAmount)}
                 </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Analiz Grafikleri */}
+        {categoryChartData.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Kategori Dağılımı */}
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <PieChart className="w-5 h-5 text-red-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Kategori Dağılımı</h3>
+              </div>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsPieChart>
+                    <Pie
+                      data={categoryChartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {categoryChartData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-4 space-y-2">
+                {categoryChartData.slice(0, 5).map((category, index) => (
+                  <div key={category.name} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
+                      ></div>
+                      <span className="text-gray-700">{category.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium text-gray-900">{formatCurrency(category.value)}</div>
+                      <div className="text-gray-500">{category.count} adet</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Aylık Trend */}
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <TrendingUp className="w-5 h-5 text-red-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Aylık Trend</h3>
+              </div>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyTrendData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis tickFormatter={(value) => `₺${(value / 1000).toFixed(0)}K`} />
+                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                    <Bar dataKey="amount" fill="#EF4444" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
           </div>
