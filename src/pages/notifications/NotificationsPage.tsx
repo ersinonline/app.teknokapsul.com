@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Check, Trash2, Filter, Settings, Mail, Smartphone, ExternalLink } from 'lucide-react';
+import { Bell, Check, Trash2, Settings, Mail, Smartphone, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Target, Plus, Calendar, TrendingUp, CheckCircle, Clock, Edit, Trash2, DollarSign, Pause, PlusCircle } from 'lucide-react';
-import { addDoc, collection, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { Target, Plus, Calendar, TrendingUp, CheckCircle, Clock, DollarSign, Pause, PlusCircle } from 'lucide-react';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
@@ -154,19 +154,7 @@ export const GoalsPage = () => {
     });
   };
 
-  const handleEdit = (goal: Goal) => {
-    setEditingGoal(goal);
-    setFormData({
-      title: goal.title,
-      description: goal.description || '',
-      targetAmount: goal.targetAmount.toString(),
-      targetDate: goal.targetDate ? goal.targetDate.toISOString().split('T')[0] : goal.deadline.toISOString().split('T')[0],
-      category: goal.category,
-      priority: goal.priority,
-      currency: goal.currency || 'TL'
-    });
-    setIsModalOpen(true);
-  };
+
 
   const handlePause = async (goalId: string) => {
     if (!user || !window.confirm('Bu hedefi pasife almak istediğinizden emin misiniz?')) return;

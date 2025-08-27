@@ -23,12 +23,10 @@ import { CargoTracking, CARGO_COMPANIES } from '../types/cargo';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { portfolioService } from '../services/portfolio.service';
-import { useAutoMigration } from '../services/user-migration.service';
 
 export const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { checkAndMigrate } = useAutoMigration();
   const { data: payments = [], loading: paymentsLoading } = useFirebaseData<Payment>('payments');
 
   

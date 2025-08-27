@@ -13,7 +13,8 @@ import {
   Menu,
   X,
   Briefcase,
-  Zap
+  Zap,
+  Gift
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 // import { usePremium } from '../../contexts/PremiumContext';
@@ -31,9 +32,10 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
 
   const mainMenuItems = [
     { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
+    { id: 'teknohizmet', path: '/services', label: 'TeknoHizmet', icon: Briefcase },
     { id: 'teknofinans', path: '/mobile-finance', label: 'TeknoFinans', icon: PieChart },
-    { id: 'teknohizmet', path: '/teknokapsul', label: 'TeknoKapsül', icon: Zap },
-    { id: 'teknokapsul', path: '/services', label: 'TeknoHizmet', icon: Briefcase },
+    { id: 'teknokapsul', path: '/teknokapsul', label: 'TeknoKapsül', icon: Zap },
+    { id: 'teknofirsat', path: '/tekno-firsat', label: 'TeknoFırsat', icon: Gift },
   ];
 
   const secondaryMenuItems = [

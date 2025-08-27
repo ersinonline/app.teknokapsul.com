@@ -55,8 +55,9 @@ import OrderSuccessPage from './pages/other/OrderSuccessPage';
 import { GoalsPage } from './pages/goals/GoalsPage';
 import { BudgetPage } from './pages/budget/BudgetPage';
 import TeknoFinansPage from './pages/apps/TeknoFinansPage';
-import TeknoKapsulPage from './pages/apps/TeknoKapsulPage';
 import TeknoHizmetPage from './pages/apps/TeknoHizmetPage';
+import TeknoKapsulPage from './pages/apps/TeknoKapsulPage';
+import TeknoFirsatPage from './pages/other/TeknoFirsatPage';
 // Premium sayfaları geçici olarak kaldırıldı
 // import PremiumIntroPage from './pages/PremiumIntroPage';
 // import PremiumManagePage from './pages/PremiumManagePage';
@@ -78,9 +79,10 @@ import { useLocation } from 'react-router-dom';
 const TeknoRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   
-  const getCurrentApp = (): 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' => {
+  const getCurrentApp = (): 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' | 'tekno-firsat' => {
     if (location.pathname.startsWith('/tekno-finans')) return 'tekno-finans';
     if (location.pathname.startsWith('/tekno-hizmet')) return 'tekno-hizmet';
+    if (location.pathname.startsWith('/tekno-firsat')) return 'tekno-firsat';
     return 'tekno-kapsul';
   };
 
@@ -226,6 +228,10 @@ const router = createBrowserRouter([
     path: '/teknokapsul',
     element: <TeknoRoute><TeknokapsulPage /></TeknoRoute>
   },
+  {
+     path: '/tekno-firsat',
+     element: <TeknoRoute><TeknoFirsatPage /></TeknoRoute>
+   },
 
 
   {

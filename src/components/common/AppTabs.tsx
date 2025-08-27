@@ -4,7 +4,7 @@ import { Package, TrendingUp, Wrench, ShoppingCart } from 'lucide-react';
 import { useUser, UserButton } from '@clerk/clerk-react';
 
 interface AppTabsProps {
-  currentApp: 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet';
+  currentApp: 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' | 'tekno-firsat';
 }
 
 const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
@@ -35,6 +35,15 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
       name: 'TeknoFinans',
       icon: TrendingUp,
       path: '/tekno-finans',
+      color: '#10B981',
+      bgColor: 'bg-gradient-to-r from-green-500 to-teal-500',
+      hoverColor: 'hover:bg-green-50'
+    },
+    {
+      id: 'tekno-firsat',
+      name: 'TeknoFırsat',
+      icon: TrendingUp,
+      path: '/tekno-firsat',
       color: '#10B981',
       bgColor: 'bg-gradient-to-r from-green-500 to-teal-500',
       hoverColor: 'hover:bg-green-50'
@@ -93,9 +102,10 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
               <div className="flex flex-col items-start">
                 <span className="font-semibold">{tab.name}</span>
                 <span className="text-xs text-gray-500">
-                  {tab.id === 'tekno-kapsul' && 'Ürün Yönetimi'}
+                  {tab.id === 'tekno-kapsul' && 'Günlük Yönetim'}
                   {tab.id === 'tekno-hizmet' && 'Hizmet Platformu'}
                   {tab.id === 'tekno-finans' && 'Finansal Araçlar'}
+                  {tab.id === 'tekno-firsat' && 'Müthiş Fırsatlar'}
                 </span>
               </div>
             </button>
