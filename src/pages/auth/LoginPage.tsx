@@ -107,6 +107,7 @@ export const LoginPage = () => {
                 }
               }}
               redirectUrl={from}
+              routing="hash"
             />
           </div>
         </div>
