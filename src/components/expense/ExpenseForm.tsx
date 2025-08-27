@@ -15,9 +15,10 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, initialData 
     category: initialData?.category || 'other',
 
     date: initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-    isRecurring: initialData?.isRecurring || false,
-    recurringDay: initialData?.recurringDay || 1,
-    recurringMonths: initialData?.recurringMonths || 12,
+    isInstallment: initialData?.isInstallment || false,
+    installmentDay: initialData?.installmentDay || 1,
+    totalInstallments: initialData?.totalInstallments || 12,
+    installmentNumber: initialData?.installmentNumber || 1,
     isPaid: initialData?.isPaid || false,
     isActive: initialData?.isActive !== undefined ? initialData.isActive : true
   });
@@ -104,25 +105,25 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, initialData 
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
-          id="isRecurring"
-          checked={formData.isRecurring}
-          onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
+          id="isInstallment"
+          checked={formData.isInstallment}
+          onChange={(e) => setFormData({ ...formData, isInstallment: e.target.checked })}
           className="rounded border-gray-300 text-red-600 focus:ring-red-500"
         />
-        <label htmlFor="isRecurring" className="text-sm font-medium text-gray-700">
-          Taksit (her ay tekrarlanır)
+        <label htmlFor="isInstallment" className="text-sm font-medium text-gray-700">
+          Taksitli ödeme (her ay tekrarlanır)
         </label>
       </div>
 
-      {formData.isRecurring && (
+      {formData.isInstallment && (
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Ayın kaçında ödenecek? *
             </label>
             <select
-              value={formData.recurringDay}
-              onChange={(e) => setFormData({ ...formData, recurringDay: parseInt(e.target.value) })}
+              value={formData.installmentDay}
+              onChange={(e) => setFormData({ ...formData, installmentDay: parseInt(e.target.value) })}
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-red-500 focus:ring-red-500"
               required
             >
@@ -133,14 +134,14 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, initialData 
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Kaç ay devam edecek? *
+              Toplam kaç taksit? *
             </label>
             <input
               type="number"
               min="1"
               max="120"
-              value={formData.recurringMonths}
-              onChange={(e) => setFormData({ ...formData, recurringMonths: parseInt(e.target.value) || 1 })}
+              value={formData.totalInstallments}
+              onChange={(e) => setFormData({ ...formData, totalInstallments: parseInt(e.target.value) || 1 })}
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-red-500 focus:ring-red-500"
               placeholder="12"
               required
@@ -180,7 +181,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, initialData 
         disabled={loading}
         className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-medium py-2 px-4 rounded-lg transition-colors"
       >
-        {loading ? 'Kaydediliyor...' : (initialData ? 'Güncelle' : 'Gider Ekle')}
+        {loading ? 'Kaydediliyor...' : (initialData ? 'Güncelle' : 'Taksit Ekle')}
       </button>
     </form>
   );

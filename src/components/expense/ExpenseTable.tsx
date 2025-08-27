@@ -65,29 +65,6 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  const getInstallmentInfo = (expense: Expense) => {
-    if (!expense.isRecurring || !expense.recurringMonths) return null;
-    
-    const expenseDate = new Date(expense.date);
-    const currentDate = new Date();
-    const startDate = new Date(expense.createdAt);
-    
-    // Kaç ay geçtiğini hesapla
-    const monthsDiff = (expenseDate.getFullYear() - startDate.getFullYear()) * 12 + 
-                      (expenseDate.getMonth() - startDate.getMonth());
-    
-    const installmentNumber = monthsDiff + 1;
-    const totalInstallments = expense.recurringMonths;
-    
-    if (installmentNumber === 1) {
-      return '1. taksit';
-    } else if (installmentNumber === totalInstallments) {
-      return 'son taksit';
-    } else {
-      return `${installmentNumber}. taksit`;
-    }
-  };
-
   const getStatusInfo = (expense: Expense) => {
     if (!expense.isActive) {
       return {
@@ -96,11 +73,10 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
         className: 'bg-gray-100 text-gray-800'
       };
     }
-    if (expense.isRecurring) {
-      const installmentInfo = getInstallmentInfo(expense);
+    if (expense.isInstallment) {
       return {
         icon: <Calendar className="w-4 h-4" />,
-        text: installmentInfo ? `Taksit (${installmentInfo})` : `Taksit (${expense.recurringDay}. gün)`,
+        text: `Taksit (${expense.installmentDay}. gün)`,
         className: 'bg-blue-100 text-blue-800'
       };
     }
@@ -191,10 +167,13 @@ export const ExpenseTable: React.FC<ExpenseTableProps> = ({ expenses, onUpdate }
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-bold text-red-600">{formatCurrency(expense.amount)}</span>
-                    {expense.isRecurring && (
+                    {expense.isInstallment && (
                       <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                         <Calendar className="w-3 h-3" />
-                        Taksit (Her ayın {expense.recurringDay}. günü)
+                        {expense.installmentNumber && expense.totalInstallments 
+                          ? `${expense.installmentNumber}. Taksit (${expense.totalInstallments} taksit)`
+                          : `Taksit (Her ayın ${expense.installmentDay}. günü)`
+                        }
                       </span>
                     )}
                   </div>

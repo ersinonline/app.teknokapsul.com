@@ -45,8 +45,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       {/* Tablet Navigation - Large screens only */}
       <TabletNavigation className="hidden lg:block xl:hidden fixed top-0 left-0 right-0 z-20" />
       
-      {/* Mobile Header - Small screens only */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-white border-b">
+      {/* Mobile Header - Tamamen gizli */}
+      <div className="hidden">
         <div className="flex items-center justify-between p-4">
           <button 
             onClick={() => navigate('/dashboard')}

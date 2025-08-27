@@ -22,7 +22,7 @@ const calculateNextDate = (recurringDay: number, startDate?: string): Date => {
 export const getUserExpenses = async (userId: string, year?: number, month?: number): Promise<Expense[]> => {
   try {
     const expensesRef = collection(db, 'teknokapsul', userId, 'expenses');
-    let q = query(expensesRef, orderBy('recurringDay', 'asc'), orderBy('date', 'asc'));
+    let q = query(expensesRef, orderBy('installmentDay', 'asc'), orderBy('date', 'asc'));
     
     if (year && month) {
       const startDate = new Date(year, month - 1, 1).toISOString();
@@ -52,20 +52,21 @@ export const addExpense = async (userId: string, data: ExpenseFormData): Promise
   try {
     const expenseData = {
       ...data,
-      date: data.isRecurring && data.recurringDay 
-        ? calculateNextDate(data.recurringDay, data.date).toISOString()
+      date: data.isInstallment && data.installmentDay 
+        ? calculateNextDate(data.installmentDay, data.date).toISOString()
         : data.date || new Date().toISOString(),
       isActive: data.isActive ?? true,
       isPaid: data.isPaid ?? false,
+      installmentNumber: data.isInstallment ? (data.installmentNumber || 1) : undefined,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
     await addDoc(collection(db, 'teknokapsul', userId, 'expenses'), expenseData);
     
-    // Düzenli gider ise, belirtilen ay sayısı kadar gelecek aylara da ekle
-    if (data.isRecurring && data.recurringMonths && data.recurringMonths > 1) {
-      await createRecurringExpenses(userId, expenseData, data.recurringMonths - 1);
+    // Taksitli ödeme ise, belirtilen taksit sayısı kadar gelecek aylara da ekle
+    if (data.isInstallment && data.totalInstallments && data.totalInstallments > 1) {
+      await createInstallmentExpenses(userId, expenseData, data.totalInstallments - 1);
     }
   } catch (error) {
     console.error('Error adding expense:', error);
@@ -73,29 +74,30 @@ export const addExpense = async (userId: string, data: ExpenseFormData): Promise
   }
 };
 
-const createRecurringExpenses = async (userId: string, baseExpense: any, monthsToCreate: number): Promise<void> => {
+const createInstallmentExpenses = async (userId: string, baseExpense: any, installmentsToCreate: number): Promise<void> => {
   try {
     const promises = [];
     const baseDate = new Date(baseExpense.date);
     
-    for (let i = 1; i <= monthsToCreate; i++) {
+    for (let i = 1; i <= installmentsToCreate; i++) {
       const nextDate = new Date(baseDate);
       nextDate.setMonth(nextDate.getMonth() + i);
       
-      const recurringExpense = {
+      const installmentExpense = {
         ...baseExpense,
         date: nextDate.toISOString(),
+        installmentNumber: (baseExpense.installmentNumber || 1) + i,
         isPaid: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
       
-      promises.push(addDoc(collection(db, 'teknokapsul', userId, 'expenses'), recurringExpense));
+      promises.push(addDoc(collection(db, 'teknokapsul', userId, 'expenses'), installmentExpense));
     }
     
     await Promise.all(promises);
   } catch (error) {
-    console.error('Error creating recurring expenses:', error);
+    console.error('Error creating installment expenses:', error);
     throw error;
   }
 };
@@ -112,8 +114,8 @@ export const updateExpense = async (
       updatedAt: new Date().toISOString()
     };
 
-    if (data.isRecurring && data.recurringDay) {
-      updateData.date = calculateNextDate(data.recurringDay, data.date).toISOString();
+    if (data.isInstallment && data.installmentDay) {
+      updateData.date = calculateNextDate(data.installmentDay, data.date).toISOString();
     }
 
     await updateDoc(expenseRef, updateData);
@@ -135,9 +137,9 @@ export const deleteExpense = async (userId: string, expenseId: string): Promise<
     
     const expense = expenseDoc.docs[0].data() as Expense;
     
-    // Eğer düzenli gider ise, aynı başlık ve kategoriye sahip tüm giderleri sil
-    if (expense.isRecurring) {
-      await deleteRecurringExpenses(userId, expense.title, expense.category);
+    // Eğer taksitli ödeme ise, aynı başlık ve kategoriye sahip tüm taksitleri sil
+    if (expense.isInstallment) {
+      await deleteInstallmentExpenses(userId, expense.title, expense.category);
     } else {
       // Tek seferlik gider ise sadece kendisini sil
       await deleteDoc(expenseRef);
@@ -148,15 +150,15 @@ export const deleteExpense = async (userId: string, expenseId: string): Promise<
   }
 };
 
-// Düzenli giderleri silme fonksiyonu
-const deleteRecurringExpenses = async (userId: string, title: string, category: string): Promise<void> => {
+// Taksitli ödemeleri silme fonksiyonu
+const deleteInstallmentExpenses = async (userId: string, title: string, category: string): Promise<void> => {
   try {
     const expensesRef = collection(db, 'teknokapsul', userId, 'expenses');
     const q = query(
       expensesRef,
       where('title', '==', title),
       where('category', '==', category),
-      where('isRecurring', '==', true)
+      where('isInstallment', '==', true)
     );
     
     const querySnapshot = await getDocs(q);
@@ -164,7 +166,7 @@ const deleteRecurringExpenses = async (userId: string, title: string, category: 
     
     await Promise.all(deletePromises);
   } catch (error) {
-    console.error('Error deleting recurring expenses:', error);
+    console.error('Error deleting installment expenses:', error);
     throw error;
   }
 };

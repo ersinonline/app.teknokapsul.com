@@ -6,10 +6,11 @@ export interface Expense {
   userId: string;
   category: 'food' | 'transport' | 'entertainment' | 'shopping' | 'bills' | 'health' | 'education' | 'credit' | 'insurance' | 'fuel' | 'home' | 'other';
   description?: string;
-  isRecurring: boolean;
-  recurringDay?: number; // Aylık tekrarlanan giderler için hangi gün
-  recurringEndDate?: string; // Düzenli giderin bitiş tarihi
-  recurringMonths?: number; // Kaç ay devam edecek
+  isInstallment: boolean;
+  installmentNumber?: number; // Kaçıncı taksit
+  totalInstallments?: number; // Toplam taksit sayısı
+  installmentDay?: number; // Aylık taksitler için hangi gün
+  installmentEndDate?: string; // Taksitlerin bitiş tarihi
   isActive: boolean;
   isPaid: boolean;
   status: string;
@@ -23,10 +24,11 @@ export interface ExpenseFormData {
   date?: string;
   category: 'food' | 'transport' | 'entertainment' | 'shopping' | 'bills' | 'health' | 'education' | 'credit' | 'insurance' | 'fuel' | 'home' | 'other';
   description?: string;
-  isRecurring: boolean;
-  recurringDay?: number;
-  recurringEndDate?: string;
-  recurringMonths?: number;
+  isInstallment: boolean;
+  installmentNumber?: number;
+  totalInstallments?: number;
+  installmentDay?: number;
+  installmentEndDate?: string;
   isActive?: boolean;
   isPaid?: boolean;
 }
