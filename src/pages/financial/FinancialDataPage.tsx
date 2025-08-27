@@ -46,6 +46,7 @@ import {
 } from '../../services/financial.service';
 import { CreditCard, CashAdvanceAccount, Loan, LOAN_TYPES } from '../../types/financial';
 import { formatCurrency } from '../../utils/currency';
+import { addEvent } from '../../services/calendar.service';
 
 type TabType = 'creditCards' | 'cashAdvance' | 'loans';
 
@@ -286,6 +287,24 @@ export const FinancialDataPage = () => {
       } else {
         await addCreditCard(user!.id, formData);
       }
+      
+      // Aidat tarihi varsa takvime otomatik etkinlik ekle
+      if (formData.annualFeeDate) {
+        try {
+          await addEvent({
+             title: `${formData.name || 'Kredi Kartı'} - Yıllık Aidat`,
+             description: `${formData.bank || ''} ${formData.name || 'Kredi Kartı'} yıllık aidat ödemesi`,
+             date: formData.annualFeeDate.toISOString(),
+             type: 'payment',
+             createdAt: new Date().toISOString(),
+             userId: user!.id
+           }, user!.id);
+        } catch (calendarError) {
+          console.error('Error adding calendar event:', calendarError);
+          // Takvim hatası kredi kartı kaydını etkilemesin
+        }
+      }
+      
       setShowCreditCardForm(false);
       loadData();
     } catch (error) {
@@ -789,7 +808,7 @@ export const FinancialDataPage = () => {
                 {Object.entries(groupedCashAdvanceAccounts).map(([bank, bankData]) => (
                   <div key={bank} className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{getPlatformDisplayName(bank)}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">{bank}</h3>
                       <div className="flex space-x-4 text-sm text-gray-600">
                         <span>Toplam Limit: <span className="font-semibold text-purple-600">{formatCurrency(bankData.totalLimit)}</span></span>
                         <span>Toplam Borç: <span className="font-semibold text-red-600">{formatCurrency(bankData.totalDebt)}</span></span>

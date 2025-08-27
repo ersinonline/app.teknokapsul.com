@@ -4,6 +4,6 @@ export interface Event {
   title: string;
   description?: string;
   date: string;
-  type: 'event' | 'birthday' | 'reminder';
+  type: 'event' | 'birthday' | 'reminder' | 'payment';
   createdAt: string;
 }
