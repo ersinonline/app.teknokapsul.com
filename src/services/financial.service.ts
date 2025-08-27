@@ -63,7 +63,8 @@ export const getCreditCards = async (userId: string): Promise<CreditCard[]> => {
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate() || new Date()
+        updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+        annualFeeDate: doc.data().annualFeeDate?.toDate() || null
       })) as CreditCard[];
       
       // Save to offline storage

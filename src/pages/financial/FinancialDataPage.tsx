@@ -441,7 +441,7 @@ export const FinancialDataPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`flex items-center space-x-1 sm:space-x-2 py-2 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 sm:flex-none justify-center sm:justify-start ${
+                className={`flex items-center space-x-1 sm:space-x-2 py-2 px-1 sm:px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 sm:flex-none justify-center sm:justify-start ${
                   activeTab === tab.id
                     ? 'border-yellow-500 text-yellow-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -450,7 +450,7 @@ export const FinancialDataPage = () => {
                 <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">{tab.label}</span>
                 <span className="sm:hidden text-xs">{tab.label.split(' ')[0]}</span>
-                <span className="bg-gray-100 text-gray-600 py-0.5 px-1 sm:px-2 rounded-full text-xs">
+                <span className="bg-gray-100 text-gray-600 py-0.5 px-0.5 sm:px-2 rounded-full text-xs">
                   {tab.count}
                 </span>
               </button>
@@ -804,23 +804,12 @@ export const FinancialDataPage = () => {
                 <p className="text-gray-500">Henüz avans hesabı eklenmemiş</p>
               </div>
             ) : (
-              <div className="space-y-8">
-                {Object.entries(groupedCashAdvanceAccounts).map(([bank, bankData]) => (
-                  <div key={bank} className="bg-white border border-gray-200 rounded-lg p-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{getPlatformDisplayName(bank)}</h3>
-                      <div className="flex space-x-4 text-sm text-gray-600">
-                        <span>Toplam Limit: <span className="font-semibold text-purple-600">{formatCurrency(bankData.totalLimit)}</span></span>
-                        <span>Toplam Borç: <span className="font-semibold text-red-600">{formatCurrency(bankData.totalDebt)}</span></span>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {bankData.accounts
-                        .sort((a, b) => b.limit - a.limit)
-                        .map((account) => {
-                        const debtRatio = calculateDebtRatio(account.currentDebt, account.limit);
-                        const availableLimit = calculateAvailableLimit(account.limit, account.currentDebt);
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {cashAdvanceAccounts
+                  .sort((a, b) => b.limit - a.limit)
+                  .map((account) => {
+                  const debtRatio = calculateDebtRatio(account.currentDebt, account.limit);
+                  const availableLimit = calculateAvailableLimit(account.limit, account.currentDebt);
                         
                         return (
                           <div key={account.id} className="bg-white border border-purple-200 rounded-lg p-4 hover:border-purple-300 transition-colors">
@@ -875,9 +864,6 @@ export const FinancialDataPage = () => {
                           </div>
                         );
                       })}
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
           </div>
