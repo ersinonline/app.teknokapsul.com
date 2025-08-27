@@ -36,7 +36,8 @@ export const MobileNavigation: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const handleUserClick = () => {
-    navigate('/settings');
+    // Clerk ayarları sayfasını aç
+    window.open('https://accounts.clerk.dev/user', '_blank');
   };
 
   const handleNotificationClick = () => {
@@ -58,8 +59,8 @@ export const MobileNavigation: React.FC = () => {
 
   return (
     <>
-      {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 z-40">
+      {/* Mobile Header - Tamamen gizli */}
+      <div className="hidden fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 z-40">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">

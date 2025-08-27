@@ -808,7 +808,7 @@ export const FinancialDataPage = () => {
                 {Object.entries(groupedCashAdvanceAccounts).map(([bank, bankData]) => (
                   <div key={bank} className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{bank}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">{getPlatformDisplayName(bank)}</h3>
                       <div className="flex space-x-4 text-sm text-gray-600">
                         <span>Toplam Limit: <span className="font-semibold text-purple-600">{formatCurrency(bankData.totalLimit)}</span></span>
                         <span>Toplam Borç: <span className="font-semibold text-red-600">{formatCurrency(bankData.totalDebt)}</span></span>
