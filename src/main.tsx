@@ -66,27 +66,6 @@ const renderApp = () => {
         <ClerkProvider 
           publishableKey={PUBLISHABLE_KEY}
           localization={trTR}
-          appearance={{
-            elements: {
-              // WebView içinde daha iyi görünüm için
-              rootBox: "min-h-screen",
-              card: "shadow-none border-0",
-            },
-          }}
-          // WebView desteği için
-          signInUrl="/sign-in"
-          signUpUrl="/sign-up"
-          afterSignInUrl="/"
-          afterSignUpUrl="/"
-          // Google ve Apple OAuth için WebView uyumluluğu
-          allowedRedirectOrigins={[
-            window.location.origin,
-            "https://app.teknokapsul.com",
-            "https://teknokapsul.com",
-            // WebView için local origins
-            "http://localhost:3000",
-            "http://127.0.0.1:3000"
-          ]}
         >
           <App />
         </ClerkProvider>

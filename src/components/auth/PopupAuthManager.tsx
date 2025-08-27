@@ -40,18 +40,51 @@ export const PopupAuthManager = ({ provider, onSuccess, onError, onLoadingChange
       const googleProvider = new GoogleAuthProvider();
       googleProvider.addScope('email');
       googleProvider.addScope('profile');
+      
+      // WebView için özel ayarlar - cihazdaki Google hesabını kullan
+      if (isWebView()) {
+        googleProvider.setCustomParameters({
+          'prompt': 'none', // Cihazdaki hesabı kullan, yeniden giriş isteme
+          'login_hint': '', // Boş bırak, cihaz hesabını otomatik seç
+        });
+      }
+      
       return googleProvider;
     } else {
       const appleProvider = new OAuthProvider('apple.com');
       appleProvider.addScope('email');
       appleProvider.addScope('name');
+      
+      // WebView için özel ayarlar - Apple Sign-In optimizasyonu
+      if (isWebView()) {
+        appleProvider.setCustomParameters({
+          'response_mode': 'web_message', // WebView için optimize edilmiş response mode
+        });
+      }
+      
       return appleProvider;
     }
   };
 
   const isWebView = () => {
     const userAgent = navigator.userAgent;
-    return /wv|WebView|Android.*Version\/[.\d]+.*Chrome|iPhone.*AppleWebKit.*Mobile.*Safari|iPad.*AppleWebKit.*Mobile.*Safari/.test(userAgent);
+    
+    // Android WebView tespiti
+    const isAndroidWebView = /Android.*wv|Android.*Version\/[.\d]+.*Chrome/.test(userAgent) &&
+                             !/Chrome\/[.\d]+ Mobile/.test(userAgent);
+    
+    // iOS WebView tespiti (WKWebView)
+    const isIOSWebView = /iPhone.*AppleWebKit.*Mobile.*Safari|iPad.*AppleWebKit.*Mobile.*Safari/.test(userAgent) && 
+                        !userAgent.includes('CriOS') && 
+                        !userAgent.includes('FxiOS') &&
+                        !userAgent.includes('Version/');
+    
+    // Ek WebView kontrolleri
+    const hasWebViewIndicators = window.navigator.standalone !== undefined || 
+                                (window as any).AndroidInterface !== undefined ||
+                                (window as any).webkit?.messageHandlers !== undefined;
+    
+    return isAndroidWebView || isIOSWebView || hasWebViewIndicators;
   };
 
   const testPopupBlocker = (): boolean => {

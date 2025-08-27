@@ -36,16 +36,19 @@ class WebViewAuthService {
     const userAgent = navigator.userAgent;
     
     // Android WebView tespiti
-    const isAndroidWebView = /Android.*wv|Android.*Version\/[.\d]+.*Chrome/.test(userAgent);
+    const isAndroidWebView = /Android.*wv|Android.*Version\/[.\d]+.*Chrome/.test(userAgent) &&
+                             !/Chrome\/[.\d]+ Mobile/.test(userAgent);
     
     // iOS WebView tespiti (WKWebView)
     const isIOSWebView = /iPhone.*AppleWebKit.*Mobile.*Safari|iPad.*AppleWebKit.*Mobile.*Safari/.test(userAgent) && 
                         !userAgent.includes('CriOS') && 
-                        !userAgent.includes('FxiOS');
+                        !userAgent.includes('FxiOS') &&
+                        !userAgent.includes('Version/');
     
     // Ek WebView kontrolleri
     const hasWebViewIndicators = window.navigator.standalone !== undefined || 
-                                window.AndroidInterface !== undefined;
+                                window.AndroidInterface !== undefined ||
+                                (window as any).webkit?.messageHandlers !== undefined;
     
     return isAndroidWebView || isIOSWebView || hasWebViewIndicators;
   }
