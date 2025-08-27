@@ -66,6 +66,20 @@ const renderApp = () => {
         <ClerkProvider 
           publishableKey={PUBLISHABLE_KEY}
           localization={trTR}
+          appearance={{
+            layout: {
+              socialButtonsVariant: 'blockButton',
+              logoImageUrl: undefined,
+              showOptionalFields: false
+            },
+            elements: {
+              rootBox: 'w-full',
+              card: 'w-full max-w-md mx-auto',
+              socialButtonsBlockButton: 'w-full py-3 text-sm md:text-base',
+              formButtonPrimary: 'w-full py-3 text-sm md:text-base',
+              formFieldInput: 'w-full py-3 px-4 text-sm md:text-base'
+            }
+          }}
         >
           <App />
         </ClerkProvider>

@@ -87,15 +87,24 @@ export const LoginPage = () => {
               afterSignInUrl={from}
               appearance={{
                 elements: {
-                  rootBox: "mx-auto",
-                  card: "bg-white rounded-2xl shadow-xl",
-                  headerTitle: "text-3xl font-bold text-gray-900",
-                  headerSubtitle: "text-gray-600",
-                  socialButtonsBlockButton: "border-2 border-gray-200 hover:border-yellow-300 hover:bg-yellow-50",
-                  formButtonPrimary: "bg-yellow-600 hover:bg-yellow-700",
-                  footerActionLink: "text-yellow-600 hover:text-yellow-500"
+                  rootBox: "mx-auto w-full",
+                  card: "bg-white rounded-2xl shadow-xl w-full max-w-md mx-auto",
+                  headerTitle: "text-2xl md:text-3xl font-bold text-gray-900",
+                  headerSubtitle: "text-gray-600 text-sm md:text-base",
+                  socialButtonsBlockButton: "border-2 border-gray-200 hover:border-yellow-300 hover:bg-yellow-50 w-full py-3 text-sm md:text-base",
+                  formButtonPrimary: "bg-yellow-600 hover:bg-yellow-700 w-full py-3 text-sm md:text-base",
+                  footerActionLink: "text-yellow-600 hover:text-yellow-500 text-sm md:text-base",
+                  formFieldInput: "w-full py-3 px-4 text-sm md:text-base",
+                  formFieldLabel: "text-sm md:text-base font-medium text-gray-700",
+                  identityPreviewText: "text-sm md:text-base",
+                  identityPreviewEditButton: "text-sm md:text-base"
+                },
+                layout: {
+                  socialButtonsPlacement: "top",
+                  showOptionalFields: false
                 }
               }}
+              redirectUrl={from}
             />
           </div>
         </div>
