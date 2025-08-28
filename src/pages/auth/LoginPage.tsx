@@ -1,11 +1,13 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { SignIn } from '@clerk/clerk-react';
 import { Package } from 'lucide-react';
+import { useEffect } from 'react';
 
 export const LoginPage = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Mobilde dashboard'a, masaüstünde anasayfaya yönlendir
   const getDefaultRedirect = () => {
@@ -14,6 +16,18 @@ export const LoginPage = () => {
   };
   
   const from = location.state?.from || getDefaultRedirect();
+
+  // Kullanıcı giriş yaptığında otomatik yönlendirme
+  useEffect(() => {
+    if (user && !loading) {
+      // Kısa bir gecikme ile yönlendirme yap
+      const timer = setTimeout(() => {
+        navigate(from, { replace: true });
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [user, loading, from, navigate]);
 
   if (loading) {
     return (
@@ -84,9 +98,6 @@ export const LoginPage = () => {
         <div className="w-full lg:w-1/2 flex items-center justify-center py-8 lg:py-16">
           <div className="w-full max-w-md">
             <SignIn 
-              afterSignInUrl={from}
-              fallbackRedirectUrl="/dashboard"
-              forceRedirectUrl={from}
               appearance={{
                 elements: {
                   rootBox: "mx-auto w-full",
@@ -106,7 +117,6 @@ export const LoginPage = () => {
                   showOptionalFields: false
                 }
               }}
-              redirectUrl={from}
             />
           </div>
         </div>

@@ -80,10 +80,10 @@ const renderApp = () => {
               formFieldInput: 'w-full py-3 px-4 text-sm md:text-base'
             }
           }}
-          signInFallbackRedirectUrl="/dashboard"
-          signUpFallbackRedirectUrl="/dashboard"
-          afterSignInUrl="/dashboard"
-          afterSignUpUrl="/dashboard"
+          signInFallbackRedirectUrl={null}
+          signUpFallbackRedirectUrl={null}
+          afterSignInUrl={null}
+          afterSignUpUrl={null}
         >
           <App />
         </ClerkProvider>

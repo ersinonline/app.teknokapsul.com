@@ -74,9 +74,7 @@ import { IsBankCallbackPage } from './pages/auth/IsBankCallbackPage';
 import AppTabs from './components/common/AppTabs';
 import { useLocation } from 'react-router-dom';
 
-
-
-const TeknoRoute = ({ children }: { children: React.ReactNode }) => {
+const TeknoRouteContent = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   
   const getCurrentApp = (): 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' | 'tekno-firsat' => {
@@ -87,13 +85,21 @@ const TeknoRoute = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
+    <div className="min-h-screen bg-gray-50">
+      <AppTabs currentApp={getCurrentApp()} />
+      <MobileNavigation />
+      <OfflineIndicator />
+      {children}
+    </div>
+  );
+};
+
+const TeknoRoute = ({ children }: { children: React.ReactNode }) => {
+  return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50">
-        <AppTabs currentApp={getCurrentApp()} />
-        <MobileNavigation />
-        <OfflineIndicator />
+      <TeknoRouteContent>
         {children}
-      </div>
+      </TeknoRouteContent>
     </AuthGuard>
   );
 };
