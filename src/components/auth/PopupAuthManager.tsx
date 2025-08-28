@@ -41,11 +41,17 @@ export const PopupAuthManager = ({ provider, onSuccess, onError, onLoadingChange
       googleProvider.addScope('email');
       googleProvider.addScope('profile');
       
-      // WebView için özel ayarlar - cihazdaki Google hesabını kullan
+      // WebView için özel ayarlar - OAuth callback URL optimizasyonu
       if (isWebView()) {
         googleProvider.setCustomParameters({
-          'prompt': 'none', // Cihazdaki hesabı kullan, yeniden giriş isteme
-          'login_hint': '', // Boş bırak, cihaz hesabını otomatik seç
+          'prompt': 'select_account', // WebView'da hesap seçimi için
+          'access_type': 'online', // WebView için online access
+          'response_type': 'code', // Authorization code flow
+          'redirect_uri': window.location.origin + '/auth/callback', // Explicit redirect URI
+        });
+      } else {
+        googleProvider.setCustomParameters({
+          'prompt': 'select_account',
         });
       }
       
@@ -58,7 +64,8 @@ export const PopupAuthManager = ({ provider, onSuccess, onError, onLoadingChange
       // WebView için özel ayarlar - Apple Sign-In optimizasyonu
       if (isWebView()) {
         appleProvider.setCustomParameters({
-          'response_mode': 'web_message', // WebView için optimize edilmiş response mode
+          'response_mode': 'form_post', // WebView için form post mode
+          'redirect_uri': window.location.origin + '/auth/callback',
         });
       }
       
@@ -69,22 +76,47 @@ export const PopupAuthManager = ({ provider, onSuccess, onError, onLoadingChange
   const isWebView = () => {
     const userAgent = navigator.userAgent;
     
-    // Android WebView tespiti
+    // Android WebView tespiti - daha kapsamlı kontrol
     const isAndroidWebView = /Android.*wv|Android.*Version\/[.\d]+.*Chrome/.test(userAgent) &&
                              !/Chrome\/[.\d]+ Mobile/.test(userAgent);
     
-    // iOS WebView tespiti (WKWebView)
-    const isIOSWebView = /iPhone.*AppleWebKit.*Mobile.*Safari|iPad.*AppleWebKit.*Mobile.*Safari/.test(userAgent) && 
+    // iOS WebView tespiti (WKWebView) - geliştirilmiş tespit
+    const isIOSWebView = (/iPhone.*AppleWebKit.*Mobile.*Safari|iPad.*AppleWebKit.*Mobile.*Safari/.test(userAgent) && 
                         !userAgent.includes('CriOS') && 
                         !userAgent.includes('FxiOS') &&
-                        !userAgent.includes('Version/');
+                        !userAgent.includes('Version/')) ||
+                        // WKWebView için ek kontrol
+                        (userAgent.includes('iPhone') && userAgent.includes('AppleWebKit') && !userAgent.includes('Safari'));
     
-    // Ek WebView kontrolleri
+    // Flutter WebView tespiti
+    const isFlutterWebView = userAgent.includes('Flutter') || 
+                            (window as any).flutter_inappwebview !== undefined ||
+                            (window as any).flutter !== undefined;
+    
+    // Ek WebView kontrolleri - genişletilmiş
     const hasWebViewIndicators = window.navigator.standalone !== undefined || 
                                 (window as any).AndroidInterface !== undefined ||
-                                (window as any).webkit?.messageHandlers !== undefined;
+                                (window as any).webkit?.messageHandlers !== undefined ||
+                                (window as any).ReactNativeWebView !== undefined ||
+                                // URL parametresi kontrolü
+                                window.location.search.includes('webview=true') ||
+                                // Referrer kontrolü
+                                document.referrer.includes('android-app://') ||
+                                document.referrer.includes('ios-app://');
     
-    return isAndroidWebView || isIOSWebView || hasWebViewIndicators;
+    const result = isAndroidWebView || isIOSWebView || isFlutterWebView || hasWebViewIndicators;
+    
+    if (result) {
+      console.log('🔍 WebView tespit edildi:', {
+        userAgent,
+        isAndroidWebView,
+        isIOSWebView,
+        isFlutterWebView,
+        hasWebViewIndicators
+      });
+    }
+    
+    return result;
   };
 
   const testPopupBlocker = (): boolean => {
@@ -109,9 +141,27 @@ export const PopupAuthManager = ({ provider, onSuccess, onError, onLoadingChange
       const providerName = provider === 'google' ? 'Google' : 'Apple';     
       console.log(`🚀 ${providerName} popup giriş başlatılıyor...`);
 
-      // WebView kontrolü
+      // WebView kontrolü - geliştirilmiş yönlendirme
       if (isWebView()) {
         console.log('📱 WebView tespit edildi, redirect kullanılıyor');
+        
+        // WebView için özel callback URL ayarı
+        const currentUrl = window.location.href;
+        const callbackUrl = new URL('/auth/callback', window.location.origin).href;
+        
+        // WebView parent'a mesaj gönder (Flutter için)
+        if ((window as any).flutter_inappwebview) {
+          (window as any).flutter_inappwebview.callHandler('authStart', {
+            provider: provider,
+            callbackUrl: callbackUrl
+          });
+        }
+        
+        // Android Interface için mesaj
+        if ((window as any).AndroidInterface) {
+          (window as any).AndroidInterface.onAuthStart(provider, callbackUrl);
+        }
+        
         await signInWithRedirect(auth, authProvider);
         return;
       }

@@ -8,6 +8,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { offlineService } from './services/offline.service';
 import { MobileAuthHandler } from './components/auth/MobileAuthHandler';
 import { LoginPage } from './pages/auth/LoginPage';
+import { CallbackPage } from './pages/auth/CallbackPage';
 
 import { AuthGuard } from './components/auth/AuthGuard';
 
@@ -124,6 +125,10 @@ const router = createBrowserRouter([
   {
     path: '/auth/callback/isbank',
     element: <AuthProvider><IsBankCallbackPage /></AuthProvider>
+  },
+  {
+    path: '/auth/callback',
+    element: <AuthProvider><CallbackPage /></AuthProvider>
   },
   {
     path: '/dashboard',
