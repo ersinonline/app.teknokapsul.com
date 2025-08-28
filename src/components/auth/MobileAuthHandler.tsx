@@ -67,9 +67,7 @@ export const MobileAuthHandler: React.FC<MobileAuthHandlerProps> = ({
       const handleStorageChange = (e: StorageEvent) => {
         if (e.key === 'clerk-db-jwt' || e.key?.includes('clerk')) {
           console.log('Clerk storage changed on mobile, reloading page');
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 500);
+          window.location.reload();
         }
       };
 
@@ -92,42 +90,14 @@ export const MobileAuthHandler: React.FC<MobileAuthHandlerProps> = ({
         }, 1000);
       };
 
-      // Listen for hash changes (OAuth redirects)
-      const handleHashChange = () => {
-        if (window.location.hash.includes('oauth') || window.location.hash.includes('callback')) {
-          console.log('OAuth hash detected, redirecting to dashboard');
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 1000);
-        }
-      };
-
-      // Listen for URL changes
-      const handleUrlChange = () => {
-        if (window.location.search.includes('__clerk_status=complete')) {
-          console.log('Clerk OAuth complete detected');
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 500);
-        }
-      };
-
       window.addEventListener('storage', handleStorageChange);
       window.addEventListener('message', handleMessage);
       window.addEventListener('focus', handlePopupClose);
-      window.addEventListener('hashchange', handleHashChange);
-      window.addEventListener('popstate', handleUrlChange);
-
-      // Check initial URL state
-      handleUrlChange();
-      handleHashChange();
 
       return () => {
         window.removeEventListener('storage', handleStorageChange);
         window.removeEventListener('message', handleMessage);
         window.removeEventListener('focus', handlePopupClose);
-        window.removeEventListener('hashchange', handleHashChange);
-        window.removeEventListener('popstate', handleUrlChange);
       };
     }
   }, [isMobile]);
