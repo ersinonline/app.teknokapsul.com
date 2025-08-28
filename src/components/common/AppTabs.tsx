@@ -114,8 +114,8 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
       </div>
 
       {/* Right Section - User Info or Actions */}
-      <div className="flex items-center px-3 sm:px-4 py-4 sm:py-3 sm:border-l sm:border-gray-200">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center px-3 sm:px-4 py-4 sm:py-3 sm:border-l sm:border-gray-200 min-w-0">
+        <div className="flex items-center gap-3 min-w-0">
           <UserButton 
             appearance={{
               elements: {
@@ -125,11 +125,11 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
               }
             }}
           />
-          <div className="hidden md:flex flex-col">
-            <span className="text-base font-semibold text-gray-800">
+          <div className="hidden md:flex flex-col min-w-0 max-w-[200px]">
+            <span className="text-base font-semibold text-gray-800 truncate">
               {user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || 'Kullanıcı'}
             </span>
-            <span className="text-sm text-gray-500">Tekno Üye</span>
+            <span className="text-sm text-gray-500 whitespace-nowrap">Tekno Üye</span>
           </div>
         </div>
       </div>
