@@ -9,6 +9,7 @@ import { offlineService } from './services/offline.service';
 import { MobileAuthHandler } from './components/auth/MobileAuthHandler';
 import { LoginPage } from './pages/auth/LoginPage';
 import { CallbackPage } from './pages/auth/CallbackPage';
+import FlutterAuthBridge from './components/auth/FlutterAuthBridge';
 
 import { AuthGuard } from './components/auth/AuthGuard';
 
@@ -129,6 +130,10 @@ const router = createBrowserRouter([
   {
     path: '/auth/callback',
     element: <AuthProvider><CallbackPage /></AuthProvider>
+  },
+  {
+    path: '/flutter-auth',
+    element: <AuthProvider><FlutterAuthBridge /></AuthProvider>
   },
   {
     path: '/dashboard',
