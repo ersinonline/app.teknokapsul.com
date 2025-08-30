@@ -81,6 +81,11 @@ import { useLocation } from 'react-router-dom';
 const TeknoRouteContent = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   
+  // Sayfa değişikliklerinde scroll'u en üste al
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+  
   const getCurrentApp = (): 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' | 'tekno-firsat' => {
     if (location.pathname.startsWith('/tekno-finans')) return 'tekno-finans';
     if (location.pathname.startsWith('/tekno-hizmet')) return 'tekno-hizmet';

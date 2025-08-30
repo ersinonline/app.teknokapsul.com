@@ -330,24 +330,24 @@ const PaymentPlanEditPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="max-w-6xl mx-auto p-4 sm:p-6">
+      <div className="max-w-6xl mx-auto p-3 sm:p-4 lg:p-6">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="flex items-center justify-center mb-3">
+        <div className="text-center mb-4 sm:mb-6 lg:mb-8">
+          <div className="flex items-center justify-center mb-3 relative">
             <button
               onClick={() => navigate(`/tekno-finans/payment-plans/${id}`)}
-              className="absolute left-4 sm:left-6 p-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="absolute left-0 sm:left-2 p-2 text-gray-600 hover:text-gray-800 transition-colors touch-manipulation active:bg-gray-100 rounded-lg"
             >
-              <ArrowLeft className="w-6 h-6" />
+              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            <div className="bg-[#ffb700] p-3 rounded-full mr-3">
-              {planType === 'vehicle' ? <Car className="w-8 h-8 text-white" /> : <Home className="w-8 h-8 text-white" />}
+            <div className="bg-[#ffb700] p-2 sm:p-3 rounded-full mr-2 sm:mr-3">
+              {planType === 'vehicle' ? <Car className="w-6 h-6 sm:w-8 sm:h-8 text-white" /> : <Home className="w-6 h-6 sm:w-8 sm:h-8 text-white" />}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
               Ödeme Planını Düzenle
             </h1>
           </div>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+          <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-2 sm:px-4">
             {planType === 'vehicle' ? 'Araç alımınız' : 'Ev alımınız'} için ödeme planınızı güncelleyin.
           </p>
         </div>
@@ -356,51 +356,51 @@ const PaymentPlanEditPage: React.FC = () => {
         {renderStepIndicator()}
 
         {/* Form Content */}
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
           {/* Type Selection Step */}
           {currentStep === 'type' && (
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-6">Plan Tipini Seçin</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-2xl mx-auto">
                 <button
                   onClick={() => setPlanType('housing')}
-                  className={`p-6 rounded-xl border-2 transition-all ${
+                  className={`p-4 sm:p-6 rounded-xl border-2 transition-all touch-manipulation active:scale-95 ${
                     planType === 'housing'
                       ? 'border-[#ffb700] bg-[#ffb700]/5'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-gray-200 hover:border-gray-300 active:border-gray-400'
                   }`}
                 >
-                  <Home className={`w-12 h-12 mx-auto mb-4 ${
+                  <Home className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 ${
                     planType === 'housing' ? 'text-[#ffb700]' : 'text-gray-400'
                   }`} />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Konut</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Konut</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">
                     Ev, daire veya konut alımı için ödeme planı
                   </p>
                 </button>
                 
                 <button
                   onClick={() => setPlanType('vehicle')}
-                  className={`p-6 rounded-xl border-2 transition-all ${
+                  className={`p-4 sm:p-6 rounded-xl border-2 transition-all touch-manipulation active:scale-95 ${
                     planType === 'vehicle'
                       ? 'border-[#ffb700] bg-[#ffb700]/5'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-gray-200 hover:border-gray-300 active:border-gray-400'
                   }`}
                 >
-                  <Car className={`w-12 h-12 mx-auto mb-4 ${
+                  <Car className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 ${
                     planType === 'vehicle' ? 'text-[#ffb700]' : 'text-gray-400'
                   }`} />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Taşıt</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Taşıt</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">
                     Araba, motosiklet veya taşıt alımı için ödeme planı
                   </p>
                 </button>
               </div>
               
-              <div className="mt-8 text-center">
+              <div className="mt-6 sm:mt-8 text-center">
                 <button
                   onClick={() => setCurrentStep('price')}
-                  className="bg-[#ffb700] text-white px-8 py-3 rounded-lg hover:bg-[#e6a500] transition-colors font-medium"
+                  className="bg-[#ffb700] text-white px-6 sm:px-8 py-3 rounded-lg hover:bg-[#e6a500] transition-colors font-medium touch-manipulation active:bg-[#d49400] w-full sm:w-auto"
                 >
                   Devam Et
                 </button>
@@ -422,7 +422,7 @@ const PaymentPlanEditPage: React.FC = () => {
                   type="number"
                   value={price || ''}
                   onChange={(e) => setPrice(Number(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent text-lg"
+                  className="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent text-base sm:text-lg touch-manipulation"
                   placeholder={planType === 'vehicle' ? 'Örn: 800000' : 'Örn: 5000000'}
                 />
                 
@@ -449,17 +449,17 @@ const PaymentPlanEditPage: React.FC = () => {
                   </div>
                 )}
                 
-                <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-0 justify-between">
+                <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:justify-between">
                   <button
                     onClick={() => setCurrentStep('type')}
-                    className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
+                    className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors touch-manipulation active:bg-gray-700 w-full sm:w-auto"
                   >
                     Geri
                   </button>
                   <button
                     onClick={() => setCurrentStep('down-payments')}
                     disabled={!price || price <= 0}
-                    className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-manipulation active:bg-[#d49400] w-full sm:w-auto"
                   >
                     Devam Et
                   </button>
@@ -474,16 +474,16 @@ const PaymentPlanEditPage: React.FC = () => {
               <h2 className="text-xl font-semibold text-gray-900 mb-6">Peşinat Ödemelerini Düzenleyin</h2>
               
               {/* Add new down payment */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Yeni Peşinat Ekle</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-6">
+                <h3 className="text-base sm:text-lg font-medium text-gray-800 mb-4">Yeni Peşinat Ekle</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Tutar (TL)</label>
                     <input
                       type="number"
                       value={newDownPayment.amount || ''}
                       onChange={(e) => setNewDownPayment({...newDownPayment, amount: Number(e.target.value)})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      className="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent text-base touch-manipulation"
                       placeholder="Örn: 500000"
                     />
                   </div>
@@ -493,15 +493,15 @@ const PaymentPlanEditPage: React.FC = () => {
                       type="text"
                       value={newDownPayment.description}
                       onChange={(e) => setNewDownPayment({...newDownPayment, description: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      className="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent text-base touch-manipulation"
                       placeholder="Örn: İlk peşinat"
                     />
                   </div>
-                  <div className="flex items-end">
+                  <div className="flex items-end sm:col-span-2 lg:col-span-1">
                     <button
                       onClick={addDownPayment}
                       disabled={!newDownPayment.amount || !newDownPayment.description.trim()}
-                      className="w-full bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a500] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                      className="w-full bg-[#ffb700] text-white px-4 py-2 sm:py-3 rounded-lg hover:bg-[#e6a500] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center touch-manipulation active:bg-[#d49400]"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Ekle
@@ -516,14 +516,14 @@ const PaymentPlanEditPage: React.FC = () => {
                   <h3 className="text-lg font-medium text-gray-800 mb-4">Eklenen Peşinatlar</h3>
                   <div className="space-y-3">
                     {downPayments.map((payment) => (
-                      <div key={payment.id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900">{payment.description}</p>
-                          <p className="text-sm text-gray-600">{formatCurrency(payment.amount)}</p>
+                      <div key={payment.id} className="flex items-center justify-between p-3 sm:p-4 bg-white border border-gray-200 rounded-lg">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{payment.description}</p>
+                          <p className="text-xs sm:text-sm text-gray-600">{formatCurrency(payment.amount)}</p>
                         </div>
                         <button
                           onClick={() => removeDownPayment(payment.id)}
-                          className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                          className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors touch-manipulation active:bg-red-100 ml-2 flex-shrink-0"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -538,16 +538,16 @@ const PaymentPlanEditPage: React.FC = () => {
               )}
 
               {/* Navigation */}
-              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0">
+              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
                 <button
                   onClick={() => setCurrentStep('price')}
-                  className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
+                  className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors touch-manipulation active:bg-gray-700 w-full sm:w-auto"
                 >
                   Geri
                 </button>
                 <button
                   onClick={() => setCurrentStep('housing-credit')}
-                  className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors"
+                  className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors touch-manipulation active:bg-[#d49400] w-full sm:w-auto"
                 >
                   Devam Et
                 </button>
@@ -572,16 +572,16 @@ const PaymentPlanEditPage: React.FC = () => {
               </div>
 
               {/* Navigation */}
-              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0">
+              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
                 <button
                   onClick={() => setCurrentStep('down-payments')}
-                  className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
+                  className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors touch-manipulation active:bg-gray-700 w-full sm:w-auto"
                 >
                   Geri
                 </button>
                 <button
                   onClick={() => setCurrentStep('personal-credits')}
-                  className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors"
+                  className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors touch-manipulation active:bg-[#d49400] w-full sm:w-auto text-sm sm:text-base"
                 >
                   {remainingAfterDownPayment > 0 ? 'İhtiyaç Kredisine Geç' : 'Devam Et'}
                 </button>
@@ -601,16 +601,16 @@ const PaymentPlanEditPage: React.FC = () => {
               </div>
 
               {/* Navigation */}
-              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0">
+              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
                 <button
                   onClick={() => setCurrentStep('housing-credit')}
-                  className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
+                  className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors touch-manipulation active:bg-gray-700 w-full sm:w-auto"
                 >
                   Geri
                 </button>
                 <button
                   onClick={() => setCurrentStep('plan-summary')}
-                  className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors"
+                  className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors touch-manipulation active:bg-[#d49400] w-full sm:w-auto"
                 >
                   Plan Özetine Geç
                 </button>
@@ -624,31 +624,31 @@ const PaymentPlanEditPage: React.FC = () => {
               <h2 className="text-xl font-semibold text-gray-900 mb-6">Plan Özeti</h2>
               
               {/* Plan Summary */}
-              <div className="bg-gray-50 rounded-lg p-6 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
-                  <div className="bg-white p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">{planType === 'vehicle' ? 'Araç Fiyatı' : 'Ev Fiyatı'}</p>
-                    <p className="text-lg font-semibold text-gray-900">{formatCurrency(price)}</p>
+              <div className="bg-gray-50 rounded-lg p-4 sm:p-6 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-center">
+                  <div className="bg-white p-3 sm:p-4 rounded-lg">
+                    <p className="text-xs sm:text-sm text-gray-600">{planType === 'vehicle' ? 'Araç Fiyatı' : 'Ev Fiyatı'}</p>
+                    <p className="text-base sm:text-lg font-semibold text-gray-900">{formatCurrency(price)}</p>
                   </div>
-                  <div className="bg-white p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Toplam Peşinat</p>
-                    <p className="text-lg font-semibold text-green-600">{formatCurrency(totalDownPayment)}</p>
+                  <div className="bg-white p-3 sm:p-4 rounded-lg">
+                    <p className="text-xs sm:text-sm text-gray-600">Toplam Peşinat</p>
+                    <p className="text-base sm:text-lg font-semibold text-green-600">{formatCurrency(totalDownPayment)}</p>
                   </div>
-                  <div className="bg-white p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">{planType === 'vehicle' ? 'Taşıt Kredisi' : 'Konut Kredisi'}</p>
-                    <p className="text-lg font-semibold text-blue-600">{formatCurrency(actualCreditAmount)}</p>
+                  <div className="bg-white p-3 sm:p-4 rounded-lg">
+                    <p className="text-xs sm:text-sm text-gray-600">{planType === 'vehicle' ? 'Taşıt Kredisi' : 'Konut Kredisi'}</p>
+                    <p className="text-base sm:text-lg font-semibold text-blue-600">{formatCurrency(actualCreditAmount)}</p>
                   </div>
-                  <div className="bg-white p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">İhtiyaç Kredileri</p>
-                    <p className="text-lg font-semibold text-orange-600">{formatCurrency(totalPersonalCreditAmount)}</p>
+                  <div className="bg-white p-3 sm:p-4 rounded-lg">
+                    <p className="text-xs sm:text-sm text-gray-600">İhtiyaç Kredileri</p>
+                    <p className="text-base sm:text-lg font-semibold text-orange-600">{formatCurrency(totalPersonalCreditAmount)}</p>
                   </div>
                 </div>
               </div>
 
               {/* Save Plan */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Plan Bilgilerini Güncelle</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-6">
+                <h3 className="text-base sm:text-lg font-medium text-gray-800 mb-4">Plan Bilgilerini Güncelle</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Plan Adı *
@@ -657,7 +657,7 @@ const PaymentPlanEditPage: React.FC = () => {
                       type="text"
                       value={planName}
                       onChange={(e) => setPlanName(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      className="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent text-base touch-manipulation"
                       placeholder={`Örn: ${planType === 'vehicle' ? 'Araç' : 'Ev'} Alım Planı 2024`}
                     />
                   </div>
@@ -669,7 +669,7 @@ const PaymentPlanEditPage: React.FC = () => {
                       type="email"
                       value={shareEmail}
                       onChange={(e) => setShareEmail(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      className="w-full px-3 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent text-base touch-manipulation"
                       placeholder="ornek@email.com"
                     />
                   </div>
@@ -677,7 +677,7 @@ const PaymentPlanEditPage: React.FC = () => {
                 <button
                   onClick={savePlan}
                   disabled={!planName.trim() || saving}
-                  className="mt-4 w-full sm:w-auto bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                  className="mt-4 w-full sm:w-auto bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center touch-manipulation active:bg-[#d49400]"
                 >
                   {saving ? (
                     <>
@@ -694,10 +694,10 @@ const PaymentPlanEditPage: React.FC = () => {
               </div>
 
               {/* Navigation */}
-              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0">
+              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
                 <button
                   onClick={() => setCurrentStep('personal-credits')}
-                  className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
+                  className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors touch-manipulation active:bg-gray-700 w-full sm:w-auto"
                 >
                   Geri
                 </button>

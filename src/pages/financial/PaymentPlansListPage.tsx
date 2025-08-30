@@ -208,7 +208,7 @@ const PaymentPlansListPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Plans Table */}
+        {/* Plans List */}
         {plans.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm border p-8 text-center">
             <div className="mb-4">
@@ -229,120 +229,232 @@ const PaymentPlansListPage: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Plan Adı
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tip
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fiyat
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Peşinat
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Aylık Ödeme
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Oluşturulma
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      İşlemler
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {plans.map((plan) => {
-                    const totalDownPayment = plan.downPayments?.reduce((sum, dp) => sum + dp.amount, 0) || 0;
-                    
-                    return (
-                      <tr key={plan.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {plan.name}
-                          </div>
-                          {plan.sharedWith && (
-                            <div className="text-xs text-blue-600">
-                              📧 {plan.sharedWith} ile paylaşıldı
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden lg:block bg-white rounded-xl shadow-sm border overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Plan Adı
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tip
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Fiyat
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Peşinat
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Aylık Ödeme
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Oluşturulma
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        İşlemler
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {plans.map((plan) => {
+                      const totalDownPayment = plan.downPayments?.reduce((sum, dp) => sum + dp.amount, 0) || 0;
+                      
+                      return (
+                        <tr key={plan.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {plan.name}
                             </div>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            {plan.type === 'vehicle' ? (
-                              <Car className="w-4 h-4 text-blue-600 mr-2" />
-                            ) : (
-                              <Home className="w-4 h-4 text-green-600 mr-2" />
+                            {plan.sharedWith && (
+                              <div className="text-xs text-blue-600">
+                                📧 {plan.sharedWith} ile paylaşıldı
+                              </div>
                             )}
-                            <span className="text-sm text-gray-900">
-                              {plan.type === 'vehicle' ? 'Taşıt' : 'Konut'}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatCurrency(plan.price)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatCurrency(totalDownPayment)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm font-medium text-green-600">
-                            {formatCurrency(plan.totalMonthlyPayment)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {plan.createdAt.toLocaleDateString('tr-TR')}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() => navigate(`/tekno-finans/payment-plans/${plan.id}`)}
-                              className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                              title="Görüntüle"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => navigate(`/tekno-finans/payment-plans/${plan.id}/edit`)}
-                              className="text-[#ffb700] hover:text-[#e6a500] p-1 rounded"
-                              title="Düzenle"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => downloadPlanAsPDF(plan)}
-                              className="text-green-600 hover:text-green-900 p-1 rounded"
-                              title="PDF İndir"
-                            >
-                              <Download className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => deletePlan(plan.id)}
-                              disabled={isDeleting === plan.id}
-                              className="text-red-600 hover:text-red-900 p-1 rounded disabled:opacity-50"
-                              title="Sil"
-                            >
-                              {isDeleting === plan.id ? (
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              {plan.type === 'vehicle' ? (
+                                <Car className="w-4 h-4 text-blue-600 mr-2" />
                               ) : (
-                                <Trash2 className="w-4 h-4" />
+                                <Home className="w-4 h-4 text-green-600 mr-2" />
                               )}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                              <span className="text-sm text-gray-900">
+                                {plan.type === 'vehicle' ? 'Taşıt' : 'Konut'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {formatCurrency(plan.price)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {formatCurrency(totalDownPayment)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-medium text-green-600">
+                              {formatCurrency(plan.totalMonthlyPayment)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {plan.createdAt.toLocaleDateString('tr-TR')}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => navigate(`/tekno-finans/payment-plans/${plan.id}`)}
+                                className="text-blue-600 hover:text-blue-900 p-1 rounded"
+                                title="Görüntüle"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => navigate(`/tekno-finans/payment-plans/${plan.id}/edit`)}
+                                className="text-[#ffb700] hover:text-[#e6a500] p-1 rounded"
+                                title="Düzenle"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => downloadPlanAsPDF(plan)}
+                                className="text-green-600 hover:text-green-900 p-1 rounded"
+                                title="PDF İndir"
+                              >
+                                <Download className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => deletePlan(plan.id)}
+                                disabled={isDeleting === plan.id}
+                                className="text-red-600 hover:text-red-900 p-1 rounded disabled:opacity-50"
+                                title="Sil"
+                              >
+                                {isDeleting === plan.id ? (
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                                ) : (
+                                  <Trash2 className="w-4 h-4" />
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden space-y-4">
+              {plans.map((plan) => {
+                const totalDownPayment = plan.downPayments?.reduce((sum, dp) => sum + dp.amount, 0) || 0;
+                
+                return (
+                  <div key={plan.id} className="bg-white rounded-xl shadow-sm border p-4">
+                    {/* Plan Header */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center mb-2">
+                          {plan.type === 'vehicle' ? (
+                            <Car className="w-5 h-5 text-blue-600 mr-2" />
+                          ) : (
+                            <Home className="w-5 h-5 text-green-600 mr-2" />
+                          )}
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {plan.name}
+                          </h3>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <span className="bg-gray-100 px-2 py-1 rounded-full text-xs font-medium">
+                            {plan.type === 'vehicle' ? 'Taşıt' : 'Konut'}
+                          </span>
+                          <span className="ml-2">
+                            {plan.createdAt.toLocaleDateString('tr-TR')}
+                          </span>
+                        </div>
+                        {plan.sharedWith && (
+                          <div className="text-xs text-blue-600 mt-1">
+                            📧 {plan.sharedWith} ile paylaşıldı
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Plan Details */}
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <div className="text-xs text-gray-500 mb-1">
+                          {plan.type === 'vehicle' ? 'Araç Fiyatı' : 'Ev Fiyatı'}
+                        </div>
+                        <div className="text-sm font-semibold text-gray-900">
+                          {formatCurrency(plan.price)}
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <div className="text-xs text-gray-500 mb-1">Toplam Peşinat</div>
+                        <div className="text-sm font-semibold text-gray-900">
+                          {formatCurrency(totalDownPayment)}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Monthly Payment */}
+                    <div className="bg-green-50 p-3 rounded-lg mb-4">
+                      <div className="text-xs text-green-600 mb-1">Aylık Ödeme</div>
+                      <div className="text-lg font-bold text-green-700">
+                        {formatCurrency(plan.totalMonthlyPayment)}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => navigate(`/tekno-finans/payment-plans/${plan.id}`)}
+                        className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm font-medium active:bg-blue-800"
+                      >
+                        <Eye className="w-4 h-4" />
+                        Görüntüle
+                      </button>
+                      <button
+                        onClick={() => navigate(`/tekno-finans/payment-plans/${plan.id}/edit`)}
+                        className="bg-[#ffb700] text-white px-4 py-3 rounded-lg hover:bg-[#e6a500] transition-colors flex items-center justify-center gap-2 text-sm font-medium active:bg-[#cc9500]"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Düzenle
+                      </button>
+                    </div>
+
+                    {/* Secondary Actions */}
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <button
+                        onClick={() => downloadPlanAsPDF(plan)}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm active:bg-green-800"
+                      >
+                        <Download className="w-4 h-4" />
+                        PDF İndir
+                      </button>
+                      <button
+                        onClick={() => deletePlan(plan.id)}
+                        disabled={isDeleting === plan.id}
+                        className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50 active:bg-red-800"
+                      >
+                        {isDeleting === plan.id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        ) : (
+                          <>
+                            <Trash2 className="w-4 h-4" />
+                            Sil
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </div>

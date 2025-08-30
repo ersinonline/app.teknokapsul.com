@@ -523,113 +523,117 @@ const PaymentPlanDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="max-w-6xl mx-auto p-4 sm:p-6">
+      <div className="max-w-6xl mx-auto p-3 sm:p-4 lg:p-6">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="flex items-center justify-center mb-3 relative">
+        <div className="mb-4 sm:mb-6 lg:mb-8">
+          {/* Back Button Row */}
+          <div className="flex items-center mb-4">
             <button
               onClick={() => navigate('/tekno-finans/payment-plans')}
-              className="absolute left-0 p-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="p-2 text-gray-600 hover:text-gray-800 transition-colors touch-manipulation active:bg-gray-100 rounded-lg"
             >
-              <ArrowLeft className="w-6 h-6" />
+              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            <div className="bg-[#ffb700] p-3 rounded-full mr-3">
-              {plan.type === 'vehicle' ? <Car className="w-8 h-8 text-white" /> : <Home className="w-8 h-8 text-white" />}
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                {plan.name}
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                {formatDate(plan.createdAt)} tarihinde oluşturuldu
-              </p>
-            </div>
+            <span className="ml-2 text-sm text-gray-500">Geri</span>
+          </div>
+          
+          {/* Title Row */}
+          <div className="text-center">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-2">
+              {plan.name}
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500">
+              {formatDate(plan.createdAt)} tarihinde oluşturuldu
+            </p>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
           {user && user.id === plan.userId && (
             <button
               onClick={handleEdit}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation text-sm sm:text-base"
             >
-              <Edit className="w-4 h-4 mr-2" />
-              Düzenle
+              <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden xs:inline">Düzenle</span>
+              <span className="xs:hidden">Düzenle</span>
             </button>
           )}
           <button
             onClick={handleShare}
-            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors touch-manipulation text-sm sm:text-base"
           >
-            <Share className="w-4 h-4 mr-2" />
-            Paylaş
+            <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Paylaş</span>
+            <span className="xs:hidden">Paylaş</span>
           </button>
           <button
             onClick={handleDownload}
-            className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-colors touch-manipulation text-sm sm:text-base"
           >
-            <Download className="w-4 h-4 mr-2" />
-            PDF İndir
+            <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">PDF İndir</span>
+            <span className="xs:hidden">PDF</span>
           </button>
         </div>
 
         {/* Plan Overview */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Plan Özeti</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-gray-50 p-4 rounded-lg text-center">
+        <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Plan Özeti</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-lg text-center">
               <div className="flex items-center justify-center mb-2">
-                {plan.type === 'vehicle' ? <Car className="w-6 h-6 text-gray-600" /> : <Home className="w-6 h-6 text-gray-600" />}
+                {plan.type === 'vehicle' ? <Car className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" /> : <Home className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />}
               </div>
-              <p className="text-sm text-gray-600">{plan.type === 'vehicle' ? 'Araç Fiyatı' : 'Ev Fiyatı'}</p>
-              <p className="text-lg font-semibold text-gray-900">{formatCurrency(plan.price)}</p>
+              <p className="text-xs sm:text-sm text-gray-600">{plan.type === 'vehicle' ? 'Araç Fiyatı' : 'Ev Fiyatı'}</p>
+              <p className="text-sm sm:text-lg font-semibold text-gray-900">{formatCurrency(plan.price)}</p>
             </div>
-            <div className="bg-green-50 p-4 rounded-lg text-center">
+            <div className="bg-green-50 p-3 sm:p-4 rounded-lg text-center">
               <div className="flex items-center justify-center mb-2">
-                <CreditCard className="w-6 h-6 text-green-600" />
+                <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
               </div>
-              <p className="text-sm text-gray-600">Toplam Peşinat</p>
-              <p className="text-lg font-semibold text-green-600">{formatCurrency(totalDownPayment)}</p>
+              <p className="text-xs sm:text-sm text-gray-600">Toplam Peşinat</p>
+              <p className="text-sm sm:text-lg font-semibold text-green-600">{formatCurrency(totalDownPayment)}</p>
             </div>
-            <div className="bg-blue-50 p-4 rounded-lg text-center">
+            <div className="bg-blue-50 p-3 sm:p-4 rounded-lg text-center">
               <div className="flex items-center justify-center mb-2">
-                <Building className="w-6 h-6 text-blue-600" />
+                <Building className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
               </div>
-              <p className="text-sm text-gray-600">{plan.type === 'vehicle' ? 'Taşıt Kredisi' : 'Konut Kredisi'}</p>
-              <p className="text-lg font-semibold text-blue-600">{formatCurrency(housingCreditAmount)}</p>
+              <p className="text-xs sm:text-sm text-gray-600">{plan.type === 'vehicle' ? 'Taşıt Kredisi' : 'Konut Kredisi'}</p>
+              <p className="text-sm sm:text-lg font-semibold text-blue-600">{formatCurrency(housingCreditAmount)}</p>
             </div>
-            <div className="bg-orange-50 p-4 rounded-lg text-center">
+            <div className="bg-orange-50 p-3 sm:p-4 rounded-lg text-center">
               <div className="flex items-center justify-center mb-2">
-                <Calculator className="w-6 h-6 text-orange-600" />
+                <Calculator className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
               </div>
-              <p className="text-sm text-gray-600">İhtiyaç Kredileri</p>
-              <p className="text-lg font-semibold text-orange-600">{formatCurrency(totalPersonalCreditAmount)}</p>
+              <p className="text-xs sm:text-sm text-gray-600">İhtiyaç Kredileri</p>
+              <p className="text-sm sm:text-lg font-semibold text-orange-600">{formatCurrency(totalPersonalCreditAmount)}</p>
             </div>
           </div>
         </div>
 
         {/* Down Payments */}
         {plan.downPayments.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Peşinat Ödemeleri</h2>
+          <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Peşinat Ödemeleri</h2>
             <div className="space-y-3">
               {plan.downPayments.map((payment, index) => (
-                <div key={payment.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
-                    <div className="bg-green-100 p-2 rounded-full mr-3">
-                      <CreditCard className="w-4 h-4 text-green-600" />
+                <div key={payment.id} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center min-w-0 flex-1">
+                    <div className="bg-green-100 p-2 rounded-full mr-2 sm:mr-3 flex-shrink-0">
+                      <CreditCard className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
                     </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{payment.description}</p>
-                      <p className="text-sm text-gray-600">Peşinat #{index + 1}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{payment.description}</p>
+                      <p className="text-xs sm:text-sm text-gray-600">Peşinat #{index + 1}</p>
                     </div>
                   </div>
-                  <p className="text-lg font-semibold text-green-600">{formatCurrency(payment.amount)}</p>
+                  <p className="text-sm sm:text-lg font-semibold text-green-600 ml-2">{formatCurrency(payment.amount)}</p>
                 </div>
               ))}
             </div>
-            <div className="mt-4 p-4 bg-green-50 rounded-lg">
+            <div className="mt-4 p-3 sm:p-4 bg-green-50 rounded-lg">
               <p className="text-sm font-medium text-green-800">Toplam Peşinat: {formatCurrency(totalDownPayment)}</p>
             </div>
           </div>
@@ -637,23 +641,23 @@ const PaymentPlanDetailPage: React.FC = () => {
 
         {/* Housing/Vehicle Credit */}
         {plan.housingCredit && (
-          <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
               {plan.type === 'vehicle' ? 'Taşıt Kredisi' : 'Konut Kredisi'}
             </h2>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div>
-                  <p className="text-sm text-gray-600">Kredi Tutarı</p>
-                  <p className="text-lg font-semibold text-blue-600">{formatCurrency(plan.housingCredit.amount)}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">Kredi Tutarı</p>
+                  <p className="text-sm sm:text-lg font-semibold text-blue-600">{formatCurrency(plan.housingCredit.amount)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Aylık Ödeme</p>
-                  <p className="text-lg font-semibold text-blue-600">{formatCurrency(plan.housingCredit.monthlyPayment)}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">Aylık Ödeme</p>
+                  <p className="text-sm sm:text-lg font-semibold text-blue-600">{formatCurrency(plan.housingCredit.monthlyPayment)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Vade</p>
-                  <p className="text-lg font-semibold text-blue-600">{plan.housingCredit.term} ay</p>
+                  <p className="text-xs sm:text-sm text-gray-600">Vade</p>
+                  <p className="text-sm sm:text-lg font-semibold text-blue-600">{plan.housingCredit.term} ay</p>
                 </div>
               </div>
             </div>
@@ -662,39 +666,39 @@ const PaymentPlanDetailPage: React.FC = () => {
 
         {/* Personal Credits */}
         {plan.personalCredits.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">İhtiyaç Kredileri</h2>
+          <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">İhtiyaç Kredileri</h2>
             <div className="space-y-3">
               {plan.personalCredits.map((credit, index) => (
-                <div key={credit.id} className="p-4 bg-orange-50 rounded-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-600">Kredi #{index + 1}</p>
-                      <p className="font-medium text-gray-900">{credit.bankName || 'Banka'}</p>
+                <div key={credit.id} className="p-3 sm:p-4 bg-orange-50 rounded-lg">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                    <div className="col-span-2 sm:col-span-1">
+                      <p className="text-xs sm:text-sm text-gray-600">Kredi #{index + 1}</p>
+                      <p className="font-medium text-gray-900 text-sm sm:text-base">{credit.bankName || 'Banka'}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Tutar</p>
-                      <p className="text-lg font-semibold text-orange-600">{formatCurrency(credit.amount)}</p>
+                      <p className="text-xs sm:text-sm text-gray-600">Tutar</p>
+                      <p className="text-sm sm:text-lg font-semibold text-orange-600">{formatCurrency(credit.amount)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Aylık Ödeme</p>
-                      <p className="text-lg font-semibold text-orange-600">{formatCurrency(credit.monthlyPayment)}</p>
+                      <p className="text-xs sm:text-sm text-gray-600">Aylık Ödeme</p>
+                      <p className="text-sm sm:text-lg font-semibold text-orange-600">{formatCurrency(credit.monthlyPayment)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Vade</p>
-                      <p className="text-lg font-semibold text-orange-600">{credit.term} ay</p>
+                      <p className="text-xs sm:text-sm text-gray-600">Vade</p>
+                      <p className="text-sm sm:text-lg font-semibold text-orange-600">{credit.term} ay</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="mt-4 p-4 bg-orange-50 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mt-4 p-3 sm:p-4 bg-orange-50 rounded-lg">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <p className="text-sm font-medium text-orange-800">Toplam İhtiyaç Kredisi: {formatCurrency(totalPersonalCreditAmount)}</p>
+                  <p className="text-xs sm:text-sm font-medium text-orange-800">Toplam İhtiyaç Kredisi: {formatCurrency(totalPersonalCreditAmount)}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-orange-800">Toplam Aylık Ödeme: {formatCurrency(plan.personalCredits.reduce((sum, credit) => sum + credit.monthlyPayment, 0))}</p>
+                  <p className="text-xs sm:text-sm font-medium text-orange-800">Toplam Aylık Ödeme: {formatCurrency(plan.personalCredits.reduce((sum, credit) => sum + credit.monthlyPayment, 0))}</p>
                 </div>
               </div>
             </div>
@@ -702,8 +706,8 @@ const PaymentPlanDetailPage: React.FC = () => {
         )}
 
         {/* Financial Summary */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Finansal Özet</h2>
+        <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Finansal Özet</h2>
           <div className="space-y-4">
             <div className="flex justify-between items-center py-2 border-b border-gray-200">
               <span className="text-gray-600">{plan.type === 'vehicle' ? 'Araç Fiyatı' : 'Ev Fiyatı'}</span>
@@ -738,8 +742,8 @@ const PaymentPlanDetailPage: React.FC = () => {
         </div>
 
         {/* Additional Expenses */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Ek Masraflar</h2>
+        <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Ek Masraflar</h2>
           {(() => {
             const additionalExpenses = plan.additionalExpenses || calculateAdditionalExpenses(plan.price);
             return (
@@ -775,29 +779,29 @@ const PaymentPlanDetailPage: React.FC = () => {
 
         {/* Periodic Payment Schedule */}
         {periodicPayments.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Dönemsel Ödeme Planı</h2>
-            <div className="space-y-4">
+          <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Dönemsel Ödeme Planı</h2>
+            <div className="space-y-3 sm:space-y-4">
               {periodicPayments.map((period, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{period.description}</h3>
-                      <p className="text-sm text-gray-600">
+                <div key={index} className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 space-y-2 sm:space-y-0">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{period.description}</h3>
+                      <p className="text-xs sm:text-sm text-gray-600">
                         {period.startMonth}. ay - {period.endMonth}. ay ({period.endMonth - period.startMonth + 1} ay)
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-[#ffb700]">
+                    <div className="text-left sm:text-right">
+                      <p className="text-lg sm:text-xl font-bold text-[#ffb700]">
                         {formatCurrency(period.monthlyPayment)}
                       </p>
-                      <p className="text-sm text-gray-600">aylık</p>
+                      <p className="text-xs sm:text-sm text-gray-600">aylık</p>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-700">Aktif Krediler:</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-700">Aktif Krediler:</p>
                     {period.activeCredits.map((credit, creditIndex) => (
-                      <p key={creditIndex} className="text-sm text-gray-600 ml-2">• {credit}</p>
+                      <p key={creditIndex} className="text-xs sm:text-sm text-gray-600 ml-2">• {credit}</p>
                     ))}
                   </div>
                 </div>
@@ -807,18 +811,18 @@ const PaymentPlanDetailPage: React.FC = () => {
         )}
 
         {/* Monthly Payment Summary */}
-        <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Aylık Ödeme Özeti</h2>
-          <div className="bg-[#ffb700]/10 p-6 rounded-lg text-center">
+        <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Aylık Ödeme Özeti</h2>
+          <div className="bg-[#ffb700]/10 p-4 sm:p-6 rounded-lg text-center">
             <div className="flex items-center justify-center mb-3">
-              <Calendar className="w-8 h-8 text-[#ffb700] mr-3" />
-              <DollarSign className="w-8 h-8 text-[#ffb700]" />
+              <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-[#ffb700] mr-2 sm:mr-3" />
+              <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-[#ffb700]" />
             </div>
-            <p className="text-sm text-gray-600 mb-2">Toplam Aylık Ödeme</p>
-            <p className="text-3xl font-bold text-[#ffb700]">
+            <p className="text-xs sm:text-sm text-gray-600 mb-2">Toplam Aylık Ödeme</p>
+            <p className="text-2xl sm:text-3xl font-bold text-[#ffb700]">
               {formatCurrency(plan.totalMonthlyPayment)}
             </p>
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
               {plan.housingCredit && (
                 <div className="bg-white p-3 rounded-lg">
                   <p className="text-gray-600">{plan.type === 'vehicle' ? 'Taşıt Kredisi' : 'Konut Kredisi'}</p>

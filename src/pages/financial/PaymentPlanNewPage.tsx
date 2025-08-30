@@ -551,22 +551,24 @@ const PaymentPlanNewPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="max-w-6xl mx-auto p-4 sm:p-6">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="flex items-center justify-center mb-3">
+        <div className="text-center mb-4 sm:mb-6 md:mb-8">
+          <div className="relative flex items-center justify-center mb-3">
             <button
               onClick={() => navigate('/tekno-finans/payment-plans')}
-              className="absolute left-4 sm:left-6 p-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="absolute left-0 sm:left-2 p-2 text-gray-600 hover:text-gray-800 transition-colors touch-manipulation"
             >
-              <ArrowLeft className="w-6 h-6" />
+              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            <div className="bg-[#ffb700] p-3 rounded-full mr-3">
-              {planType === 'vehicle' ? <Car className="w-8 h-8 text-white" /> : <Home className="w-8 h-8 text-white" />}
+            <div className="flex items-center">
+              <div className="bg-[#ffb700] p-2 sm:p-3 rounded-full mr-2 sm:mr-3">
+                {planType === 'vehicle' ? <Car className="w-6 h-6 sm:w-8 sm:h-8 text-white" /> : <Home className="w-6 h-6 sm:w-8 sm:h-8 text-white" />}
+              </div>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
+                Yeni Ödeme Planı
+              </h1>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-              Yeni Ödeme Planı
-            </h1>
           </div>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-2 sm:px-4">
             {planType === 'vehicle' ? 'Araç alımınız' : 'Ev alımınız'} için detaylı ödeme planı oluşturun.
           </p>
         </div>
@@ -575,51 +577,51 @@ const PaymentPlanNewPage: React.FC = () => {
         {renderStepIndicator()}
 
         {/* Form Content */}
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border p-4 sm:p-6">
           {/* Type Selection Step */}
           {currentStep === 'type' && (
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-6">Plan Tipini Seçin</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-2xl mx-auto">
                 <button
                   onClick={() => setPlanType('housing')}
-                  className={`p-6 rounded-xl border-2 transition-all ${
+                  className={`p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 transition-all touch-manipulation ${
                     planType === 'housing'
                       ? 'border-[#ffb700] bg-[#ffb700]/5'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-gray-200 hover:border-gray-300 active:border-gray-400'
                   }`}
                 >
-                  <Home className={`w-12 h-12 mx-auto mb-4 ${
+                  <Home className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 ${
                     planType === 'housing' ? 'text-[#ffb700]' : 'text-gray-400'
                   }`} />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Konut</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Konut</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">
                     Ev, daire veya konut alımı için ödeme planı oluşturun
                   </p>
                 </button>
                 
                 <button
                   onClick={() => setPlanType('vehicle')}
-                  className={`p-6 rounded-xl border-2 transition-all ${
+                  className={`p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 transition-all touch-manipulation ${
                     planType === 'vehicle'
                       ? 'border-[#ffb700] bg-[#ffb700]/5'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-gray-200 hover:border-gray-300 active:border-gray-400'
                   }`}
                 >
-                  <Car className={`w-12 h-12 mx-auto mb-4 ${
+                  <Car className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 ${
                     planType === 'vehicle' ? 'text-[#ffb700]' : 'text-gray-400'
                   }`} />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Taşıt</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Taşıt</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">
                     Araba, motosiklet veya taşıt alımı için ödeme planı oluşturun
                   </p>
                 </button>
               </div>
               
-              <div className="mt-8 text-center">
+              <div className="mt-6 sm:mt-8 text-center">
                 <button
                   onClick={() => setCurrentStep('price')}
-                  className="bg-[#ffb700] text-white px-8 py-3 rounded-lg hover:bg-[#e6a500] transition-colors font-medium"
+                  className="w-full sm:w-auto bg-[#ffb700] text-white px-6 sm:px-8 py-3 rounded-lg hover:bg-[#e6a500] active:bg-[#d49400] transition-colors font-medium touch-manipulation"
                 >
                   Devam Et
                 </button>
@@ -639,9 +641,10 @@ const PaymentPlanNewPage: React.FC = () => {
                 </label>
                 <input
                   type="number"
+                  inputMode="numeric"
                   value={price || ''}
                   onChange={(e) => setPrice(Number(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent text-lg"
+                  className="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent text-base sm:text-lg touch-manipulation"
                   placeholder={planType === 'vehicle' ? 'Örn: 800000' : 'Örn: 5000000'}
                 />
                 
@@ -668,17 +671,17 @@ const PaymentPlanNewPage: React.FC = () => {
                   </div>
                 )}
                 
-                <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-0 justify-between">
+                <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-between">
                   <button
                     onClick={() => setCurrentStep('type')}
-                    className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
+                    className="w-full sm:w-auto bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition-colors touch-manipulation"
                   >
                     Geri
                   </button>
                   <button
                     onClick={() => setCurrentStep('down-payments')}
                     disabled={!price || price <= 0}
-                    className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="w-full sm:w-auto bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] active:bg-[#d49400] disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-manipulation"
                   >
                     Devam Et
                   </button>
@@ -694,15 +697,16 @@ const PaymentPlanNewPage: React.FC = () => {
               
               {/* Add new down payment */}
               <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Yeni Peşinat Ekle</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <h3 className="text-base sm:text-lg font-medium text-gray-800 mb-4">Yeni Peşinat Ekle</h3>
+                <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Tutar (TL)</label>
                     <input
                       type="number"
+                      inputMode="numeric"
                       value={newDownPayment.amount || ''}
                       onChange={(e) => setNewDownPayment({...newDownPayment, amount: Number(e.target.value)})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
                       placeholder="Örn: 500000"
                     />
                   </div>
@@ -712,15 +716,15 @@ const PaymentPlanNewPage: React.FC = () => {
                       type="text"
                       value={newDownPayment.description}
                       onChange={(e) => setNewDownPayment({...newDownPayment, description: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
                       placeholder="Örn: İlk peşinat"
                     />
                   </div>
-                  <div className="flex items-end">
+                  <div className="sm:flex sm:items-end">
                     <button
                       onClick={addDownPayment}
                       disabled={!newDownPayment.amount || !newDownPayment.description.trim()}
-                      className="w-full bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a500] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                      className="w-full bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a500] active:bg-[#d49400] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center touch-manipulation"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Ekle
@@ -735,14 +739,14 @@ const PaymentPlanNewPage: React.FC = () => {
                   <h3 className="text-lg font-medium text-gray-800 mb-4">Eklenen Peşinatlar</h3>
                   <div className="space-y-3">
                     {downPayments.map((payment) => (
-                      <div key={payment.id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg">
-                        <div>
-                          <p className="font-medium text-gray-900">{payment.description}</p>
-                          <p className="text-sm text-gray-600">{formatCurrency(payment.amount)}</p>
+                      <div key={payment.id} className="flex items-center justify-between p-3 sm:p-4 bg-white border border-gray-200 rounded-lg">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{payment.description}</p>
+                          <p className="text-xs sm:text-sm text-gray-600">{formatCurrency(payment.amount)}</p>
                         </div>
                         <button
                           onClick={() => removeDownPayment(payment.id)}
-                          className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                          className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 active:bg-red-100 transition-colors touch-manipulation ml-2"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -898,14 +902,14 @@ const PaymentPlanNewPage: React.FC = () => {
                   <h3 className="text-lg font-medium text-gray-800 mb-4">
                     {planType === 'vehicle' ? 'Taşıt Kredisi Teklifleri' : 'Konut Kredisi Teklifleri'}
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                     {(planType === 'vehicle' ? vehicleCreditOffers : housingCreditOffers).map((offer) => {
                       const isSelected = selectedCredits.some(c => c.id === offer.id);
                       return (
-                        <div key={offer.id} className={`p-4 border rounded-lg transition-all duration-300 ${
+                        <div key={offer.id} className={`p-3 sm:p-4 border rounded-lg transition-all duration-300 ${
                           isSelected 
-                            ? 'border-green-500 bg-green-50 shadow-lg transform scale-105' 
-                            : 'border-gray-200 hover:border-[#ffb700] hover:shadow-md'
+                            ? 'border-green-500 bg-green-50 shadow-lg' 
+                            : 'border-gray-200 hover:border-[#ffb700] hover:shadow-md active:border-[#ffb700]'
                         }`}>
                           <div className="flex justify-between items-start mb-3">
                             <h4 className="font-medium text-gray-900 text-sm">{offer.bankName}</h4>
@@ -953,10 +957,10 @@ const PaymentPlanNewPage: React.FC = () => {
                                  }
                               }
                             }}
-                            className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+                            className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 touch-manipulation ${
                               isSelected
-                                ? 'bg-green-600 text-white hover:bg-green-700 shadow-md'
-                                : 'bg-[#ffb700] text-white hover:bg-[#e6a500] hover:shadow-md'
+                                ? 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800 shadow-md'
+                                : 'bg-[#ffb700] text-white hover:bg-[#e6a500] active:bg-[#d49400] hover:shadow-md'
                             }`}
                           >
                             {isSelected ? (
@@ -1115,16 +1119,16 @@ const PaymentPlanNewPage: React.FC = () => {
               {personalCreditOffers.length > 0 && (
                 <div className="mb-6">
                   <h3 className="text-lg font-medium text-gray-800 mb-4">İhtiyaç Kredisi Teklifleri</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                     {personalCreditOffers.map((offer) => {
                       const isSelected = personalCredits.some(c => c.id === offer.id);
                       return (
                         <div 
                           key={offer.id} 
-                          className={`p-4 border rounded-lg transition-all duration-200 ${
+                          className={`p-3 sm:p-4 border rounded-lg transition-all duration-200 ${
                             isSelected 
-                              ? 'border-green-500 bg-green-50 shadow-lg transform scale-105' 
-                              : 'border-gray-200 hover:border-[#ffb700]'
+                              ? 'border-green-500 bg-green-50 shadow-lg' 
+                              : 'border-gray-200 hover:border-[#ffb700] active:border-[#ffb700]'
                           }`}
                         >
                           <div className="flex justify-between items-start mb-3">
@@ -1161,10 +1165,10 @@ const PaymentPlanNewPage: React.FC = () => {
                                 setPersonalCreditOffers([]);
                               }
                             }}
-                            className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center ${
+                            className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center touch-manipulation ${
                               isSelected
-                                ? 'bg-green-600 text-white hover:bg-green-700'
-                                : 'bg-[#ffb700] text-white hover:bg-[#e6a500]'
+                                ? 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800'
+                                : 'bg-[#ffb700] text-white hover:bg-[#e6a500] active:bg-[#d49400]'
                             }`}
                           >
                             {isSelected ? (
