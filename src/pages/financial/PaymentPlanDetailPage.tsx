@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { Home, Car, CreditCard, Building, Calculator, ArrowLeft, Edit, Share, Download, Calendar, DollarSign } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -127,7 +127,7 @@ const PaymentPlanDetailPage: React.FC = () => {
 
   // Calculate periodic payment schedule
   const calculatePeriodicPayments = (plan: PaymentPlan) => {
-    const payments: { month: number; amount: number; description: string }[] = [];
+
     
     // Get all credits with their terms
     const allCredits = [];
@@ -151,7 +151,7 @@ const PaymentPlanDetailPage: React.FC = () => {
     
     // Calculate payment periods
     const periods = [];
-    let currentMonth = 1;
+
     
     for (let i = 0; i < allCredits.length; i++) {
       const credit = allCredits[i];
@@ -188,8 +188,6 @@ const PaymentPlanDetailPage: React.FC = () => {
           });
         }
       }
-      
-      currentMonth = endMonth + 1;
     }
     
     return periods;
@@ -222,11 +220,24 @@ const PaymentPlanDetailPage: React.FC = () => {
 
   const handleShare = async () => {
     try {
+      if (!plan) {
+        alert('Plan bulunamadı!');
+        return;
+      }
+
+      // Planı paylaşılan planlar koleksiyonuna kaydet
+      const sharedPlanRef = doc(db, 'sharedPaymentPlans', id!);
+      await setDoc(sharedPlanRef, {
+        ...plan,
+        sharedAt: new Date(),
+        sharedBy: user?.id || 'anonymous'
+      });
+
       const shareUrl = `${window.location.origin}/tekno-finans/payment-plans/${id}`;
       await navigator.clipboard.writeText(shareUrl);
-      alert('Plan linki panoya kopyalandı! Bu linki paylaşarak diğer kullanıcıların planınızı görüntülemesini sağlayabilirsiniz.');
+      alert('Plan başarıyla paylaşıldı! Link panoya kopyalandı. Bu linki paylaşarak herkese planınızı görüntüleme imkanı sağlayabilirsiniz.');
     } catch (error) {
-      console.error('Link kopyalama hatası:', error);
+      console.error('Paylaşım hatası:', error);
       // Fallback: Show the URL in a prompt
       const shareUrl = `${window.location.origin}/tekno-finans/payment-plans/${id}`;
       prompt('Plan linkini kopyalayın:', shareUrl);
@@ -323,7 +334,7 @@ const PaymentPlanDetailPage: React.FC = () => {
             <h3 style="color: #333; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #ffb700; padding-bottom: 5px;">Dönemsel Ödeme Planı</h3>
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
               <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Kredilerinizin farklı sürelerle bitmesi nedeniyle aylık ödemeniz dönemsel olarak değişecektir:</p>
-              ${periodicPayments.map((period, index) => `
+              ${periodicPayments.map((period) => `
                 <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #ffb700;">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <div>
