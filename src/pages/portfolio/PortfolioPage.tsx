@@ -101,17 +101,15 @@ export const PortfolioPage: React.FC = () => {
     
     setRefreshing(true);
     try {
-      // Tüm fiyatları güncelle (hisse, döviz, altın)
+      // Tüm fiyatları güncelle (hisse, döviz, altın) - vadeli hesaplar hariç
       await portfolioService.updateAllPricesFromAPI(user.id);
-      // Vadeli hesapları güncelle
-      await portfolioService.addDailyReturnToAllDeposits(user.id);
       // Portföy verilerini yeniden yükle
       await loadPortfolioData();
       
       // Bildirim gönder
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification('Portföy Güncellendi', {
-          body: 'Tüm yatırımlarınızın fiyatları güncellendi.',
+          body: 'Yatırımlarınızın fiyatları güncellendi. Vadeli hesaplar manuel güncellenir.',
           icon: '/icons/icon-192x192.svg'
         });
       }
@@ -148,23 +146,15 @@ export const PortfolioPage: React.FC = () => {
     if (!user) return;
     
     try {
-      const portfolioItem = await portfolioService.addPortfolioItem(user.id, item);
+      await portfolioService.addPortfolioItem(user.id, item);
       
-      // Vadeli hesap ise otomatik getiri hesaplamasını başlat (kullanıcıya sormadan)
-      if (item.type === 'deposit' && item.metadata?.annualInterestRate && item.metadata?.taxExemptPercentage) {
-        try {
-          await depositAutoReturnService.startAutoReturnCalculation(user.id, portfolioItem);
-          setDepositAutoReturnActive(true);
-          
-          // Bildirim gönder
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('Vadeli Hesap Eklendi', {
-              body: 'Vadeli hesabınız eklendi ve otomatik günlük getiri hesaplama başlatıldı.',
-              icon: '/icons/icon-192x192.svg'
-            });
-          }
-        } catch (error) {
-          console.error('Otomatik getiri hesaplama başlatılamadı:', error);
+      // Vadeli hesap eklendi bildirimi (otomatik getiri başlatılmadan)
+      if (item.type === 'deposit') {
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('Vadeli Hesap Eklendi', {
+            body: 'Vadeli hesabınız başarıyla eklendi. Manuel güncelleme yapabilirsiniz.',
+            icon: '/icons/icon-192x192.svg'
+          });
         }
       }
       
