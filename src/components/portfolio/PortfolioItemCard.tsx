@@ -29,21 +29,24 @@ export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
   const [showEditModal, setShowEditModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'stock':
-        return '📈';
-      case 'fund':
-        return '🏦';
-      case 'gold':
-        return '🥇';
-      case 'currency':
-        return '💱';
-      case 'crypto':
-        return '₿';
-      default:
-        return '💼';
+  const getTypeIcon = (type: string, transactionType?: string) => {
+    const baseIcon = {
+      'stock': '📈',
+      'fund': '🏦',
+      'gold': '🥇',
+      'currency': '💱',
+      'crypto': '₿',
+      'default': '💼'
+    };
+    
+    const icon = baseIcon[type as keyof typeof baseIcon] || baseIcon.default;
+    
+    // Satış işlemi için kırmızı ok ekle
+    if (transactionType === 'sell') {
+      return icon + ' 📉';
     }
+    
+    return icon;
   };
 
   const getDisplayName = (item: PortfolioItem) => {
@@ -68,7 +71,7 @@ export const PortfolioItemCard: React.FC<PortfolioItemCardProps> = ({
       <div className="flex items-start justify-between mb-3 sm:mb-4">
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center text-lg sm:text-xl">
-            {getTypeIcon(item.type)}
+            {getTypeIcon(item.type, item.transactionType)}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">

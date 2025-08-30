@@ -22,6 +22,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
     quantity: '',
     purchasePrice: '',
     purchaseDate: new Date().toISOString().split('T')[0],
+    transactionType: 'buy' as 'buy' | 'sell',
     // Vadeli hesap için ek alanlar
     annualInterestRate: '',
     taxExemptPercentage: '10',
@@ -116,6 +117,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
       quantity: formData.type === 'deposit' ? 1 : parseFloat(formData.quantity),
       purchasePrice: parseFloat(formData.purchasePrice),
       purchaseDate: formData.purchaseDate,
+      transactionType: (formData.type === 'currency' || formData.type === 'gold') ? formData.transactionType : undefined,
       createdAt: new Date(),
       updatedAt: new Date(),
       userId: '' // Bu değer PortfolioService tarafından doldurulacak
@@ -146,6 +148,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
       quantity: '',
       purchasePrice: '',
       purchaseDate: new Date().toISOString().split('T')[0],
+      transactionType: 'buy' as 'buy' | 'sell',
       annualInterestRate: '',
       taxExemptPercentage: '10',
       maturityDate: '',
@@ -178,6 +181,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
       type,
       symbol: '',
       name: '',
+      transactionType: 'buy' as 'buy' | 'sell',
       annualInterestRate: '',
       taxExemptPercentage: '10',
       maturityDate: '',
@@ -258,6 +262,39 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
               ))}
             </div>
           </div>
+
+          {/* Alış/Satış Seçeneği - Sadece döviz ve altın için */}
+          {(formData.type === 'currency' || formData.type === 'gold') && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                İşlem Türü
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, transactionType: 'buy' })}
+                  className={`px-4 py-3 rounded-lg border-2 transition-all ${
+                    formData.transactionType === 'buy'
+                      ? 'border-green-500 bg-green-50 text-green-700'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  Alış
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, transactionType: 'sell' })}
+                  className={`px-4 py-3 rounded-lg border-2 transition-all ${
+                    formData.transactionType === 'sell'
+                      ? 'border-red-500 bg-red-50 text-red-700'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  Satış
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Sembol - Altın için gizle */}
           {formData.type !== 'gold' && (

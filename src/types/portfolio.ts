@@ -14,6 +14,8 @@ export interface PortfolioItem {
   averagePrice?: number;
   category?: string;
   fintablesUrl?: string;
+  dailyChange?: number;
+  transactionType?: 'buy' | 'sell';
   metadata?: {
     dailyReturnRate?: number;
     maturityDate?: Date;
