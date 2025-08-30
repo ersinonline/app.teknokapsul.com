@@ -134,22 +134,30 @@ const TeknomailPage: React.FC = () => {
     }
   };
 
+  // Netflix email kontrolü
+  const isNetflixEmail = (email: EmailMessage) => {
+    const subject = email.subject.toLowerCase();
+    const from = email.from.toLowerCase();
+    return subject.includes('netflix') || from.includes('netflix');
+  };
+
   const filteredEmails = emails.filter(email => {
+    // Netflix filtresi - sadece Netflix emaillerini göster
+    if (!isNetflixEmail(email)) {
+      return false;
+    }
+
     const matchesSearch = searchTerm === '' || 
                          email.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          email.from.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Netflix filtrelemesi - sadece Netflix ile ilgili emailler
-    const isNetflixEmail = email.subject.toLowerCase().includes('netflix') || 
-                          email.from.toLowerCase().includes('netflix');
-    
     switch (filter) {
       case 'unread':
-        return matchesSearch && !email.isRead && isNetflixEmail;
+        return matchesSearch && !email.isRead;
       case 'starred':
-        return matchesSearch && email.isStarred && isNetflixEmail;
+        return matchesSearch && email.isStarred;
       default:
-        return matchesSearch && isNetflixEmail;
+        return matchesSearch;
     }
   });
   
