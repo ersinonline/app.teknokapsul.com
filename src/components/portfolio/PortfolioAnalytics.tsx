@@ -44,23 +44,14 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
     }
 
     const totalValue = consolidatedItems.reduce((sum, item) => {
-      if (item.transactionType === 'sell') {
-        // Satış işlemi: satış tutarını toplamdan çıkar
-        return sum - (item.purchasePrice * Math.abs(item.quantity));
-      } else {
-        // Normal alış işlemi
-        return sum + (item.currentPrice * item.quantity);
-      }
+      const effectiveQuantity = item.transactionType === 'sell' ? -Math.abs(item.quantity) : item.quantity;
+      return sum + (item.currentPrice * effectiveQuantity);
     }, 0);
     
     const totalCost = consolidatedItems.reduce((sum, item) => {
-      if (item.transactionType === 'sell') {
-        // Satış işlemi: maliyeti toplamdan çıkar
-        return sum - (item.currentPrice * Math.abs(item.quantity));
-      } else {
-        // Normal alış işlemi
-        return sum + ((item.purchasePrice || item.averagePrice || item.currentPrice) * item.quantity);
-      }
+      const effectiveQuantity = item.transactionType === 'sell' ? -Math.abs(item.quantity) : item.quantity;
+      const purchasePrice = item.purchasePrice || item.averagePrice || item.currentPrice;
+      return sum + (purchasePrice * effectiveQuantity);
     }, 0);
     const totalReturn = totalValue - totalCost;
     const returnPercentage = totalCost > 0 ? (totalReturn / totalCost) * 100 : 0;
@@ -69,35 +60,19 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
     const dayChange = consolidatedItems.reduce((sum, item) => {
       // Use lastUpdated to calculate daily change if available
       const dailyChangeAmount = item.dailyChange || 0;
-      
-      if (item.transactionType === 'sell') {
-        // Satış işlemi için günlük değişim hesaplama
-        return sum + (dailyChangeAmount * Math.abs(item.quantity));
-      } else {
-        // Normal alış işlemi
-        return sum + (dailyChangeAmount * item.quantity);
-      }
+      const effectiveQuantity = item.transactionType === 'sell' ? -Math.abs(item.quantity) : item.quantity;
+      return sum + (dailyChangeAmount * effectiveQuantity);
     }, 0);
     const dayChangePercent = totalValue > 0 ? (dayChange / totalValue) * 100 : 0;
 
     // Find best and worst performers
     const itemsWithReturn = consolidatedItems.map(item => {
-      // Satış işlemleri için kar/zarar hesaplama
-      let currentValue, cost, itemReturn;
+      const effectiveQuantity = item.transactionType === 'sell' ? -Math.abs(item.quantity) : item.quantity;
+      const currentValue = item.currentPrice * effectiveQuantity;
+      const cost = (item.purchasePrice || item.averagePrice || item.currentPrice) * effectiveQuantity;
+      const itemReturn = currentValue - cost;
       
-      if (item.transactionType === 'sell') {
-        // Satış işlemi: satış fiyatı - alış fiyatı * miktar
-        currentValue = item.purchasePrice * Math.abs(item.quantity); // Satış tutarı
-        cost = item.currentPrice * Math.abs(item.quantity); // Mevcut değer (varsayılan alış fiyatı)
-        itemReturn = currentValue - cost; // Kar/zarar
-      } else {
-        // Normal alış işlemi
-        currentValue = item.currentPrice * item.quantity;
-        cost = (item.purchasePrice || item.averagePrice || item.currentPrice) * item.quantity;
-        itemReturn = currentValue - cost;
-      }
-      
-      const itemReturnPercent = cost > 0 ? (itemReturn / cost) * 100 : 0;
+      const itemReturnPercent = Math.abs(cost) > 0 ? (itemReturn / Math.abs(cost)) * 100 : 0;
       return { ...item, return: itemReturn, returnPercent: itemReturnPercent };
     });
 
@@ -128,7 +103,8 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
     const categoryAllocation: Record<string, { value: number; count: number; percentage: number }> = {};
     
     consolidatedItems.forEach(item => {
-      const value = item.currentPrice * item.quantity;
+      const effectiveQuantity = item.transactionType === 'sell' ? -Math.abs(item.quantity) : item.quantity;
+      const value = item.currentPrice * effectiveQuantity;
       const category = item.category || item.type;
       if (!categoryAllocation[category]) {
         categoryAllocation[category] = { value: 0, count: 0, percentage: 0 };
