@@ -1,11 +1,12 @@
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { SignIn } from '@clerk/clerk-react';
+import { SignIn, useUser } from '@clerk/clerk-react';
 import { Package } from 'lucide-react';
 import { useEffect } from 'react';
 
 export const LoginPage = () => {
   const { user, loading } = useAuth();
+  const { isSignedIn, isLoaded } = useUser(); // Clerk'in kendi hook'u
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -19,7 +20,7 @@ export const LoginPage = () => {
 
   // Kullanıcı giriş yaptığında otomatik yönlendirme
   useEffect(() => {
-    if (user && !loading) {
+    if ((user && !loading) || (isSignedIn && isLoaded)) {
       // Kısa bir gecikme ile yönlendirme yap
       const timer = setTimeout(() => {
         navigate(from, { replace: true });
@@ -27,9 +28,9 @@ export const LoginPage = () => {
       
       return () => clearTimeout(timer);
     }
-  }, [user, loading, from, navigate]);
+  }, [user, loading, isSignedIn, isLoaded, from, navigate]);
 
-  if (loading) {
+  if (loading || !isLoaded) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
         <div className="text-center">
@@ -40,7 +41,8 @@ export const LoginPage = () => {
     );
   }
 
-  if (user) {
+  // Çifte kontrol: hem AuthContext hem de Clerk'in kendi durumu
+  if (user || isSignedIn) {
     return <Navigate to={from} replace />;
   }
 

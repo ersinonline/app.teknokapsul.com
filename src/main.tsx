@@ -6,8 +6,31 @@ import { trTR } from '@clerk/localizations';
 import App from './App';
 import './index.css';
 
-// Clerk publishable key
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || import.meta.env.VITE_NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+// Dynamic Clerk key selection based on environment
+const getClerkPublishableKey = (): string => {
+  const hostname = window.location.hostname;
+  
+  // Test keys for localhost and local IPs
+  if (hostname === 'localhost' || 
+      hostname === '127.0.0.1' || 
+      hostname === '192.168.1.11' ||
+      hostname.startsWith('192.168.') || 
+      hostname.startsWith('10.') || 
+      hostname.startsWith('172.')) {
+    return import.meta.env.VITE_CLERK_PUBLISHABLE_KEY_TEST || 
+           import.meta.env.VITE_NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY_TEST || 
+           import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY_TEST || 
+           'pk_test_Y29udGVudC10ZXJtaXRlLTQ4LmNsZXJrLmFjY291bnRzLmRldiQ';
+  }
+  
+  // Production keys for all other domains
+  return import.meta.env.VITE_CLERK_PUBLISHABLE_KEY_PROD || 
+         import.meta.env.VITE_NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY_PROD || 
+         import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY_PROD || 
+         'pk_live_Y2xlcmsudGVrbm9rYXBzdWwuaW5mbyQ';
+};
+
+const PUBLISHABLE_KEY = getClerkPublishableKey();
 
 if (!PUBLISHABLE_KEY) {
   throw new Error('Missing Publishable Key');
