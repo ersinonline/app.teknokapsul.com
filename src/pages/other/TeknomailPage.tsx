@@ -71,7 +71,14 @@ const TeknomailPage: React.FC = () => {
     setError(null);
     try {
       // Firebase Cloud Function HTTP endpoint kullanarak gerçek IMAP bağlantısı
-      const response = await fetch('http://127.0.0.1:5002/superapp-37db4/us-central1/fetchGmailEmails', {
+      // Production ve development ortamları için dinamik URL
+      const baseUrl = import.meta.env.DEV 
+        ? (typeof window !== 'undefined' && window.location.hostname !== 'localhost' 
+           ? `http://${window.location.hostname}:5002/superapp-37db4/us-central1` 
+           : 'http://127.0.0.1:5002/superapp-37db4/us-central1')
+        : 'https://us-central1-superapp-37db4.cloudfunctions.net';
+      
+      const response = await fetch(`${baseUrl}/fetchGmailEmails`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
