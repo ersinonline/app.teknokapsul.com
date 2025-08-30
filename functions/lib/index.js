@@ -19,4 +19,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./priceUpdater"), exports);
 __exportStar(require("./auth"), exports);
 __exportStar(require("./emailService"), exports);
+__exportStar(require("./imapService"), exports);
 //# sourceMappingURL=index.js.map

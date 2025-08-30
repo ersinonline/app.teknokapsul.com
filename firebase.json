@@ -60,11 +60,11 @@
       "port": 9099
     },
     "functions": {
-      "port": 5001
+      "port": 5002
     },
     "ui": {
       "enabled": true,
-      "port": 4000
+      "port": 4002
     },
     "singleProjectMode": true
   }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Shield, Smartphone, ShoppingBag, Star, Gift, Percent } from 'lucide-react';
+import { ExternalLink, Shield, Smartphone, ShoppingBag, Star, Gift, Percent, Server } from 'lucide-react';
 
 const TeknoFirsatPage: React.FC = () => {
   const campaigns = [
@@ -58,6 +58,25 @@ const TeknoFirsatPage: React.FC = () => {
         '%99.9 Kesintisiz Altyapı',
         'Kullanıcı Dostu Arayüz',
         'VIP Danışman Desteği'
+      ]
+    },
+    {
+      id: 'hosting',
+      title: 'Hosting.com.tr',
+      subtitle: 'Web Hosting İndirimleri',
+      description: 'Profesyonel web hosting hizmetleri ile sitenizi güvenli ve hızlı bir şekilde yayınlayın. Kurumsal e-posta ve hazır site çözümleri.',
+      discount: '%30-72 İndirim',
+      icon: Server,
+      color: 'from-purple-500 to-purple-600',
+      bgColor: 'bg-purple-50',
+      textColor: 'text-purple-700',
+      link: 'https://www.hosting.com.tr/aff.php?aff=484',
+      features: [
+        '%30 İndirimli Hosting',
+        '%72 İndirimli Hazır Site',
+        '%50 İndirimli Kurumsal E-Posta',
+        '7/24 Teknik Destek',
+        'Ücretsiz SSL Sertifikası'
       ]
     }
   ];

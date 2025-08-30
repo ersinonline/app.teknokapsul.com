@@ -3,3 +3,4 @@
 export * from './priceUpdater';
 export * from './auth';
 export * from './emailService';
+export * from './imapService';

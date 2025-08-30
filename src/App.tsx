@@ -58,6 +58,8 @@ import TeknoFinansPage from './pages/apps/TeknoFinansPage';
 import TeknoHizmetPage from './pages/apps/TeknoHizmetPage';
 import TeknoKapsulPage from './pages/apps/TeknoKapsulPage';
 import TeknoFirsatPage from './pages/other/TeknoFirsatPage';
+import TeknomailPage from './pages/other/TeknomailPage';
+import TeknodeskPage from './pages/other/TeknodeskPage';
 import PaymentPlansListPage from './pages/financial/PaymentPlansListPage';
 import PaymentPlanNewPage from './pages/financial/PaymentPlanNewPage';
 import PaymentPlanDetailPage from './pages/financial/PaymentPlanDetailPage';
@@ -249,6 +251,14 @@ const router = createBrowserRouter([
      path: '/tekno-firsat',
      element: <TeknoRoute><TeknoFirsatPage /></TeknoRoute>
    },
+  {
+    path: '/teknomail',
+    element: <TeknoRoute><TeknomailPage /></TeknoRoute>
+  },
+  {
+    path: '/teknodesk',
+    element: <TeknoRoute><TeknodeskPage /></TeknoRoute>
+  },
 
 
   {
