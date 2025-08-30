@@ -128,12 +128,6 @@ const TeknomailPage: React.FC = () => {
   };
 
   const filteredEmails = emails.filter(email => {
-    // Netflix filtresi - sadece konu veya gönderici adresinde 'netflix' geçen mailleri göster
-    const hasNetflix = email.subject.toLowerCase().includes('netflix') ||
-                      email.from.toLowerCase().includes('netflix');
-    
-    if (!hasNetflix) return false;
-    
     const matchesSearch = searchTerm === '' || 
                          email.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          email.from.toLowerCase().includes(searchTerm.toLowerCase());
