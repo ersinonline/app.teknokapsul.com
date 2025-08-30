@@ -261,7 +261,7 @@ const TeknomailPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Email List */}
-          <div className="lg:col-span-1">
+          <div className={`lg:col-span-1 ${selectedEmail ? 'hidden lg:block' : 'block'}`}>
             {/* Search and Filters */}
             <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
               <div className="relative mb-4">
@@ -275,10 +275,10 @@ const TeknomailPage: React.FC = () => {
                 />
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={() => setFilter('all')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  className={`px-3 py-2 sm:py-1 rounded-full text-sm font-medium ${
                     filter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -286,7 +286,7 @@ const TeknomailPage: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setFilter('unread')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  className={`px-3 py-2 sm:py-1 rounded-full text-sm font-medium ${
                     filter === 'unread' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -294,7 +294,7 @@ const TeknomailPage: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setFilter('starred')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  className={`px-3 py-2 sm:py-1 rounded-full text-sm font-medium ${
                     filter === 'starred' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -381,9 +381,21 @@ const TeknomailPage: React.FC = () => {
           </div>
 
           {/* Email Content */}
-          <div className="lg:col-span-2">
+          <div className={`lg:col-span-2 ${selectedEmail ? 'block' : 'hidden lg:block'}`}>
             {selectedEmail ? (
               <div className="bg-white rounded-lg shadow-sm">
+                {/* Mobile Back Button */}
+                <div className="lg:hidden p-4 border-b border-gray-200">
+                  <button
+                    onClick={() => setSelectedEmail(null)}
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Geri
+                  </button>
+                </div>
                 {/* Email Header */}
                 <div className="p-6 border-b border-gray-200">
                   <div className="flex items-start justify-between mb-4">
@@ -521,14 +533,15 @@ const TeknomailPage: React.FC = () => {
                       `}
                       className="w-full border-0"
                       style={{
-                        minHeight: '400px',
+                        minHeight: window.innerWidth < 768 ? '300px' : '400px',
                         height: 'auto'
                       }}
                       onLoad={(e) => {
                         const iframe = e.target as HTMLIFrameElement;
                         if (iframe.contentDocument) {
                           const height = iframe.contentDocument.documentElement.scrollHeight;
-                          iframe.style.height = Math.max(400, height + 40) + 'px';
+                          const minHeight = window.innerWidth < 768 ? 300 : 400;
+                          iframe.style.height = Math.max(minHeight, height + 40) + 'px';
                         }
                       }}
                     />
