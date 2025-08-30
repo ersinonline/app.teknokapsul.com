@@ -62,10 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const signOut = async () => {
     try {
       await clerkSignOut();
-      // Çıkış sonrası anasayfaya yönlendir
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 100);
+      // Çıkış sonrası state temizlenir, yönlendirme router tarafından yapılır
     } catch (error) {
       console.error('Sign-out error:', error);
     }

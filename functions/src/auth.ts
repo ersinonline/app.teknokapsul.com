@@ -16,7 +16,7 @@ const corsHandler = cors({ origin: true });
      }
  
      try {
-       const { userInfo, tokenResponse } = req.body;
+       const { userInfo } = req.body;
  
        if (!userInfo || !userInfo.id || !userInfo.email) {
          return res.status(400).json({ error: 'userInfo ve gerekli alanlar (id, email) zorunlu' });

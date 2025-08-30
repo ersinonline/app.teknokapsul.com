@@ -71,6 +71,14 @@ const TeknoFinansPage: React.FC = () => {
       icon: Calculator,
       path: '/tekno-finans/credit-calculator',
       color: 'bg-yellow-500'
+    },
+    {
+      id: 'payment-plan',
+      title: 'Ödeme Planı',
+      description: 'Ev alım ödeme planları oluşturun ve yönetin',
+      icon: CreditCard,
+      path: '/tekno-finans/payment-plan',
+      color: 'bg-orange-500'
     }
   ];
 

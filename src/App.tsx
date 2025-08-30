@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { Analytics } from '@vercel/analytics/react';
@@ -58,6 +58,10 @@ import TeknoFinansPage from './pages/apps/TeknoFinansPage';
 import TeknoHizmetPage from './pages/apps/TeknoHizmetPage';
 import TeknoKapsulPage from './pages/apps/TeknoKapsulPage';
 import TeknoFirsatPage from './pages/other/TeknoFirsatPage';
+import PaymentPlansListPage from './pages/financial/PaymentPlansListPage';
+import PaymentPlanNewPage from './pages/financial/PaymentPlanNewPage';
+import PaymentPlanDetailPage from './pages/financial/PaymentPlanDetailPage';
+import PaymentPlanEditPage from './pages/financial/PaymentPlanEditPage';
 // Premium sayfaları geçici olarak kaldırıldı
 // import PremiumIntroPage from './pages/PremiumIntroPage';
 // import PremiumManagePage from './pages/PremiumManagePage';
@@ -89,7 +93,9 @@ const TeknoRouteContent = ({ children }: { children: React.ReactNode }) => {
       <AppTabs currentApp={getCurrentApp()} />
       <MobileNavigation />
       <OfflineIndicator />
-      {children}
+      <div className="pb-20 lg:pb-0">
+        {children}
+      </div>
     </div>
   );
 };
@@ -356,6 +362,26 @@ const router = createBrowserRouter([
   {
     path: '/tekno-finans/credit-calculator',
     element: <TeknoRoute><CreditCalculatorPage2 /></TeknoRoute>
+  },
+  {
+    path: '/tekno-finans/payment-plan',
+    element: <Navigate to="/tekno-finans/payment-plans" replace />
+  },
+  {
+    path: '/tekno-finans/payment-plans',
+    element: <TeknoRoute><PaymentPlansListPage /></TeknoRoute>
+  },
+  {
+    path: '/tekno-finans/payment-plans/new',
+    element: <TeknoRoute><PaymentPlanNewPage /></TeknoRoute>
+  },
+  {
+    path: '/tekno-finans/payment-plans/:id',
+    element: <TeknoRoute><PaymentPlanDetailPage /></TeknoRoute>
+  },
+  {
+    path: '/tekno-finans/payment-plans/:id/edit',
+    element: <TeknoRoute><PaymentPlanEditPage /></TeknoRoute>
   },
   {
     path: '/tekno-kapsul',

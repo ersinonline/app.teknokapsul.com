@@ -37,10 +37,6 @@ export const MobileAuthHandler: React.FC<MobileAuthHandlerProps> = ({
       setTimeout(() => {
         if (user && onAuthSuccess) {
           onAuthSuccess();
-          // Force redirect to dashboard after successful auth
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 1000);
         }
       }, 100);
     }
@@ -64,30 +60,42 @@ export const MobileAuthHandler: React.FC<MobileAuthHandlerProps> = ({
   // Listen for storage and message events for authentication state changes
   useEffect(() => {
     if (isMobile) {
+      let reloadTimeout: NodeJS.Timeout;
+      let hasReloaded = false;
+
       const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === 'clerk-db-jwt' || e.key?.includes('clerk')) {
-          console.log('Clerk storage changed on mobile, reloading page');
-          window.location.reload();
+        if ((e.key === 'clerk-db-jwt' || e.key?.includes('clerk')) && !hasReloaded) {
+          console.log('Clerk storage changed on mobile');
+          hasReloaded = true;
+          // Prevent multiple reloads by using a flag and timeout
+          clearTimeout(reloadTimeout);
+          reloadTimeout = setTimeout(() => {
+            if (onAuthSuccess) {
+              onAuthSuccess();
+            }
+          }, 100);
         }
       };
 
       const handleMessage = (e: MessageEvent<any>) => {
-        if (e.data === 'AUTH_STATE_CHANGED' || e.data?.type === 'clerk:oauth:success') {
+        if ((e.data === 'AUTH_STATE_CHANGED' || e.data?.type === 'clerk:oauth:success') && !hasReloaded) {
           console.log('Auth state changed message received on mobile');
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 500);
+          hasReloaded = true;
+          if (onAuthSuccess) {
+            onAuthSuccess();
+          }
         }
       };
 
       // Listen for OAuth popup close events
       const handlePopupClose = () => {
-        setTimeout(() => {
-          if (window.Clerk?.user) {
-            console.log('OAuth popup closed, user authenticated');
-            window.location.href = '/dashboard';
+        if (window.Clerk?.user && !hasReloaded) {
+          console.log('OAuth popup closed, user authenticated');
+          hasReloaded = true;
+          if (onAuthSuccess) {
+            onAuthSuccess();
           }
-        }, 1000);
+        }
       };
 
       window.addEventListener('storage', handleStorageChange);
@@ -95,12 +103,13 @@ export const MobileAuthHandler: React.FC<MobileAuthHandlerProps> = ({
       window.addEventListener('focus', handlePopupClose);
 
       return () => {
+        clearTimeout(reloadTimeout);
         window.removeEventListener('storage', handleStorageChange);
         window.removeEventListener('message', handleMessage);
         window.removeEventListener('focus', handlePopupClose);
       };
     }
-  }, [isMobile]);
+  }, [isMobile, onAuthSuccess]);
 
   // Bileşen görünmez, sadece işlevsellik sağlar
   return null;

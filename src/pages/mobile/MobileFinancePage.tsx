@@ -138,6 +138,16 @@ export const MobileFinancePage: React.FC = () => {
       bgColor: 'bg-indigo-50',
       textColor: 'text-indigo-700'
     },
+    {
+      id: 'payment-plan',
+      title: 'Ödeme Planı',
+      description: 'Ev alım ödeme planları oluşturun',
+      icon: CreditCard,
+      path: '/tekno-finans/payment-plan',
+      color: 'bg-orange-500',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-orange-700'
+    }
   ];
 
   return (

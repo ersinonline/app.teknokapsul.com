@@ -24,10 +24,10 @@ interface NavigationItem {
 
 const bottomNavigationItems: NavigationItem[] = [
   { path: '/dashboard', label: 'Ana Sayfa', icon: Home },
-  { path: '/mobile-finance', label: 'TeknoFinans', icon: PieChart },
-  { path: '/teknokapsul', label: 'TeknoKapsül', icon: Zap },
-  { path: '/services', label: 'TeknoHizmet', icon: Grid3X3 },
-  { path: '/tekno-firsat', label: 'TeknoFırsat', icon: Gift },
+  { path: '/mobile-finance', label: 'Finans', icon: PieChart },
+  { path: '/teknokapsul', label: 'Kapsül', icon: Zap },
+  { path: '/services', label: 'Hizmet', icon: Grid3X3 },
+  { path: '/tekno-firsat', label: 'Fırsat', icon: Gift },
 ];
 
 export const MobileNavigation: React.FC = () => {

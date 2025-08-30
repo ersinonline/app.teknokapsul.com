@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, TrendingUp, Wrench, ShoppingCart } from 'lucide-react';
-import { useUser, UserButton } from '@clerk/clerk-react';
+import { UserButton } from '@clerk/clerk-react';
 
 interface AppTabsProps {
   currentApp: 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' | 'tekno-firsat';
@@ -9,7 +9,6 @@ interface AppTabsProps {
 
 const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
   const navigate = useNavigate();
-  const { user } = useUser();
 
   const tabs = [
     {
@@ -125,12 +124,7 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
               }
             }}
           />
-          <div className="hidden md:flex flex-col min-w-0 max-w-[200px]">
-            <span className="text-base font-semibold text-gray-800 truncate">
-              {user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || 'Kullanıcı'}
-            </span>
-            <span className="text-sm text-gray-500 whitespace-nowrap">Tekno Üye</span>
-          </div>
+
         </div>
       </div>
     </div>
