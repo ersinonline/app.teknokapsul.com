@@ -117,7 +117,7 @@ export const AddPortfolioModal: React.FC<AddPortfolioModalProps> = ({
       quantity: formData.type === 'deposit' ? 1 : parseFloat(formData.quantity),
       purchasePrice: parseFloat(formData.purchasePrice),
       purchaseDate: formData.purchaseDate,
-      transactionType: (formData.type === 'currency' || formData.type === 'gold') ? formData.transactionType : undefined,
+      transactionType: (formData.type === 'currency' || formData.type === 'gold') ? formData.transactionType : 'buy',
       createdAt: new Date(),
       updatedAt: new Date(),
       userId: '' // Bu değer PortfolioService tarafından doldurulacak
