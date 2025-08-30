@@ -31,11 +31,7 @@ interface EmailMessage {
   references?: string;
 }
 
-interface FetchEmailsRequest {
-  email: string;
-  appPassword: string;
-  limit?: number;
-}
+
 
 class ImapEmailService {
   private createImapConnection(config: GmailConfig): Imap {
@@ -110,7 +106,7 @@ class ImapEmailService {
                   })) : [],
                   messageId: mail.messageId || '',
                   inReplyTo: mail.inReplyTo || '',
-                  references: mail.references ? mail.references.join(' ') : ''
+                  references: mail.references ? (Array.isArray(mail.references) ? mail.references.join(' ') : mail.references.toString()) : ''
                 };
 
                 emails.push(email);
@@ -248,17 +244,33 @@ class ImapEmailService {
 
 const imapService = new ImapEmailService();
 
-// Firebase Cloud Function
-export const fetchGmailEmails = functions.https.onCall(async (data: FetchEmailsRequest, context) => {
-  // Kullanıcı doğrulaması (geçici olarak devre dışı)
-  // if (!context.auth) {
-  //   throw new functions.https.HttpsError('unauthenticated', 'Kullanıcı doğrulaması gerekli');
-  // }
+// Firebase Cloud Function with CORS support
+export const fetchGmailEmails = functions.https.onRequest(async (req, res) => {
+  // CORS headers
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
 
-  const { email, appPassword, limit = 20 } = data;
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  const { email, appPassword, limit = 20 } = req.body;
 
   if (!email || !appPassword) {
-    throw new functions.https.HttpsError('invalid-argument', 'Email adresi ve uygulama şifresi gerekli');
+    res.status(400).json({ 
+      success: false,
+      error: 'Email adresi ve uygulama şifresi gerekli' 
+    });
+    return;
   }
 
   try {
@@ -267,17 +279,17 @@ export const fetchGmailEmails = functions.https.onCall(async (data: FetchEmailsR
     const emails = await imapService.fetchEmails(config, limit);
     
     console.log(`IMAP başarılı: ${emails.length} email getirildi`);
-    return {
+    res.status(200).json({
       success: true,
       emails: emails,
       message: `${emails.length} email başarıyla getirildi`
-    };
+    });
   } catch (error) {
     console.error('IMAP email fetch hatası:', error);
-    return {
+    res.status(500).json({
       success: false,
       emails: [],
       message: error instanceof Error ? error.message : 'Email getirme işlemi başarısız'
-    };
+    });
   }
 });

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Inbox, Trash2, Star, Archive, RefreshCw, Search, Eye, Paperclip, AlertCircle } from 'lucide-react';
 import { GmailService, type EmailMessage } from '../../services/gmail.service';
-import { httpsCallable } from 'firebase/functions';
-import { functions } from '../../lib/firebase';
 
 // Email content styling
 const emailContentStyles = `
@@ -72,15 +70,24 @@ const TeknomailPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      // Firebase Cloud Function kullanarak gerçek IMAP bağlantısı
-      const fetchGmailEmails = httpsCallable(functions, 'fetchGmailEmails');
-      const result = await fetchGmailEmails({
-        email: GMAIL_CONFIG.email,
-        appPassword: GMAIL_CONFIG.appPassword,
-        limit: 20
+      // Firebase Cloud Function HTTP endpoint kullanarak gerçek IMAP bağlantısı
+      const response = await fetch('http://127.0.0.1:5002/superapp-37db4/us-central1/fetchGmailEmails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: GMAIL_CONFIG.email,
+          appPassword: GMAIL_CONFIG.appPassword,
+          limit: 20
+        })
       });
       
-      const data = result.data as { success: boolean; emails: EmailMessage[]; message: string };
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json() as { success: boolean; emails: EmailMessage[]; message: string };
       console.log('Firebase function response:', data);
       console.log('Emails count:', data.emails ? data.emails.length : 0);
       console.log('First few emails:', data.emails ? data.emails.slice(0, 3) : []);
