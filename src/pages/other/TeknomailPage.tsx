@@ -132,13 +132,17 @@ const TeknomailPage: React.FC = () => {
                          email.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          email.from.toLowerCase().includes(searchTerm.toLowerCase());
     
+    // Netflix filtrelemesi - sadece Netflix ile ilgili emailler
+    const isNetflixEmail = email.subject.toLowerCase().includes('netflix') || 
+                          email.from.toLowerCase().includes('netflix');
+    
     switch (filter) {
       case 'unread':
-        return matchesSearch && !email.isRead;
+        return matchesSearch && !email.isRead && isNetflixEmail;
       case 'starred':
-        return matchesSearch && email.isStarred;
+        return matchesSearch && email.isStarred && isNetflixEmail;
       default:
-        return matchesSearch;
+        return matchesSearch && isNetflixEmail;
     }
   });
   
