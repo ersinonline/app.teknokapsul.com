@@ -24,6 +24,7 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
     purchasePrice: item.purchasePrice,
     currentPrice: item.currentPrice,
     purchaseDate: item.purchaseDate,
+    transactionType: item.transactionType || 'buy',
     annualInterestRate: item.metadata?.annualInterestRate?.toString() || '',
     taxExemptPercentage: item.metadata?.taxExemptPercentage?.toString() || '10',
     bankName: item.metadata?.bankName || '',
@@ -81,6 +82,7 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
         purchasePrice: item.purchasePrice,
         currentPrice: item.currentPrice,
         purchaseDate: item.purchaseDate,
+        transactionType: item.transactionType || 'buy',
         annualInterestRate: item.metadata?.annualInterestRate?.toString() || '',
         taxExemptPercentage: item.metadata?.taxExemptPercentage?.toString() || '10',
         bankName: item.metadata?.bankName || '',
@@ -191,6 +193,7 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
           totalValue,
           totalReturn,
           returnPercentage,
+          transactionType: formData.transactionType,
           lastUpdated: new Date()
         };
       }
@@ -331,6 +334,39 @@ export const EditPortfolioModal: React.FC<EditPortfolioModalProps> = ({
                 step="any"
                 required
               />
+            </div>
+          )}
+
+          {/* İşlem Türü - Sadece döviz ve altın için */}
+          {(formData.type === 'currency' || formData.type === 'gold') && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                İşlem Türü
+              </label>
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, transactionType: 'buy' })}
+                  className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
+                    formData.transactionType === 'buy'
+                      ? 'bg-green-500 text-white border-green-500'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  Alış
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, transactionType: 'sell' })}
+                  className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
+                    formData.transactionType === 'sell'
+                      ? 'bg-red-500 text-white border-red-500'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  Satış
+                </button>
+              </div>
             </div>
           )}
 

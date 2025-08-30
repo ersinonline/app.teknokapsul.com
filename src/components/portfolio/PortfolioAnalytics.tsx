@@ -45,8 +45,8 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
 
     const totalValue = consolidatedItems.reduce((sum, item) => {
       if (item.transactionType === 'sell') {
-        // Satış işlemi: satış tutarını ekle
-        return sum + (item.purchasePrice * Math.abs(item.quantity));
+        // Satış işlemi: satış tutarını toplamdan çıkar
+        return sum - (item.purchasePrice * Math.abs(item.quantity));
       } else {
         // Normal alış işlemi
         return sum + (item.currentPrice * item.quantity);
@@ -55,8 +55,8 @@ export const PortfolioAnalytics: React.FC<PortfolioAnalyticsProps> = ({ portfoli
     
     const totalCost = consolidatedItems.reduce((sum, item) => {
       if (item.transactionType === 'sell') {
-        // Satış işlemi: mevcut değeri maliyet olarak kullan
-        return sum + (item.currentPrice * Math.abs(item.quantity));
+        // Satış işlemi: maliyeti toplamdan çıkar
+        return sum - (item.currentPrice * Math.abs(item.quantity));
       } else {
         // Normal alış işlemi
         return sum + ((item.purchasePrice || item.averagePrice || item.currentPrice) * item.quantity);
