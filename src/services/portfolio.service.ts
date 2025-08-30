@@ -301,6 +301,7 @@ class PortfolioService {
       const portfolioItem: Omit<PortfolioItem, 'id'> = {
         ...item,
         userId: item.userId || userId,
+        transactionType: item.transactionType || 'buy',
         currentPrice,
         totalValue,
         totalReturn,
