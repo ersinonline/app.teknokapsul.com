@@ -16,4 +16,5 @@ export interface AuthContextType extends AuthState {
   isWebView: boolean;
   isMobile: boolean;
   forceUpdate: number;
+  isSessionPersistent: boolean;
 }

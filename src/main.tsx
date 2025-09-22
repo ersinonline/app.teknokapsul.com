@@ -90,23 +90,23 @@ const renderApp = () => {
           publishableKey={PUBLISHABLE_KEY}
           localization={trTR}
           appearance={{
-            layout: {
-              socialButtonsVariant: 'blockButton',
-              logoImageUrl: undefined,
-              showOptionalFields: false
-            },
             elements: {
-              rootBox: 'w-full',
               card: 'w-full max-w-md mx-auto',
               socialButtonsBlockButton: 'w-full py-3 text-sm md:text-base',
               formButtonPrimary: 'w-full py-3 text-sm md:text-base',
-              formFieldInput: 'w-full py-3 px-4 text-sm md:text-base'
+              formFieldInput: 'w-full py-3 px-4 text-sm md:text-base',
+              // Login formunda "Beni Hatırla" seçeneğini göster
+              formFieldAction: 'block',
+            },
+            variables: {
+              // CSS variables for theming
+              colorPrimary: '#3b82f6',
             }
           }}
-          signInFallbackRedirectUrl={null}
-          signUpFallbackRedirectUrl={null}
-          afterSignInUrl={null}
-          afterSignUpUrl={null}
+          signInFallbackRedirectUrl="/dashboard"
+          signUpFallbackRedirectUrl="/dashboard"
+          signInForceRedirectUrl="/dashboard"
+          signUpForceRedirectUrl="/dashboard"
         >
           <App />
         </ClerkProvider>

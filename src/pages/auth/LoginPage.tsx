@@ -1,4 +1,4 @@
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { SignIn, useUser } from '@clerk/clerk-react';
 import { Package } from 'lucide-react';
@@ -8,7 +8,6 @@ export const LoginPage = () => {
   const { user, loading } = useAuth();
   const { isSignedIn, isLoaded } = useUser(); // Clerk'in kendi hook'u
   const location = useLocation();
-  const navigate = useNavigate();
   
   // Mobilde dashboard'a, masaüstünde anasayfaya yönlendir
   const getDefaultRedirect = () => {
@@ -21,14 +20,15 @@ export const LoginPage = () => {
   // Kullanıcı giriş yaptığında otomatik yönlendirme
   useEffect(() => {
     if ((user && !loading) || (isSignedIn && isLoaded)) {
-      // Kısa bir gecikme ile yönlendirme yap
+      // Daha uzun bir gecikme ile yönlendirme yap ve window.location kullan
       const timer = setTimeout(() => {
-        navigate(from, { replace: true });
-      }, 100);
+        // React Router yerine window.location kullanarak tam sayfa yenileme ile yönlendir
+        window.location.href = from;
+      }, 500);
       
       return () => clearTimeout(timer);
     }
-  }, [user, loading, isSignedIn, isLoaded, from, navigate]);
+  }, [user, loading, isSignedIn, isLoaded, from]);
 
   if (loading || !isLoaded) {
     return (

@@ -3,19 +3,52 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { verifyMagicLink, checkMagicLink } from '../../services/auth.service';
 import { Package } from 'lucide-react';
+import { useClerk } from '@clerk/clerk-react';
 
 export const VerifyPage = () => {
   const { user, loading } = useAuth();
   const [verifying, setVerifying] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const clerk = useClerk();
+
+  // Mobilde dashboard'a, masaüstünde anasayfaya yönlendir
+  const getDefaultRedirect = () => {
+    const isMobile = window.innerWidth < 1024; // lg breakpoint
+    return isMobile ? '/dashboard' : '/';
+  };
 
   useEffect(() => {
     const handleMagicLink = async () => {
       try {
+        // Clerk magic link handling
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('__clerk_ticket');
+        
+        if (token) {
+          // Clerk magic link doğrulama
+          try {
+            await clerk.handleEmailLinkVerification({ 
+              redirectUrl: window.location.href,
+              redirectUrlComplete: getDefaultRedirect()
+            });
+            
+            // Başarılı doğrulama sonrası yönlendirme
+            setTimeout(() => {
+              window.location.href = getDefaultRedirect();
+            }, 1000);
+            return;
+          } catch (clerkError) {
+            console.error('Clerk magic link error:', clerkError);
+          }
+        }
+
+        // Fallback: Eski Firebase magic link handling
         if (checkMagicLink()) {
           await verifyMagicLink();
-          navigate('/dashboard', { replace: true });
+          setTimeout(() => {
+            window.location.href = getDefaultRedirect();
+          }, 1000);
         } else {
           setError('Geçersiz veya süresi dolmuş link.');
         }
@@ -26,7 +59,9 @@ export const VerifyPage = () => {
           if (email) {
             try {
               await verifyMagicLink(email);
-              navigate('/dashboard', { replace: true });
+              setTimeout(() => {
+                window.location.href = getDefaultRedirect();
+              }, 1000);
             } catch (verifyErr: any) {
               setError('Doğrulama başarısız. Lütfen tekrar deneyin.');
             }
@@ -44,7 +79,7 @@ export const VerifyPage = () => {
     if (!loading && !user) {
       handleMagicLink();
     }
-  }, [loading, user, navigate]);
+  }, [loading, user, navigate, clerk]);
 
   if (loading || verifying) {
     return (
@@ -58,7 +93,7 @@ export const VerifyPage = () => {
   }
 
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={getDefaultRedirect()} replace />;
   }
 
   return (
