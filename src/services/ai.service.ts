@@ -31,16 +31,37 @@ const xaiClient = createXai({
 // Initialize model
 const model = xaiClient('grok-2-1212');
 
-export const generateText = async (prompt: string): Promise<string> => {
+export const generateText = async (prompt: string, retryCount = 0): Promise<string> => {
   try {
-    const result = await aiGenerateText({
+    const { text } = await aiGenerateText({
       model,
       prompt,
       temperature: 0.7,
     });
-    return result.text;
-  } catch (error) {
-    console.error("Error generating text:", error);
+    
+    return text;
+  } catch (error: any) {
+    console.error('Error generating text:', error);
+    
+    // Handle rate limiting with exponential backoff
+    if (error?.status === 429 && retryCount < 3) { // Increased retry count
+      const delay = Math.pow(2, retryCount + 1) * 3000; // Increased base delay: 6s, 12s, 24s
+      console.log(`Rate limited, retrying in ${delay}ms... (attempt ${retryCount + 1}/3)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return generateText(prompt, retryCount + 1);
+    }
+    
+    // For other errors or max retries reached, throw a custom error
+    if (error?.status === 429) {
+      throw new Error(`AI_RateLimit: Rate limit exceeded after ${retryCount + 1} attempts`);
+    }
+    
+    // For other API errors, provide a fallback response
+    if (error?.status >= 400) {
+      console.warn('AI API error, using fallback response');
+      return 'Üzgünüm, şu anda AI hizmeti kullanılamıyor. Lütfen daha sonra tekrar deneyin.';
+    }
+    
     throw error;
   }
 };
@@ -321,38 +342,166 @@ Eğer soru portföy ile ilgiliyse, finansal verileri analiz et ve portföy durum
   }
 };
 
-export const getAIRecommendations = async (financialData: any): Promise<string[]> => {
+export const getAIRecommendations = async (financialData: any, retryCount = 0): Promise<string[]> => {
   try {
+    // Analyze the financial data to create a more specific prompt
+    const dataAnalysis = analyzeFinancialData(financialData);
+    
     const prompt = `Finansal verilerime göre 3 kısa ve net öneri ver. Her öneri tek satırda olsun ve şu formatı kullan:
     
     * [Öneri metni]
     
-    Örnek:
-    * Yüksek kredi yükü: Çok sayıda kredi ve kredi kartı borcunuz var. Bu, finansal durumunuz üzerinde ciddi bir baskı oluşturuyor.
-    * Market kategorisinde harcamalarınızı azaltmaya odaklanın.
-    * Günü geçmiş ödemelerinize dikkat edin ve öncelikle bunları kapatın.
+    Veri Analizi:
+    - Toplam kredi kartı borcu: ${dataAnalysis.totalCreditDebt.toLocaleString('tr-TR')} TL
+    - Aylık gelir: ${dataAnalysis.totalIncome.toLocaleString('tr-TR')} TL
+    - Aylık gider: ${dataAnalysis.totalExpenses.toLocaleString('tr-TR')} TL
+    - Aktif abonelik sayısı: ${dataAnalysis.activeSubscriptions}
+    - Kredi kartı kullanım oranı: %${dataAnalysis.creditUtilization.toFixed(0)}
+    - Tasarruf oranı: %${dataAnalysis.savingsRate.toFixed(0)}
+    
+    ${dataAnalysis.hasNoData ? 'NOT: Kullanıcı henüz veri girmemiş, genel finansal tavsiyeler ver.' : ''}
+    
+    Öneriler gerçek verilerime dayalı olsun. Eğer bir kategoride veri yoksa o konuda yorum yapma.
     
     Finansal veriler: ${JSON.stringify(financialData)}`;
     
-    const result = await generateText(prompt);
+    const result = await generateText(prompt, retryCount);
     const recommendations = result
       .split('\n')
       .filter(line => line.trim().startsWith('*'))
       .map(line => line.trim().substring(1).trim())
       .slice(0, 3);
     
-    return recommendations.length > 0 ? recommendations : [
-      "Yüksek kredi yükü: Çok sayıda kredi ve kredi kartı borcunuz var. Bu, finansal durumunuz üzerinde ciddi bir baskı oluşturuyor.",
-      "Market kategorisinde harcamalarınızı azaltmaya odaklanın.",
-      "Günü geçmiş ödemelerinize dikkat edin ve öncelikle bunları kapatın."
-    ];
-  } catch (error) {
+    return recommendations.length > 0 ? recommendations : getSmartFallbackRecommendations(financialData);
+  } catch (error: any) {
     console.error("AI önerileri alma hatası:", error);
-    return [
-      "Yüksek kredi yükü: Çok sayıda kredi ve kredi kartı borcunuz var. Bu, finansal durumunuz üzerinde ciddi bir baskı oluşturuyor.",
-      "Market kategorisinde harcamalarınızı azaltmaya odaklanın.",
-      "Günü geçmiş ödemelerinize dikkat edin ve öncelikle bunları kapatın."
-    ];
+    
+    // Handle rate limiting with exponential backoff
+    if (error?.message?.includes('AI_RateLimit') && retryCount < 2) {
+      const delay = Math.pow(2, retryCount + 1) * 5000; // 10s, 20s for recommendations
+      console.log(`AI recommendations rate limited, retrying in ${delay}ms... (attempt ${retryCount + 1}/2)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return getAIRecommendations(financialData, retryCount + 1);
+    }
+    
+    // Return smart fallback recommendations based on financial data
+    console.log('Using smart fallback recommendations due to AI error');
+    return getSmartFallbackRecommendations(financialData);
+  }
+};
+
+// Helper function to analyze financial data
+const analyzeFinancialData = (financialData: any) => {
+  const totalCreditDebt = financialData.creditCards?.reduce((sum: number, card: any) => 
+    sum + (card.currentBalance || 0), 0) || 0;
+  const totalCreditLimit = financialData.creditCards?.reduce((sum: number, card: any) => 
+    sum + (card.creditLimit || 0), 0) || 0;
+  const totalIncome = financialData.incomes?.reduce((sum: number, income: any) => 
+    sum + (income.amount || 0), 0) || 0;
+  const totalExpenses = financialData.expenses?.reduce((sum: number, expense: any) => 
+    sum + (expense.amount || 0), 0) || 0;
+  const activeSubscriptions = financialData.subscriptions?.filter((sub: any) => sub.isActive)?.length || 0;
+  
+  const creditUtilization = totalCreditLimit > 0 ? (totalCreditDebt / totalCreditLimit) * 100 : 0;
+  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
+  
+  const hasNoData = totalIncome === 0 && totalExpenses === 0 && totalCreditDebt === 0 && activeSubscriptions === 0;
+  
+  return {
+    totalCreditDebt,
+    totalCreditLimit,
+    totalIncome,
+    totalExpenses,
+    activeSubscriptions,
+    creditUtilization,
+    savingsRate,
+    hasNoData
+  };
+};
+
+// Helper function for default recommendations
+const getDefaultRecommendations = (): string[] => [
+  "Yüksek kredi yükü: Çok sayıda kredi ve kredi kartı borcunuz var. Bu, finansal durumunuz üzerinde ciddi bir baskı oluşturuyor.",
+  "Market kategorisinde harcamalarınızı azaltmaya odaklanın.",
+  "Günü geçmiş ödemelerinize dikkat edin ve öncelikle bunları kapatın."
+];
+
+// Smart fallback recommendations based on actual financial data
+const getSmartFallbackRecommendations = (financialData: any): string[] => {
+  const recommendations: string[] = [];
+  
+  try {
+    // Analyze credit cards
+    if (financialData.creditCards?.length > 0) {
+      const totalCreditDebt = financialData.creditCards.reduce((sum: number, card: any) => 
+        sum + (card.currentBalance || 0), 0);
+      const totalCreditLimit = financialData.creditCards.reduce((sum: number, card: any) => 
+        sum + (card.creditLimit || 0), 0);
+      const utilizationRate = totalCreditLimit > 0 ? (totalCreditDebt / totalCreditLimit) * 100 : 0;
+      
+      if (totalCreditDebt > 10000) {
+        recommendations.push(`Kredi kartı borcunuz ${totalCreditDebt.toLocaleString('tr-TR')} TL. En yüksek faizli kartları öncelikle kapatın.`);
+      } else if (utilizationRate > 70) {
+        recommendations.push(`Kredi kartı kullanım oranınız %${utilizationRate.toFixed(0)}. %30'un altına indirmeye çalışın.`);
+      }
+    } else {
+      recommendations.push("Kredi kartı kullanımınız yok. Bu finansal disiplin açısından olumlu.");
+    }
+    
+    // Analyze expenses vs incomes
+    const totalExpenses = financialData.expenses?.reduce((sum: number, expense: any) => 
+      sum + (expense.amount || 0), 0) || 0;
+    const totalIncomes = financialData.incomes?.reduce((sum: number, income: any) => 
+      sum + (income.amount || 0), 0) || 0;
+    
+    if (totalExpenses === 0 && totalIncomes === 0) {
+      recommendations.push("Henüz gelir ve gider verisi eklenmemiş. Finansal takip için veri girişi yapın.");
+    } else if (totalExpenses > totalIncomes * 0.8) {
+      const savingsRate = totalIncomes > 0 ? ((totalIncomes - totalExpenses) / totalIncomes * 100) : 0;
+      recommendations.push(`Harcama/gelir oranınız yüksek. Tasarruf oranınız %${savingsRate.toFixed(0)}. %20'ye çıkarmaya çalışın.`);
+    } else if (totalExpenses === 0) {
+      recommendations.push("Harcama kaydınız yok. Gerçek finansal durumunuz için giderlerinizi kaydedin.");
+    }
+    
+    // Analyze subscriptions
+    const activeSubscriptions = financialData.subscriptions?.filter((sub: any) => sub.isActive) || [];
+    const totalSubscriptionCost = activeSubscriptions.reduce((sum: number, sub: any) => 
+      sum + (sub.amount || 0), 0);
+    
+    if (activeSubscriptions.length > 5) {
+      recommendations.push(`${activeSubscriptions.length} aktif aboneliğiniz var (${totalSubscriptionCost.toLocaleString('tr-TR')} TL/ay). Kullanmadıklarınızı iptal edin.`);
+    } else if (activeSubscriptions.length === 0) {
+      recommendations.push("Abonelik kaydınız yok. Düzenli ödemelerinizi takip etmek için ekleyin.");
+    }
+    
+    // Analyze loans
+    if (financialData.loans?.length > 0) {
+      const totalLoanDebt = financialData.loans.reduce((sum: number, loan: any) => 
+        sum + (loan.remainingAmount || 0), 0);
+      if (totalLoanDebt > 50000) {
+        recommendations.push(`Toplam kredi borcunuz ${totalLoanDebt.toLocaleString('tr-TR')} TL. Erken ödeme seçeneklerini değerlendirin.`);
+      }
+    }
+    
+    // Fill with default recommendations if not enough specific ones
+    while (recommendations.length < 3) {
+      const defaults = [
+        "Acil durum fonu oluşturun. 3-6 aylık harcamanız kadar para biriktirin.",
+        "Yatırım portföyünüzü çeşitlendirin. Farklı varlık sınıflarına yatırım yapın.",
+        "Finansal hedeflerinizi belirleyin ve bunlar için bütçe oluşturun."
+      ];
+      const remaining = defaults.filter(rec => !recommendations.includes(rec));
+      if (remaining.length > 0) {
+        recommendations.push(remaining[0]);
+      } else {
+        break;
+      }
+    }
+    
+    return recommendations.slice(0, 3);
+  } catch (error) {
+    console.error("Error generating smart fallback recommendations:", error);
+    return getDefaultRecommendations();
   }
 };
 

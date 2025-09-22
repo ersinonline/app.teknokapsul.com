@@ -23,6 +23,11 @@ import { CargoTracking, CARGO_COMPANIES } from '../types/cargo';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { portfolioService } from '../services/portfolio.service';
+import { 
+  StatCardSkeleton, 
+  CreditCardSkeleton, 
+  CargoSkeleton 
+} from './common/SkeletonLoader';
 
 export const Dashboard = () => {
   const { user } = useAuth();
@@ -54,60 +59,77 @@ export const Dashboard = () => {
 
 
   const loading = paymentsLoading || subscriptionsLoading || expensesLoading || incomesLoading || cargoLoading;
-  
+
   // Gider, gelir ve abonelik verilerini yükle
   useEffect(() => {
     const loadData = async () => {
       if (!user) return;
       
       try {
-        setExpensesLoading(true);
-        setIncomesLoading(true);
-        setSubscriptionsLoading(true);
-        setCargoLoading(true);
-        
-        const [userExpenses, userIncomes, userSubscriptions, userCreditCards, userCashAdvanceAccounts, userLoans, userCargos] = await Promise.all([
+        // Phase 1: Load critical data first (expenses, incomes, subscriptions)
+        const [userExpenses, userIncomes, userSubscriptions] = await Promise.all([
           getUserExpenses(user.id, currentYear, currentMonth),
           getUserIncomes(user.id, currentYear, currentMonth),
-          getUserSubscriptions(user.id),
-          getCreditCards(user.id),
-          getCashAdvanceAccounts(user.id),
-          getLoans(user.id),
-          getUserCargoTrackings(user.id)
+          getUserSubscriptions(user.id)
         ]);
         
         setExpenses(userExpenses);
         setIncomes(userIncomes);
         setSubscriptions(userSubscriptions);
+        
+        // Update loading states for critical data - this allows UI to show stats immediately
+        setExpensesLoading(false);
+        setIncomesLoading(false);
+        setSubscriptionsLoading(false);
+
+        // Phase 2: Load secondary data (financial data)
+        const [userCreditCards, userCashAdvanceAccounts, userLoans] = await Promise.all([
+          getCreditCards(user.id),
+          getCashAdvanceAccounts(user.id),
+          getLoans(user.id)
+        ]);
+        
         setCreditCards(userCreditCards);
         setCashAdvanceAccounts(userCashAdvanceAccounts);
         setLoans(userLoans);
-        setCargoList(userCargos);
-        
-        // AI önerilerini yükle
-        try {
-          const recommendations = await getAIRecommendations({
-            expenses: userExpenses,
-            incomes: userIncomes,
-            creditCards: userCreditCards,
-            cashAdvanceAccounts: userCashAdvanceAccounts,
-            loans: userLoans,
-            subscriptions: userSubscriptions
-          });
-          setAiRecommendations(recommendations);
-        } catch (aiError) {
-          console.error('Error loading AI recommendations:', aiError);
-          setAiRecommendations([]);
-        }
+
+        // Phase 3: Load non-critical data (cargo tracking) - can be delayed
+        setTimeout(async () => {
+          try {
+            const userCargos = await getUserCargoTrackings(user.id);
+            setCargoList(userCargos);
+          } catch (cargoError) {
+            console.error('Cargo loading error:', cargoError);
+          } finally {
+            setCargoLoading(false);
+          }
+        }, 500);
+
+        // Phase 4: Load AI recommendations with longer delay to avoid rate limits
+        setTimeout(async () => {
+          try {
+            const recommendations = await getAIRecommendations({
+              expenses: userExpenses,
+              incomes: userIncomes,
+              creditCards: userCreditCards,
+              cashAdvanceAccounts: userCashAdvanceAccounts,
+              loans: userLoans,
+              subscriptions: userSubscriptions
+            });
+            setAiRecommendations(recommendations);
+          } catch (aiError) {
+            console.error('Error loading AI recommendations:', aiError);
+            setAiRecommendations([]);
+          } finally {
+            setAiLoading(false);
+          }
+        }, 2000); // Increased delay to 2 seconds to avoid rate limits
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
         setExpensesLoading(false);
         setIncomesLoading(false);
         setSubscriptionsLoading(false);
-        setCargoLoading(false);
-
-        setAiLoading(false);
       }
     };
     
@@ -398,20 +420,27 @@ export const Dashboard = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4">
-        {stats.map((stat, index) => (
-          <div key={index} onClick={stat.onClick} className="group bg-white rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-lg border border-gray-100 hover:border-[#ffb700]/30 transition-all duration-300 animate-bounce-in cursor-pointer" style={{ animationDelay: `${index * 0.1}s` }}>
-            <div className="flex items-center justify-between mb-2">
-              <div className={`p-2 rounded-xl ${stat.color} text-white shadow-sm group-hover:shadow-md transition-shadow`}>
-                <stat.icon className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+        {loading ? (
+          // Skeleton loading for stats
+          [...Array(6)].map((_, index) => (
+            <StatCardSkeleton key={index} />
+          ))
+        ) : (
+          stats.map((stat, index) => (
+            <div key={index} onClick={stat.onClick} className="group bg-white rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-lg border border-gray-100 hover:border-[#ffb700]/30 transition-all duration-300 animate-bounce-in cursor-pointer" style={{ animationDelay: `${index * 0.1}s` }}>
+              <div className="flex items-center justify-between mb-2">
+                <div className={`p-2 rounded-xl ${stat.color} text-white shadow-sm group-hover:shadow-md transition-shadow`}>
+                  <stat.icon className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                </div>
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium">{stat.label}</p>
+                <p className="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 group-hover:text-[#e6a500] transition-colors">{stat.value}</p>
+                <p className="text-xs text-gray-500 mt-1">{stat.trend}</p>
               </div>
             </div>
-            <div>
-              <p className="text-xs sm:text-sm text-gray-600 mb-1 font-medium">{stat.label}</p>
-              <p className="text-sm sm:text-lg lg:text-xl font-bold text-gray-900 group-hover:text-[#e6a500] transition-colors">{stat.value}</p>
-              <p className="text-xs text-gray-500 mt-1">{stat.trend}</p>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
 
@@ -574,13 +603,19 @@ export const Dashboard = () => {
             </div>
           </div>
           <div className="space-y-3">
-             {sortedCreditCards.length > 0 ? sortedCreditCards.slice(0, 3).map((card) => {
-               const availableRatio = card.limit > 0 ? ((card.limit - card.currentDebt) / card.limit) * 100 : 0;
-               const daysToPayment = calculateDaysRemaining(new Date(new Date().getFullYear(), new Date().getMonth(), card.statementDate).toISOString());
-               return (
-                 <div key={card.id} className="p-3 bg-muted/30 rounded-lg">
-                   <div className="flex items-center justify-between mb-2">
-                     <h3 className="font-medium text-sm truncate">{card.name}</h3>
+            {loading ? (
+              // Skeleton loading for credit cards
+              [...Array(3)].map((_, index) => (
+                <CreditCardSkeleton key={index} />
+              ))
+            ) : (
+              sortedCreditCards.length > 0 ? sortedCreditCards.slice(0, 3).map((card) => {
+                const availableRatio = card.limit > 0 ? ((card.limit - card.currentDebt) / card.limit) * 100 : 0;
+                const daysToPayment = calculateDaysRemaining(new Date(new Date().getFullYear(), new Date().getMonth(), card.statementDate).toISOString());
+                return (
+                  <div key={card.id} className="p-3 bg-muted/30 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium text-sm truncate">{card.name}</h3>
                      <div className="flex gap-1">
                        <span className={`text-xs px-2 py-1 rounded-full ${
                          availableRatio >= 80 ? 'bg-green-100 text-green-800' :
@@ -617,7 +652,7 @@ export const Dashboard = () => {
                 <CreditCard className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">Kredi kartı bulunmuyor</p>
               </div>
-            )}
+            ))}
           </div>
         </div>
 
@@ -869,33 +904,39 @@ export const Dashboard = () => {
           </div>
          
          <div className="space-y-3">
-           {recentCargos.length > 0 ? (
-             recentCargos.slice(0, 3).map((cargo) => {
-               const company = CARGO_COMPANIES[cargo.company];
-               return (
-                 <div key={cargo.id} className="flex items-center justify-between p-3 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors">
-                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                     {company?.logo ? (
-                       <img 
-                         src={company.logo} 
-                         alt={company.name}
-                         className="w-6 h-6 object-contain rounded flex-shrink-0"
-                         onError={(e) => {
-                           e.currentTarget.style.display = 'none';
-                           e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                         }}
-                       />
-                     ) : null}
-                     <Truck className={`w-5 h-5 text-orange-600 flex-shrink-0 ${company?.logo ? 'hidden' : ''}`} />
-                     <div className="flex-1 min-w-0">
-                       <h4 className="font-medium text-sm truncate text-orange-800">{cargo.name}</h4>
-                       <p className="text-xs text-orange-600 truncate">
-                         {cargo.trackingNumber} • {company?.name || cargo.company}
-                       </p>
+           {loading ? (
+             // Skeleton loading for cargo tracking
+             [...Array(3)].map((_, index) => (
+               <CargoSkeleton key={index} />
+             ))
+           ) : (
+             recentCargos.length > 0 ? (
+               recentCargos.slice(0, 3).map((cargo) => {
+                 const company = CARGO_COMPANIES[cargo.company];
+                 return (
+                   <div key={cargo.id} className="flex items-center justify-between p-3 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors">
+                     <div className="flex items-center gap-3 flex-1 min-w-0">
+                       {company?.logo ? (
+                         <img 
+                           src={company.logo} 
+                           alt={company.name}
+                           className="w-6 h-6 object-contain rounded flex-shrink-0"
+                           onError={(e) => {
+                             e.currentTarget.style.display = 'none';
+                             e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                           }}
+                         />
+                       ) : null}
+                       <Truck className={`w-5 h-5 text-orange-600 flex-shrink-0 ${company?.logo ? 'hidden' : ''}`} />
+                       <div className="flex-1 min-w-0">
+                         <h4 className="font-medium text-sm truncate text-orange-800">{cargo.name}</h4>
+                         <p className="text-xs text-orange-600 truncate">
+                           {cargo.trackingNumber} • {company?.name || cargo.company}
+                         </p>
+                       </div>
                      </div>
-                   </div>
-                   <div className="flex items-center gap-2 flex-shrink-0">
-                     {cargo.isDelivered ? (
+                     <div className="flex items-center gap-2 flex-shrink-0">
+                       {cargo.isDelivered ? (
                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
                          Teslim Edildi
                        </span>
@@ -907,15 +948,15 @@ export const Dashboard = () => {
                    </div>
                  </div>
                );
-             })
-           ) : (
-             <div className="text-center py-8 text-muted-foreground">
-               <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
-               <p className="text-sm">Henüz kargo eklenmemiş</p>
-               <p className="text-xs mt-1">İlk kargonuzu ekleyerek başlayın!</p>
-             </div>
-           )}
-         </div>
+               })
+             ) : (
+               <div className="text-center py-8 text-muted-foreground">
+                 <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                 <p className="text-sm">Henüz kargo eklenmemiş</p>
+                 <p className="text-xs mt-1">İlk kargonuzu ekleyerek başlayın!</p>
+               </div>
+             ))}
+           </div>
        </div>
 
         {/* Kargo Durumu */}
@@ -982,9 +1023,16 @@ export const Dashboard = () => {
         </div>
         <div className="space-y-4 min-h-[200px]">
           {aiLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{ borderBottomColor: '#ffb700' }}></div>
-              <p className="text-sm text-muted-foreground mt-4">AI önerileri hazırlanıyor...</p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="p-4 rounded-lg min-h-[80px] bg-gray-50 border border-gray-200">
+                  <div className="space-y-2">
+                    <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-4 w-4/5 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-4 w-3/5 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : aiRecommendations.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
