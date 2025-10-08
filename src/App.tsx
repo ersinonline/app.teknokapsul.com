@@ -24,6 +24,7 @@ import { NotificationsPage } from './pages/notifications/NotificationsPage';
 import { FAQPage } from './pages/faq/FAQPage';
 import { OtherPage } from './pages/other/OtherPage';
 import { CargoTrackingPage } from './pages/cargo-tracking/CargoTrackingPage';
+import AttendancePage from './pages/attendance/AttendancePage';
 import { FinancialAnalytics } from './components/analytics/FinancialAnalytics';
 import { MobileNavigation } from './components/navigation/MobileNavigation';
 import { OfflineIndicator } from './components/offline/OfflineIndicator';
@@ -201,6 +202,10 @@ const router = createBrowserRouter([
   {
     path: '/cargo-tracking',
     element: <TeknoRoute><CargoTrackingPage /></TeknoRoute>
+  },
+  {
+    path: '/attendance',
+    element: <TeknoRoute><AttendancePage /></TeknoRoute>
   },
   {
     path: '/ai-assistant',
