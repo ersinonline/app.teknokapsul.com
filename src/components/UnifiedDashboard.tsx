@@ -430,17 +430,27 @@ export const UnifiedDashboard = () => {
                         </div>
                         <div className="flex items-center justify-between">
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            ₺{card.currentDebt.toLocaleString('tr-TR')} / ₺{card.limit.toLocaleString('tr-TR')}
+                            ₺{(card.currentDebt || 0).toLocaleString('tr-TR')} / ₺{(card.limit || 0).toLocaleString('tr-TR')}
                           </p>
-                          <p className={`text-sm font-medium ${card.debtRatio > 70 ? 'text-rose-600 dark:text-rose-400' : card.debtRatio > 30 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                            %{card.debtRatio.toFixed(1)}
-                          </p>
+                          {(() => {
+                            const debtRatio = card.debtRatio ?? (card.limit > 0 ? (card.currentDebt / card.limit) * 100 : 0);
+                            return (
+                              <p className={`text-sm font-medium ${debtRatio > 70 ? 'text-rose-600 dark:text-rose-400' : debtRatio > 30 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                %{debtRatio.toFixed(1)}
+                              </p>
+                            );
+                          })()}
                         </div>
                         <div className="mt-2 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full transition-all duration-300 ${card.debtRatio > 70 ? 'bg-rose-500' : card.debtRatio > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                            style={{ width: `${Math.min(card.debtRatio, 100)}%` }}
-                          />
+                          {(() => {
+                            const debtRatio = card.debtRatio ?? (card.limit > 0 ? (card.currentDebt / card.limit) * 100 : 0);
+                            return (
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-300 ${debtRatio > 70 ? 'bg-rose-500' : debtRatio > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                                style={{ width: `${Math.min(debtRatio, 100)}%` }}
+                              />
+                            );
+                          })()}
                         </div>
                       </div>
                     ))}
