@@ -1,7 +1,7 @@
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { SignIn, useUser } from '@clerk/clerk-react';
-import { Sparkles, Shield, Zap, Users, Star, CheckCircle } from 'lucide-react';
+import { Shield, Zap, Users, Star, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export const LoginPage = () => {
@@ -67,8 +67,8 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className="fixed inset-0 bg-white overflow-hidden">
-      <div className="h-full flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-white overflow-y-auto">
+      <div className="min-h-screen flex flex-col lg:flex-row">
         {/* Left Section - Hero/Branding - Desktop Only */}
         <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-50 to-gray-100 flex-col justify-center relative overflow-hidden">
           {/* Background Pattern */}
@@ -132,19 +132,19 @@ export const LoginPage = () => {
         </div>
 
         {/* Right Section - Clerk SignIn */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-12 min-h-screen lg:min-h-0">
           <div className="w-full max-w-md">
             {/* Mobile Branding */}
-            <div className="lg:hidden text-center mb-12">
-              <div className="flex items-center justify-center mb-6">
-                <div className="w-12 h-12 bg-[#ffb700] rounded-2xl flex items-center justify-center mr-4 shadow-lg">
-                  <span className="text-white font-bold text-xl">T</span>
+            <div className="lg:hidden text-center mb-8 sm:mb-12">
+              <div className="flex items-center justify-center mb-4 sm:mb-6">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#ffb700] rounded-2xl flex items-center justify-center mr-3 sm:mr-4 shadow-lg">
+                  <span className="text-white font-bold text-lg sm:text-xl">T</span>
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   TeknoKapsül
                 </h1>
               </div>
-              <p className="text-gray-600 text-lg">
+              <p className="text-gray-600 text-base sm:text-lg">
                 Dijital yaşamınızı kolaylaştıran platform
               </p>
             </div>
@@ -152,6 +152,8 @@ export const LoginPage = () => {
             {/* Compact Clerk SignIn Form */}
             <div className="w-full max-w-sm mx-auto">
               <SignIn 
+                redirectUrl="/dashboard"
+                afterSignInUrl="/dashboard"
                 appearance={{
                   elements: {
                     rootBox: "w-full",
