@@ -154,17 +154,6 @@ export const UnifiedDashboard = () => {
           setCargoLoading(false);
         }
 
-        // Load AI recommendations
-        setAiLoading(true);
-        try {
-          const recommendations = await getAIRecommendations(user.id);
-          setAiRecommendations(recommendations);
-        } catch (aiError) {
-          console.error('AI recommendations error:', aiError);
-        } finally {
-          setAiLoading(false);
-        }
-
       } catch (err) {
         console.error('Dashboard data loading error:', err);
         setError('Veriler yüklenirken bir hata oluştu');
@@ -175,6 +164,40 @@ export const UnifiedDashboard = () => {
 
     loadData();
   }, [user, currentYear, currentMonth]);
+
+  // Separate useEffect for AI recommendations with delay to avoid blocking main dashboard load
+  useEffect(() => {
+    if (!user || loading) return;
+
+    const loadAIRecommendations = async () => {
+      // Wait 3 seconds after main dashboard loads to avoid rate limits
+      setTimeout(async () => {
+        setAiLoading(true);
+        try {
+          // Create financial data object for AI recommendations
+          const financialData = {
+            expenses,
+            incomes,
+            subscriptions,
+            creditCards,
+            cashAdvanceAccounts,
+            loans
+          };
+          
+          const recommendations = await getAIRecommendations(financialData);
+          setAiRecommendations(recommendations);
+        } catch (aiError) {
+          console.error('AI recommendations error:', aiError);
+          // Set empty array instead of keeping loading state
+          setAiRecommendations([]);
+        } finally {
+          setAiLoading(false);
+        }
+      }, 3000); // 3 second delay
+    };
+
+    loadAIRecommendations();
+  }, [user, loading, expenses, incomes, subscriptions, creditCards, cashAdvanceAccounts, loans]);
 
   // Calculate enhanced financial stats with null checks
   const totalIncome = incomes.reduce((sum, income) => sum + (income?.amount || 0), 0);

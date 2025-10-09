@@ -43,23 +43,16 @@ export const generateText = async (prompt: string, retryCount = 0): Promise<stri
   } catch (error: any) {
     console.error('Error generating text:', error);
     
-    // Handle rate limiting with exponential backoff
-    if (error?.status === 429 && retryCount < 3) { // Increased retry count
-      const delay = Math.pow(2, retryCount + 1) * 3000; // Increased base delay: 6s, 12s, 24s
-      console.log(`Rate limited, retrying in ${delay}ms... (attempt ${retryCount + 1}/3)`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-      return generateText(prompt, retryCount + 1);
-    }
-    
-    // For other errors or max retries reached, throw a custom error
-    if (error?.status === 429) {
-      throw new Error(`AI_RateLimit: Rate limit exceeded after ${retryCount + 1} attempts`);
-    }
-    
-    // For other API errors, provide a fallback response
-    if (error?.status >= 400) {
-      console.warn('AI API error, using fallback response');
-      return 'Üzgünüm, şu anda AI hizmeti kullanılamıyor. Lütfen daha sonra tekrar deneyin.';
+    // Enhanced rate limiting handling with longer delays
+    if (error?.message?.includes('429') || error?.status === 429) {
+      if (retryCount < 2) {
+        // Exponential backoff with longer base delay for rate limits
+        const delay = Math.pow(2, retryCount + 2) * 5000; // 20s, 40s delays
+        console.log(`Rate limited, retrying in ${delay}ms... (attempt ${retryCount + 1}/2)`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return generateText(prompt, retryCount + 1);
+      }
+      throw new Error('AI_RateLimit: Too many requests');
     }
     
     throw error;
@@ -376,10 +369,10 @@ export const getAIRecommendations = async (financialData: any, retryCount = 0): 
   } catch (error: any) {
     console.error("AI önerileri alma hatası:", error);
     
-    // Handle rate limiting with exponential backoff
-    if (error?.message?.includes('AI_RateLimit') && retryCount < 2) {
-      const delay = Math.pow(2, retryCount + 1) * 5000; // 10s, 20s for recommendations
-      console.log(`AI recommendations rate limited, retrying in ${delay}ms... (attempt ${retryCount + 1}/2)`);
+    // Enhanced rate limiting with longer delays for recommendations
+    if ((error?.message?.includes('AI_RateLimit') || error?.message?.includes('429')) && retryCount < 1) {
+      const delay = (retryCount + 1) * 15000; // 15s delay for first retry
+      console.log(`AI recommendations rate limited, retrying in ${delay}ms... (attempt ${retryCount + 1}/1)`);
       await new Promise(resolve => setTimeout(resolve, delay));
       return getAIRecommendations(financialData, retryCount + 1);
     }
