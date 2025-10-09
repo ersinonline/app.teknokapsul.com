@@ -347,182 +347,314 @@ export const UnifiedDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Enhanced Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Compact Header with Welcome Message */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">Hoş Geldiniz! 👋</h1>
+              <p className="text-blue-100 mt-1">Finansal durumunuzun özeti</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-blue-100">Bugün</p>
+              <p className="text-lg font-semibold">{new Date().toLocaleDateString('tr-TR')}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Enhanced Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
-          {statsCards.map((stat, index) => (
-            <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 hover:scale-105">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-lg ${getColorClasses(stat.color)}`}>
-                  <stat.icon className="w-6 h-6" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Compact Stats Grid - 4 columns instead of 6 */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {statsCards.slice(0, 4).map((stat, index) => (
+            <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200">
+              <div className="flex items-center justify-between mb-2">
+                <div className={`p-2 rounded-lg ${getColorClasses(stat.color)}`}>
+                  <stat.icon className="w-5 h-5" />
                 </div>
+                <p className={`text-xs font-medium ${getChangeColor(stat.changeType)}`}>
+                  {stat.change}
+                </p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
                   {stat.title}
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                <p className="text-lg font-bold text-gray-900 dark:text-white">
                   {stat.value}
-                </p>
-                <p className={`text-sm font-medium ${getChangeColor(stat.changeType)}`}>
-                  {stat.change}
                 </p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Takes 2/3 on desktop */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Quick Actions */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+        {/* Main Dashboard Grid - 3 columns layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Left Column - Quick Actions & Recent Transactions */}
+          <div className="space-y-6">
+            {/* Compact Quick Actions */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
                 Hızlı İşlemler
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {quickActions.map((action) => (
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                {quickActions.slice(0, 4).map((action) => (
                   <button
                     key={action.id}
                     onClick={() => navigate(action.path)}
-                    className="flex flex-col items-center p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200 hover:scale-105 group"
+                    className="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-sm transition-all duration-200 group"
                   >
-                    <div className={`p-3 rounded-lg ${action.bgColor} group-hover:scale-110 transition-transform duration-200 mb-3`}>
-                      <action.icon className={`w-6 h-6 ${action.iconColor}`} />
+                    <div className={`p-2 rounded-lg ${action.bgColor} mr-3`}>
+                      <action.icon className={`w-4 h-4 ${action.iconColor}`} />
                     </div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white text-center">
+                    <span className="text-xs font-medium text-gray-900 dark:text-white">
                       {action.title}
                     </span>
                   </button>
                 ))}
               </div>
             </div>
+
+            {/* Recent Transactions */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Son İşlemler
+                </h3>
+                <button 
+                  onClick={() => navigate('/expenses')}
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  Tümünü Gör
+                </button>
+              </div>
+              <div className="space-y-2">
+                {recentTransactions.slice(0, 4).map((transaction) => (
+                  <div key={transaction.id} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="flex items-center space-x-2">
+                      <div className={`p-1 rounded ${transaction.type === 'income' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-rose-100 dark:bg-rose-900/30'}`}>
+                        {transaction.type === 'income' ? 
+                          <ArrowUpRight className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> :
+                          <ArrowDownLeft className="w-3 h-3 text-rose-600 dark:text-rose-400" />
+                        }
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-gray-900 dark:text-white">
+                          {transaction.description.length > 15 ? transaction.description.substring(0, 15) + '...' : transaction.description}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {transaction.category}
+                        </p>
+                      </div>
+                    </div>
+                    <p className={`text-xs font-semibold ${transaction.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                      {transaction.type === 'income' ? '+' : '-'}₺{transaction.amount.toLocaleString('tr-TR')}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Right Column - Takes 1/3 on desktop */}
-          <div className="space-y-8">
+          {/* Middle Column - Credit Cards & Portfolio */}
+          <div className="space-y-6">
             {/* Credit Cards Summary */}
             {creditCards.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                     Kredi Kartları
-                  </h2>
+                  </h3>
+                  <button 
+                    onClick={() => navigate('/financial')}
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Detay
+                  </button>
                 </div>
-                <div className="p-6">
-                  <div className="space-y-4">
-                    {creditCards.slice(0, 3).map((card) => (
-                      <div key={card.id} className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800/30">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="font-medium text-gray-900 dark:text-white">
-                            {card.bank}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            ****{card.cardNumber.slice(-4)}
-                          </p>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            ₺{(card.currentDebt || 0).toLocaleString('tr-TR')} / ₺{(card.limit || 0).toLocaleString('tr-TR')}
-                          </p>
-                          {(() => {
-                            const debtRatio = card.debtRatio ?? (card.limit > 0 ? (card.currentDebt / card.limit) * 100 : 0);
-                            return (
-                              <p className={`text-sm font-medium ${debtRatio > 70 ? 'text-rose-600 dark:text-rose-400' : debtRatio > 30 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                                %{debtRatio.toFixed(1)}
-                              </p>
-                            );
-                          })()}
-                        </div>
-                        <div className="mt-2 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                          {(() => {
-                            const debtRatio = card.debtRatio ?? (card.limit > 0 ? (card.currentDebt / card.limit) * 100 : 0);
-                            return (
-                              <div 
-                                className={`h-2 rounded-full transition-all duration-300 ${debtRatio > 70 ? 'bg-rose-500' : debtRatio > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                                style={{ width: `${Math.min(debtRatio, 100)}%` }}
-                              />
-                            );
-                          })()}
-                        </div>
+                <div className="space-y-3">
+                  {creditCards.slice(0, 3).map((card) => (
+                    <div key={card.id} className="p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {card.bank}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          ****{card.cardNumber.slice(-4)}
+                        </p>
                       </div>
-                    ))}
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          ₺{(card.currentDebt || 0).toLocaleString('tr-TR')} / ₺{(card.limit || 0).toLocaleString('tr-TR')}
+                        </p>
+                        {(() => {
+                          const debtRatio = card.debtRatio ?? (card.limit > 0 ? (card.currentDebt / card.limit) * 100 : 0);
+                          return (
+                            <p className={`text-xs font-medium ${debtRatio > 70 ? 'text-rose-600 dark:text-rose-400' : debtRatio > 30 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                              %{debtRatio.toFixed(1)}
+                            </p>
+                          );
+                        })()}
+                      </div>
+                      <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                        {(() => {
+                          const debtRatio = card.debtRatio ?? (card.limit > 0 ? (card.currentDebt / card.limit) * 100 : 0);
+                          return (
+                            <div 
+                              className={`h-1.5 rounded-full transition-all duration-300 ${debtRatio > 70 ? 'bg-rose-500' : debtRatio > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                              style={{ width: `${Math.min(debtRatio, 100)}%` }}
+                            />
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Portfolio Summary */}
+            {portfolioSummary && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    Portföy Özeti
+                  </h3>
+                  <button 
+                    onClick={() => navigate('/portfolio')}
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Detay
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  <div className="p-3 rounded-lg bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 border border-emerald-100 dark:border-emerald-800/30">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Toplam Değer</p>
+                        <p className="text-lg font-bold text-gray-900 dark:text-white">
+                          ₺{portfolioSummary.totalValue?.toLocaleString('tr-TR') || '0'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Getiri</p>
+                        <p className={`text-sm font-semibold ${(portfolioSummary.totalReturn || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                          {(portfolioSummary.totalReturn || 0) >= 0 ? '+' : ''}%{portfolioSummary.totalReturn?.toFixed(1) || '0'}
+                        </p>
+                      </div>
+                    </div>
                   </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - AI Recommendations & Cargo */}
+          <div className="space-y-6">
+            {/* AI Recommendations */}
+            {aiRecommendations.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                      AI Önerileri
+                    </h3>
+                  </div>
+                  <button 
+                    onClick={() => navigate('/ai')}
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Sohbet
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {aiRecommendations.slice(0, 3).map((recommendation, index) => (
+                    <div key={index} className="p-3 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-100 dark:border-purple-800/30">
+                      <div className="flex items-start space-x-2">
+                        <div className="p-1 bg-purple-100 dark:bg-purple-900/30 rounded-full mt-0.5">
+                          <Sparkles className="w-3 h-3 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <p className="text-xs text-gray-900 dark:text-white leading-relaxed">
+                          {recommendation.length > 80 ? recommendation.substring(0, 80) + '...' : recommendation}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
 
             {/* Cargo Tracking */}
             {cargoList.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                     Kargo Takip
-                  </h2>
+                  </h3>
+                  <button 
+                    onClick={() => navigate('/cargo-tracking')}
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Tümü
+                  </button>
                 </div>
-                <div className="p-6">
-                  <div className="space-y-4">
-                    {cargoList.slice(0, 3).map((cargo) => (
-                      <div key={cargo.id} className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="font-medium text-gray-900 dark:text-white">
-                            {cargo.name}
-                          </p>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${cargo.isDelivered ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'}`}>
-                            {cargo.isDelivered ? 'Teslim Edildi' : 'Takip Ediliyor'}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {CARGO_COMPANIES[cargo.company]?.name || cargo.company}
+                <div className="space-y-2">
+                  {cargoList.slice(0, 3).map((cargo) => (
+                    <div key={cargo.id} className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs font-medium text-gray-900 dark:text-white">
+                          {cargo.name.length > 20 ? cargo.name.substring(0, 20) + '...' : cargo.name}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                          {cargo.trackingNumber}
-                        </p>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${cargo.isDelivered ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'}`}>
+                          {cargo.isDelivered ? 'Teslim' : 'Yolda'}
+                        </span>
                       </div>
-                    ))}
-                  </div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        {CARGO_COMPANIES[cargo.company]?.name || cargo.company}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* AI Recommendations */}
-            {aiRecommendations.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            {/* Monthly Summary */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                Bu Ay Özet
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20">
                   <div className="flex items-center space-x-2">
-                    <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      AI Önerileri
-                    </h2>
+                    <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Gelir</span>
                   </div>
+                  <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                    ₺{totalIncome.toLocaleString('tr-TR')}
+                  </span>
                 </div>
-                <div className="p-6">
-                  <div className="space-y-4">
-                    {aiRecommendations.slice(0, 3).map((recommendation, index) => (
-                      <div key={index} className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-100 dark:border-purple-800/30">
-                        <div className="flex items-start space-x-3">
-                          <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-                            <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                              {recommendation}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                <div className="flex items-center justify-between p-2 rounded-lg bg-rose-50 dark:bg-rose-900/20">
+                  <div className="flex items-center space-x-2">
+                    <TrendingDown className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Gider</span>
                   </div>
+                  <span className="text-sm font-semibold text-rose-600 dark:text-rose-400">
+                    ₺{totalExpense.toLocaleString('tr-TR')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center space-x-2">
+                    <Wallet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span className="text-xs font-medium text-gray-900 dark:text-white">Net</span>
+                  </div>
+                  <span className={`text-sm font-bold ${netBalance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                    ₺{netBalance.toLocaleString('tr-TR')}
+                  </span>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
