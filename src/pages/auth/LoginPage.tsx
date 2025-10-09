@@ -11,10 +11,9 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const [isRedirecting, setIsRedirecting] = useState(false);
   
-  // Mobilde dashboard'a, masaüstünde anasayfaya yönlendir
+  // Her zaman dashboard'a yönlendir
   const getDefaultRedirect = () => {
-    const isMobile = window.innerWidth < 1024;
-    return isMobile ? '/dashboard' : '/';
+    return '/dashboard';
   };
   
   const from = location.state?.from || getDefaultRedirect();

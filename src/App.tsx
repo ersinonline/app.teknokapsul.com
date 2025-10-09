@@ -12,7 +12,7 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { AuthGuard } from './components/auth/AuthGuard';
 
 // Route components
-import { Dashboard } from './components/Dashboard';
+import { UnifiedDashboard } from './components/UnifiedDashboard';
 import { HomePage } from './components/HomePage';
 import Services from './pages/services/ServicesPage';
 
@@ -147,7 +147,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/dashboard',
-    element: <TeknoRoute><Dashboard /></TeknoRoute>
+    element: <TeknoRoute><UnifiedDashboard /></TeknoRoute>
   },
   {
     path: '/services',

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Theme = 'light';
+type Theme = 'light' | 'dark' | 'system';
 type ColorScheme = 'blue' | 'green' | 'purple' | 'orange' | 'pink';
 
 interface ThemeSettings {
@@ -71,7 +71,30 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
   });
 
-  const [isDark] = useState(false);
+  // Determine if dark mode should be active
+  const [isDark, setIsDark] = useState(() => {
+    if (settings.theme === 'dark') return true;
+    if (settings.theme === 'light') return false;
+    // System preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (settings.theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (e: MediaQueryListEvent) => {
+        setIsDark(e.matches);
+      };
+      
+      mediaQuery.addEventListener('change', handleChange);
+      setIsDark(mediaQuery.matches);
+      
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    } else {
+      setIsDark(settings.theme === 'dark');
+    }
+  }, [settings.theme]);
 
   // Apply theme to document
   useEffect(() => {
@@ -84,8 +107,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.style.setProperty('--color-secondary', colors.secondary);
     root.style.setProperty('--color-accent', colors.accent);
 
-    // Always use light theme
-    root.classList.remove('dark');
+    // Apply dark/light theme
+    if (isDark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
 
     // Apply font size
     root.classList.remove('text-sm', 'text-base', 'text-lg');
@@ -117,7 +144,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Save to localStorage
     localStorage.setItem('theme-settings', JSON.stringify(settings));
-  }, [settings]);
+  }, [settings, isDark]);
 
   const updateTheme = (theme: Theme) => {
     setSettings(prev => ({ ...prev, theme }));

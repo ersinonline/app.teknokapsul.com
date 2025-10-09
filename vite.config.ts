@@ -19,29 +19,83 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     minify: 'esbuild',
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
-      external: [
-        'node:events',
-        'node:util',
-        'node:stream',
-        'node:buffer',
-        'node:crypto',
-        'node:fs',
-        'node:path',
-        'node:os',
-        'node:http',
-        'node:https',
-        'node:url',
-        'firebase-admin'
-      ],
-      output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
-          'ui-vendor': ['@mui/material', '@emotion/react', '@emotion/styled']
+        external: [
+          'node:events',
+          'node:util',
+          'node:stream',
+          'node:buffer',
+          'node:crypto',
+          'node:fs',
+          'node:path',
+          'node:os',
+          'node:http',
+          'node:https',
+          'node:url',
+          'firebase-admin'
+        ],
+        output: {
+          manualChunks: {
+            // React ecosystem
+            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+            
+            // Firebase services
+            'firebase-vendor': [
+              'firebase/app',
+              'firebase/auth',
+              'firebase/firestore',
+              'firebase/storage',
+              'firebase/analytics'
+            ],
+            
+            // Authentication
+            'auth-vendor': ['@clerk/clerk-react'],
+            
+            // UI libraries
+            'ui-vendor': [
+              '@radix-ui/react-dialog',
+              '@radix-ui/react-dropdown-menu',
+              '@radix-ui/react-select',
+              '@radix-ui/react-tabs',
+              '@radix-ui/react-toast',
+              'lucide-react'
+            ],
+            
+            // Charts and visualization
+            'charts-vendor': ['recharts', 'chart.js', 'react-chartjs-2'],
+            
+            // Utilities
+            'utils-vendor': [
+              'date-fns',
+              'clsx',
+              'tailwind-merge',
+              'class-variance-authority'
+            ],
+            
+            // Large individual packages
+            'lodash': ['lodash'],
+            'moment': ['moment'],
+            'axios': ['axios']
+          },
+          chunkFileNames: () => {
+            return `js/[name]-[hash].js`;
+          },
+          entryFileNames: 'js/[name]-[hash].js',
+          assetFileNames: (assetInfo) => {
+            const name = assetInfo.name || 'asset';
+            const info = name.split('.');
+            const ext = info[info.length - 1];
+            if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+              return `images/[name]-[hash][extname]`;
+            }
+            if (/css/i.test(ext)) {
+              return `css/[name]-[hash][extname]`;
+            }
+            return `assets/[name]-[hash][extname]`;
+          }
         }
       }
-    }
   },
   optimizeDeps: {
     include: [
