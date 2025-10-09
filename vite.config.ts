@@ -54,11 +54,6 @@ export default defineConfig({
             
             // UI libraries
             'ui-vendor': [
-              '@radix-ui/react-dialog',
-              '@radix-ui/react-dropdown-menu',
-              '@radix-ui/react-select',
-              '@radix-ui/react-tabs',
-              '@radix-ui/react-toast',
               'lucide-react'
             ],
             
@@ -69,13 +64,11 @@ export default defineConfig({
             'utils-vendor': [
               'date-fns',
               'clsx',
-              'tailwind-merge',
-              'class-variance-authority'
+              'tailwind-merge'
             ],
             
             // Large individual packages
             'lodash': ['lodash'],
-            'moment': ['moment'],
             'axios': ['axios']
           },
           chunkFileNames: () => {
