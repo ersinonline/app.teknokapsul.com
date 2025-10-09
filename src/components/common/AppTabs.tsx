@@ -4,7 +4,7 @@ import { Package, TrendingUp, Wrench, ShoppingCart } from 'lucide-react';
 import { UserButton } from '@clerk/clerk-react';
 
 interface AppTabsProps {
-  currentApp: 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' | 'tekno-firsat';
+  currentApp: 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' | 'tekno-firsat' | null;
 }
 
 const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
@@ -70,7 +70,7 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
 
       {/* Navigation Tabs */}
       <div className="hidden lg:flex items-center flex-1">
-        {tabs.map((tab) => {
+        {currentApp && tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = currentApp === tab.id;
           

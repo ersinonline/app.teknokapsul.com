@@ -89,7 +89,8 @@ const TeknoRouteContent = ({ children }: { children: React.ReactNode }) => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
   
-  const getCurrentApp = (): 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' | 'tekno-firsat' => {
+  const getCurrentApp = (): 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' | 'tekno-firsat' | null => {
+    if (location.pathname === '/dashboard' || location.pathname === '/') return null;
     if (location.pathname.startsWith('/tekno-finans')) return 'tekno-finans';
     if (location.pathname.startsWith('/tekno-hizmet')) return 'tekno-hizmet';
     if (location.pathname.startsWith('/tekno-firsat')) return 'tekno-firsat';
