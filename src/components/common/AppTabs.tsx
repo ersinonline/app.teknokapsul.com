@@ -70,7 +70,7 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
 
       {/* Navigation Tabs */}
       <div className="hidden lg:flex items-center flex-1">
-        {currentApp && tabs.map((tab) => {
+        {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = currentApp === tab.id;
           
@@ -101,7 +101,7 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
               <div className="flex flex-col items-start">
                 <span className="font-semibold">{tab.name}</span>
                 <span className="text-xs text-gray-500">
-                  {tab.id === 'tekno-kapsul' && 'Ana Dashboard'}
+                  {tab.id === 'tekno-kapsul' && 'Günlük Yönetim'}
                   {tab.id === 'tekno-hizmet' && 'Hizmet Platformu'}
                   {tab.id === 'tekno-finans' && 'Finansal Araçlar'}
                   {tab.id === 'tekno-firsat' && 'Müthiş Fırsatlar'}
