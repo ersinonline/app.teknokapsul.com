@@ -176,67 +176,67 @@ export const UnifiedDashboard = () => {
     loadData();
   }, [user, currentYear, currentMonth]);
 
-  // Calculate enhanced financial stats
-  const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0);
-  const totalExpense = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  // Calculate enhanced financial stats with null checks
+  const totalIncome = incomes.reduce((sum, income) => sum + (income?.amount || 0), 0);
+  const totalExpense = expenses.reduce((sum, expense) => sum + (expense?.amount || 0), 0);
   const netBalance = totalIncome - totalExpense;
   const totalBalance = netBalance;
   const monthlyIncome = totalIncome;
   const monthlyExpenses = totalExpense;
 
-  const totalCreditLimit = creditCards.reduce((sum, card) => sum + card.limit, 0);
-  const totalCreditUsed = creditCards.reduce((sum, card) => sum + card.currentDebt, 0);
+  const totalCreditLimit = creditCards.reduce((sum, card) => sum + (card?.limit || 0), 0);
+  const totalCreditUsed = creditCards.reduce((sum, card) => sum + (card?.currentDebt || 0), 0);
   const totalCreditAvailable = totalCreditLimit - totalCreditUsed;
   const creditUtilization = totalCreditLimit > 0 ? (totalCreditUsed / totalCreditLimit) * 100 : 0;
 
   // Calculate savings rate
   const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome) * 100 : 0;
 
-  // Calculate total debt from all sources
-  const totalDebt = creditCards.reduce((sum, card) => sum + card.currentDebt, 0) +
-                   cashAdvanceAccounts.reduce((sum, account) => sum + account.currentDebt, 0) +
-                   loans.reduce((sum, loan) => sum + loan.remainingAmount, 0);
+  // Calculate total debt from all sources with null checks
+  const totalDebt = creditCards.reduce((sum, card) => sum + (card?.currentDebt || 0), 0) +
+                   cashAdvanceAccounts.reduce((sum, account) => sum + (account?.currentDebt || 0), 0) +
+                   loans.reduce((sum, loan) => sum + (loan?.remainingAmount || 0), 0);
 
-  // Enhanced Income Sources
+  // Enhanced Income Sources with null checks
   const topIncomeSources = incomes
     .reduce((acc: { source: string; amount: number }[], income: Income) => {
-      const existingSource = acc.find(item => item.source === income.category);
+      const existingSource = acc.find(item => item.source === income?.category);
       if (existingSource) {
-        existingSource.amount += income.amount;
+        existingSource.amount += (income?.amount || 0);
       } else {
-        acc.push({ source: income.category, amount: income.amount });
+        acc.push({ source: income?.category || 'Unknown', amount: income?.amount || 0 });
       }
       return acc;
     }, [])
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 3);
 
-  // Enhanced Subscription Analysis
+  // Enhanced Subscription Analysis with null checks
   const subscriptionAnalysis = subscriptions
-    .filter(sub => sub.isActive)
+    .filter(sub => sub?.isActive)
     .reduce((acc: { name: string; amount: number }[], sub: Subscription) => {
-      acc.push({ name: sub.name, amount: sub.price });
+      acc.push({ name: sub?.name || 'Unknown', amount: sub?.price || 0 });
       return acc;
     }, [])
     .sort((a, b) => b.amount - a.amount);
 
-  // Create recent transactions from expenses and incomes
+  // Create recent transactions from expenses and incomes with null checks
   const recentTransactions = [
     ...expenses.map(expense => ({
-      id: expense.id,
-      description: expense.description,
-      amount: expense.amount,
-      date: expense.date,
+      id: expense?.id || '',
+      description: expense?.description || 'Unknown expense',
+      amount: expense?.amount || 0,
+      date: expense?.date || new Date(),
       type: 'expense' as const,
-      category: expense.category
+      category: expense?.category || 'Unknown'
     })),
     ...incomes.map(income => ({
-      id: income.id,
-      description: income.description,
-      amount: income.amount,
-      date: income.date,
+      id: income?.id || '',
+      description: income?.description || 'Unknown income',
+      amount: income?.amount || 0,
+      date: income?.date || new Date(),
       type: 'income' as const,
-      category: income.category
+      category: income?.category || 'Unknown'
     }))
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 10);
 
@@ -295,7 +295,7 @@ export const UnifiedDashboard = () => {
     {
       title: 'Aktif Abonelik',
       value: subscriptions.length.toString(),
-      change: `₺${subscriptions.reduce((sum, sub) => sum + sub.price, 0).toLocaleString('tr-TR')}/ay`,
+      change: `₺${subscriptions.reduce((sum, sub) => sum + (sub?.price || 0), 0).toLocaleString('tr-TR')}/ay`,
       changeType: 'neutral',
       icon: Crown,
       color: 'purple'
