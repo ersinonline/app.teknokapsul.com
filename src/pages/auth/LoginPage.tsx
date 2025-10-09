@@ -152,7 +152,7 @@ export const LoginPage = () => {
             <div className="w-full max-w-sm mx-auto">
               <SignIn 
                 redirectUrl="/dashboard"
-                afterSignInUrl="/dashboard"
+                fallbackRedirectUrl="/dashboard"
                 appearance={{
                   elements: {
                     rootBox: "w-full",

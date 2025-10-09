@@ -107,7 +107,6 @@ const renderApp = () => {
           signUpFallbackRedirectUrl="/dashboard"
           signInForceRedirectUrl="/dashboard"
           signUpForceRedirectUrl="/dashboard"
-          afterSignInUrl="/dashboard"
           afterSignOutUrl="/login"
         >
           <App />
