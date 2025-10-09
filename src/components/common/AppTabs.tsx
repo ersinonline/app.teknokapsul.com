@@ -54,7 +54,7 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
       {/* Logo/Brand Section */}
       <div className="flex items-center px-3 sm:px-4 py-4 sm:py-3 sm:border-r sm:border-gray-200">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard')}
           className="flex items-center gap-3 hover:opacity-90 active:opacity-80 focus:outline-none"
           aria-label="Anasayfa - TeknoKapsül"
         >
@@ -101,7 +101,7 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
               <div className="flex flex-col items-start">
                 <span className="font-semibold">{tab.name}</span>
                 <span className="text-xs text-gray-500">
-                  {tab.id === 'tekno-kapsul' && 'Günlük Yönetim'}
+                  {tab.id === 'tekno-kapsul' && 'Ana Dashboard'}
                   {tab.id === 'tekno-hizmet' && 'Hizmet Platformu'}
                   {tab.id === 'tekno-finans' && 'Finansal Araçlar'}
                   {tab.id === 'tekno-firsat' && 'Müthiş Fırsatlar'}

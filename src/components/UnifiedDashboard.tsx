@@ -348,15 +348,15 @@ export const UnifiedDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Compact Header with Welcome Message */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <div className="bg-[#ffb700] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold">Hoş Geldiniz! 👋</h1>
-              <p className="text-blue-100 mt-1">Finansal durumunuzun özeti</p>
+              <p className="text-orange-100 mt-1">Finansal durumunuzun özeti</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-blue-100">Bugün</p>
+              <p className="text-sm text-orange-100">Bugün</p>
               <p className="text-lg font-semibold">{new Date().toLocaleDateString('tr-TR')}</p>
             </div>
           </div>

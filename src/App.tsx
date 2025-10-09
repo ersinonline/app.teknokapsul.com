@@ -485,11 +485,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/',
-    element: <AuthGuard>
-      <MobileHomeRedirect>
-        <HomePage />
-      </MobileHomeRedirect>
-    </AuthGuard>
+    element: <TeknoRoute><UnifiedDashboard /></TeknoRoute>
   }
 ]);
 
