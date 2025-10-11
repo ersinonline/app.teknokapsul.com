@@ -24,9 +24,9 @@ interface NavigationItem {
 
 const bottomNavigationItems: NavigationItem[] = [
   { path: '/dashboard', label: 'Ana Sayfa', icon: Home },
-  { path: '/mobile-finance', label: 'Finans', icon: PieChart },
-  { path: '/teknokapsul', label: 'Kapsül', icon: Zap },
-  { path: '/services', label: 'Hizmet', icon: Grid3X3 },
+  { path: '/tekno-finans', label: 'Finans', icon: PieChart },
+  { path: '/tekno-kapsul', label: 'Kapsül', icon: Zap },
+  { path: '/tekno-hizmet', label: 'Hizmet', icon: Grid3X3 },
   { path: '/tekno-firsat', label: 'Fırsat', icon: Gift },
 ];
 
@@ -119,7 +119,7 @@ export const MobileNavigation: React.FC = () => {
                 className={`
                   flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all duration-200
                   ${isActive 
-                    ? 'text-primary bg-primary/10' 
+                    ? 'text-[#ffb700] bg-[#ffb700]/10' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }
                 `}

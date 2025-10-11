@@ -88,7 +88,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 key={item.id}
                 onClick={() => navigate(item.path)}
                 className={`flex flex-col items-center justify-center py-3 px-2 ${
-                  isActive ? 'text-yellow-600 bg-yellow-50' : 'text-gray-600'
+                  isActive ? 'text-[#ffb700] bg-[#ffb700]/10' : 'text-gray-600'
                 } hover:bg-gray-50 transition-colors`}
               >
                 <Icon className="w-5 h-5" />

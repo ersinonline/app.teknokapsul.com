@@ -97,7 +97,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
                   onClick={() => navigate(item.path)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive 
-                      ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                      ? 'bg-[#ffb700]/10 text-[#ffb700] border border-[#ffb700]/20'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
@@ -153,7 +153,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
                         onClick={() => handleMenuItemClick(item.path)}
                         className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-colors ${
                           isActive 
-                            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                            ? 'bg-[#ffb700]/10 text-[#ffb700] border border-[#ffb700]/20'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                         }`}
                       >
@@ -178,17 +178,12 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
                         onClick={() => handleMenuItemClick(item.path)}
                         className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-colors ${
                           isActive 
-                            ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                            ? 'bg-[#ffb700]/10 text-[#ffb700] border border-[#ffb700]/20'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                         }`}
                       >
                         <Icon className="w-5 h-5" />
                         <span>{item.label}</span>
-                        {/* {item.id === 'premium' && !isPremium && (
-                          <span className="ml-auto text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
-                            Yeni
-                          </span>
-                        )} */}
                       </button>
                     );
                   })}

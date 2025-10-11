@@ -246,12 +246,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
                       onClick={() => navigate(item.path)}
                       className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
                         isActive 
-                          ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                          ? 'bg-[#ffb700]/10 text-[#ffb700] border border-[#ffb700]/20'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
                       title={isCollapsed ? item.label : undefined}
                     >
-                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-[#ffb700]' : ''}`} />
                       {!isCollapsed && <span>{item.label}</span>}
                     </button>
                   </li>
@@ -278,12 +278,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
                       onClick={() => navigate(item.path)}
                       className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
                         isActive 
-                          ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                          ? 'bg-[#ffb700]/10 text-[#ffb700] border border-[#ffb700]/20'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
                       title={isCollapsed ? item.label : undefined}
                     >
-                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-yellow-600' : ''}`} />
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-[#ffb700]' : ''}`} />
                       {!isCollapsed && <span>{item.label}</span>}
                     </button>
                   </li>
@@ -310,12 +310,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
                       onClick={() => navigate(item.path)}
                       className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2' : 'gap-3 px-4'} py-3 rounded-lg transition-colors ${
                         isActive 
-                          ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                          ? 'bg-[#ffb700]/10 text-[#ffb700] border border-[#ffb700]/20'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
                       title={isCollapsed ? item.label : undefined}
                     >
-                      <Icon className={`w-6 h-6 ${isActive ? 'text-yellow-600' : ''}`} />
+                      <Icon className={`${isCollapsed ? 'w-5 h-5' : 'w-6 h-6'} ${isActive ? 'text-[#ffb700]' : ''}`} />
                       {!isCollapsed && <span>{item.label}</span>}
                     </button>
                   </li>

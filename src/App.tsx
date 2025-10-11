@@ -13,7 +13,6 @@ import { AuthGuard } from './components/auth/AuthGuard';
 
 // Route components
 import { UnifiedDashboard } from './components/UnifiedDashboard';
-import { HomePage } from './components/HomePage';
 import Services from './pages/services/ServicesPage';
 
 import { SubscriptionsPage } from './pages/subscriptions/SubscriptionsPage';
@@ -40,8 +39,6 @@ import { FinancialDataPage } from './pages/financial/FinancialDataPage';
 import CreditScorePage from './pages/financial/CreditScorePage';
 import { WarrantyTrackingPage } from './pages/warranty/WarrantyTrackingPage';
 import { PortfolioPage } from './pages/portfolio/PortfolioPage';
-import { MobileFinancePage } from './pages/mobile/MobileFinancePage';
-import { TeknokapsulPage } from './pages/mobile/TeknokapsulPage';
 import StockMarketPage from './pages/financial/StockMarketPage';
 
 import CreditCalculatorPage2 from './pages/CreditCalculatorPage';
@@ -119,16 +116,6 @@ const TeknoRoute = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const MobileHomeRedirect = ({ children }: { children: React.ReactNode }) => {
-  const isMobile = window.innerWidth < 1024; // lg breakpoint
-  
-  if (isMobile) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
 const router = createBrowserRouter([
   {
     path: '/login',
@@ -150,10 +137,7 @@ const router = createBrowserRouter([
     path: '/dashboard',
     element: <TeknoRoute><UnifiedDashboard /></TeknoRoute>
   },
-  {
-    path: '/services',
-    element: <TeknoRoute><Services /></TeknoRoute>
-  },
+
 
   {
     path: '/subscriptions',
@@ -246,12 +230,29 @@ const router = createBrowserRouter([
     element: <TeknoRoute><StockMarketPage /></TeknoRoute>
   },
   {
+    path: '/tekno-finans',
+    element: <TeknoRoute><TeknoFinansPage /></TeknoRoute>
+  },
+  {
+    path: '/tekno-kapsul',
+    element: <TeknoRoute><TeknoKapsulPage /></TeknoRoute>
+  },
+  {
+    path: '/tekno-hizmet',
+    element: <TeknoRoute><TeknoHizmetPage /></TeknoRoute>
+  },
+  // Eski route'ları yeni route'lara yönlendir
+  {
     path: '/mobile-finance',
-    element: <TeknoRoute><MobileFinancePage /></TeknoRoute>
+    element: <Navigate to="/tekno-finans" replace />
   },
   {
     path: '/teknokapsul',
-    element: <TeknoRoute><TeknokapsulPage /></TeknoRoute>
+    element: <Navigate to="/tekno-kapsul" replace />
+  },
+  {
+    path: '/services',
+    element: <Navigate to="/tekno-hizmet" replace />
   },
   {
      path: '/tekno-firsat',
@@ -346,10 +347,7 @@ const router = createBrowserRouter([
     path: '/credit-calculator',
     element: <TeknoRoute><CreditCalculatorPage2 /></TeknoRoute>
   },
-  {
-    path: '/tekno-finans',
-    element: <TeknoRoute><TeknoFinansPage /></TeknoRoute>
-  },
+
   {
     path: '/tekno-finans/income',
     element: <TeknoRoute><IncomePage /></TeknoRoute>
