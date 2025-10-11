@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Target, PieChart, BarChart3, CreditCard, Calculator, DollarSign, Wallet, Building, Coins, Receipt, Shield, ArrowRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, PieChart, BarChart3, CreditCard, Calculator, Wallet, Building, Coins, Receipt, Shield, ArrowRight } from 'lucide-react';
 
 const TeknoFinansPage: React.FC = () => {
   const navigate = useNavigate();

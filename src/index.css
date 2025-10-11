@@ -530,6 +530,7 @@ body {
     font-size: 16px !important;
     min-height: 48px !important;
     -webkit-appearance: none !important;
+    appearance: none !important;
     border-radius: 8px !important;
   }
   
@@ -542,6 +543,7 @@ body {
   textarea {
     font-size: 16px !important;
     -webkit-appearance: none !important;
+    appearance: none !important;
   }
   
   /* Fix for iOS Safari */
