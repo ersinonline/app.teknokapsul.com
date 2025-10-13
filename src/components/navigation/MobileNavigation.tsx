@@ -100,7 +100,7 @@ export const MobileNavigation: React.FC = () => {
       {/* Top Navigation for Tablet and Desktop */}
       {!isHomePage && (
         <div className="hidden md:block fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 z-40">
-          <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center justify-between px-4 py-4">
             {/* Left side - Logo */}
             <div className="flex items-center space-x-3">
               <img src="/logo.ico" alt="TeknoKapsül" className="w-8 h-8 object-contain" />
