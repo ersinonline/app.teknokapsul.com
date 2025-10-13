@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Plus, Search, AlertCircle, CheckCircle, Clock, Shield, Package, Filter } from 'lucide-react';
 import { deleteDoc, doc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
 import { db } from '../../lib/firebase';
 import { useFirebaseData } from '../../hooks/useFirebaseData';
 import { useAuth } from '../../contexts/AuthContext';
@@ -29,7 +28,6 @@ interface Warranty {
 
 export const WarrantyTrackingPage = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { data: warranties = [], loading, error, reload } = useFirebaseData<Warranty>('warranties');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingWarranty, setEditingWarranty] = useState<Warranty | null>(null);
@@ -53,8 +51,6 @@ export const WarrantyTrackingPage = () => {
     setEditingWarranty(warranty);
     setIsFormOpen(true);
   };
-
-  const categories = Array.from(new Set(warranties.map(warranty => warranty.category)));
 
   // Calculate warranty status
   const getWarrantyStatus = (warranty: Warranty): 'active' | 'expired' | 'expiring_soon' => {

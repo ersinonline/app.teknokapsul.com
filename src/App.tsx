@@ -104,7 +104,7 @@ const TeknoRouteContent = ({ children }: { children: React.ReactNode }) => {
       <AppTabs currentApp={getCurrentApp()} />
       <MobileNavigation />
       <OfflineIndicator />
-      <div className="pb-20 lg:pb-0">
+      <div className="pb-20">
         {children}
       </div>
     </div>

@@ -3,7 +3,6 @@ import { Search, RefreshCw, TrendingUp, TrendingDown, Star, Activity } from 'luc
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 interface StockData {
   name: string;
@@ -39,7 +38,6 @@ interface MarketData {
 type TabType = 'all' | 'bist50' | 'bist30' | 'rising' | 'falling' | 'indices' | 'favorites';
 
 const StockMarketPage: React.FC = () => {
-  const navigate = useNavigate();
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [bist50Stocks, setBist50Stocks] = useState<StockData[]>([]);
   const [bist30Stocks, setBist30Stocks] = useState<StockData[]>([]);
@@ -49,7 +47,6 @@ const StockMarketPage: React.FC = () => {
   const [filteredStocks, setFilteredStocks] = useState<StockData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [favorites, setFavorites] = useState<string[]>([]);
   const [marketData, setMarketData] = useState<MarketData | null>(null);
@@ -108,8 +105,6 @@ const StockMarketPage: React.FC = () => {
         setMarketData(marketDataRes.data[0]);
       }
       
-      setLastUpdate(new Date());
-      
       // Firebase'e kaydet
       if (user) {
         await setDoc(doc(db, 'stockData', 'latest'), {
@@ -142,7 +137,6 @@ const StockMarketPage: React.FC = () => {
             setRisingStocks(savedData.rising || []);
             setFallingStocks(savedData.falling || []);
             setMarketData(savedData.marketData || null);
-            setLastUpdate(savedData.lastUpdate?.toDate() || null);
           }
         } catch (firebaseError) {
           console.error('Firebase verisi alınırken hata:', firebaseError);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Calendar, DollarSign, Settings, Plus, Edit2, Trash2, AlertTriangle, Grid, List, X, CheckCircle } from 'lucide-react';
+import { Clock, Calendar, DollarSign, Settings, Plus, Edit2, Trash2, AlertTriangle, Grid, List, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { workTrackingService } from '../services/work-tracking.service';
 import { WorkEntry, WorkSettings } from '../types/work-tracking';
