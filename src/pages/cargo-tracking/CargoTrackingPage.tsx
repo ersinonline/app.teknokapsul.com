@@ -385,16 +385,31 @@ export const CargoTrackingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="w-full px-4 py-6">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Kargo Takip
-          </h1>
-          <p className="text-gray-600">
-            Kargolarınızı takip edin ve durumlarını kontrol edin
-          </p>
+      <div className="bg-white shadow-sm sticky top-0 z-10 border-b">
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Truck className="w-6 h-6" style={{ color: '#ffb700' }} />
+              <h1 className="text-xl font-semibold text-gray-900">Kargo Takip</h1>
+            </div>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl text-white"
+              style={{ backgroundColor: '#ffb700' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Yeni Kargo Ekle</span>
+              <span className="sm:hidden">Ekle</span>
+            </button>
+          </div>
+
         </div>
+      </div>
+
+      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-6">
 
         {/* Actions */}
         <div className="flex flex-col gap-4 mb-6">
@@ -407,7 +422,9 @@ export const CargoTrackingPage = () => {
                   placeholder="Kargo adı, takip numarası veya firma ara..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent focus:ring-[#ffb700]"
+                  onFocus={(e) => e.currentTarget.style.borderColor = '#ffb700'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
                 />
               </div>
             </div>
@@ -418,7 +435,9 @@ export const CargoTrackingPage = () => {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value as 'all' | 'delivered' | 'pending')}
-                  className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent appearance-none min-w-[100px] w-[100px] sm:min-w-[140px] sm:w-auto"
+                  className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent focus:ring-[#ffb700] appearance-none min-w-[100px] w-[100px] sm:min-w-[140px] sm:w-auto bg-white"
+                  onFocus={(e) => e.currentTarget.style.borderColor = '#ffb700'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
                 >
                   <option value="all">Tümü ({cargoList.length})</option>
                   <option value="pending">Bekleyen ({cargoList.filter((c: CargoTracking) => !c.isDelivered).length})</option>
@@ -431,9 +450,10 @@ export const CargoTrackingPage = () => {
                   onClick={() => setViewMode('grid')}
                   className={`px-3 sm:px-6 py-3 transition-colors flex-1 flex items-center justify-center ${
                     viewMode === 'grid'
-                      ? 'bg-yellow-600 text-white'
+                      ? 'text-white'
                       : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
+                  style={{ backgroundColor: viewMode === 'grid' ? '#ffb700' : undefined }}
                   title="Kutu görünümü"
                 >
                   <Grid className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -442,23 +462,15 @@ export const CargoTrackingPage = () => {
                   onClick={() => setViewMode('list')}
                   className={`px-3 sm:px-6 py-3 transition-colors flex-1 flex items-center justify-center ${
                     viewMode === 'list'
-                      ? 'bg-yellow-600 text-white'
+                      ? 'text-white'
                       : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
+                  style={{ backgroundColor: viewMode === 'list' ? '#ffb700' : undefined }}
                   title="Liste görünümü"
                 >
                   <List className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </div>
-              
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-2 px-3 sm:px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors whitespace-nowrap"
-              >
-                <Plus className="w-4 sm:w-5 h-4 sm:h-5" />
-                <span className="hidden sm:inline">Yeni Kargo Ekle</span>
-                <span className="sm:hidden">Ekle</span>
-              </button>
             </div>
           </div>
         </div>
@@ -510,15 +522,6 @@ export const CargoTrackingPage = () => {
             <p className="text-gray-600 mb-4">
               {searchTerm || filterStatus !== 'all' ? 'Farklı anahtar kelimeler veya filtreler deneyin' : 'İlk kargonuzu ekleyerek başlayın'}
             </p>
-            {!searchTerm && filterStatus === 'all' && (
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
-              >
-                <Plus className="w-5 h-5" />
-                Kargo Ekle
-              </button>
-            )}
           </div>
         ) : (
           <div className="space-y-8">

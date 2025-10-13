@@ -49,16 +49,27 @@ export const WarrantyForm: React.FC<WarrantyFormProps> = ({ warranty, onClose, o
   // Düzenleme modunda form verilerini doldur
   useEffect(() => {
     if (warranty) {
-      const purchaseDate = warranty.purchaseDate instanceof Date 
-        ? warranty.purchaseDate 
-        : new Date(warranty.purchaseDate);
+      let purchaseDate: Date;
+      
+      // Handle different date formats safely
+      if (warranty.purchaseDate instanceof Date) {
+        purchaseDate = warranty.purchaseDate;
+      } else if (typeof warranty.purchaseDate === 'string') {
+        purchaseDate = new Date(warranty.purchaseDate);
+      } else {
+        // Fallback to current date if invalid
+        purchaseDate = new Date();
+      }
+      
+      // Check if the date is valid before calling toISOString
+      const isValidDate = purchaseDate instanceof Date && !isNaN(purchaseDate.getTime());
       
       setFormData({
         productName: warranty.productName,
         brand: warranty.brand,
         model: warranty.model || '',
         serialNumber: warranty.serialNumber || '',
-        purchaseDate: purchaseDate.toISOString().split('T')[0],
+        purchaseDate: isValidDate ? purchaseDate.toISOString().split('T')[0] : '',
         warrantyPeriod: warranty.warrantyPeriod,
         category: warranty.category,
         purchasePrice: warranty.purchasePrice.toString(),

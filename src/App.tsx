@@ -14,6 +14,7 @@ import { AuthGuard } from './components/auth/AuthGuard';
 // Route components
 import { UnifiedDashboard } from './components/UnifiedDashboard';
 import Services from './pages/services/ServicesPage';
+import ProfessionalHomePage from './pages/ProfessionalHomePage.tsx';
 
 import { SubscriptionsPage } from './pages/subscriptions/SubscriptionsPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
@@ -30,6 +31,7 @@ import { OfflineIndicator } from './components/offline/OfflineIndicator';
 import { AIAssistantPage } from './pages/ai/AIAssistantPage';
 import { ServicesListPage } from './pages/applications/ServicesListPage';
 import { ApplicationPage } from './pages/applications/ApplicationPage';
+import ApplicationsListPage from './pages/applications/ApplicationsListPage';
 import DocumentsPage from './pages/documents/DocumentsPage';
 import AdminPage from './pages/admin/AdminPage';
 
@@ -72,6 +74,9 @@ import PaymentPlanEditPage from './pages/financial/PaymentPlanEditPage';
 import { ResponsiveTestPage } from './pages/test/ResponsiveTestPage';
 import WorkTrackingPage from './pages/WorkTrackingPage';
 import PharmacyPage from './pages/PharmacyPage';
+import KendimPage from './pages/KendimPage';
+import EvimPage from './pages/EvimPage';
+import BankamPage from './pages/BankamPage';
 import WebViewAuthPage from './pages/auth/WebViewAuthPage';
 import { VerifyPage } from './pages/auth/VerifyPage';
 import { IsBankCallbackPage } from './pages/auth/IsBankCallbackPage';
@@ -209,6 +214,10 @@ const router = createBrowserRouter([
     element: <Navigate to="/services-list" replace />
   },
   {
+    path: '/applications',
+    element: <TeknoRoute><ApplicationsListPage /></TeknoRoute>
+  },
+  {
     path: '/financial',
     element: <TeknoRoute><FinancialDataPage /></TeknoRoute>
   },
@@ -340,6 +349,18 @@ const router = createBrowserRouter([
     element: <TeknoRoute><WorkTrackingPage /></TeknoRoute>
   },
   {
+    path: '/kapsulum',
+    element: <TeknoRoute><KendimPage /></TeknoRoute>
+  },
+  {
+    path: '/evim',
+    element: <TeknoRoute><EvimPage /></TeknoRoute>
+  },
+  {
+    path: '/bankam',
+    element: <TeknoRoute><BankamPage /></TeknoRoute>
+  },
+  {
     path: '/pharmacy',
     element: <TeknoRoute><PharmacyPage /></TeknoRoute>
   },
@@ -383,24 +404,40 @@ const router = createBrowserRouter([
     element: <TeknoRoute><CreditCalculatorPage2 /></TeknoRoute>
   },
   {
-    path: '/tekno-finans/payment-plan',
-    element: <Navigate to="/tekno-finans/payment-plans" replace />
-  },
-  {
-    path: '/tekno-finans/payment-plans',
+    path: '/payment-plan',
     element: <TeknoRoute><PaymentPlansListPage /></TeknoRoute>
   },
   {
-    path: '/tekno-finans/payment-plans/new',
+    path: '/payment-plan/new',
     element: <TeknoRoute><PaymentPlanNewPage /></TeknoRoute>
   },
   {
-    path: '/tekno-finans/payment-plans/:id',
+    path: '/payment-plan/:id',
     element: <TeknoRoute><PaymentPlanDetailPage /></TeknoRoute>
   },
   {
-    path: '/tekno-finans/payment-plans/:id/edit',
+    path: '/payment-plan/:id/edit',
     element: <TeknoRoute><PaymentPlanEditPage /></TeknoRoute>
+  },
+  {
+    path: '/tekno-finans/payment-plan',
+    element: <Navigate to="/payment-plan" replace />
+  },
+  {
+    path: '/tekno-finans/payment-plans',
+    element: <Navigate to="/payment-plan" replace />
+  },
+  {
+    path: '/tekno-finans/payment-plans/new',
+    element: <Navigate to="/payment-plan/new" replace />
+  },
+  {
+    path: '/tekno-finans/payment-plans/:id',
+    element: <Navigate to="/payment-plan/:id" replace />
+  },
+  {
+    path: '/tekno-finans/payment-plans/:id/edit',
+    element: <Navigate to="/payment-plan/:id/edit" replace />
   },
   {
     path: '/tekno-kapsul',
@@ -483,8 +520,12 @@ const router = createBrowserRouter([
     </TeknoRoute>
   },
   {
+    path: '/professional-home',
+    element: <TeknoRoute><ProfessionalHomePage /></TeknoRoute>
+  },
+  {
     path: '/',
-    element: <TeknoRoute><UnifiedDashboard /></TeknoRoute>
+    element: <TeknoRoute><ProfessionalHomePage /></TeknoRoute>
   }
 ]);
 

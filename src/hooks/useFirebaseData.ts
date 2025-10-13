@@ -105,12 +105,12 @@ export const useFirebaseData = <T extends DataType>(
           case 'goals':
           case 'budget':
           case 'warranties':
+          case 'subscriptions':
             collectionRef = collection(db, 'teknokapsul', user.id, collectionName);
             q = query(collectionRef);
             break;
           case 'expenses':
-          case 'subscriptions':
-            collectionRef = collection(db, collectionName === 'subscriptions' ? 'subscription-end' : collectionName);
+            collectionRef = collection(db, collectionName);
             q = query(collectionRef, where('userId', '==', user.id));
             break;
           case 'payments':
@@ -132,7 +132,12 @@ export const useFirebaseData = <T extends DataType>(
               id: doc.id,
               name: data.name,
               endDate: data.subscriptionEndDate,
-              userId: data.userId
+              userId: data.userId,
+              isActive: data.isActive !== undefined ? data.isActive : true,
+              autoRenew: data.autoRenew || false,
+              renewalDay: data.renewalDay,
+              price: data.price || 0,
+              lastRenewalDate: data.lastRenewalDate
             } as T;
           }
           return {

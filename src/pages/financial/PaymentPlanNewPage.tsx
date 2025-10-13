@@ -491,7 +491,7 @@ const PaymentPlanNewPage: React.FC = () => {
       alert(`Plan başarıyla kaydedildi! ${shareEmail ? 'Email gönderildi.' : ''}`);
       
       // Navigate to the created plan's detail page
-      navigate(`/tekno-finans/payment-plans/${docRef.id}`);
+      navigate(`/payment-plan/${docRef.id}`);
     } catch (error) {
       console.error('Plan kaydedilirken hata:', error);
       alert('Plan kaydedilirken bir hata oluştu.');
@@ -554,7 +554,7 @@ const PaymentPlanNewPage: React.FC = () => {
         <div className="text-center mb-4 sm:mb-6 md:mb-8">
           <div className="relative flex items-center justify-center mb-3">
             <button
-              onClick={() => navigate('/tekno-finans/payment-plans')}
+              onClick={() => navigate('/payment-plan')}
               className="absolute left-0 sm:left-2 p-2 text-gray-600 hover:text-gray-800 transition-colors touch-manipulation"
             >
               <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />

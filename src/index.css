@@ -75,6 +75,21 @@
   @apply bg-gray-400 dark:bg-gray-500;
 }
 
+/* Hide scrollbar for horizontal scrollable sections */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth scrolling for horizontal sections */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
 /* Skeleton wave animation */
 @keyframes wave {
   0% {

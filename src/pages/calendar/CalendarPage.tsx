@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, MapPin } from 'lucide-react';
 
 import { useFirebaseData } from '../../hooks/useFirebaseData';
 import { Event } from '../../types/calendar';
@@ -22,27 +22,30 @@ export const CalendarPage = () => {
   if (error) return <ErrorMessage message="Etkinlikler yüklenirken bir hata oluştu." />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-4 lg:p-6 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3">
+    <div className="bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm sticky top-0 z-10 border-b">
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
             <CalendarIcon className="w-6 h-6" style={{ color: '#ffb700' }} />
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Takvim</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Takvim</h1>
           </div>
-          <button
-            onClick={() => setIsEventFormOpen(true)}
-            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl"
-            style={{ backgroundColor: '#ffb700' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
-          >
-            <Plus className="w-4 h-4" />
-            Yeni Etkinlik Ekle
-          </button>
+            <button
+              onClick={() => setIsEventFormOpen(true)}
+              className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl"
+              style={{ backgroundColor: '#ffb700' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* Main Content */}
+      {/* Main Content */}
+      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar Section */}
           <div className="lg:col-span-2">

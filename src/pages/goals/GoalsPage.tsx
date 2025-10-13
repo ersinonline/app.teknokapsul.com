@@ -244,29 +244,35 @@ export const GoalsPage = () => {
   if (error) return <ErrorMessage message="Hedefler yüklenirken bir hata oluştu." />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-4 lg:p-6 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <Target className="w-6 h-6" style={{ color: '#ffb700' }} />
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Hedeflerim</h1>
+    <div className="bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Target className="w-6 h-6" style={{ color: '#ffb700' }} />
+              <h1 className="text-xl font-semibold text-gray-900">Hedeflerim</h1>
+            </div>
+            <button
+              onClick={() => {
+                setEditingGoal(null);
+                resetForm();
+                setIsModalOpen(true);
+              }}
+              className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl"
+              style={{ backgroundColor: '#ffb700' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
+            >
+              <Plus className="w-4 h-4" />
+              Ekle
+            </button>
           </div>
-          <button
-            onClick={() => {
-              setEditingGoal(null);
-              resetForm();
-              setIsModalOpen(true);
-            }}
-            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl w-full sm:w-auto justify-center"
-            style={{ backgroundColor: '#ffb700' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
-          >
-            <Plus className="w-4 h-4" />
-            Yeni Hedef Ekle
-          </button>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

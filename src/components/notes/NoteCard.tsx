@@ -57,7 +57,7 @@ export const NoteCard: React.FC<NoteCardProps> = ({ note, onEdit, onDelete }) =>
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+      <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-200">
         <div className="p-6">
           <div className="flex justify-between items-start mb-4">
             <h3 className="text-lg font-medium text-gray-900">{note.title}</h3>

@@ -180,32 +180,28 @@ const PaymentPlansListPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto p-4 sm:p-6">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="flex items-center justify-center mb-3">
-            <div className="bg-[#ffb700] p-3 rounded-full mr-3">
-              <Home className="w-8 h-8 text-white" />
+        <div className="bg-white shadow-sm sticky top-0 z-10 border-b">
+          <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Home className="w-6 h-6" style={{ color: '#ffb700' }} />
+                <h1 className="text-lg font-semibold text-gray-900">Ödeme Planları</h1>
+              </div>
+              <button
+                onClick={() => navigate('/payment-plan/new')}
+                className="flex items-center gap-2 text-white px-3 py-2 rounded-lg transition-colors"
+                style={{ backgroundColor: '#ffb700' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm">Ekle</span>
+              </button>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-              Ödeme Planları
-            </h1>
           </div>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-            Kayıtlı ödeme planlarınızı görüntüleyin, düzenleyin veya yeni plan oluşturun.
-          </p>
-        </div>
-
-        {/* New Plan Button */}
-        <div className="mb-6 flex justify-end">
-          <button
-            onClick={() => navigate('/tekno-finans/payment-plans/new')}
-            className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors flex items-center gap-2 font-medium"
-          >
-            <Plus className="w-5 h-5" />
-            Yeni Plan Oluştur
-          </button>
         </div>
 
         {/* Plans List */}
@@ -221,7 +217,7 @@ const PaymentPlansListPage: React.FC = () => {
               İlk ödeme planınızı oluşturmak için aşağıdaki butona tıklayın.
             </p>
             <button
-              onClick={() => navigate('/tekno-finans/payment-plans/new')}
+              onClick={() => navigate('/payment-plan/new')}
               className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors inline-flex items-center gap-2"
             >
               <Plus className="w-5 h-5" />
@@ -304,14 +300,14 @@ const PaymentPlansListPage: React.FC = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex items-center space-x-2">
                               <button
-                                onClick={() => navigate(`/tekno-finans/payment-plans/${plan.id}`)}
+                                onClick={() => navigate(`/payment-plan/${plan.id}`)}
                                 className="text-blue-600 hover:text-blue-900 p-1 rounded"
                                 title="Görüntüle"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => navigate(`/tekno-finans/payment-plans/${plan.id}/edit`)}
+                                onClick={() => navigate(`/payment-plan/${plan.id}/edit`)}
                                 className="text-[#ffb700] hover:text-[#e6a500] p-1 rounded"
                                 title="Düzenle"
                               >
@@ -411,14 +407,14 @@ const PaymentPlansListPage: React.FC = () => {
                     {/* Action Buttons */}
                     <div className="grid grid-cols-2 gap-2">
                       <button
-                        onClick={() => navigate(`/tekno-finans/payment-plans/${plan.id}`)}
+                        onClick={() => navigate(`/payment-plan/${plan.id}`)}
                         className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm font-medium active:bg-blue-800"
                       >
                         <Eye className="w-4 h-4" />
                         Görüntüle
                       </button>
                       <button
-                        onClick={() => navigate(`/tekno-finans/payment-plans/${plan.id}/edit`)}
+                        onClick={() => navigate(`/payment-plan/${plan.id}/edit`)}
                         className="bg-[#ffb700] text-white px-4 py-3 rounded-lg hover:bg-[#e6a500] transition-colors flex items-center justify-center gap-2 text-sm font-medium active:bg-[#cc9500]"
                       >
                         <Edit className="w-4 h-4" />

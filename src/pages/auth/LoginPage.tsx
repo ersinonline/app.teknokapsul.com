@@ -11,9 +11,9 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const [isRedirecting, setIsRedirecting] = useState(false);
   
-  // Her zaman dashboard'a yönlendir
+  // Her zaman ana sayfaya yönlendir
   const getDefaultRedirect = () => {
-    return '/dashboard';
+    return '/';
   };
   
   const from = location.state?.from || getDefaultRedirect();

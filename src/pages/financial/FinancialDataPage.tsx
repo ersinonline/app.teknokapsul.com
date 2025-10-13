@@ -452,11 +452,35 @@ export const FinancialDataPage = () => {
   const groupedLoans = groupLoansByBank(loans);
 
   return (
-    <div className="p-3 sm:p-6 w-full">
-      <div className="mb-4 sm:mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Finansal Verilerim</h1>
-        <p className="text-sm sm:text-base text-gray-600">Kredi kartları, ek hesapları ve kredilerinizi yönetin</p>
+    <div className="bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <DollarSign className="w-6 h-6" style={{ color: '#ffb700' }} />
+              <h1 className="text-lg font-semibold text-gray-900">Finansal Verilerim</h1>
+            </div>
+            <button
+              onClick={() => {
+                if (activeTab === 'creditCards') setShowCreditCardForm(true);
+                else if (activeTab === 'cashAdvance') setShowCashAdvanceForm(true);
+                else if (activeTab === 'loans') setShowLoanForm(true);
+              }}
+              className="flex items-center gap-2 text-white px-3 py-2 rounded-lg transition-colors"
+              style={{ backgroundColor: '#ffb700' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
+            >
+              <Plus className="w-4 h-4" />
+              <span className="text-sm">Ekle</span>
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Main Content */}
+      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
 
       {/* Tabs - Mobile Responsive */}
       <div className="border-b border-gray-200 mb-4 sm:mb-6">
@@ -1721,6 +1745,7 @@ export const FinancialDataPage = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

@@ -235,29 +235,27 @@ const CreditScorePage: React.FC = () => {
   const scoreDifference = latestScore && previousScore ? latestScore.score - previousScore.score : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-2 sm:p-4">
-      <div className="w-full">
-        {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Findeks Kredi Notu</h1>
-                <p className="text-sm sm:text-base text-gray-600">Kredi notunuzu takip edin</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-[#ffb700] text-white rounded-lg hover:bg-[#e6a500] transition-colors text-sm sm:text-base w-full sm:w-auto justify-center"
-            >
-              <Plus className="w-4 h-4" />
-              Yeni Kayıt
-            </button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <TrendingUp className="w-6 h-6 text-yellow-600" />
+            <h1 className="text-lg font-semibold text-gray-900">Findeks Kredi Notu</h1>
           </div>
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="text-sm font-medium">Güncelle</span>
+          </button>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="p-4">
+        <div className="w-full">
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
@@ -558,6 +556,7 @@ const CreditScorePage: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

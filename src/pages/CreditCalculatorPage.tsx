@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building, Car, Home, Calculator, TrendingUp, PiggyBank } from 'lucide-react';
+import { Building, Car, Home, Calculator, TrendingUp, PiggyBank, Plus } from 'lucide-react';
 
 interface CreditBidResult {
   'bank-code': string;
@@ -108,17 +108,33 @@ const CreditCalculatorPage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      {/* Notification */}
-      {notification && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
-          notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-        }`}>
-          {notification.message}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Calculator className="w-6 h-6 text-teal-600" />
+            <h1 className="text-lg font-semibold text-gray-900">Kredi Hesaplama</h1>
+          </div>
+          <button className="flex items-center gap-2 px-3 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+            <Plus className="w-4 h-4" />
+            <span className="text-sm font-medium">Ekle</span>
+          </button>
         </div>
-      )}
-      
-      <div className="max-w-7xl mx-auto">
+      </div>
+
+      {/* Main Content */}
+      <div className="p-4">
+        {/* Notification */}
+        {notification && (
+          <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+            notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+          }`}>
+            {notification.message}
+          </div>
+        )}
+        
+        <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -452,6 +468,7 @@ const CreditCalculatorPage: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

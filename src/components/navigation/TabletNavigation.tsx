@@ -85,8 +85,8 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
               </div>
           </div>
           
-          {/* Ana Menü - Mobilde tamamen gizli */}
-          <div className="hidden lg:flex items-center gap-2">
+          {/* Ana Menü - Tamamen gizli */}
+          <div className="hidden">
             {mainMenuItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;

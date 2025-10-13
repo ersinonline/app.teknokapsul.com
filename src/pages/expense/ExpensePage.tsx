@@ -103,31 +103,34 @@ export const ExpensePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <CreditCard className="w-6 h-6 lg:w-8 lg:h-8 text-red-500" />
-                Giderler
-              </h1>
-              <p className="text-gray-600 mt-1 text-sm lg:text-base">
-                Taksitli ve tek seferlik ödemelerinizi yönetin
-              </p>
+    <div className="bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <CreditCard className="w-6 h-6" style={{ color: '#ffb700' }} />
+              <h1 className="text-xl font-semibold text-gray-900">Giderler</h1>
             </div>
             <button
               onClick={() => setShowForm(true)}
-              className="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-lg font-medium transition-colors shadow-lg hover:shadow-xl text-sm lg:text-base w-full sm:w-auto"
+              className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl"
+              style={{ backgroundColor: '#ffb700' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
             >
-              <Plus className="w-4 h-4 lg:w-5 lg:h-5" />
-              <span>Yeni Gider Ekle</span>
+              <Plus className="w-4 h-4" />
+              Ekle
             </button>
           </div>
-          
-          {/* Ay Navigasyonu */}
-          <div className="flex items-center justify-center mt-4">
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
+        {/* Month Navigation */}
+        <div className="mb-6">
+          <div className="flex items-center justify-center">
             <div className="flex items-center bg-white rounded-lg shadow-lg border border-gray-200 p-1 lg:p-2">
               <button
                 onClick={() => navigateMonth('prev')}

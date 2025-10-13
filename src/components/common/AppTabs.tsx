@@ -54,7 +54,7 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
       {/* Logo/Brand Section */}
       <div className="flex items-center px-3 sm:px-4 py-4 sm:py-3 sm:border-r sm:border-gray-200">
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/')}
           className="flex items-center gap-3 hover:opacity-90 active:opacity-80 focus:outline-none"
           aria-label="Anasayfa - TeknoKapsül"
         >
@@ -66,8 +66,8 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
         </button>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="hidden lg:flex items-center flex-1">
+      {/* Navigation Tabs - Gizli */}
+      <div className="hidden">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = currentApp === tab.id;

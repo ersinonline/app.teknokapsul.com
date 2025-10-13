@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Plus, Trash2, Calculator, CreditCard, Building, CheckCircle, Save, ArrowLeft, Edit, Eye, Download } from 'lucide-react';
+import { Home, Plus, Trash2, Calculator, CreditCard, Building, CheckCircle, Save, Edit, Eye, Download, ArrowLeft } from 'lucide-react';
 import { collection, addDoc, getDocs, query, orderBy, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -1179,19 +1179,25 @@ const PaymentPlanPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto p-4 sm:p-6">
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="flex items-center justify-center mb-3">
-            <div className="bg-[#ffb700] p-3 rounded-full mr-3">
-              <Home className="w-8 h-8 text-white" />
+        <div className="bg-white shadow-sm sticky top-0 z-10 p-4 mb-6 sm:mb-8 rounded-lg">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center">
+              <div className="bg-[#ffb700] p-3 rounded-full mr-3">
+                <Home className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                {isEditing ? `${selectedPlan?.name} - Düzenleme` : 'Ödeme Planı Oluştur'}
+              </h1>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-              {isEditing ? `${selectedPlan?.name} - Düzenleme` : 'Ödeme Planı Oluştur'}
-            </h1>
+            <button className="flex items-center gap-2 px-3 py-2 bg-[#ffb700] text-white rounded-lg hover:bg-[#e6a500] transition-colors">
+              <Plus className="w-4 h-4" />
+              <span className="text-sm font-medium">Ekle</span>
+            </button>
           </div>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4 text-center">
             Ev alımınız için detaylı ödeme planı oluşturun. Peşinat, konut kredisi ve ihtiyaç kredilerini planlayın.
           </p>
         </div>

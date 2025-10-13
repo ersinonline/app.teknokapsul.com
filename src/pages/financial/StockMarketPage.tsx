@@ -3,6 +3,7 @@ import { Search, RefreshCw, TrendingUp, TrendingDown, Star, Activity } from 'luc
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface StockData {
   name: string;
@@ -38,6 +39,7 @@ interface MarketData {
 type TabType = 'all' | 'bist50' | 'bist30' | 'rising' | 'falling' | 'indices' | 'favorites';
 
 const StockMarketPage: React.FC = () => {
+  const navigate = useNavigate();
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [bist50Stocks, setBist50Stocks] = useState<StockData[]>([]);
   const [bist30Stocks, setBist30Stocks] = useState<StockData[]>([]);
@@ -262,30 +264,29 @@ const StockMarketPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-      <div className="w-full">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Borsa İstanbul (BIST)
-            </h1>
+    <div className="bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Activity className="w-6 h-6" style={{ color: '#ffb700' }} />
+              <h1 className="text-lg font-semibold text-gray-900">Borsa Takibi</h1>
+            </div>
             <button
               onClick={fetchAllData}
               disabled={loading}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
+              className="flex items-center gap-2 px-3 py-2 bg-[#ffb700] text-white rounded-lg hover:bg-[#e6a500] transition-colors"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              Yenile
+              <span className="text-sm font-medium">Güncelle</span>
             </button>
           </div>
-          
-          {lastUpdate && (
-            <p className="text-sm text-gray-600">
-              Son güncelleme: {lastUpdate.toLocaleString('tr-TR')}
-            </p>
-          )}
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
 
         {/* Market Data Box */}
         {marketData && (

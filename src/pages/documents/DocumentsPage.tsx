@@ -238,8 +238,19 @@ const DocumentsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-        <div className="w-full">
+      <div className="bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm sticky top-0 z-10 border-b">
+          <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+            <div className="flex items-center gap-3">
+              <FolderOpen className="w-6 h-6" style={{ color: '#ffb700' }} />
+              <h1 className="text-xl font-semibold text-gray-900">Belgelerim</h1>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ffb700]"></div>
           </div>
@@ -249,60 +260,27 @@ const DocumentsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="w-full">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Dosyalarım
-          </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Kira sözleşmeleri, sigorta poliçeleri ve diğer önemli belgelerinizi güvenle saklayın
-          </p>
-          <div className="w-20 h-1 bg-[#ffb700] mx-auto mt-4 rounded-full"></div>
-        </div>
-
-        {/* Upload Area */}
-        <div className="mb-8">
-          <div
-            className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-              dragActive ? 'border-[#ffb700] bg-[#fff7e6]' : 'border-gray-300 bg-white'
-            }`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Dosya Yükle
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Dosyalarınızı buraya sürükleyip bırakın veya seçin
-            </p>
-            <input
-              type="file"
-              multiple
-              onChange={(e) => handleFileSelect(e.target.files)}
-              className="hidden"
-              id="file-upload"
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.xlsx,.xls"
-            />
-            <label
-              htmlFor="file-upload"
-              className="inline-flex items-center gap-2 bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a600] transition-colors cursor-pointer"
+    <div className="bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <FolderOpen className="w-6 h-6" style={{ color: '#ffb700' }} />
+              <h1 className="text-xl font-semibold text-gray-900">Belgelerim</h1>
+            </div>
+            <button
+              onClick={() => setShowUploadModal(true)}
+              className="flex items-center gap-2 bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a600] transition-colors"
             >
-              <Plus className="w-5 h-5" />
-              Dosya Seç
-            </label>
-            {uploading && (
-              <div className="mt-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#ffb700] mx-auto"></div>
-                <p className="text-sm text-gray-600 mt-2">Yükleniyor...</p>
-              </div>
-            )}
+              <Plus className="w-4 h-4" />
+            </button>
           </div>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
 
         {/* Categories */}
         <div className="mb-8">
@@ -334,7 +312,7 @@ const DocumentsPage: React.FC = () => {
                       : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
                   }`}
                 >
-                  <div className="mx-auto mb-2">{category.icon}</div>
+                  <div className="flex justify-center mb-2">{category.icon}</div>
                   <span className="text-sm font-medium block">{category.name}</span>
                   <span className="block text-xs text-gray-500 mt-1">
                     {categoryCount} dosya
@@ -381,8 +359,9 @@ const DocumentsPage: React.FC = () => {
               return (
                 <div
                   key={document.id}
-                  className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow"
+                  className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow flex flex-col h-full"
                 >
+                  {/* Top section with file icon and name */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{getFileIcon(document.type)}</span>
@@ -397,37 +376,45 @@ const DocumentsPage: React.FC = () => {
                     </div>
                   </div>
                   
-                  {category && (
-                    <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium mb-3 ${category.bgColor} ${category.color}`}>
-                      {category.icon}
-                      <span>{category.name}</span>
+                  {/* Spacer to push bottom content down */}
+                  <div className="flex-1"></div>
+                  
+                  {/* Bottom section with category, date, and buttons */}
+                  <div className="mt-auto space-y-3">
+                    {category && (
+                      <div className="flex justify-center">
+                        <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${category.bgColor} ${category.color}`}>
+                          {category.icon}
+                          <span>{category.name}</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <p className="text-xs text-gray-500 text-center">
+                      {document.uploadDate.toLocaleDateString('tr-TR')}
+                    </p>
+                    
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleDownload(document)}
+                        className="flex-1 flex items-center justify-center gap-1 bg-[#ffb700] text-white px-3 py-2 rounded-lg hover:bg-[#e6a600] transition-colors text-sm"
+                      >
+                        <Eye className="w-4 h-4" />
+                        Görüntüle
+                      </button>
+                      <button
+                        onClick={() => handleDownload(document)}
+                        className="flex items-center justify-center gap-1 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteDocument(document)}
+                        className="flex items-center justify-center gap-1 bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors text-sm"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
-                  )}
-                  
-                  <p className="text-xs text-gray-500 mb-4">
-                    {document.uploadDate.toLocaleDateString('tr-TR')}
-                  </p>
-                  
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleDownload(document)}
-                      className="flex-1 flex items-center justify-center gap-1 bg-[#ffb700] text-white px-3 py-2 rounded-lg hover:bg-[#e6a600] transition-colors text-sm"
-                    >
-                      <Eye className="w-4 h-4" />
-                      Görüntüle
-                    </button>
-                    <button
-                      onClick={() => handleDownload(document)}
-                      className="flex items-center justify-center gap-1 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm"
-                    >
-                      <Download className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteDocument(document)}
-                      className="flex items-center justify-center gap-1 bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors text-sm"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   </div>
                 </div>
               );
@@ -438,22 +425,64 @@ const DocumentsPage: React.FC = () => {
         {/* Upload Modal */}
         {showUploadModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="bg-white rounded-xl max-w-lg w-full p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                Dosya Yükleme
+                Belge Yükleme
               </h3>
+              
+              {/* Drag and Drop Area */}
+              <div className="mb-6">
+                <div
+                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+                    dragActive ? 'border-[#ffb700] bg-[#fff7e6]' : 'border-gray-300 bg-gray-50'
+                  }`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                >
+                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                    Belge Yükle
+                  </h4>
+                  <p className="text-gray-600 mb-4">
+                    Belgelerinizi buraya sürükleyip bırakın veya seçin
+                  </p>
+                  <input
+                    type="file"
+                    multiple
+                    onChange={(e) => handleFileSelect(e.target.files)}
+                    className="hidden"
+                    id="modal-file-upload"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.xlsx,.xls"
+                  />
+                  <label
+                    htmlFor="modal-file-upload"
+                    className="inline-flex items-center gap-2 bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a600] transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Belge Seç
+                  </label>
+                  {uploading && (
+                    <div className="mt-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#ffb700] mx-auto"></div>
+                      <p className="text-sm text-gray-600 mt-2">Yükleniyor...</p>
+                    </div>
+                  )}
+                </div>
+              </div>
               
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Dosya Adı
+                    Belge Adı
                   </label>
                   <input
                     type="text"
                     value={uploadFileName}
                     onChange={(e) => setUploadFileName(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
-                    placeholder="Dosya adını girin"
+                    placeholder="Belge adını girin"
                   />
                 </div>
                 

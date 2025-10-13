@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Tag, FileText, Filter, Grid } from 'lucide-react';
+import { Plus, Search, FileText, Filter, Grid } from 'lucide-react';
 import { useFirebaseData } from '../../hooks/useFirebaseData';
 import { Note } from '../../types/notes';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
@@ -9,7 +9,6 @@ import { NoteCard } from '../../components/notes/NoteCard';
 import { Modal } from '../../components/common/Modal';
 
 export const NotesPage = () => {
-
   const { data: notes = [], loading, error, reload } = useFirebaseData<Note>('notes');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
@@ -35,34 +34,38 @@ export const NotesPage = () => {
   if (error) return <ErrorMessage message="Notlar yüklenirken bir hata oluştu." />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-4 lg:p-6 space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <FileText className="w-6 h-6" style={{ color: '#ffb700' }} />
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Notlarım</h1>
+    <div className="bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <FileText className="w-6 h-6" style={{ color: '#ffb700' }} />
+              <h1 className="text-xl font-semibold text-gray-900">Notlarım</h1>
+            </div>
+            <button
+              onClick={() => {
+                setCurrentNote(null);
+                setIsEditorOpen(true);
+              }}
+              className="flex items-center gap-2 bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a600] transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Yeni Not</span>
+            </button>
           </div>
-          <button
-            onClick={() => {
-              setCurrentNote(null);
-              setIsEditorOpen(true);
-            }}
-            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl"
-            style={{ backgroundColor: '#ffb700' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
-          >
-            <Plus className="w-4 h-4" />
-            Yeni Not Ekle
-          </button>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4 space-y-6">
 
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-4">
             <Filter className="w-5 h-5" style={{ color: '#ffb700' }} />
             <h2 className="text-lg font-semibold text-gray-900">Arama ve Filtreleme</h2>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -77,7 +80,7 @@ export const NotesPage = () => {
               />
             </div>
             <div className="relative">
-              <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <select
                 value={selectedTag || ''}
                 onChange={(e) => setSelectedTag(e.target.value || null)}
@@ -86,7 +89,7 @@ export const NotesPage = () => {
                 onFocus={(e) => e.target.style.borderColor = '#ffb700'}
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
               >
-                <option value="">Tüm etiketler</option>
+                <option value="">Tümü</option>
                 {tags.map(tag => (
                   <option key={tag} value={tag}>{tag}</option>
                 ))}

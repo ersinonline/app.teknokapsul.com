@@ -215,7 +215,7 @@ const PaymentPlanDetailPage: React.FC = () => {
   };
 
   const handleEdit = () => {
-    navigate(`/tekno-finans/payment-plans/${id}/edit`);
+    navigate(`/payment-plan/${id}/edit`);
   };
 
   const handleShare = async () => {
@@ -233,13 +233,13 @@ const PaymentPlanDetailPage: React.FC = () => {
         sharedBy: user?.id || 'anonymous'
       });
 
-      const shareUrl = `${window.location.origin}/tekno-finans/payment-plans/${id}`;
+      const shareUrl = `${window.location.origin}/payment-plan/${id}`;
       await navigator.clipboard.writeText(shareUrl);
       alert('Plan başarıyla paylaşıldı! Link panoya kopyalandı. Bu linki paylaşarak herkese planınızı görüntüleme imkanı sağlayabilirsiniz.');
     } catch (error) {
       console.error('Paylaşım hatası:', error);
       // Fallback: Show the URL in a prompt
-      const shareUrl = `${window.location.origin}/tekno-finans/payment-plans/${id}`;
+      const shareUrl = `${window.location.origin}/payment-plan/${id}`;
       prompt('Plan linkini kopyalayın:', shareUrl);
     }
   };
@@ -506,7 +506,7 @@ const PaymentPlanDetailPage: React.FC = () => {
             <p className="text-red-800">{error || 'Plan bulunamadı'}</p>
           </div>
           <button
-            onClick={() => navigate('/tekno-finans/payment-plans')}
+            onClick={() => navigate('/payment-plan')}
             className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors"
           >
             Geri Dön
@@ -529,7 +529,7 @@ const PaymentPlanDetailPage: React.FC = () => {
           {/* Back Button Row */}
           <div className="flex items-center mb-4">
             <button
-              onClick={() => navigate('/tekno-finans/payment-plans')}
+              onClick={() => navigate('/payment-plan')}
               className="p-2 text-gray-600 hover:text-gray-800 transition-colors touch-manipulation active:bg-gray-100 rounded-lg"
             >
               <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />

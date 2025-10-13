@@ -70,14 +70,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <Sidebar onCollapseChange={setSidebarCollapsed} />
 
       {/* Ana İçerik - Responsive padding */}
-      <div className={`${sidebarCollapsed ? 'xl:pl-20' : 'xl:pl-64'} pb-16 md:pb-0 xl:pb-0 pt-16 md:pt-16 xl:pt-0 transition-all duration-300`}>
+      <div className={`${sidebarCollapsed ? 'xl:pl-20' : 'xl:pl-64'} pb-16 pt-16 md:pt-16 xl:pt-0 transition-all duration-300`}>
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-8">
           {children}
         </div>
       </div>
 
-      {/* Mobil Alt Menü - Fixed - Sadece küçük ekranlar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden z-20">
+      {/* Mobil Alt Menü - Gizli (MobileNavigation bileşeni kullanılıyor) */}
+      <div className="hidden">
         <div className="grid grid-cols-5">
           {mobileMenuItems.map((item) => {
             const Icon = item.icon;

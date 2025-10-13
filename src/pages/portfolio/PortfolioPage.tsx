@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, TrendingUp, Target, Brain, Eye, EyeOff, RefreshCw, PieChart, Clock, X } from 'lucide-react';
+import { Plus, TrendingUp, Target, Brain, RefreshCw, PieChart, Clock, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { portfolioService } from '../../services/portfolio.service';
 import { PortfolioItem, AIRecommendation, PORTFOLIO_CATEGORIES } from '../../types/portfolio';
@@ -248,45 +248,31 @@ export const PortfolioPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-2 sm:p-4 lg:p-8">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="mb-6 sm:mb-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Portföyüm</h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-1">Yatırımlarınızı takip edin ve AI destekli öneriler alın</p>
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <button
-              onClick={() => setShowValues(!showValues)}
-              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              {showValues ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              <span className="text-xs sm:text-sm">{showValues ? 'Gizle' : 'Göster'}</span>
-            </button>
-
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-              <span className="text-xs sm:text-sm">Yenile</span>
-            </button>
-            
-
-            
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <PieChart className="w-6 h-6" style={{ color: '#ffb700' }} />
+              <h1 className="text-xl font-semibold text-gray-900">Portföyüm</h1>
+            </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+              className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl"
+              style={{ backgroundColor: '#ffb700' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
             >
               <Plus className="w-4 h-4" />
-              <span className="text-xs sm:text-sm">Yatırım Ekle</span>
+              Ekle
             </button>
           </div>
         </div>
       </div>
+
+      {/* Main Content */}
+      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
 
       {/* Tab Navigation */}
        <div className="grid grid-cols-4 gap-1 mb-6 bg-gray-100 p-1 rounded-lg">
@@ -627,6 +613,7 @@ export const PortfolioPage: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

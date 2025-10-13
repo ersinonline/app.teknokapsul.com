@@ -108,10 +108,32 @@ export const deleteSubscription = async (subscriptionId: string, userId: string)
   }
 };
 
-export const toggleSubscriptionStatus = async (subscriptionId: string, userId: string, isActive: boolean): Promise<void> => {
+export const toggleSubscriptionStatus = async (subscriptionId: string, userId: string, isActive: boolean, subscription?: Subscription): Promise<void> => {
   try {
     const subscriptionRef = doc(db, 'teknokapsul', userId, 'subscriptions', subscriptionId);
-    await updateDoc(subscriptionRef, { isActive });
+    const updateData: any = { isActive };
+    
+    // If activating a subscription, set new start date and calculate end date
+    if (isActive && subscription) {
+      const now = new Date();
+      
+      // Always set new start date when reactivating
+      updateData.lastRenewalDate = now.toISOString();
+      
+      // Calculate new end date based on renewal settings
+      if (subscription.autoRenew && subscription.renewalDay) {
+        // For auto-renewal subscriptions, calculate end date from renewal day
+        const newEndDate = calculateEndDate(subscription.renewalDay);
+        updateData.subscriptionEndDate = newEndDate.toISOString();
+      } else {
+        // For non-auto-renewal subscriptions, set 30 days from today
+        const newEndDate = new Date(now);
+        newEndDate.setDate(newEndDate.getDate() + 30);
+        updateData.subscriptionEndDate = newEndDate.toISOString();
+      }
+    }
+    
+    await updateDoc(subscriptionRef, updateData);
   } catch (error) {
     console.error('Error toggling subscription status:', error);
     throw error;

@@ -1,13 +1,12 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Home,
   Bell,
   User,
-  Grid3X3,
   PieChart,
   Zap,
-  Gift
+  Briefcase,
+  Building
 } from 'lucide-react';
 // import { usePremium } from '../../contexts/PremiumContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -23,11 +22,10 @@ interface NavigationItem {
 }
 
 const bottomNavigationItems: NavigationItem[] = [
-  { path: '/dashboard', label: 'Ana Sayfa', icon: Home },
-  { path: '/tekno-finans', label: 'Finans', icon: PieChart },
-  { path: '/tekno-kapsul', label: 'Kapsül', icon: Zap },
-  { path: '/tekno-hizmet', label: 'Hizmet', icon: Grid3X3 },
-  { path: '/tekno-firsat', label: 'Fırsat', icon: Gift },
+  { path: '/kapsulum', label: 'Kapsülüm', icon: Zap },
+  { path: '/evim', label: 'Evim', icon: Building },
+  { path: '/bankam', label: 'Bankam', icon: PieChart },
+  { path: '/work-tracking', label: 'İşim', icon: Briefcase },
 ];
 
 export const MobileNavigation: React.FC = () => {
@@ -36,6 +34,9 @@ export const MobileNavigation: React.FC = () => {
   // const { isPremium } = usePremium();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Ana sayfada mobil alt menüyü gizle
+  const isHomePage = location.pathname === '/';
 
   const handleUserClick = () => {
     // Clerk ayarları sayfasını aç
@@ -105,9 +106,10 @@ export const MobileNavigation: React.FC = () => {
 
 
 
-      {/* Bottom Navigation for Mobile */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-40">
-        <div className="grid grid-cols-5 gap-1 px-2 py-2">
+      {/* Bottom Navigation for Mobile and Desktop */}
+      {!isHomePage && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-40">
+        <div className="grid grid-cols-4 gap-1 px-2 py-2">
           {bottomNavigationItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -136,7 +138,7 @@ export const MobileNavigation: React.FC = () => {
           })}
         </div>
       </div>
-
+      )}
 
     </>
   );

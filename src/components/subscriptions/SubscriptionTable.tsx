@@ -32,12 +32,12 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
     }
   };
 
-  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
+  const handleToggleStatus = async (id: string, currentStatus: boolean, subscription: Subscription) => {
     if (!user) return;
     
     setIsToggling(id);
     try {
-      await toggleSubscriptionStatus(id, user.id, !currentStatus);
+      await toggleSubscriptionStatus(id, user.id, !currentStatus, subscription);
       onUpdate();
     } catch (error) {
       console.error('Error toggling subscription status:', error);
@@ -60,20 +60,25 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
   );
 
   const getStatusInfo = (daysRemaining: number, isActive: boolean) => {
-    if (!isActive) {
-      return {
-        icon: <Power className="w-4 h-4" />,
-        text: 'Pasif',
-        className: 'bg-gray-100 text-gray-800'
-      };
-    }
+    // If subscription is expired (days remaining <= 0), always show as expired regardless of isActive
     if (daysRemaining <= 0) {
       return {
         icon: <AlertCircle className="w-4 h-4" />,
-        text: 'Bitti',
+        text: 'Süresi Doldu',
         className: 'bg-red-100 text-red-800'
       };
     }
+    
+    // If subscription is not active but still has time, show as expired
+    if (!isActive) {
+      return {
+        icon: <AlertCircle className="w-4 h-4" />,
+        text: 'Süresi Doldu',
+        className: 'bg-red-100 text-red-800'
+      };
+    }
+    
+    // Active subscription with time remaining
     if (daysRemaining <= 7) {
       return {
         icon: <Clock className="w-4 h-4" />,
@@ -188,7 +193,7 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleToggleStatus(subscription.id, subscription.isActive)}
+                        onClick={() => handleToggleStatus(subscription.id, subscription.isActive, subscription)}
                         className={`${subscription.isActive ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900'} disabled:opacity-50`}
                         title={subscription.isActive ? 'Pasif Yap' : 'Aktif Yap'}
                         disabled={isToggling === subscription.id}
@@ -254,7 +259,7 @@ export const SubscriptionTable: React.FC<SubscriptionTableProps> = ({ subscripti
                   <Edit2 className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => handleToggleStatus(subscription.id, subscription.isActive)}
+                  onClick={() => handleToggleStatus(subscription.id, subscription.isActive, subscription)}
                   className={`p-2 ${subscription.isActive ? 'text-green-600 hover:text-green-900 hover:bg-green-50' : 'text-red-600 hover:text-red-900 hover:bg-red-50'} disabled:opacity-50 rounded-md transition-colors`}
                   title={subscription.isActive ? 'Pasif Yap' : 'Aktif Yap'}
                   disabled={isToggling === subscription.id}
