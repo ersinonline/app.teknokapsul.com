@@ -29,7 +29,7 @@ export const PortfolioPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'analytics' | 'investments' | 'returns' | 'prices'>('analytics');
 
   const [showExchangeRateModal, setShowExchangeRateModal] = useState(false);
-  const [showValues, setShowValues] = useState(true);
+  const [showValues] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedSymbol, setSelectedSymbol] = useState<string>('');

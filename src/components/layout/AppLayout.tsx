@@ -49,7 +49,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <div className="hidden">
         <div className="flex items-center justify-between p-4">
           <button 
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/')}
             className="hover:opacity-80 transition-opacity"
           >
             <h1 className="text-lg font-semibold">TeknoKapsül</h1>
@@ -70,7 +70,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <Sidebar onCollapseChange={setSidebarCollapsed} />
 
       {/* Ana İçerik - Responsive padding */}
-      <div className={`${sidebarCollapsed ? 'xl:pl-20' : 'xl:pl-64'} pb-16 pt-16 md:pt-16 xl:pt-0 transition-all duration-300`}>
+      <div className={`${sidebarCollapsed ? 'xl:pl-20' : 'xl:pl-64'} pb-16 md:pb-0 pt-16 md:pt-20 xl:pt-0 transition-all duration-300`}>
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-8">
           {children}
         </div>
