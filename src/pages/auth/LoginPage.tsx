@@ -1,8 +1,8 @@
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { SignIn, useUser } from '@clerk/clerk-react';
-import { Shield, Zap, Users, Star, CheckCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Shield, Zap, Users, Star } from 'lucide-react';
+import { useEffect } from 'react';
 
 export const LoginPage = () => {
   const { user, loading } = useAuth();
