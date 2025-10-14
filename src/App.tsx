@@ -12,7 +12,6 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { AuthGuard } from './components/auth/AuthGuard';
 
 // Route components
-import { UnifiedDashboard } from './components/UnifiedDashboard';
 import Services from './pages/services/ServicesPage';
 import ProfessionalHomePage from './pages/ProfessionalHomePage.tsx';
 

@@ -23,7 +23,6 @@ export const PortfolioPage: React.FC = () => {
 
   const [recommendations, setRecommendations] = useState<AIRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'analytics' | 'investments' | 'returns' | 'prices'>('analytics');
@@ -99,7 +98,6 @@ export const PortfolioPage: React.FC = () => {
   const handleRefresh = async () => {
     if (!user) return;
     
-    setRefreshing(true);
     try {
       // Tüm fiyatları güncelle (hisse, döviz, altın) - vadeli hesaplar hariç
       await portfolioService.updateAllPricesFromAPI(user.id);
@@ -115,8 +113,6 @@ export const PortfolioPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Portföy güncellenirken hata:', error);
-    } finally {
-      setRefreshing(false);
     }
   };
 
