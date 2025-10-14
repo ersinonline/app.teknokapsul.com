@@ -151,8 +151,8 @@ export const LoginPage = () => {
             {/* Compact Clerk SignIn Form */}
             <div className="w-full max-w-sm mx-auto">
               <SignIn 
-                redirectUrl="/dashboard"
-                fallbackRedirectUrl="/dashboard"
+                redirectUrl="/"
+                fallbackRedirectUrl="/"
                 appearance={{
                   elements: {
                     rootBox: "w-full",
