@@ -80,10 +80,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signOut = async () => {
     try {
+      // Local storage'ı temizle
+      localStorage.removeItem('clerk_session_active');
+      localStorage.removeItem('clerk_session_timestamp');
+      
+      // Clerk signOut'u çağır
       await clerkSignOut();
-      // Çıkış sonrası state temizlenir, yönlendirme router tarafından yapılır
+      
+      // State'i zorla güncelle
+      setForceUpdate(prev => prev + 1);
+      
+      // Kısa bir gecikme sonrası login sayfasına yönlendir
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 100);
     } catch (error) {
       console.error('Sign-out error:', error);
+      // Hata durumunda da yönlendirme yap
+      window.location.href = '/login';
     }
   };
 

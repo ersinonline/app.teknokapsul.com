@@ -9,7 +9,6 @@ export const LoginPage = () => {
   const { isSignedIn, isLoaded } = useUser();
   const location = useLocation();
   const navigate = useNavigate();
-  const [isRedirecting, setIsRedirecting] = useState(false);
   
   // Her zaman ana sayfaya yönlendir
   const getDefaultRedirect = () => {
@@ -18,18 +17,17 @@ export const LoginPage = () => {
   
   const from = location.state?.from || getDefaultRedirect();
 
-  // Kullanıcı giriş yaptığında otomatik yönlendirme - React Router kullanarak
+  // Kullanıcı giriş yaptığında otomatik yönlendirme
   useEffect(() => {
-    if ((user && !loading) || (isSignedIn && isLoaded)) {
-      setIsRedirecting(true);
-      // React Router navigate kullanarak sayfa yenilenmeden yönlendir
+    if (isLoaded && isSignedIn && user) {
+      // Kısa bir gecikme ile yönlendir
       const timer = setTimeout(() => {
         navigate(from, { replace: true });
-      }, 1000);
+      }, 100);
       
       return () => clearTimeout(timer);
     }
-  }, [user, loading, isSignedIn, isLoaded, from, navigate]);
+  }, [user, isSignedIn, isLoaded, from, navigate]);
 
   if (loading || !isLoaded) {
     return (
@@ -39,22 +37,6 @@ export const LoginPage = () => {
             <div className="w-16 h-16 border-4 border-gray-200 border-t-[#ffb700] rounded-full animate-spin mx-auto" />
           </div>
           <p className="mt-4 text-gray-600 font-medium">Yükleniyor...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Yönlendirme durumu
-  if (isRedirecting) {
-    return (
-      <div className="fixed inset-0 bg-white flex items-center justify-center overflow-hidden">
-        <div className="text-center">
-          <div className="relative">
-            <div className="w-16 h-16 bg-[#ffb700] rounded-full flex items-center justify-center mx-auto animate-pulse">
-              <CheckCircle className="w-8 h-8 text-white" />
-            </div>
-          </div>
-          <p className="mt-4 text-gray-900 font-medium">Giriş başarılı! Yönlendiriliyorsunuz...</p>
         </div>
       </div>
     );
