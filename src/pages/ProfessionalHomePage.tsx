@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Home, CreditCard, DollarSign, Star, Shield, Smartphone, ShoppingBag, Server } from 'lucide-react';
+import { Car, Home, CreditCard, DollarSign, Star, Shield, Smartphone, ShoppingBag, Server, User } from 'lucide-react';
 
 interface SlideData {
   id: number;
@@ -79,7 +79,7 @@ const ProfessionalHomePage: React.FC = () => {
     {
       id: 'kendim',
       title: 'Kapsülüm',
-      icon: <Car className="w-8 h-8 text-white" />,
+      icon: <User className="w-8 h-8 text-white" />,
       color: 'bg-[#FFB700]',
       route: '/kapsulum'
     },

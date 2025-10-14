@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Calendar, ChevronRight, StickyNote, ClipboardList } from 'lucide-react';
+import { FileText, Calendar, ChevronRight, StickyNote, ClipboardList, Users } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { useNavigate } from 'react-router-dom';
@@ -114,6 +114,20 @@ const KendimPage: React.FC = () => {
       }))
     },
     {
+      id: 'attendance',
+      title: 'Yoklama Takibi',
+      description: 'Devam durumunuzu takip edin',
+      icon: Users,
+      color: 'bg-indigo-500',
+      bgColor: 'bg-indigo-50',
+      textColor: 'text-indigo-700',
+      borderColor: 'border-indigo-200',
+      route: '/attendance',
+      count: 0,
+      loading: false,
+      items: []
+    },
+    {
       id: 'applications',
       title: 'Başvurularım',
       description: 'Başvurularınızı takip edin',
@@ -176,7 +190,7 @@ const KendimPage: React.FC = () => {
                       <p className="text-gray-600 text-sm mt-1">
                         {section.description}
                       </p>
-                      {section.id !== 'calendar' && section.id !== 'applications' && (section.loading ? (
+                      {section.id !== 'calendar' && section.id !== 'applications' && section.id !== 'attendance' && (section.loading ? (
                         <div className="flex items-center gap-2 mt-2">
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
                           <span className="text-xs text-gray-500">Yükleniyor...</span>

@@ -1,8 +1,17 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="64" fill="#3b82f6"/>
-  <path d="M128 256C128 185.31 185.31 128 256 128C326.69 128 384 185.31 384 256C384 326.69 326.69 384 256 384C185.31 384 128 326.69 128 256Z" fill="white"/>
-  <path d="M256 170.67C232.42 170.67 213.33 189.76 213.33 213.33V298.67C213.33 322.24 232.42 341.33 256 341.33C279.58 341.33 298.67 322.24 298.67 298.67V213.33C298.67 189.76 279.58 170.67 256 170.67Z" fill="#3b82f6"/>
-  <circle cx="256" cy="213.33" r="21.33" fill="white"/>
-  <rect x="234.67" y="256" width="42.67" height="64" rx="5.33" fill="white"/>
+  <!-- Ana arka plan -->
+  <rect width="512" height="512" rx="64" fill="#FFB700"/>
+  
+  <!-- Merkez daire (beyaz) -->
+  <circle cx="256" cy="256" r="128" fill="white"/>
+  
+  <!-- İç kapsül şekli (sarı) -->
+  <rect x="192" y="192" width="128" height="128" rx="64" fill="#FFB700"/>
+  
+  <!-- Kapsül detayları -->
+  <circle cx="256" cy="224" r="16" fill="white"/>
+  <rect x="240" y="256" width="32" height="48" rx="4" fill="white"/>
+  
+  <!-- Alt metin -->
   <text x="256" y="440" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="36" font-weight="bold">TeknoKapsül</text>
 </svg>

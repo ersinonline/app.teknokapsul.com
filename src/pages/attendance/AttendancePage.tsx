@@ -183,14 +183,21 @@ const AttendancePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Yoklama Takip Sistemi</h1>
-          <p className="text-gray-600">Ders programlarınızı yönetin ve devamsızlık durumunuzu takip edin</p>
+    <div className="bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
+              <Users className="w-6 h-6" style={{ color: '#6366f1' }} />
+              <h1 className="text-2xl font-bold text-gray-900">Yoklama Takibi</h1>
+            </div>
+          </div>
         </div>
+      </div>
 
+      {/* Main Content */}
+      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
         {/* Semester Configuration */}
         <div className="bg-white rounded-lg shadow-sm border mb-6 p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">

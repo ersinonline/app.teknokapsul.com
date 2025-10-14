@@ -1,8 +1,17 @@
 <svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="192" height="192" rx="24" fill="#3b82f6"/>
-  <path d="M48 96C48 69.49 69.49 48 96 48C122.51 48 144 69.49 144 96C144 122.51 122.51 144 96 144C69.49 144 48 122.51 48 96Z" fill="white"/>
-  <path d="M96 64C87.16 64 80 71.16 80 80V112C80 120.84 87.16 128 96 128C104.84 128 112 120.84 112 112V80C112 71.16 104.84 64 96 64Z" fill="#3b82f6"/>
-  <circle cx="96" cy="80" r="8" fill="white"/>
-  <rect x="88" y="96" width="16" height="24" rx="2" fill="white"/>
+  <!-- Ana arka plan -->
+  <rect width="192" height="192" rx="24" fill="#FFB700"/>
+  
+  <!-- Merkez daire (beyaz) -->
+  <circle cx="96" cy="96" r="48" fill="white"/>
+  
+  <!-- İç kapsül şekli (sarı) -->
+  <rect x="72" y="72" width="48" height="48" rx="24" fill="#FFB700"/>
+  
+  <!-- Kapsül detayları -->
+  <circle cx="96" cy="84" r="6" fill="white"/>
+  <rect x="90" y="96" width="12" height="18" rx="2" fill="white"/>
+  
+  <!-- Alt metin -->
   <text x="96" y="160" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">TK</text>
 </svg>

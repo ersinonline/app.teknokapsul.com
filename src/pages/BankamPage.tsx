@@ -277,8 +277,8 @@ const BankamPage: React.FC = () => {
   return (
     <div className="bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-6">
+      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-3">
               <DollarSign className="w-6 h-6" style={{ color: '#ffb700' }} />
