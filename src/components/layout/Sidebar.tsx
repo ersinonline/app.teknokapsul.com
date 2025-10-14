@@ -16,7 +16,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
   // const { isPremium } = usePremium();
 
   const dashboardItems = [
-    { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
+    { id: 'home', path: '/', label: 'Ana Sayfa', icon: Home },
   ];
 
   const financeItems = [

@@ -31,7 +31,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
   // const { isPremium } = usePremium();
 
   const mainMenuItems = [
-    { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
+    { id: 'home', path: '/', label: 'Ana Sayfa', icon: Home },
     { id: 'teknohizmet', path: '/services', label: 'TeknoHizmet', icon: Briefcase },
     { id: 'teknofinans', path: '/mobile-finance', label: 'TeknoFinans', icon: PieChart },
     { id: 'teknokapsul', path: '/teknokapsul', label: 'TeknoKapsül', icon: Zap },
@@ -75,7 +75,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
             </button>
             <div className="flex items-center gap-2">
                 <button 
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => navigate('/')}
                   className="hover:opacity-80 transition-opacity"
                 >
                   <h1 className="text-base sm:text-lg font-semibold text-gray-900">TeknoKapsül</h1>

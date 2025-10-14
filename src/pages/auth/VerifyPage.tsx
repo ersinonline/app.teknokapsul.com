@@ -12,10 +12,9 @@ export const VerifyPage = () => {
   const navigate = useNavigate();
   const clerk = useClerk();
 
-  // Mobilde dashboard'a, masaüstünde anasayfaya yönlendir
+  // Her zaman ana sayfaya yönlendir
   const getDefaultRedirect = () => {
-    const isMobile = window.innerWidth < 1024; // lg breakpoint
-    return isMobile ? '/dashboard' : '/';
+    return '/';
   };
 
   useEffect(() => {

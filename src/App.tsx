@@ -140,7 +140,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/dashboard',
-    element: <TeknoRoute><UnifiedDashboard /></TeknoRoute>
+    element: <Navigate to="/" replace />
   },
 
 

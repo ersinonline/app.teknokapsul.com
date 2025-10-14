@@ -30,7 +30,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   };
 
   const mobileMenuItems = [
-    { id: 'dashboard', path: '/dashboard', label: 'Ana Sayfa', icon: Home },
+    { id: 'home', path: '/', label: 'Ana Sayfa', icon: Home },
     { id: 'income', path: '/income', label: 'Gelirlerim', icon: TrendingUp },
     { id: 'expenses', path: '/expenses', label: 'Giderlerim', icon: TrendingDown },
     { id: 'budget', path: '/budget', label: 'Bütçe', icon: Wallet },
