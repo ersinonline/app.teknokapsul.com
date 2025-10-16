@@ -3,7 +3,6 @@ import emailjs from '@emailjs/browser';
 // EmailJS configuration - using VITE_ prefix for Vite environment variables
 const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || '';
 const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '';
-const EMAILJS_EXPENSE_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_EXPENSE_TEMPLATE_ID || '';
 const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '';
 
 // Initialize EmailJS
@@ -86,7 +85,7 @@ export const validateEmailConfiguration = (): boolean => {
 export const sendExpenseNotification = async (data: ExpenseNotificationData): Promise<boolean> => {
   try {
     // Check if EmailJS is properly configured
-    if (!EMAILJS_SERVICE_ID || !EMAILJS_EXPENSE_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
+    if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
       console.warn('EmailJS not configured for expense notifications. Skipping email notification.');
       return false;
     }
@@ -106,7 +105,7 @@ export const sendExpenseNotification = async (data: ExpenseNotificationData): Pr
 
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
-      EMAILJS_EXPENSE_TEMPLATE_ID,
+      EMAILJS_TEMPLATE_ID,
       templateParams
     );
 
