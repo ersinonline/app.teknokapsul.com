@@ -26,8 +26,10 @@
     "mailparser": "^3.7.4",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.13",
+    "pdfjs-dist": "^2.16.105",
     "protobufjs": ">=7.2.5",
-    "stripe": "^18.3.0"
+    "stripe": "^18.3.0",
+    "tesseract.js": "^6.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

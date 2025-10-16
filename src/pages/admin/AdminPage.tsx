@@ -3,12 +3,13 @@ import { collection, getDocs, query, orderBy, doc, updateDoc, addDoc, deleteDoc 
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { Eye, Calendar, User, FileText, Search, Trash2, MessageSquare, Headphones, Edit, Check, X, Package, ShoppingCart, Plus, Clock, Settings, CheckCircle } from 'lucide-react';
+import { Eye, Calendar, User, FileText, Search, Trash2, MessageSquare, Headphones, Edit, Check, X, Package, ShoppingCart, Plus, Clock, Settings, CheckCircle, Mail } from 'lucide-react';
 import { getAllSupportTickets, updateSupportTicketStatus, deleteSupportTicket, updateSupportTicket } from '../../services/support.service';
 import { deleteApplication, updateApplication } from '../../services/application.service';
 import { SupportTicket, SUPPORT_CATEGORIES, SUPPORT_PRIORITIES, SUPPORT_STATUSES } from '../../types/support';
 import { SupportTicketReplies } from '../../components/support/SupportTicketReplies';
 import { Order } from '../../services/order.service';
+import { EmailTestPanel } from '../../components/admin/EmailTestPanel';
 
 interface FormSubmission {
   id: string;
@@ -58,7 +59,7 @@ const AdminPage: React.FC = () => {
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
   const [showOrderModal, setShowOrderModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'applications' | 'support' | 'products' | 'orders'>('applications');
+  const [activeTab, setActiveTab] = useState<'applications' | 'support' | 'products' | 'orders' | 'email'>('applications');
   const [isEditing, setIsEditing] = useState(false);
   const [editingTicket, setEditingTicket] = useState(false);
   const [editingProduct, setEditingProduct] = useState(false);
@@ -767,6 +768,17 @@ const AdminPage: React.FC = () => {
             >
               <ShoppingCart className="w-4 h-4 inline mr-2" />
               Sipariş Yönetimi
+            </button>
+            <button
+              onClick={() => setActiveTab('email')}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'email'
+                  ? 'border-[#ffb700] text-[#ffb700]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Mail className="w-4 h-4 inline mr-2" />
+              E-posta Test
             </button>
 
           </div>
@@ -2375,6 +2387,19 @@ const AdminPage: React.FC = () => {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'email' ? (
+          <EmailTestPanel />
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <Settings className="w-12 h-12 mx-auto" />
+              </div>
+              <p className="text-gray-500">Lütfen bir sekme seçin.</p>
             </div>
           </div>
         )}

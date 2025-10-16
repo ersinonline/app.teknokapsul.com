@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator, Shield, Target, Menu, X, Briefcase, BarChart3 } from 'lucide-react';
+import { Home, Apple as Apps, Clock, StickyNote, Calendar, Settings, HelpCircle, LogOut, TrendingUp, TrendingDown, CreditCard, Package, PieChart, FolderOpen, Calculator, Shield, Target, Menu, X, Briefcase, BarChart3, Landmark } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 // import { usePremium } from '../../contexts/PremiumContext';
 
@@ -30,6 +30,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCollapseChange }) => {
   ];
 
   const dataItems = [
+    { id: 'accounts', path: '/accounts', label: 'Hesaplarım', icon: Landmark },
     { id: 'financial-data', path: '/financial-data', label: 'Finansal Verilerim', icon: CreditCard },
     { id: 'credit-score', path: '/credit-score', label: 'Findeks Kredi Notu', icon: TrendingUp },
     { id: 'warranty-tracking', path: '/warranty-tracking', label: 'Garanti Takibi', icon: Shield },

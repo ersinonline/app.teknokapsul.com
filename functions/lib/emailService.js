@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendPaymentPlanEmail = void 0;
+exports.sendExpenseReminder = exports.sendPaymentPlanEmail = void 0;
 const functions = require("firebase-functions");
 const nodemailer = require("nodemailer");
 // Gmail SMTP transporter oluştur
@@ -103,4 +103,57 @@ function formatCurrency(amount) {
         maximumFractionDigits: 2
     }) + ' TL';
 }
+// Gider hatırlatma email gönderme fonksiyonu
+const sendExpenseReminder = async (data) => {
+    try {
+        const transporter = createTransporter();
+        // Email içeriği oluştur
+        const emailContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #ffb700; text-align: center;">TeknoKapsül - Gider Hatırlatması</h2>
+        
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #333; margin-top: 0;">Merhaba ${data.to_name},</h3>
+          <p style="color: #666; line-height: 1.6;">
+            <strong>${data.expense_title}</strong> adlı giderinizin ödeme tarihi yaklaşıyor.
+          </p>
+          
+          <div style="background-color: #fff; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ffb700;">
+            <h4 style="color: #333; margin: 0 0 10px 0;">Gider Detayları:</h4>
+            <p style="margin: 5px 0;"><strong>Gider Adı:</strong> ${data.expense_title}</p>
+            <p style="margin: 5px 0;"><strong>Tutar:</strong> ${data.expense_amount}</p>
+            <p style="margin: 5px 0;"><strong>Kategori:</strong> ${data.expense_category}</p>
+            <p style="margin: 5px 0;"><strong>Ödeme Tarihi:</strong> ${data.expense_due_date}</p>
+            <p style="margin: 5px 0; color: #e74c3c;"><strong>Kalan Süre:</strong> ${data.days_until_due} gün</p>
+          </div>
+          
+          <p style="color: #666; line-height: 1.6;">
+            Ödemenizi zamanında yapmayı unutmayın. TeknoKapsül uygulaması üzerinden giderlerinizi takip edebilirsiniz.
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background-color: #f0f0f0; border-radius: 8px;">
+          <p style="margin: 0; color: #666;">Bu hatırlatma TeknoKapsül uygulaması tarafından otomatik olarak gönderilmiştir.</p>
+          <p style="margin: 10px 0 0 0; color: #666; font-size: 12px;">
+            <a href="https://app.teknokapsul.com" style="color: #ffb700; text-decoration: none;">TeknoKapsül'e Git</a>
+          </p>
+        </div>
+      </div>
+    `;
+        // Email gönder
+        const mailOptions = {
+            from: functions.config().gmail.user,
+            to: data.to_email,
+            subject: `TeknoKapsül - Gider Hatırlatması: ${data.expense_title}`,
+            html: emailContent
+        };
+        await transporter.sendMail(mailOptions);
+        console.log(`Expense reminder sent successfully to ${data.to_email} for expense: ${data.expense_title}`);
+    }
+    catch (error) {
+        console.error('Expense reminder email error:', error);
+        throw error;
+    }
+};
+exports.sendExpenseReminder = sendExpenseReminder;
 //# sourceMappingURL=emailService.js.map

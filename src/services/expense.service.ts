@@ -1,6 +1,7 @@
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, updateDoc, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Expense, ExpenseFormData } from '../types/expense';
+import { sendExpenseNotification, ExpenseNotificationData } from './email.service';
 
 const calculateNextDate = (recurringDay: number, startDate?: string): Date => {
   if (startDate) {
@@ -48,21 +49,59 @@ export const getUserExpenses = async (userId: string, year?: number, month?: num
   }
 };
 
-export const addExpense = async (userId: string, data: ExpenseFormData): Promise<void> => {
+export const addExpense = async (userId: string, data: ExpenseFormData, userEmail?: string, userName?: string): Promise<void> => {
   try {
-    const expenseData = {
+    const expenseData: any = {
       ...data,
       date: data.isInstallment && data.installmentDay 
         ? calculateNextDate(data.installmentDay, data.date).toISOString()
         : data.date || new Date().toISOString(),
       isActive: data.isActive ?? true,
       isPaid: data.isPaid ?? false,
-      installmentNumber: data.isInstallment ? (data.installmentNumber || 1) : undefined,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
+    // Only add installment-related fields if it's an installment
+    if (data.isInstallment) {
+      expenseData.installmentNumber = data.installmentNumber || 1;
+      if (data.totalInstallments) {
+        expenseData.totalInstallments = data.totalInstallments;
+      }
+      if (data.installmentDay) {
+        expenseData.installmentDay = data.installmentDay;
+      }
+      if (data.installmentEndDate) {
+        expenseData.installmentEndDate = data.installmentEndDate;
+      }
+    }
+
     await addDoc(collection(db, 'teknokapsul', userId, 'expenses'), expenseData);
+    
+    // Send email notification if user email is provided
+    if (userEmail && userName) {
+      const installmentInfo = data.isInstallment && data.totalInstallments 
+        ? `${data.totalInstallments} taksit, ayın ${data.installmentDay}. günü`
+        : undefined;
+
+      const emailData: ExpenseNotificationData = {
+        to_email: userEmail,
+        to_name: userName,
+        expense_title: data.title,
+        expense_amount: `${data.amount} TL`,
+        expense_category: data.category,
+        expense_date: new Date(expenseData.date).toLocaleDateString('tr-TR'),
+        is_installment: data.isInstallment || false,
+        installment_info: installmentInfo
+      };
+
+      try {
+        await sendExpenseNotification(emailData);
+      } catch (emailError) {
+        console.error('Failed to send expense notification email:', emailError);
+        // Don't throw error for email failure, expense should still be saved
+      }
+    }
     
     // Taksitli ödeme ise, belirtilen taksit sayısı kadar gelecek aylara da ekle
     if (data.isInstallment && data.totalInstallments && data.totalInstallments > 1) {

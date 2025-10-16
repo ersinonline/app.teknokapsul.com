@@ -1,0 +1,13 @@
+Test Bank Statement
+
+Tarih: 01.01.2024
+Hesap No: 123456789
+
+İşlemler:
+01.01.2024 Maaş Ödemesi +5000,00 TL Giriş
+02.01.2024 Market Alışverişi -150,50 TL Çıkış
+03.01.2024 Elektrik Faturası -85,75 TL Çıkış
+04.01.2024 ATM Para Çekme -200,00 TL Çıkış
+05.01.2024 Kira Ödemesi -1500,00 TL Çıkış
+
+Bakiye: 3063,75 TL

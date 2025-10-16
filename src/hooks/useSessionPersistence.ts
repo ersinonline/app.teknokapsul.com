@@ -14,7 +14,7 @@ export const useSessionPersistence = () => {
     // Token yenileme stratejisi
     const refreshToken = async () => {
       try {
-        await getToken({ template: 'supabase_jwt' });
+        await getToken();
       } catch (error) {
         console.error('Token refresh failed:', error);
       }

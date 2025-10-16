@@ -3,6 +3,10 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 type Theme = 'light' | 'dark' | 'system';
 type ColorScheme = 'blue' | 'green' | 'purple' | 'orange' | 'pink';
 
+// Export types for external use
+export type ThemeMode = Theme;
+export type { ColorScheme };
+
 interface ThemeSettings {
   theme: Theme;
   colorScheme: ColorScheme;
@@ -20,6 +24,12 @@ interface ThemeContextType {
   toggleHighContrast: () => void;
   isDark: boolean;
   resetToDefaults: () => void;
+  // Additional properties for ThemeSelector compatibility
+  mode: Theme;
+  colorScheme: ColorScheme;
+  setMode: (mode: Theme) => void;
+  setColorScheme: (scheme: ColorScheme) => void;
+  colors: typeof COLOR_SCHEMES[ColorScheme];
 }
 
 const defaultSettings: ThemeSettings = {
@@ -179,7 +189,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     toggleReducedMotion,
     toggleHighContrast,
     isDark,
-    resetToDefaults
+    resetToDefaults,
+    // Additional properties for ThemeSelector compatibility
+    mode: settings.theme,
+    colorScheme: settings.colorScheme,
+    setMode: updateTheme,
+    setColorScheme: updateColorScheme,
+    colors: COLOR_SCHEMES[settings.colorScheme]
   };
 
   return (

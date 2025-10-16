@@ -36,19 +36,21 @@ if (!PUBLISHABLE_KEY) {
   throw new Error('Missing Publishable Key');
 }
 
-// Initialize Sentry
-Sentry.init({
-  dsn: "https://8e4750688773f87de1de590276d818fd@o4509753596248064.ingest.us.sentry.io/4509753604702208",
-  // Setting this option to true will send default PII data to Sentry.
-  // For example, automatic IP address collection on events
-  sendDefaultPii: true,
-  environment: import.meta.env.MODE,
-  integrations: [
-    Sentry.browserTracingIntegration(),
-  ],
-  // Performance Monitoring
-  tracesSampleRate: 1.0,
-});
+// Initialize Sentry only in production
+if (import.meta.env.PROD) {
+  Sentry.init({
+    dsn: "https://8e4750688773f87de1de590276d818fd@o4509753596248064.ingest.us.sentry.io/4509753604702208",
+    // Setting this option to true will send default PII data to Sentry.
+    // For example, automatic IP address collection on events
+    sendDefaultPii: true,
+    environment: import.meta.env.MODE,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+    ],
+    // Performance Monitoring
+    tracesSampleRate: 1.0,
+  });
+}
 
 // Service Worker Registration for PWA support
 const registerServiceWorker = async () => {
@@ -75,6 +77,26 @@ const registerServiceWorker = async () => {
       console.error('Service Worker registration failed:', error);
     }
   }
+};
+
+// Load Google Maps API dynamically
+const loadGoogleMapsAPI = () => {
+  // Check if Google Maps is already loaded
+  if (window.google && window.google.maps) {
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.defer = true;
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyBHKWvqJtUPiPOy8RSM2rZoNKsKdVrNb-A';
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&language=tr&region=TR&loading=async`;
+  
+  script.onerror = () => {
+    console.error('Failed to load Google Maps API');
+  };
+  
+  document.head.appendChild(script);
 };
 
 // Error boundary for better error handling
@@ -116,6 +138,9 @@ const renderApp = () => {
     
     // Register service worker after app is rendered
     registerServiceWorker();
+    
+    // Load Google Maps API
+    loadGoogleMapsAPI();
   } catch (error) {
     console.error('Error rendering app:', error);
     // Fallback UI in case of an error

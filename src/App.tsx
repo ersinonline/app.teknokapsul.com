@@ -33,6 +33,8 @@ import { ApplicationPage } from './pages/applications/ApplicationPage';
 import ApplicationsListPage from './pages/applications/ApplicationsListPage';
 import DocumentsPage from './pages/documents/DocumentsPage';
 import AdminPage from './pages/admin/AdminPage';
+import { AccountsPage } from './pages/Accounts/AccountsPage';
+import { AllTransactionsPage } from './pages/AllTransactions/AllTransactionsPage';
 
 import { IncomePage } from './pages/income/IncomePage';
 import { ExpensePage } from './pages/expense/ExpensePage';
@@ -313,6 +315,14 @@ const router = createBrowserRouter([
   {
     path: '/documents',
     element: <TeknoRoute><DocumentsPage /></TeknoRoute>
+  },
+  {
+    path: '/accounts',
+    element: <TeknoRoute><AccountsPage /></TeknoRoute>
+  },
+  {
+    path: '/all-transactions',
+    element: <TeknoRoute><AllTransactionsPage /></TeknoRoute>
   },
   {
     path: '/admin',

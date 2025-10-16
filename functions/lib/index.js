@@ -20,4 +20,6 @@ __exportStar(require("./priceUpdater"), exports);
 __exportStar(require("./auth"), exports);
 __exportStar(require("./emailService"), exports);
 __exportStar(require("./imapService"), exports);
+__exportStar(require("./statementProcessor"), exports);
+__exportStar(require("./expenseReminderService"), exports);
 //# sourceMappingURL=index.js.map
