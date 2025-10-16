@@ -140,7 +140,7 @@ function formatCurrency(amount: number): string {
 export const sendExpenseReminder = async (data: ExpenseReminderData): Promise<void> => {
   try {
     const transporter = createTransporter();
-
+    
     // Email içeriği oluştur
     const emailContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -162,15 +162,14 @@ export const sendExpenseReminder = async (data: ExpenseReminderData): Promise<vo
           </div>
           
           <p style="color: #666; line-height: 1.6;">
-            Ödemenizi zamanında yapmayı unutmayın. TeknoKapsül uygulaması üzerinden giderlerinizi takip edebilirsiniz.
+            Lütfen ödeme tarihinizi kaçırmayın. TeknoKapsül uygulamasına giriş yaparak giderinizi ödendi olarak işaretleyebilirsiniz.
           </p>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px; padding: 20px; background-color: #f0f0f0; border-radius: 8px;">
-          <p style="margin: 0; color: #666;">Bu hatırlatma TeknoKapsül uygulaması tarafından otomatik olarak gönderilmiştir.</p>
-          <p style="margin: 10px 0 0 0; color: #666; font-size: 12px;">
-            <a href="https://app.teknokapsul.com" style="color: #ffb700; text-decoration: none;">TeknoKapsül'e Git</a>
-          </p>
+          
+          <div style="text-align: center; margin: 20px 0;">
+            <p style="color: #999; font-size: 12px;">
+              Bu hatırlatma TeknoKapsül uygulaması tarafından otomatik olarak gönderilmiştir.
+            </p>
+          </div>
         </div>
       </div>
     `;
