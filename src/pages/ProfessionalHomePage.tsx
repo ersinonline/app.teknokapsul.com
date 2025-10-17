@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, CreditCard, DollarSign, Star, Shield, Smartphone, ShoppingBag, Server, User } from 'lucide-react';
+import { Home, CreditCard, DollarSign, Star, Shield, Smartphone, ShoppingBag, Server, User, Sparkles, TrendingUp, Zap } from 'lucide-react';
+import { GlassCard, PremiumCard } from '../components/ui/GlassCard';
+import { Badge } from '../components/ui/Badge';
 
 interface SlideData {
   id: number;
