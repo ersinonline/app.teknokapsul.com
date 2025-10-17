@@ -146,17 +146,17 @@ export const MobileNavigation: React.FC = () => {
             <div className="flex items-center space-x-3">
               <button 
                 onClick={handleNotificationClick}
-                className="relative p-3 rounded-xl glass-card hover-lift"
+                className="relative p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
               >
-                <Bell className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                <Bell className="w-5 h-5 text-gray-700" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-full text-xs flex items-center justify-center font-bold shadow-lg animate-pulse-soft">
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#ffb700] text-white rounded-full text-xs flex items-center justify-center font-bold">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </button>
 
-              <div className="glass-card p-1 rounded-xl">
+              <div className="bg-gray-50 p-1 rounded-xl">
                 <UserButton 
                   appearance={{
                     elements: {
