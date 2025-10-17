@@ -536,58 +536,78 @@ const ProfessionalHomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Horizontally Scrollable Kampanyalar Section */}
-      <section className="bg-white px-4 py-6">
+      {/* Premium Campaigns Section */}
+      <section className="px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">Kampanyalar</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Star className="w-6 h-6 text-yellow-500" />
+              Kampanyalar
+            </h2>
             <button 
               onClick={() => setShowAllCampaigns(!showAllCampaigns)}
-              className="text-blue-600 text-sm md:text-base font-medium"
+              className="text-blue-600 dark:text-blue-400 text-sm md:text-base font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
             >
               {showAllCampaigns ? 'Daha Az Göster' : 'Tümünü Gör'}
             </button>
           </div>
+          
           <div 
             ref={campaignsRef}
             onWheel={(e) => handleWheelScroll(e, campaignsRef)}
             onMouseDown={(e) => handleMouseDown(e, campaignsRef)}
-            className={`${showAllCampaigns ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6' : 'flex overflow-x-auto scrollbar-hide gap-4 md:gap-6 pb-2 cursor-grab select-none'}`} 
+            className={`${showAllCampaigns ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' : 'flex overflow-x-auto scrollbar-hide gap-6 pb-2 cursor-grab select-none'}`} 
             style={!showAllCampaigns ? { scrollbarWidth: 'none', msOverflowStyle: 'none' } : {}}
           >
-            {campaigns.map((campaign) => {
+            {campaigns.map((campaign, index) => {
               const IconComponent = campaign.icon;
               return (
                 <div
                   key={campaign.id}
+                  data-testid={`campaign-${campaign.id}`}
                   onClick={() => window.open(campaign.link, '_blank')}
-                  className={`${campaign.bgColor} ${campaign.borderColor} rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer border ${showAllCampaigns ? '' : 'flex-shrink-0 min-w-[200px] max-w-[200px]'} ${showAllCampaigns ? '' : 'md:min-w-0 md:max-w-none'}`}
+                  className={`
+                    glass-card hover-lift
+                    ${showAllCampaigns ? '' : 'flex-shrink-0 min-w-[280px] max-w-[280px]'}
+                    animate-fade-in-up
+                    border-l-4 ${campaign.borderColor}
+                  `}
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="p-4 md:p-6">
-                    <div className="flex items-start justify-between mb-3 md:mb-4">
-                      <div className={`${campaign.color} rounded-lg p-2 md:p-3 flex-shrink-0`}>
-                        <IconComponent className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`${campaign.color} rounded-xl p-3 shadow-lg`}>
+                        <IconComponent className="w-6 h-6 text-white" />
                       </div>
-                      <div className={`${campaign.color} text-white px-2 py-1 md:px-3 md:py-2 rounded text-xs md:text-sm font-semibold`}>
+                      <Badge variant="premium" glow>
                         {campaign.discount}
-                      </div>
+                      </Badge>
                     </div>
-                    <h3 className={`text-sm md:text-base font-bold ${campaign.textColor} mb-1 md:mb-2`}>
+                    
+                    <h3 className={`text-base md:text-lg font-bold ${campaign.textColor} mb-2`}>
                       {campaign.title}
                     </h3>
-                    <p className={`text-xs md:text-sm ${campaign.textColor} opacity-80 mb-1 md:mb-2`}>
+                    <p className={`text-sm ${campaign.textColor} opacity-90 mb-2 font-medium`}>
                       {campaign.subtitle}
                     </p>
-                    <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4 line-clamp-2">
+                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
                       {campaign.description}
                     </p>
-                    <div className="space-y-1 md:space-y-2">
-                      {campaign.features.slice(0, 3).map((feature, index) => (
-                        <div key={index} className="flex items-center text-xs md:text-sm text-gray-600">
-                          <div className={`w-1 h-1 md:w-2 md:h-2 ${campaign.color} rounded-full mr-2 flex-shrink-0`}></div>
+                    
+                    <div className="space-y-2">
+                      {campaign.features.slice(0, 3).map((feature, idx) => (
+                        <div key={idx} className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                          <div className={`w-1.5 h-1.5 ${campaign.color} rounded-full mr-2 flex-shrink-0`}></div>
                           <span className="line-clamp-1">{feature}</span>
                         </div>
                       ))}
+                    </div>
+                    
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <button className={`${campaign.color} text-white px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity w-full flex items-center justify-center gap-2`}>
+                        <span>Detaylara Git</span>
+                        <TrendingUp className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
