@@ -343,36 +343,65 @@ const ProfessionalHomePage: React.FC = () => {
   }, [showAllBrands, showAllCampaigns]);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-0">
-      {/* Enhanced Hero Slideshow */}
-      <section className="relative bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 px-4 pt-6 pb-4">
-        <div className="max-w-6xl mx-auto">
-          {/* Slideshow Container */}
-          <div className="relative mb-4 rounded-2xl overflow-hidden w-full">
-            <div className="relative h-48 md:h-64 lg:h-80 bg-gradient-to-r from-blue-600 to-purple-600">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 pb-0">
+      {/* Premium Hero Slideshow */}
+      <section className="relative overflow-hidden px-4 pt-6 pb-4">
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 opacity-90"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIwOS0xLjc5MS00LTQtNHMtNCAxLjc5MS00IDQgMS43OTEgNCA0IDQgNC0xLjc5MSA0LTR6bTAgNGMwLTIuMjA5LTEuNzktNC00LTRzLTQgMS43OTEtNCA0IDEuNzkgNCA0IDQgNC0xLjc5MSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
+        
+        <div className="relative max-w-6xl mx-auto">
+          {/* Premium Slideshow Container */}
+          <div className="relative mb-4 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="relative h-56 md:h-72 lg:h-96">
               {slides.map((slide, index) => (
                 <div
                   key={slide.id}
-                  className={`absolute inset-0 transition-opacity duration-500 ${
-                    index === currentSlide ? 'opacity-100' : 'opacity-0'
+                  className={`absolute inset-0 transition-all duration-1000 ${
+                    index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
                   }`}
                   style={{
-                    backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${slide.image})`,
+                    backgroundImage: `linear-gradient(135deg, rgba(59, 130, 246, 0.7), rgba(168, 85, 247, 0.7)), url(${slide.image})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                   }}
                 >
-                  <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-12 text-white">
-                    <h2 className="text-xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-4">{slide.title}</h2>
-                    <p className="text-sm md:text-base lg:text-lg opacity-90 mb-4 md:mb-6 leading-relaxed max-w-2xl">{slide.description}</p>
-                    <button className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-4 py-2 md:px-6 md:py-3 rounded-lg text-sm md:text-base font-semibold transition-all duration-300 self-start">
-                      {slide.buttonText}
-                    </button>
+                  <div className="absolute inset-0 backdrop-blur-[2px]"></div>
+                  <div className="relative h-full flex flex-col justify-center px-6 md:px-12 text-white">
+                    <div className="animate-fade-in-up">
+                      <Badge variant="premium" glow className="mb-4 inline-flex items-center gap-2">
+                        <Sparkles className="w-3 h-3" />
+                        Yeni
+                      </Badge>
+                      <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-5 leading-tight drop-shadow-lg">
+                        {slide.title}
+                      </h2>
+                      <p className="text-sm md:text-lg lg:text-xl opacity-95 mb-6 md:mb-8 leading-relaxed max-w-2xl drop-shadow">
+                        {slide.description}
+                      </p>
+                      <button className="btn-glass group">
+                        <span>{slide.buttonText}</span>
+                        <TrendingUp className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
               
-
+              {/* Slide Indicators */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+                {slides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      index === currentSlide 
+                        ? 'w-8 bg-white' 
+                        : 'w-2 bg-white/50 hover:bg-white/70'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
