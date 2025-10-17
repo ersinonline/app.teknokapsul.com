@@ -407,21 +407,25 @@ const ProfessionalHomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Horizontally Scrollable Quick Access Categories */}
-      <section className="bg-gray-50 px-4 py-6">
+      {/* Premium Quick Access Categories */}
+      <section className="px-4 py-8 relative">
         <div className="max-w-6xl mx-auto">
           <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-2 md:flex md:justify-center md:gap-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            {categories.map((category) => (
+            {categories.map((category, index) => (
               <div
                 key={category.id}
+                data-testid={`category-${category.id}`}
                 onClick={() => handleCategoryClick(category.route)}
-                className="bg-white rounded-xl p-4 md:p-8 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex-shrink-0 min-w-[100px] md:min-w-[140px]"
+                className="glass-card group flex-shrink-0 min-w-[110px] md:min-w-[160px] hover-lift animate-fade-in-up"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="flex flex-col items-center text-center">
-                  <div className={`mb-3 md:mb-5 p-3 md:p-5 ${category.color} rounded-full group-hover:scale-110 transition-transform duration-300`}>
+                  <div className={`mb-4 p-4 ${category.color} rounded-2xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
                     {category.icon}
                   </div>
-                  <h3 className="text-sm md:text-base lg:text-lg font-medium text-gray-700 whitespace-nowrap">{category.title}</h3>
+                  <h3 className="text-sm md:text-base lg:text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap">
+                    {category.title}
+                  </h3>
                 </div>
               </div>
             ))}
