@@ -174,8 +174,8 @@ export const MobileNavigation: React.FC = () => {
 
       {/* Bottom Navigation for Mobile Only */}
       {!isHomePage && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-40">
-        <div className="grid grid-cols-4 gap-1 px-2 py-2">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 glass z-50 border-t border-white/20">
+        <div className="grid grid-cols-4 gap-1 px-2 py-3">
           {bottomNavigationItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -184,18 +184,19 @@ export const MobileNavigation: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
+                data-testid={`mobile-nav-${item.path}`}
                 className={`
-                  flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all duration-200
+                  flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200
                   ${isActive 
-                    ? 'text-[#ffb700] bg-[#ffb700]/10' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-glow-gold scale-105' 
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-white/30 dark:hover:bg-gray-800/30'
                   }
                 `}
               >
-                <Icon className="w-5 h-5 mb-1" />
-                <span className="text-xs font-medium truncate">{item.label}</span>
+                <Icon className={`w-6 h-6 mb-1 ${isActive ? 'animate-bounce-in' : ''}`} />
+                <span className={`text-xs font-semibold ${isActive ? 'font-bold' : ''}`}>{item.label}</span>
                 {item.badge && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
                     {item.badge}
                   </span>
                 )}
