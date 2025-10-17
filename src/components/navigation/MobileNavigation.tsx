@@ -174,7 +174,7 @@ export const MobileNavigation: React.FC = () => {
 
       {/* Bottom Navigation for Mobile Only */}
       {!isHomePage && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 glass z-50 border-t border-white/20">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white z-50 border-t border-gray-200 shadow-lg">
         <div className="grid grid-cols-4 gap-1 px-2 py-3">
           {bottomNavigationItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -188,13 +188,13 @@ export const MobileNavigation: React.FC = () => {
                 className={`
                   flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200
                   ${isActive 
-                    ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-glow-gold scale-105' 
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-white/30 dark:hover:bg-gray-800/30'
+                    ? 'bg-[#ffb700] text-white' 
+                    : 'text-gray-600 hover:bg-gray-50'
                   }
                 `}
               >
-                <Icon className={`w-6 h-6 mb-1 ${isActive ? 'animate-bounce-in' : ''}`} />
-                <span className={`text-xs font-semibold ${isActive ? 'font-bold' : ''}`}>{item.label}</span>
+                <Icon className={`w-6 h-6 mb-1`} />
+                <span className={`text-xs font-semibold`}>{item.label}</span>
                 {item.badge && (
                   <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
                     {item.badge}
