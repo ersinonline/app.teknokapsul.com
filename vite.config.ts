@@ -119,6 +119,12 @@ export default defineConfig({
     port: 3000,
     strictPort: false,
     host: true,
+    allowedHosts: [
+      'guzel-hal.preview.emergentagent.com',
+      '.preview.emergentagent.com',
+      'localhost',
+      '.localhost'
+    ],
     hmr: {
       timeout: 10000
     }
