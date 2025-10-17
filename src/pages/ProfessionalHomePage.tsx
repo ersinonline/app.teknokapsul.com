@@ -433,50 +433,64 @@ const ProfessionalHomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Senin İçin Derledik Section */}
-      <section className="bg-white px-4 py-6">
+      {/* Premium "Senin İçin Derledik" Section */}
+      <section className="px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Senin İçin Derledik</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-            <div 
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Sparkles className="w-6 h-6 text-yellow-500" />
+              Senin İçin Derledik
+            </h2>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <PremiumCard
+              data-testid="maasim-card"
+              gradient="from-blue-500 via-blue-600 to-indigo-600"
               onClick={() => navigate('/work-tracking')}
-              className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 md:p-6 text-white relative overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300"
+              className="animate-fade-in-up"
+              style={{ animationDelay: '100ms' }}
             >
               <div className="relative z-10">
-                <div className="mb-3 md:mb-4">
-                  <DollarSign className="w-6 h-6 md:w-8 md:h-8" />
+                <div className="mb-4">
+                  <DollarSign className="w-8 h-8 md:w-10 md:h-10" />
                 </div>
-                <h3 className="text-sm md:text-base font-bold mb-1 md:mb-2">Maaşım+</h3>
+                <h3 className="text-base md:text-lg font-bold mb-2">Maaşım+</h3>
                 <p className="text-xs md:text-sm opacity-90">Maaş işlemleriniz tek yerde!</p>
               </div>
-              <div className="absolute -right-2 -bottom-2 w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-full"></div>
-            </div>
-            <div 
+            </PremiumCard>
+            
+            <PremiumCard
+              data-testid="bankam-card"
+              gradient="from-emerald-500 via-teal-600 to-cyan-600"
               onClick={() => navigate('/bankam')}
-              className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 md:p-6 text-white relative overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300"
+              className="animate-fade-in-up"
+              style={{ animationDelay: '200ms' }}
             >
               <div className="relative z-10">
-                <div className="mb-3 md:mb-4">
-                  <CreditCard className="w-6 h-6 md:w-8 md:h-8" />
+                <div className="mb-4">
+                  <CreditCard className="w-8 h-8 md:w-10 md:h-10" />
                 </div>
-                <h3 className="text-sm md:text-base font-bold mb-1 md:mb-2">Bankam+ Durumum</h3>
+                <h3 className="text-base md:text-lg font-bold mb-2">Bankam+ Durumum</h3>
                 <p className="text-xs md:text-sm opacity-90">Gelir - gider yönetiminiz tek ekranda!</p>
               </div>
-              <div className="absolute -right-2 -bottom-2 w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-full"></div>
-            </div>
-            <div 
+            </PremiumCard>
+            
+            <PremiumCard
+              data-testid="evim-card"
+              gradient="from-purple-500 via-pink-500 to-rose-500"
               onClick={() => navigate('/evim')}
-              className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl p-4 md:p-6 text-white relative overflow-hidden col-span-2 md:col-span-1 lg:col-span-2 cursor-pointer hover:scale-105 transition-transform duration-300"
+              className="col-span-2 md:col-span-1 lg:col-span-2 animate-fade-in-up"
+              style={{ animationDelay: '300ms' }}
             >
               <div className="relative z-10">
-                <div className="mb-3 md:mb-4">
-                  <Star className="w-6 h-6 md:w-8 md:h-8" />
+                <div className="mb-4">
+                  <Star className="w-8 h-8 md:w-10 md:h-10" />
                 </div>
-                <h3 className="text-sm md:text-base font-bold mb-1 md:mb-2">Ev ve eve dair her işlem tek yerde</h3>
+                <h3 className="text-base md:text-lg font-bold mb-2">Ev ve eve dair her işlem tek yerde</h3>
                 <p className="text-xs md:text-sm opacity-90">Ev işlemlerinizi kolayca yönetin</p>
               </div>
-              <div className="absolute -right-2 -bottom-2 w-16 h-16 md:w-20 md:h-20 bg-white/10 rounded-full"></div>
-            </div>
+            </PremiumCard>
           </div>
         </div>
       </section>
