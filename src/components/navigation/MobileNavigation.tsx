@@ -112,7 +112,7 @@ export const MobileNavigation: React.FC = () => {
             </div>
             
             {/* Center - Navigation Items */}
-            <div className="flex items-center space-x-2 glass-card p-2 rounded-xl">
+            <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-xl">
               {bottomNavigationItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 const Icon = item.icon;
@@ -125,8 +125,8 @@ export const MobileNavigation: React.FC = () => {
                     className={`
                       flex items-center space-x-2 px-5 py-2.5 rounded-lg transition-all duration-200
                       ${isActive 
-                        ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-glow-gold' 
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-800/50'
+                        ? 'bg-[#ffb700] text-white shadow-md' 
+                        : 'text-gray-700 hover:bg-white'
                       }
                     `}
                   >
