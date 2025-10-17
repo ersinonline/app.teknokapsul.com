@@ -495,18 +495,22 @@ const ProfessionalHomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Horizontally Scrollable Benim Dünyam Markaları Section */}
-      <section className="bg-gray-50 px-4 py-6">
+      {/* Premium Brands Section */}
+      <section className="px-4 py-8 bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-gray-800 dark:to-gray-900">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">Benim Dünyam Markaları</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Zap className="w-6 h-6 text-blue-500" />
+              Benim Dünyam Markaları
+            </h2>
             <button 
               onClick={() => setShowAllBrands(!showAllBrands)}
-              className="text-blue-600 text-sm md:text-base font-medium"
+              className="text-blue-600 dark:text-blue-400 text-sm md:text-base font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
             >
               {showAllBrands ? 'Daha Az Göster' : 'Tümünü Gör'}
             </button>
           </div>
+          
           <div 
             ref={brandsRef}
             onWheel={(e) => handleWheelScroll(e, brandsRef)}
@@ -514,13 +518,19 @@ const ProfessionalHomePage: React.FC = () => {
             className={`${showAllBrands ? 'grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4' : 'flex overflow-x-auto scrollbar-hide gap-4 pb-2 cursor-grab select-none'}`} 
             style={!showAllBrands ? { scrollbarWidth: 'none', msOverflowStyle: 'none' } : {}}
           >
-            {brands.map((brand) => (
-              <div key={brand.id} className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex-shrink-0 min-w-[80px] md:min-w-0 flex flex-col items-center border border-gray-100">
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                  <span className="text-white text-sm md:text-base font-bold">{brand.name.charAt(0)}</span>
+            {brands.map((brand, index) => (
+              <GlassCard
+                key={brand.id}
+                className="flex-shrink-0 min-w-[90px] md:min-w-0 p-4 animate-fade-in-up"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                    <span className="text-white text-base md:text-lg font-bold">{brand.name.charAt(0)}</span>
+                  </div>
+                  <span className="text-xs md:text-sm text-gray-700 dark:text-gray-300 text-center font-medium whitespace-nowrap">{brand.name}</span>
                 </div>
-                <span className="text-xs md:text-sm text-gray-700 text-center font-medium whitespace-nowrap">{brand.name}</span>
-              </div>
+              </GlassCard>
             ))}
           </div>
         </div>
