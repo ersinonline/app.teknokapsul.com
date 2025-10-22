@@ -286,20 +286,37 @@ class WorkTrackingService {
     const totalDays = entries.length;
     const mealRate = settings.hourlyMealRate || settings.dailyMealAllowance || 0;
     
-    const baseSalary = totalHours * settings.hourlyRate;
-    const mealAllowance = totalHours * mealRate;
+    // Calculate holiday salary
+    let regularSalary = 0;
+    let overtimeSalary = 0;
+    let holidaySalary = 0;
+    
+    entries.forEach(entry => {
+      const entryDate = new Date(entry.date);
+      const workHours = this.calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes);
+      const isHoliday = this.isHolidayDate(entryDate);
+      
+      if (isHoliday) {
+        holidaySalary += workHours * settings.hourlyRate; // Holiday double salary
+      }
+      regularSalary += workHours * settings.hourlyRate;
+    });
+    
+    const baseSalary = regularSalary;
+    // Use daily meal allowance for consistency with summary
+    const mealAllowance = totalDays * (settings.dailyMealAllowance || 0);
     const transportAllowance = totalDays * settings.dailyTransportAllowance;
     
     return {
       baseSalary,
-      overtimeSalary: 0, // Can be enhanced later
-      holidaySalary: 0, // Can be enhanced later
-      totalSalary: baseSalary,
+      overtimeSalary,
+      holidaySalary,
+      totalSalary: baseSalary + holidaySalary,
       mealAllowance,
       totalMealAllowance: mealAllowance,
       transportAllowance,
       totalTransportAllowance: transportAllowance,
-      totalCalculated: baseSalary + mealAllowance + transportAllowance,
+      totalCalculated: baseSalary + holidaySalary + mealAllowance + transportAllowance,
       totalPaid: 0, // Will be set from saved data
       salaryDifference: 0, // Will be calculated
       mealDifference: 0, // Will be calculated
@@ -317,6 +334,34 @@ class WorkTrackingService {
         hourlyMealRate: mealRate
       }
     };
+  }
+
+  // Helper method to check if a date is a holiday
+  private isHolidayDate(date: Date): boolean {
+    const holidays = this.getHolidays(date.getFullYear());
+    return holidays.some(holiday => 
+      holiday.getDate() === date.getDate() &&
+      holiday.getMonth() === date.getMonth() &&
+      holiday.getFullYear() === date.getFullYear()
+    );
+  }
+
+  private getHolidays(year: number): Date[] {
+    const holidays: Date[] = [];
+    
+    // Resmi tatiller
+    holidays.push(new Date(year, 0, 1)); // Yılbaşı
+    holidays.push(new Date(year, 3, 23)); // Ulusal Egemenlik ve Çocuk Bayramı
+    holidays.push(new Date(year, 4, 1)); // İşçi Bayramı
+    holidays.push(new Date(year, 4, 19)); // Atatürk'ü Anma, Gençlik ve Spor Bayramı
+    holidays.push(new Date(year, 6, 15)); // Demokrasi ve Milli Birlik Günü
+    holidays.push(new Date(year, 7, 30)); // Zafer Bayramı
+    holidays.push(new Date(year, 9, 29)); // Cumhuriyet Bayramı
+    
+    // Note: Ramazan and Kurban Bayramı dates would need to be passed as parameters
+    // For now, we'll include basic holidays only
+    
+    return holidays;
   }
 
   async saveSalaryHistory(salaryHistory: Omit<SalaryHistory, 'id'>): Promise<string> {
