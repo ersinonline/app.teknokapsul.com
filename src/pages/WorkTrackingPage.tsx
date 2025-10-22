@@ -37,6 +37,7 @@ const WorkTrackingPage: React.FC = () => {
   const [calculatedSalary, setCalculatedSalary] = useState(0);
   const [salaryBreakdown, setSalaryBreakdown] = useState<SalaryBreakdown | null>(null);
   const [yearlySalaryHistory, setYearlySalaryHistory] = useState<SalaryHistory[]>([]);
+  const [yearlyWorkEntries, setYearlyWorkEntries] = useState<WorkEntry[]>([]);
   
   // Düzenleme states
   const [editingEntry, setEditingEntry] = useState<WorkEntry | null>(null);
@@ -55,6 +56,7 @@ const WorkTrackingPage: React.FC = () => {
     if (user) {
       loadData();
       loadYearlySalaryHistory();
+      loadYearlyWorkEntries();
     }
   }, [user, selectedMonth, selectedYear]);
 
@@ -278,6 +280,18 @@ const WorkTrackingPage: React.FC = () => {
       setYearlySalaryHistory(yearlyHistory);
     } catch (error) {
       console.error('Yıllık maaş geçmişi yükleme hatası:', error);
+    }
+  };
+
+  const loadYearlyWorkEntries = async () => {
+    if (!user) return;
+    
+    try {
+      // Load all work entries for the selected year (without month filter)
+      const yearlyEntries = await workTrackingService.getWorkEntries(user.id, undefined, selectedYear);
+      setYearlyWorkEntries(yearlyEntries);
+    } catch (error) {
+      console.error('Yıllık iş girişleri yükleme hatası:', error);
     }
   };
 
@@ -1003,8 +1017,7 @@ const WorkTrackingPage: React.FC = () => {
                   <span className="text-sm font-medium text-gray-600">Toplam Çalışma Saati</span>
                 </div>
                 <p className="text-xl font-bold text-gray-900">
-                  {workEntries
-                    .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                  {yearlyWorkEntries
                     .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0)
                     .toFixed(1)} saat
                 </p>
@@ -1021,8 +1034,7 @@ const WorkTrackingPage: React.FC = () => {
                     <span className="text-gray-500">Hesaplanan:</span>
                     <span className="font-medium">
                       {formatCurrency(
-                        workEntries
-                          .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                        yearlyWorkEntries
                           .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * workSettings.hourlyRate
                       )}
                     </span>
@@ -1036,16 +1048,14 @@ const WorkTrackingPage: React.FC = () => {
                     </span>
                   </div>
                   <div className={`flex justify-between text-sm font-bold ${
-                    yearlySalaryHistory.reduce((sum, history) => sum + (history.paidSalary || 0), 0) - (workEntries
-                      .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                    yearlySalaryHistory.reduce((sum, history) => sum + (history.paidSalary || 0), 0) - (yearlyWorkEntries
                       .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * workSettings.hourlyRate) >= 0 
                       ? 'text-green-600' : 'text-red-600'
                   }`}>
                     <span>Fark:</span>
                     <span>
                       {formatCurrency(
-                        yearlySalaryHistory.reduce((sum, history) => sum + (history.paidSalary || 0), 0) - (workEntries
-                          .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                        yearlySalaryHistory.reduce((sum, history) => sum + (history.paidSalary || 0), 0) - (yearlyWorkEntries
                           .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * workSettings.hourlyRate)
                       )}
                     </span>
@@ -1064,8 +1074,7 @@ const WorkTrackingPage: React.FC = () => {
                     <span className="text-gray-500">Hesaplanan:</span>
                     <span className="font-medium">
                       {formatCurrency(
-                        workEntries
-                          .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                        yearlyWorkEntries
                           .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * 
                         (workSettings.hourlyMealRate || workSettings.dailyMealAllowance || 0)
                       )}
@@ -1080,8 +1089,7 @@ const WorkTrackingPage: React.FC = () => {
                     </span>
                   </div>
                   <div className={`flex justify-between text-sm font-bold ${
-                    yearlySalaryHistory.reduce((sum, history) => sum + (history.paidMealAllowance || 0), 0) - (workEntries
-                      .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                    yearlySalaryHistory.reduce((sum, history) => sum + (history.paidMealAllowance || 0), 0) - (yearlyWorkEntries
                       .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * 
                     (workSettings.hourlyMealRate || workSettings.dailyMealAllowance || 0)) >= 0 
                       ? 'text-green-600' : 'text-red-600'
@@ -1089,8 +1097,7 @@ const WorkTrackingPage: React.FC = () => {
                     <span>Fark:</span>
                     <span>
                       {formatCurrency(
-                        yearlySalaryHistory.reduce((sum, history) => sum + (history.paidMealAllowance || 0), 0) - (workEntries
-                          .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                        yearlySalaryHistory.reduce((sum, history) => sum + (history.paidMealAllowance || 0), 0) - (yearlyWorkEntries
                           .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * 
                         (workSettings.hourlyMealRate || workSettings.dailyMealAllowance || 0))
                       )}
@@ -1110,8 +1117,7 @@ const WorkTrackingPage: React.FC = () => {
                     <span className="text-gray-500">Hesaplanan:</span>
                     <span className="font-medium">
                       {formatCurrency(
-                        workEntries
-                          .filter(entry => new Date(entry.date).getFullYear() === selectedYear).length * 
+                        yearlyWorkEntries.length * 
                         (workSettings.dailyTransportAllowance || 0)
                       )}
                     </span>
@@ -1125,16 +1131,14 @@ const WorkTrackingPage: React.FC = () => {
                     </span>
                   </div>
                   <div className={`flex justify-between text-sm font-bold ${
-                    yearlySalaryHistory.reduce((sum, history) => sum + (history.paidTransportAllowance || 0), 0) - (workEntries
-                      .filter(entry => new Date(entry.date).getFullYear() === selectedYear).length * 
+                    yearlySalaryHistory.reduce((sum, history) => sum + (history.paidTransportAllowance || 0), 0) - (yearlyWorkEntries.length * 
                     (workSettings.dailyTransportAllowance || 0)) >= 0 
                       ? 'text-green-600' : 'text-red-600'
                   }`}>
                     <span>Fark:</span>
                     <span>
                       {formatCurrency(
-                        yearlySalaryHistory.reduce((sum, history) => sum + (history.paidTransportAllowance || 0), 0) - (workEntries
-                          .filter(entry => new Date(entry.date).getFullYear() === selectedYear).length * 
+                        yearlySalaryHistory.reduce((sum, history) => sum + (history.paidTransportAllowance || 0), 0) - (yearlyWorkEntries.length * 
                         (workSettings.dailyTransportAllowance || 0))
                       )}
                     </span>
@@ -1151,8 +1155,7 @@ const WorkTrackingPage: React.FC = () => {
                   <span className="text-gray-600">Maaş Farkı Saat Karşılığı:</span>
                   <p className="font-bold text-lg">
                     {Math.abs(
-                      (yearlySalaryHistory.reduce((sum, history) => sum + (history.paidSalary || 0), 0) - (workEntries
-                        .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                      (yearlySalaryHistory.reduce((sum, history) => sum + (history.paidSalary || 0), 0) - (yearlyWorkEntries
                         .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * workSettings.hourlyRate)) / workSettings.hourlyRate
                     ).toFixed(1)} saat
                   </p>
@@ -1161,8 +1164,7 @@ const WorkTrackingPage: React.FC = () => {
                   <span className="text-gray-600">Yemek Farkı Saat Karşılığı:</span>
                   <p className="font-bold text-lg">
                     {Math.abs(
-                      (yearlySalaryHistory.reduce((sum, history) => sum + (history.paidMealAllowance || 0), 0) - (workEntries
-                        .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                      (yearlySalaryHistory.reduce((sum, history) => sum + (history.paidMealAllowance || 0), 0) - (yearlyWorkEntries
                         .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * 
                       (workSettings.hourlyMealRate || workSettings.dailyMealAllowance || 0))) / (workSettings.hourlyMealRate || workSettings.dailyMealAllowance || 1)
                     ).toFixed(1)} saat
@@ -1172,8 +1174,7 @@ const WorkTrackingPage: React.FC = () => {
                   <span className="text-gray-600">Yol Farkı Gün Karşılığı:</span>
                   <p className="font-bold text-lg">
                     {Math.abs(
-                      (yearlySalaryHistory.reduce((sum, history) => sum + (history.paidTransportAllowance || 0), 0) - (workEntries
-                        .filter(entry => new Date(entry.date).getFullYear() === selectedYear).length * 
+                      (yearlySalaryHistory.reduce((sum, history) => sum + (history.paidTransportAllowance || 0), 0) - (yearlyWorkEntries.length * 
                       (workSettings.dailyTransportAllowance || 0))) / (workSettings.dailyTransportAllowance || 1)
                     ).toFixed(1)} gün
                   </p>
