@@ -303,8 +303,8 @@ class WorkTrackingService {
     });
     
     const baseSalary = regularSalary;
-    // Use daily meal allowance for consistency with summary
-    const mealAllowance = totalDays * (settings.dailyMealAllowance || 0);
+    // Use hourly meal rate multiplied by total hours for consistency
+    const mealAllowance = totalHours * mealRate;
     const transportAllowance = totalDays * settings.dailyTransportAllowance;
     
     return {
