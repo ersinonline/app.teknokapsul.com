@@ -470,6 +470,45 @@ class WorkTrackingService {
       throw error;
     }
   }
+
+  async getSalaryHistoryForYear(userId: string, year: number): Promise<SalaryHistory[]> {
+    try {
+      const q = query(
+        collection(db, this.salaryHistoryCollection),
+        where('userId', '==', userId),
+        where('year', '==', year),
+        orderBy('month', 'asc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      const history: SalaryHistory[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        history.push({
+          id: doc.id,
+          userId: data.userId,
+          year: data.year,
+          month: data.month,
+          paidSalary: data.paidSalary,
+          paidMealAllowance: data.paidMealAllowance,
+          paidTransportAllowance: data.paidTransportAllowance,
+          calculatedSalary: data.calculatedSalary,
+          calculatedMealAllowance: data.calculatedMealAllowance,
+          calculatedTransportAllowance: data.calculatedTransportAllowance,
+          totalHours: data.totalHours,
+          totalDays: data.totalDays,
+          createdAt: data.createdAt.toDate(),
+          updatedAt: data.updatedAt.toDate()
+        });
+      });
+
+      return history;
+    } catch (error) {
+      console.error('Yıllık maaş geçmişi getirme hatası:', error);
+      throw error;
+    }
+  }
 }
 
 export const workTrackingService = new WorkTrackingService();
