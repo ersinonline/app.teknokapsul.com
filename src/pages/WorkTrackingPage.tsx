@@ -277,6 +277,8 @@ const WorkTrackingPage: React.FC = () => {
     
     try {
       const yearlyHistory = await workTrackingService.getSalaryHistoryForYear(user.id, selectedYear);
+      console.log('Loaded yearly salary history:', yearlyHistory);
+      console.log('Number of months with data:', yearlyHistory.length);
       setYearlySalaryHistory(yearlyHistory);
     } catch (error) {
       console.error('Yıllık maaş geçmişi yükleme hatası:', error);
