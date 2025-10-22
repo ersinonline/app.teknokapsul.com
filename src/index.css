@@ -10,20 +10,20 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 39 100% 50%; /* #ffb700 */
+    --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222.2 84% 4.9%;
     --muted: 210 40% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
+    --accent: 39 100% 50%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --ring: 39 100% 50%;
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -33,19 +33,19 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 39 100% 50%;
     --primary-foreground: 222.2 84% 4.9%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 39 100% 50%;
+    --accent-foreground: 222.2 84% 4.9%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    --ring: 39 100% 50%;
   }
 }
 
@@ -54,28 +54,33 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gray-50 text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
   }
 }
 
-/* Custom scrollbar */
+/* Enhanced scrollbar - Minimal */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800;
+  @apply bg-gray-100;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  @apply bg-[#ffb700] rounded-full;
+  transition: background-color 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-500;
+  @apply bg-[#e6a500];
 }
 
-/* Hide scrollbar for horizontal scrollable sections */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -85,308 +90,67 @@
   display: none;
 }
 
-/* Smooth scrolling for horizontal sections */
-.scroll-smooth {
-  scroll-behavior: smooth;
+/* Banking App Style Cards */
+.bank-card {
+  @apply bg-white rounded-2xl shadow-sm border border-gray-100;
+  @apply transition-all duration-200;
 }
 
-/* Skeleton wave animation */
-@keyframes wave {
-  0% {
-    transform: translateX(-100%);
-  }
-  50% {
-    transform: translateX(100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+.bank-card:hover {
+  @apply shadow-md border-gray-200;
 }
 
-.animate-wave {
-  position: relative;
-  overflow: hidden;
+.bank-card-interactive {
+  @apply bank-card cursor-pointer;
+  @apply hover:shadow-lg hover:border-[#ffb700]/20;
 }
 
-.animate-wave::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  animation: wave 1.6s linear 0.5s infinite;
-  content: '';
+/* Primary Button - Banking Style */
+.btn-primary {
+  @apply bg-[#ffb700] text-white px-6 py-3 rounded-xl;
+  @apply font-semibold text-sm;
+  @apply transition-all duration-200;
+  @apply hover:bg-[#e6a500] hover:shadow-md;
+  @apply active:scale-95;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
-.dark .animate-wave::after {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
+.btn-secondary {
+  @apply bg-gray-100 text-gray-900 px-6 py-3 rounded-xl;
+  @apply font-semibold text-sm;
+  @apply transition-all duration-200;
+  @apply hover:bg-gray-200;
+  @apply active:scale-95;
 }
 
-/* Smooth transitions for theme changes */
-* {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+.btn-outline {
+  @apply border-2 border-[#ffb700] text-[#ffb700] px-6 py-3 rounded-xl;
+  @apply font-semibold text-sm bg-white;
+  @apply transition-all duration-200;
+  @apply hover:bg-[#ffb700] hover:text-white;
+  @apply active:scale-95;
 }
 
-/* Loading spinner animation */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+/* Input Fields - Banking Style */
+.input-field {
+  @apply w-full px-4 py-3 rounded-xl border border-gray-200;
+  @apply bg-white text-gray-900;
+  @apply transition-all duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-[#ffb700]/20 focus:border-[#ffb700];
 }
 
-.animate-spin {
-  animation: spin 1s linear infinite;
+/* Section Headers */
+.section-header {
+  @apply text-2xl font-bold text-gray-900 mb-6;
 }
 
-/* Fade in animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* Smooth Animations - Minimal */
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Scale animation for buttons */
-@keyframes scaleIn {
-  from {
-    transform: scale(0.95);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.2s ease-out;
-}
-
-/* Hover effects */
-.hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Responsive improvements and mobile optimizations */
-@media (max-width: 768px) {
-  /* Better touch targets */
-  button, a, [role="button"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
-  /* Improved spacing for mobile */
-  .mobile-spacing {
-    padding: 1rem;
-  }
-  
-  /* Better text sizes for mobile */
-  .mobile-text {
-    font-size: 16px; /* Prevents zoom on iOS */
-  }
-  
-  /* Improved form inputs */
-  input, textarea, select {
-    font-size: 16px; /* Prevents zoom on iOS */
-    padding: 12px;
-  }
-}
-
-/* Touch-friendly hover states */
-@media (hover: hover) {
-  .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  .dark .hover-lift:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-}
-
-/* Focus states for accessibility */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-  outline: 2px solid #3B82F6;
-  outline-offset: 2px;
-}
-
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Reduced motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .hover-lift:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  }
-  
-  button, .btn {
-    border: 2px solid currentColor;
-  }
-}
-
-/* Print styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  
-  * {
-    background: white !important;
-    color: black !important;
-    box-shadow: none !important;
-  }
-}
-
-/* Base styles */
-* {
-  @apply border-border;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-body {
-  @apply bg-background text-foreground;
-  font-feature-settings: "rlig" 1, "calt" 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Mobile-first responsive design */
-@media (max-width: 768px) {
-  .container {
-    @apply px-4;
-  }
-  
-  .grid-responsive {
-    @apply grid-cols-1 gap-4;
-  }
-  
-  .text-responsive {
-    @apply text-sm;
-  }
-  
-  .card-mobile {
-    @apply p-4 rounded-lg;
-  }
-}
-
-/* Tablet optimizations */
-@media (min-width: 768px) and (max-width: 1279px) {
-  .container {
-    @apply px-6;
-  }
-  
-  .grid-tablet {
-    @apply grid-cols-2 gap-6;
-  }
-  
-  .card-tablet {
-    @apply p-6 rounded-xl;
-  }
-  
-  .text-tablet {
-    @apply text-base;
-  }
-  
-  /* Tablet navigation improvements */
-  .tablet-nav {
-    @apply sticky top-0 z-30 bg-white/95 backdrop-blur-sm;
-  }
-  
-  /* Better touch targets for tablets */
-  .touch-target {
-    @apply min-h-[44px] min-w-[44px];
-  }
-  
-  /* Improved spacing for tablet */
-  .tablet-spacing {
-    @apply space-y-6;
-  }
-  
-  /* Grid optimizations for tablet */
-  .tablet-grid-2 {
-    @apply grid-cols-2;
-  }
-  
-  .tablet-grid-3 {
-    @apply grid-cols-3;
-  }
-  
-  .tablet-grid-4 {
-    @apply grid-cols-4;
-  }
-}
-
-/* Enhanced scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-muted/30;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-primary/40 rounded-full;
-  transition: background-color 0.2s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-primary/60;
-}
-
-/* Enhanced animations */
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
 .animate-slide-up {
   animation: slideUp 0.4s ease-out;
-}
-
-.animate-bounce-in {
-  animation: bounceIn 0.6s ease-out;
 }
 
 @keyframes fadeIn {
@@ -405,164 +169,138 @@ body {
   }
 }
 
-@keyframes bounceIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-  70% {
-    transform: scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+/* Balance Card - Banking Style */
+.balance-card {
+  @apply bg-[#ffb700] text-white rounded-2xl p-6;
+  @apply shadow-lg;
 }
 
-/* Glass morphism effect */
-.glass {
-  @apply backdrop-blur-md bg-white/10 border border-white/20;
+/* Transaction Item */
+.transaction-item {
+  @apply flex items-center justify-between p-4;
+  @apply border-b border-gray-100 last:border-0;
+  @apply transition-colors duration-150;
+  @apply hover:bg-gray-50;
 }
 
-/* Enhanced card styles */
-.card {
-  @apply bg-card text-card-foreground rounded-xl border shadow-sm;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Status Badges */
+.badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
 }
 
-.card:hover {
-  @apply shadow-lg -translate-y-1;
+.badge-success {
+  @apply bg-green-50 text-green-700;
 }
 
-.card-interactive {
-  @apply cursor-pointer hover:shadow-xl hover:scale-[1.02] active:scale-[0.98];
+.badge-warning {
+  @apply bg-yellow-50 text-yellow-700;
 }
 
-/* Enhanced button styles */
-.btn {
-  @apply inline-flex items-center justify-center rounded-lg text-sm font-medium;
-  @apply transition-all duration-200 focus-visible:outline-none focus-visible:ring-2;
-  @apply focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+.badge-error {
+  @apply bg-red-50 text-red-700;
 }
 
-.btn-primary {
-  @apply bg-primary text-primary-foreground hover:bg-primary/90;
+.badge-info {
+  @apply bg-blue-50 text-blue-700;
 }
 
-.btn-secondary {
-  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+.badge-primary {
+  @apply bg-[#ffb700]/10 text-[#ffb700];
 }
 
-.btn-ghost {
-  @apply hover:bg-accent hover:text-accent-foreground;
+/* Loading States */
+.skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
 }
 
-/* Loading states */
-.loading-skeleton {
-  @apply animate-pulse bg-muted rounded;
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-.loading-spinner {
-  @apply animate-spin rounded-full border-2 border-muted border-t-primary;
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Mobile touch improvements */
-@media (hover: none) and (pointer: coarse) {
-  .card:hover {
-    @apply shadow-sm translate-y-0;
-  }
-  
-  .btn:hover {
-    @apply scale-100;
-  }
-  
-  .btn:active {
-    @apply scale-95;
-  }
+/* Icon Containers */
+.icon-container {
+  @apply w-12 h-12 rounded-xl flex items-center justify-center;
+  @apply bg-gray-50;
 }
 
-/* Focus improvements for accessibility */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+.icon-container-primary {
+  @apply icon-container bg-[#ffb700]/10 text-[#ffb700];
 }
 
-/* Gradient backgrounds */
-.gradient-primary {
-  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 100%);
+/* Stats Card */
+.stat-card {
+  @apply bank-card p-6;
 }
 
-.gradient-secondary {
-  background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--muted)) 100%);
+.stat-value {
+  @apply text-3xl font-bold text-gray-900;
 }
 
-/* Text utilities */
-.text-gradient {
-  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.stat-label {
+  @apply text-sm text-gray-500 mt-1;
 }
 
-/* Mobile-specific fixes for authentication */
+/* Mobile Optimizations */
 @media (max-width: 768px) {
-  /* Fix for mobile authentication popups */
-  .cl-rootBox {
-    width: 100% !important;
-    max-width: 400px !important;
-    margin: 0 auto !important;
+  .bank-card {
+    @apply rounded-xl;
   }
   
-  .cl-card {
-    width: 100% !important;
-    max-width: 400px !important;
-    margin: 0 auto !important;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  button, a, [role="button"] {
+    min-height: 44px;
   }
   
-  .cl-socialButtonsBlockButton {
-    width: 100% !important;
-    padding: 12px 16px !important;
-    font-size: 14px !important;
-    min-height: 48px !important;
-    touch-action: manipulation !important;
-  }
-  
-  .cl-formButtonPrimary {
-    width: 100% !important;
-    padding: 12px 16px !important;
-    font-size: 14px !important;
-    min-height: 48px !important;
-    touch-action: manipulation !important;
-  }
-  
-  .cl-formFieldInput {
-    width: 100% !important;
-    padding: 12px 16px !important;
-    font-size: 16px !important;
-    min-height: 48px !important;
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    border-radius: 8px !important;
-  }
-  
-  /* Prevent zoom on input focus */
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="tel"],
-  select,
-  textarea {
+  input, textarea, select {
     font-size: 16px !important;
     -webkit-appearance: none !important;
-    appearance: none !important;
   }
   
-  /* Fix for iOS Safari */
-  body {
-    -webkit-text-size-adjust: 100% !important;
+  .section-header {
+    @apply text-xl;
+  }
+}
+
+/* Focus States for Accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  @apply outline-none ring-2 ring-[#ffb700]/50 ring-offset-2;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
