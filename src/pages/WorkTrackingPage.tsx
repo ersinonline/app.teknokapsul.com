@@ -426,7 +426,9 @@ const WorkTrackingPage: React.FC = () => {
     const totalDays = monthlyEntries.length;
     const holidayDays = getHolidayDaysInMonth(selectedMonth, selectedYear);
     
-    const mealAllowance = totalDays * (workSettings.dailyMealAllowance || 0);
+    // Use hourly meal rate for consistency with detailed breakdown
+    const mealRate = workSettings.hourlyMealRate || workSettings.dailyMealAllowance || 0;
+    const mealAllowance = totalHours * mealRate;
     const transportAllowance = totalDays * (workSettings.dailyTransportAllowance || 0);
     // Çift mesai hesaplaması: tatil günlerinde çalışılan saatler çift ücret alır
     let regularSalary = 0;
@@ -967,6 +969,190 @@ const WorkTrackingPage: React.FC = () => {
                 <p className="text-sm text-green-700">
                   Bu ay {summary.holidayDays} tatil günü için çift maaş bonusu: {formatCurrency(summary.holidaySalary)}
                 </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Yearly Summary Section */}
+        {summary && workSettings && (
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <TrendingUp className="w-6 h-6 text-blue-600" />
+              <h3 className="text-lg font-semibold text-blue-800">Yıllık Genel Bilgiler ({selectedYear})</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Total Work Hours This Year */}
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-gray-600">Toplam Çalışma Saati</span>
+                </div>
+                <p className="text-xl font-bold text-gray-900">
+                  {workEntries
+                    .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                    .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0)
+                    .toFixed(1)} saat
+                </p>
+              </div>
+
+              {/* Total Earned vs Paid Salary */}
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-medium text-gray-600">Maaş Durumu</span>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Hesaplanan:</span>
+                    <span className="font-medium">
+                      {formatCurrency(
+                        workEntries
+                          .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                          .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * workSettings.hourlyRate
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Ödenen:</span>
+                    <span className="font-medium">{formatCurrency(parseFloat(paidSalary) || 0)}</span>
+                  </div>
+                  <div className={`flex justify-between text-sm font-bold ${
+                    (parseFloat(paidSalary) || 0) - (workEntries
+                      .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                      .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * workSettings.hourlyRate) >= 0 
+                      ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    <span>Fark:</span>
+                    <span>
+                      {formatCurrency(
+                        (parseFloat(paidSalary) || 0) - (workEntries
+                          .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                          .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * workSettings.hourlyRate)
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Meal Allowance Status */}
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="w-4 h-4 text-orange-600" />
+                  <span className="text-sm font-medium text-gray-600">Yemek Durumu</span>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Hesaplanan:</span>
+                    <span className="font-medium">
+                      {formatCurrency(
+                        workEntries
+                          .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                          .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * 
+                        (workSettings.hourlyMealRate || workSettings.dailyMealAllowance || 0)
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Ödenen:</span>
+                    <span className="font-medium">{formatCurrency(parseFloat(mealAllowancePaid) || 0)}</span>
+                  </div>
+                  <div className={`flex justify-between text-sm font-bold ${
+                    (parseFloat(mealAllowancePaid) || 0) - (workEntries
+                      .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                      .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * 
+                    (workSettings.hourlyMealRate || workSettings.dailyMealAllowance || 0)) >= 0 
+                      ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    <span>Fark:</span>
+                    <span>
+                      {formatCurrency(
+                        (parseFloat(mealAllowancePaid) || 0) - (workEntries
+                          .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                          .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * 
+                        (workSettings.hourlyMealRate || workSettings.dailyMealAllowance || 0))
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Transport Allowance Status */}
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="w-4 h-4 text-purple-600" />
+                  <span className="text-sm font-medium text-gray-600">Yol Durumu</span>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Hesaplanan:</span>
+                    <span className="font-medium">
+                      {formatCurrency(
+                        workEntries
+                          .filter(entry => new Date(entry.date).getFullYear() === selectedYear).length * 
+                        (workSettings.dailyTransportAllowance || 0)
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-500">Ödenen:</span>
+                    <span className="font-medium">{formatCurrency(parseFloat(transportAllowancePaid) || 0)}</span>
+                  </div>
+                  <div className={`flex justify-between text-sm font-bold ${
+                    (parseFloat(transportAllowancePaid) || 0) - (workEntries
+                      .filter(entry => new Date(entry.date).getFullYear() === selectedYear).length * 
+                    (workSettings.dailyTransportAllowance || 0)) >= 0 
+                      ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    <span>Fark:</span>
+                    <span>
+                      {formatCurrency(
+                        (parseFloat(transportAllowancePaid) || 0) - (workEntries
+                          .filter(entry => new Date(entry.date).getFullYear() === selectedYear).length * 
+                        (workSettings.dailyTransportAllowance || 0))
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Hour Difference Analysis */}
+            <div className="mt-4 p-4 bg-white rounded-lg shadow-sm">
+              <h4 className="font-medium text-gray-800 mb-3">Saat Farkı Analizi</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-600">Maaş Farkı Saat Karşılığı:</span>
+                  <p className="font-bold text-lg">
+                    {Math.abs(
+                      ((parseFloat(paidSalary) || 0) - (workEntries
+                        .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                        .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * workSettings.hourlyRate)) / workSettings.hourlyRate
+                    ).toFixed(1)} saat
+                  </p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Yemek Farkı Saat Karşılığı:</span>
+                  <p className="font-bold text-lg">
+                    {Math.abs(
+                      ((parseFloat(mealAllowancePaid) || 0) - (workEntries
+                        .filter(entry => new Date(entry.date).getFullYear() === selectedYear)
+                        .reduce((sum, entry) => sum + calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes), 0) * 
+                      (workSettings.hourlyMealRate || workSettings.dailyMealAllowance || 0))) / (workSettings.hourlyMealRate || workSettings.dailyMealAllowance || 1)
+                    ).toFixed(1)} saat
+                  </p>
+                </div>
+                <div>
+                  <span className="text-gray-600">Yol Farkı Gün Karşılığı:</span>
+                  <p className="font-bold text-lg">
+                    {Math.abs(
+                      ((parseFloat(transportAllowancePaid) || 0) - (workEntries
+                        .filter(entry => new Date(entry.date).getFullYear() === selectedYear).length * 
+                      (workSettings.dailyTransportAllowance || 0))) / (workSettings.dailyTransportAllowance || 1)
+                    ).toFixed(1)} gün
+                  </p>
+                </div>
               </div>
             </div>
           </div>
