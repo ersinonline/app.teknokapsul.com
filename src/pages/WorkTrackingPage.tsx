@@ -72,53 +72,177 @@ const WorkTrackingPage: React.FC = () => {
     }
   }, [workEntries, workSettings, selectedMonth, selectedYear]);
 
-  // Maaş geçmişi verilerini localStorage'dan yükle
+  // Maaş geçmişi verilerini Firebase'dan yükle
   useEffect(() => {
-    if (user) {
-      const monthKey = `${selectedYear}_${selectedMonth}`;
-      const savedPaidSalary = localStorage.getItem(`paidSalary_${user.id}_${monthKey}`);
-      const savedMealAllowance = localStorage.getItem(`mealAllowancePaid_${user.id}_${monthKey}`);
-      const savedTransportAllowance = localStorage.getItem(`transportAllowancePaid_${user.id}_${monthKey}`);
-      
-      setPaidSalary(savedPaidSalary || '');
-      setMealAllowancePaid(savedMealAllowance || '');
-      setTransportAllowancePaid(savedTransportAllowance || '');
-    }
+    const loadSalaryHistory = async () => {
+      if (user) {
+        try {
+          const salaryHistory = await workTrackingService.getSalaryHistoryForMonth(user.id, selectedYear, selectedMonth);
+          if (salaryHistory) {
+            setPaidSalary(salaryHistory.paidSalary.toString());
+            setMealAllowancePaid(salaryHistory.paidMealAllowance.toString());
+            setTransportAllowancePaid(salaryHistory.paidTransportAllowance.toString());
+          } else {
+            // Eğer Firebase'da veri yoksa localStorage'dan yükle (geçiş dönemi için)
+            const monthKey = `${selectedYear}_${selectedMonth}`;
+            const savedPaidSalary = localStorage.getItem(`paidSalary_${user.id}_${monthKey}`);
+            const savedMealAllowance = localStorage.getItem(`mealAllowancePaid_${user.id}_${monthKey}`);
+            const savedTransportAllowance = localStorage.getItem(`transportAllowancePaid_${user.id}_${monthKey}`);
+            
+            setPaidSalary(savedPaidSalary || '');
+            setMealAllowancePaid(savedMealAllowance || '');
+            setTransportAllowancePaid(savedTransportAllowance || '');
+          }
+        } catch (error) {
+          console.error('Maaş geçmişi yükleme hatası:', error);
+          // Hata durumunda localStorage'dan yükle
+          const monthKey = `${selectedYear}_${selectedMonth}`;
+          const savedPaidSalary = localStorage.getItem(`paidSalary_${user.id}_${monthKey}`);
+          const savedMealAllowance = localStorage.getItem(`mealAllowancePaid_${user.id}_${monthKey}`);
+          const savedTransportAllowance = localStorage.getItem(`transportAllowancePaid_${user.id}_${monthKey}`);
+          
+          setPaidSalary(savedPaidSalary || '');
+          setMealAllowancePaid(savedMealAllowance || '');
+          setTransportAllowancePaid(savedTransportAllowance || '');
+        }
+      }
+    };
+
+    loadSalaryHistory();
   }, [user, selectedYear, selectedMonth]);
 
-  // Maaş geçmişi verilerini localStorage'a kaydet
+  // Maaş geçmişi verilerini Firebase'a kaydet
   useEffect(() => {
-    if (user) {
-      const monthKey = `${selectedYear}_${selectedMonth}`;
-      if (paidSalary) {
-        localStorage.setItem(`paidSalary_${user.id}_${monthKey}`, paidSalary);
-      } else {
-        localStorage.removeItem(`paidSalary_${user.id}_${monthKey}`);
+    const saveSalaryHistory = async () => {
+      if (user && salaryBreakdown && (paidSalary || mealAllowancePaid || transportAllowancePaid)) {
+        try {
+          const now = new Date();
+          await workTrackingService.saveSalaryHistory({
+            userId: user.id,
+            year: selectedYear,
+            month: selectedMonth,
+            paidSalary: parseFloat(paidSalary) || 0,
+            paidMealAllowance: parseFloat(mealAllowancePaid) || 0,
+            paidTransportAllowance: parseFloat(transportAllowancePaid) || 0,
+            calculatedSalary: salaryBreakdown.baseSalary,
+            calculatedMealAllowance: salaryBreakdown.mealAllowance,
+            calculatedTransportAllowance: salaryBreakdown.transportAllowance,
+            totalHours: salaryBreakdown.totalHours,
+            totalDays: salaryBreakdown.totalDays,
+            createdAt: now,
+            updatedAt: now
+          });
+          
+          // Başarılı kayıt sonrası localStorage'dan temizle (geçiş dönemi için)
+          const monthKey = `${selectedYear}_${selectedMonth}`;
+          if (paidSalary) {
+            localStorage.removeItem(`paidSalary_${user.id}_${monthKey}`);
+          }
+          if (mealAllowancePaid) {
+            localStorage.removeItem(`mealAllowancePaid_${user.id}_${monthKey}`);
+          }
+          if (transportAllowancePaid) {
+            localStorage.removeItem(`transportAllowancePaid_${user.id}_${monthKey}`);
+          }
+        } catch (error) {
+          console.error('Maaş geçmişi kaydetme hatası:', error);
+          // Hata durumunda localStorage'a kaydet (fallback)
+          const monthKey = `${selectedYear}_${selectedMonth}`;
+          if (paidSalary) {
+            localStorage.setItem(`paidSalary_${user.id}_${monthKey}`, paidSalary);
+          } else {
+            localStorage.removeItem(`paidSalary_${user.id}_${monthKey}`);
+          }
+        }
       }
-    }
-  }, [user, paidSalary, selectedYear, selectedMonth]);
+    };
+
+    // Debounce ile kaydetme işlemini geciktir
+    const timeoutId = setTimeout(saveSalaryHistory, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [user, paidSalary, mealAllowancePaid, transportAllowancePaid, salaryBreakdown, selectedYear, selectedMonth]);
 
   useEffect(() => {
-    if (user) {
-      const monthKey = `${selectedYear}_${selectedMonth}`;
-      if (mealAllowancePaid) {
-        localStorage.setItem(`mealAllowancePaid_${user.id}_${monthKey}`, mealAllowancePaid);
-      } else {
-        localStorage.removeItem(`mealAllowancePaid_${user.id}_${monthKey}`);
+    const saveMealAllowanceHistory = async () => {
+      if (user && salaryBreakdown && mealAllowancePaid) {
+        try {
+          const now = new Date();
+          await workTrackingService.saveSalaryHistory({
+            userId: user.id,
+            year: selectedYear,
+            month: selectedMonth,
+            paidSalary: parseFloat(paidSalary) || 0,
+            paidMealAllowance: parseFloat(mealAllowancePaid) || 0,
+            paidTransportAllowance: parseFloat(transportAllowancePaid) || 0,
+            calculatedSalary: salaryBreakdown.baseSalary,
+            calculatedMealAllowance: salaryBreakdown.mealAllowance,
+            calculatedTransportAllowance: salaryBreakdown.transportAllowance,
+            totalHours: salaryBreakdown.totalHours,
+            totalDays: salaryBreakdown.totalDays,
+            createdAt: now,
+            updatedAt: now
+          });
+          
+          // Başarılı kayıt sonrası localStorage'dan temizle
+          const monthKey = `${selectedYear}_${selectedMonth}`;
+          localStorage.removeItem(`mealAllowancePaid_${user.id}_${monthKey}`);
+        } catch (error) {
+          console.error('Yemek ücreti geçmişi kaydetme hatası:', error);
+          // Hata durumunda localStorage'a kaydet (fallback)
+          const monthKey = `${selectedYear}_${selectedMonth}`;
+          if (mealAllowancePaid) {
+            localStorage.setItem(`mealAllowancePaid_${user.id}_${monthKey}`, mealAllowancePaid);
+          } else {
+            localStorage.removeItem(`mealAllowancePaid_${user.id}_${monthKey}`);
+          }
+        }
       }
-    }
-  }, [user, mealAllowancePaid, selectedYear, selectedMonth]);
+    };
+
+    const timeoutId = setTimeout(saveMealAllowanceHistory, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [user, mealAllowancePaid, paidSalary, transportAllowancePaid, salaryBreakdown, selectedYear, selectedMonth]);
 
   useEffect(() => {
-    if (user) {
-      const monthKey = `${selectedYear}_${selectedMonth}`;
-      if (transportAllowancePaid) {
-        localStorage.setItem(`transportAllowancePaid_${user.id}_${monthKey}`, transportAllowancePaid);
-      } else {
-        localStorage.removeItem(`transportAllowancePaid_${user.id}_${monthKey}`);
+    const saveTransportAllowanceHistory = async () => {
+      if (user && salaryBreakdown && transportAllowancePaid) {
+        try {
+          const now = new Date();
+          await workTrackingService.saveSalaryHistory({
+            userId: user.id,
+            year: selectedYear,
+            month: selectedMonth,
+            paidSalary: parseFloat(paidSalary) || 0,
+            paidMealAllowance: parseFloat(mealAllowancePaid) || 0,
+            paidTransportAllowance: parseFloat(transportAllowancePaid) || 0,
+            calculatedSalary: salaryBreakdown.baseSalary,
+            calculatedMealAllowance: salaryBreakdown.mealAllowance,
+            calculatedTransportAllowance: salaryBreakdown.transportAllowance,
+            totalHours: salaryBreakdown.totalHours,
+            totalDays: salaryBreakdown.totalDays,
+            createdAt: now,
+            updatedAt: now
+          });
+          
+          // Başarılı kayıt sonrası localStorage'dan temizle
+          const monthKey = `${selectedYear}_${selectedMonth}`;
+          localStorage.removeItem(`transportAllowancePaid_${user.id}_${monthKey}`);
+        } catch (error) {
+          console.error('Ulaşım ücreti geçmişi kaydetme hatası:', error);
+          // Hata durumunda localStorage'a kaydet (fallback)
+          const monthKey = `${selectedYear}_${selectedMonth}`;
+          if (transportAllowancePaid) {
+            localStorage.setItem(`transportAllowancePaid_${user.id}_${monthKey}`, transportAllowancePaid);
+          } else {
+            localStorage.removeItem(`transportAllowancePaid_${user.id}_${monthKey}`);
+          }
+        }
       }
-    }
-  }, [user, transportAllowancePaid, selectedYear, selectedMonth]);
+    };
+
+    const timeoutId = setTimeout(saveTransportAllowanceHistory, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [user, transportAllowancePaid, paidSalary, mealAllowancePaid, salaryBreakdown, selectedYear, selectedMonth]);
 
   const loadData = async () => {
     if (!user) return;

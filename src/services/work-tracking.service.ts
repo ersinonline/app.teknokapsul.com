@@ -366,14 +366,68 @@ class WorkTrackingService {
 
   async saveSalaryHistory(salaryHistory: Omit<SalaryHistory, 'id'>): Promise<string> {
     try {
-      const docRef = await addDoc(collection(db, this.salaryHistoryCollection), {
-        ...salaryHistory,
-        createdAt: Timestamp.fromDate(salaryHistory.createdAt),
-        updatedAt: Timestamp.fromDate(salaryHistory.updatedAt)
-      });
-      return docRef.id;
+      // Check if salary history already exists for this user, year, and month
+      const existingHistory = await this.getSalaryHistoryForMonth(salaryHistory.userId, salaryHistory.year, salaryHistory.month);
+      
+      if (existingHistory) {
+        // Update existing record
+        const docRef = doc(db, this.salaryHistoryCollection, existingHistory.id);
+        await updateDoc(docRef, {
+          ...salaryHistory,
+          updatedAt: Timestamp.fromDate(new Date())
+        });
+        return existingHistory.id;
+      } else {
+        // Create new record
+        const docRef = await addDoc(collection(db, this.salaryHistoryCollection), {
+          ...salaryHistory,
+          createdAt: Timestamp.fromDate(new Date()),
+          updatedAt: Timestamp.fromDate(new Date())
+        });
+        return docRef.id;
+      }
     } catch (error) {
       console.error('Maaş geçmişi kaydetme hatası:', error);
+      throw error;
+    }
+  }
+
+  async getSalaryHistoryForMonth(userId: string, year: number, month: number): Promise<SalaryHistory | null> {
+    try {
+      const q = query(
+        collection(db, this.salaryHistoryCollection),
+        where('userId', '==', userId),
+        where('year', '==', year),
+        where('month', '==', month)
+      );
+
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        return null;
+      }
+
+      const doc = querySnapshot.docs[0];
+      const data = doc.data();
+      
+      return {
+        id: doc.id,
+        userId: data.userId,
+        year: data.year,
+        month: data.month,
+        paidSalary: data.paidSalary,
+        paidMealAllowance: data.paidMealAllowance,
+        paidTransportAllowance: data.paidTransportAllowance,
+        calculatedSalary: data.calculatedSalary,
+        calculatedMealAllowance: data.calculatedMealAllowance,
+        calculatedTransportAllowance: data.calculatedTransportAllowance,
+        totalHours: data.totalHours,
+        totalDays: data.totalDays,
+        createdAt: data.createdAt.toDate(),
+        updatedAt: data.updatedAt.toDate()
+      };
+    } catch (error) {
+      console.error('Aylık maaş geçmişi getirme hatası:', error);
       throw error;
     }
   }
