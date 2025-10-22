@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Calendar, DollarSign, Settings, Plus, Edit2, Trash2, AlertTriangle, Grid, List, CheckCircle } from 'lucide-react';
+import { Clock, Calendar, DollarSign, Settings, Plus, Edit2, Trash2, AlertTriangle, Grid, List, CheckCircle, TrendingUp, Calculator } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { workTrackingService } from '../services/work-tracking.service';
-import { WorkEntry, WorkSettings } from '../types/work-tracking';
+import { WorkEntry, WorkSettings, SalaryBreakdown } from '../types/work-tracking';
 import { formatCurrency } from '../utils/currency';
 
 const WorkTrackingPage: React.FC = () => {
@@ -35,6 +35,7 @@ const WorkTrackingPage: React.FC = () => {
   const [mealAllowancePaid, setMealAllowancePaid] = useState('');
   const [transportAllowancePaid, setTransportAllowancePaid] = useState('');
   const [calculatedSalary, setCalculatedSalary] = useState(0);
+  const [salaryBreakdown, setSalaryBreakdown] = useState<SalaryBreakdown | null>(null);
   
   // Düzenleme states
   const [editingEntry, setEditingEntry] = useState<WorkEntry | null>(null);
@@ -59,38 +60,63 @@ const WorkTrackingPage: React.FC = () => {
     const summary = calculateMonthlySummary();
     if (summary) {
       setCalculatedSalary(summary.totalSalary);
+      
+      // Calculate separate breakdown for enhanced display
+      if (workSettings) {
+        const breakdown = workTrackingService.calculateSeparateBreakdown(
+          workEntries,
+          workSettings
+        );
+        setSalaryBreakdown(breakdown);
+      }
     }
   }, [workEntries, workSettings, selectedMonth, selectedYear]);
 
   // Maaş geçmişi verilerini localStorage'dan yükle
   useEffect(() => {
     if (user) {
-      const savedPaidSalary = localStorage.getItem(`paidSalary_${user.id}_${selectedYear}_${selectedMonth}`);
-      const savedMealAllowance = localStorage.getItem(`mealAllowancePaid_${user.id}_${selectedYear}_${selectedMonth}`);
-      const savedTransportAllowance = localStorage.getItem(`transportAllowancePaid_${user.id}_${selectedYear}_${selectedMonth}`);
+      const monthKey = `${selectedYear}_${selectedMonth}`;
+      const savedPaidSalary = localStorage.getItem(`paidSalary_${user.id}_${monthKey}`);
+      const savedMealAllowance = localStorage.getItem(`mealAllowancePaid_${user.id}_${monthKey}`);
+      const savedTransportAllowance = localStorage.getItem(`transportAllowancePaid_${user.id}_${monthKey}`);
       
-      if (savedPaidSalary) setPaidSalary(savedPaidSalary);
-      if (savedMealAllowance) setMealAllowancePaid(savedMealAllowance);
-      if (savedTransportAllowance) setTransportAllowancePaid(savedTransportAllowance);
+      setPaidSalary(savedPaidSalary || '');
+      setMealAllowancePaid(savedMealAllowance || '');
+      setTransportAllowancePaid(savedTransportAllowance || '');
     }
   }, [user, selectedYear, selectedMonth]);
 
   // Maaş geçmişi verilerini localStorage'a kaydet
   useEffect(() => {
-    if (user && paidSalary) {
-      localStorage.setItem(`paidSalary_${user.id}_${selectedYear}_${selectedMonth}`, paidSalary);
+    if (user) {
+      const monthKey = `${selectedYear}_${selectedMonth}`;
+      if (paidSalary) {
+        localStorage.setItem(`paidSalary_${user.id}_${monthKey}`, paidSalary);
+      } else {
+        localStorage.removeItem(`paidSalary_${user.id}_${monthKey}`);
+      }
     }
   }, [user, paidSalary, selectedYear, selectedMonth]);
 
   useEffect(() => {
-    if (user && mealAllowancePaid) {
-      localStorage.setItem(`mealAllowancePaid_${user.id}_${selectedYear}_${selectedMonth}`, mealAllowancePaid);
+    if (user) {
+      const monthKey = `${selectedYear}_${selectedMonth}`;
+      if (mealAllowancePaid) {
+        localStorage.setItem(`mealAllowancePaid_${user.id}_${monthKey}`, mealAllowancePaid);
+      } else {
+        localStorage.removeItem(`mealAllowancePaid_${user.id}_${monthKey}`);
+      }
     }
   }, [user, mealAllowancePaid, selectedYear, selectedMonth]);
 
   useEffect(() => {
-    if (user && transportAllowancePaid) {
-      localStorage.setItem(`transportAllowancePaid_${user.id}_${selectedYear}_${selectedMonth}`, transportAllowancePaid);
+    if (user) {
+      const monthKey = `${selectedYear}_${selectedMonth}`;
+      if (transportAllowancePaid) {
+        localStorage.setItem(`transportAllowancePaid_${user.id}_${monthKey}`, transportAllowancePaid);
+      } else {
+        localStorage.removeItem(`transportAllowancePaid_${user.id}_${monthKey}`);
+      }
     }
   }, [user, transportAllowancePaid, selectedYear, selectedMonth]);
 
@@ -633,6 +659,180 @@ const WorkTrackingPage: React.FC = () => {
           </div>
         )}
 
+        {/* Enhanced Salary Breakdown */}
+        {salaryBreakdown && (
+          <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Calculator className="w-5 h-5 text-blue-600" />
+              <h3 className="font-medium text-gray-800">Maaş Detay Hesabı</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Salary Breakdown */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h4 className="font-medium text-blue-800 mb-3 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  Maaş Hesabı
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Çalışılan Saat:</span>
+                    <span className="font-medium">{salaryBreakdown.hourlyBreakdown.totalHours.toFixed(1)} saat</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Saatlik Ücret:</span>
+                    <span className="font-medium">{formatCurrency(salaryBreakdown.hourlyBreakdown.hourlyRate)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Temel Maaş:</span>
+                    <span className="font-medium">{formatCurrency(salaryBreakdown.baseSalary)}</span>
+                  </div>
+                  {salaryBreakdown.hourlyBreakdown.overtimeHours > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Mesai ({salaryBreakdown.hourlyBreakdown.overtimeHours.toFixed(1)} saat):</span>
+                      <span className="font-medium text-green-600">+{formatCurrency(salaryBreakdown.overtimeSalary)}</span>
+                    </div>
+                  )}
+                  {salaryBreakdown.holidaySalary > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Tatil Bonusu:</span>
+                      <span className="font-medium text-green-600">+{formatCurrency(salaryBreakdown.holidaySalary)}</span>
+                    </div>
+                  )}
+                  <div className="border-t pt-2 flex justify-between font-bold">
+                    <span>Toplam:</span>
+                    <span>{formatCurrency(salaryBreakdown.baseSalary)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Meal Breakdown */}
+              <div className="bg-orange-50 rounded-lg p-4">
+                <h4 className="font-medium text-orange-800 mb-3">Yemek Hesabı</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Çalışılan Saat:</span>
+                    <span className="font-medium">{salaryBreakdown.hourlyBreakdown.totalHours.toFixed(1)} saat</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Saatlik Yemek Ücreti:</span>
+                    <span className="font-medium">{formatCurrency(salaryBreakdown.hourlyBreakdown.hourlyMealRate)}</span>
+                  </div>
+                  <div className="border-t pt-2 flex justify-between font-bold">
+                    <span>Toplam:</span>
+                    <span>{formatCurrency(salaryBreakdown.mealAllowance)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Transport Breakdown */}
+              <div className="bg-purple-50 rounded-lg p-4">
+                <h4 className="font-medium text-purple-800 mb-3">Yol Hesabı</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Çalışılan Gün:</span>
+                    <span className="font-medium">{workEntries.filter(entry => entry.date.startsWith(`${selectedYear}-${String(selectedMonth).padStart(2, '0')}`)).length} gün</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Günlük Ücret:</span>
+                    <span className="font-medium">{formatCurrency(workSettings?.dailyTransportAllowance || 0)}</span>
+                  </div>
+                  <div className="border-t pt-2 flex justify-between font-bold">
+                    <span>Toplam:</span>
+                    <span>{formatCurrency(salaryBreakdown.transportAllowance)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Discrepancy Analysis */}
+            {(parseFloat(paidSalary) > 0 || parseFloat(mealAllowancePaid) > 0 || parseFloat(transportAllowancePaid) > 0) && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <h4 className="font-medium text-gray-800 mb-3">Fark Analizi</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {parseFloat(paidSalary) > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="text-sm space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Ödenen:</span>
+                          <span>{formatCurrency(parseFloat(paidSalary))}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Hesaplanan:</span>
+                          <span>{formatCurrency(salaryBreakdown.baseSalary)}</span>
+                        </div>
+                        <div className={`flex justify-between font-bold ${
+                          parseFloat(paidSalary) - salaryBreakdown.baseSalary > 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          <span>Fark:</span>
+                          <span>{formatCurrency(parseFloat(paidSalary) - salaryBreakdown.baseSalary)}</span>
+                        </div>
+                        {Math.abs(parseFloat(paidSalary) - salaryBreakdown.baseSalary) > 0 && (
+                          <div className="text-xs text-gray-500 mt-2">
+                            ≈ {Math.abs((parseFloat(paidSalary) - salaryBreakdown.baseSalary) / (workSettings?.hourlyRate || 1)).toFixed(1)} saat
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {parseFloat(mealAllowancePaid) > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="text-sm space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Ödenen:</span>
+                          <span>{formatCurrency(parseFloat(mealAllowancePaid))}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Hesaplanan:</span>
+                          <span>{formatCurrency(salaryBreakdown.mealAllowance)}</span>
+                        </div>
+                        <div className={`flex justify-between font-bold ${
+                          parseFloat(mealAllowancePaid) - salaryBreakdown.mealAllowance > 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          <span>Fark:</span>
+                          <span>{formatCurrency(parseFloat(mealAllowancePaid) - salaryBreakdown.mealAllowance)}</span>
+                        </div>
+                        {Math.abs(parseFloat(mealAllowancePaid) - salaryBreakdown.mealAllowance) > 0 && (
+                          <div className="text-xs text-gray-500 mt-2">
+                            ≈ {Math.abs((parseFloat(mealAllowancePaid) - salaryBreakdown.mealAllowance) / salaryBreakdown.hourlyBreakdown.hourlyMealRate).toFixed(1)} saat
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {parseFloat(transportAllowancePaid) > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="text-sm space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Ödenen:</span>
+                          <span>{formatCurrency(parseFloat(transportAllowancePaid))}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Hesaplanan:</span>
+                          <span>{formatCurrency(salaryBreakdown.transportAllowance)}</span>
+                        </div>
+                        <div className={`flex justify-between font-bold ${
+                          parseFloat(transportAllowancePaid) - salaryBreakdown.transportAllowance > 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          <span>Fark:</span>
+                          <span>{formatCurrency(parseFloat(transportAllowancePaid) - salaryBreakdown.transportAllowance)}</span>
+                        </div>
+                        {Math.abs(parseFloat(transportAllowancePaid) - salaryBreakdown.transportAllowance) > 0 && (
+                          <div className="text-xs text-gray-500 mt-2">
+                            ≈ {Math.abs((parseFloat(transportAllowancePaid) - salaryBreakdown.transportAllowance) / (workSettings?.dailyTransportAllowance || 1)).toFixed(1)} gün
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Holiday Summary */}
         {summary && summary.holidayDays > 0 && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
@@ -780,7 +980,7 @@ const WorkTrackingPage: React.FC = () => {
                               <div className="bg-orange-50 rounded-lg p-3 text-center">
                                 <p className="text-xs text-gray-500 mb-1">Yemek</p>
                                 <p className="font-bold text-lg text-orange-600">
-                                  {formatCurrency(workSettings.dailyMealAllowance)}
+                                  {formatCurrency(workHours * (workSettings.hourlyMealRate || workSettings.dailyMealAllowance || 0))}
                                 </p>
                               </div>
                               <div className="bg-purple-50 rounded-lg p-3 text-center">
@@ -1258,7 +1458,7 @@ interface SettingsModalProps {
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, currentSettings }) => {
   const [hourlyRate, setHourlyRate] = useState(currentSettings?.hourlyRate || 0);
-  const [dailyMealAllowance, setDailyMealAllowance] = useState(currentSettings?.dailyMealAllowance || 0);
+  const [hourlyMealRate, setHourlyMealRate] = useState(currentSettings?.hourlyMealRate || currentSettings?.dailyMealAllowance || 0);
   const [dailyTransportAllowance, setDailyTransportAllowance] = useState(currentSettings?.dailyTransportAllowance || 0);
   const [dailyHourLimit, setDailyHourLimit] = useState(currentSettings?.dailyHourLimit || 8);
   const [weeklyHourLimit, setWeeklyHourLimit] = useState(currentSettings?.weeklyHourLimit || 45);
@@ -1267,7 +1467,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
   const handleSave = () => {
     onSave({
       hourlyRate,
-      dailyMealAllowance,
+      hourlyMealRate,
+      dailyMealAllowance: hourlyMealRate, // Keep for backward compatibility
       dailyTransportAllowance,
       dailyHourLimit,
       weeklyHourLimit,
@@ -1302,15 +1503,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Günlük Yemek Ücreti (₺)
+              Saatlik Yemek Ücreti (₺)
             </label>
             <input
               type="number"
-              value={dailyMealAllowance}
-              onChange={(e) => setDailyMealAllowance(parseFloat(e.target.value) || 0)}
+              value={hourlyMealRate}
+              onChange={(e) => setHourlyMealRate(parseFloat(e.target.value) || 0)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Örn: 25"
+              placeholder="Örn: 5"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Çalıştığınız her saat için yemek ücreti
+            </p>
           </div>
           
           <div>

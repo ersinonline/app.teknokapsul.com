@@ -13,7 +13,7 @@ export interface WorkSettings {
   id: string;
   userId: string;
   hourlyRate: number; // Saatlik ücret (₺)
-  dailyMealAllowance: number; // Günlük yemek ücreti (₺)
+  hourlyMealRate: number; // Saatlik yemek ücreti (₺)
   dailyTransportAllowance: number; // Günlük yol ücreti (₺)
   dailyHourLimit?: number; // Günlük maksimum çalışma saati
   weeklyHourLimit?: number; // Haftalık maksimum çalışma saati
@@ -22,6 +22,8 @@ export interface WorkSettings {
   includeCurbanBayram?: boolean; // Kurban Bayramı dahil edilsin mi
   createdAt: Date;
   updatedAt: Date;
+  // Backward compatibility
+  dailyMealAllowance?: number; // Deprecated - use hourlyMealRate instead
 }
 
 export interface WorkSummary {
@@ -48,4 +50,49 @@ export interface DailyWorkSummary {
   hours: number;
   isOverLimit: boolean;
   salary: number;
+}
+
+export interface SalaryHistory {
+  id: string;
+  userId: string;
+  year: number;
+  month: number; // 0-11 (JavaScript month format)
+  paidSalary: number;
+  paidMealAllowance: number;
+  paidTransportAllowance: number;
+  calculatedSalary: number;
+  calculatedMealAllowance: number;
+  calculatedTransportAllowance: number;
+  totalHours: number;
+  totalDays: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SalaryBreakdown {
+  baseSalary: number;
+  overtimeSalary: number;
+  holidaySalary: number;
+  totalSalary: number;
+  mealAllowance: number;
+  totalMealAllowance: number;
+  transportAllowance: number;
+  totalTransportAllowance: number;
+  totalCalculated: number;
+  totalPaid: number;
+  salaryDifference: number;
+  mealDifference: number;
+  transportDifference: number;
+  totalDifference: number;
+  totalHours: number;
+  totalDays: number;
+  hourlyMealRate: number;
+  dailyTransportRate: number;
+  hourlyBreakdown: {
+    totalHours: number;
+    baseHours: number;
+    overtimeHours: number;
+    hourlyRate: number;
+    hourlyMealRate: number;
+  };
 }

@@ -12,11 +12,12 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { WorkEntry, WorkSettings } from '../types/work-tracking';
+import { WorkEntry, WorkSettings, SalaryHistory, SalaryBreakdown } from '../types/work-tracking';
 
 class WorkTrackingService {
   private workEntriesCollection = 'workEntries';
   private workSettingsCollection = 'workSettings';
+  private salaryHistoryCollection = 'salaryHistory';
 
   // Work Entries
   async addWorkEntry(entry: Omit<WorkEntry, 'id'>): Promise<string> {
@@ -175,7 +176,8 @@ class WorkTrackingService {
           id: doc.id,
           userId: data.userId,
           hourlyRate: data.hourlyRate,
-          dailyMealAllowance: data.dailyMealAllowance,
+          hourlyMealRate: data.hourlyMealRate || data.dailyMealAllowance || 0, // Migration support
+          dailyMealAllowance: data.dailyMealAllowance, // Keep for backward compatibility
           dailyTransportAllowance: data.dailyTransportAllowance,
           dailyHourLimit: data.dailyHourLimit,
           weeklyHourLimit: data.weeklyHourLimit,
@@ -202,8 +204,9 @@ class WorkTrackingService {
   }
 
   calculateDailySalary(workHours: number, settings: WorkSettings): number {
+    const mealRate = settings.hourlyMealRate || settings.dailyMealAllowance || 0;
     return (workHours * settings.hourlyRate) + 
-           settings.dailyMealAllowance + 
+           (workHours * mealRate) + 
            settings.dailyTransportAllowance;
   }
 
@@ -213,9 +216,10 @@ class WorkTrackingService {
     }, 0);
 
     const totalDays = entries.length;
+    const mealRate = settings.hourlyMealRate || settings.dailyMealAllowance || 0;
     
     return (totalHours * settings.hourlyRate) + 
-           (totalDays * settings.dailyMealAllowance) + 
+           (totalHours * mealRate) + 
            (totalDays * settings.dailyTransportAllowance);
   }
 
@@ -271,6 +275,101 @@ class WorkTrackingService {
     });
     
     return weeklyData;
+  }
+
+  // New methods for enhanced functionality
+  calculateSeparateBreakdown(entries: WorkEntry[], settings: WorkSettings): SalaryBreakdown {
+    const totalHours = entries.reduce((sum, entry) => {
+      return sum + this.calculateWorkHours(entry.startTime, entry.endTime, entry.breakMinutes);
+    }, 0);
+
+    const totalDays = entries.length;
+    const mealRate = settings.hourlyMealRate || settings.dailyMealAllowance || 0;
+    
+    const baseSalary = totalHours * settings.hourlyRate;
+    const mealAllowance = totalHours * mealRate;
+    const transportAllowance = totalDays * settings.dailyTransportAllowance;
+    
+    return {
+      baseSalary,
+      overtimeSalary: 0, // Can be enhanced later
+      holidaySalary: 0, // Can be enhanced later
+      totalSalary: baseSalary,
+      mealAllowance,
+      totalMealAllowance: mealAllowance,
+      transportAllowance,
+      totalTransportAllowance: transportAllowance,
+      totalCalculated: baseSalary + mealAllowance + transportAllowance,
+      totalPaid: 0, // Will be set from saved data
+      salaryDifference: 0, // Will be calculated
+      mealDifference: 0, // Will be calculated
+      transportDifference: 0, // Will be calculated
+      totalDifference: 0, // Will be calculated
+      totalHours,
+      totalDays,
+      hourlyMealRate: mealRate,
+      dailyTransportRate: settings.dailyTransportAllowance,
+      hourlyBreakdown: {
+        totalHours,
+        baseHours: totalHours,
+        overtimeHours: 0, // Can be enhanced later
+        hourlyRate: settings.hourlyRate,
+        hourlyMealRate: mealRate
+      }
+    };
+  }
+
+  async saveSalaryHistory(salaryHistory: Omit<SalaryHistory, 'id'>): Promise<string> {
+    try {
+      const docRef = await addDoc(collection(db, this.salaryHistoryCollection), {
+        ...salaryHistory,
+        createdAt: Timestamp.fromDate(salaryHistory.createdAt),
+        updatedAt: Timestamp.fromDate(salaryHistory.updatedAt)
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Maaş geçmişi kaydetme hatası:', error);
+      throw error;
+    }
+  }
+
+  async getSalaryHistory(userId: string): Promise<SalaryHistory[]> {
+    try {
+      const q = query(
+        collection(db, this.salaryHistoryCollection),
+        where('userId', '==', userId),
+        orderBy('year', 'desc'),
+        orderBy('month', 'desc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      const history: SalaryHistory[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        history.push({
+          id: doc.id,
+          userId: data.userId,
+          year: data.year,
+          month: data.month,
+          paidSalary: data.paidSalary,
+          paidMealAllowance: data.paidMealAllowance,
+          paidTransportAllowance: data.paidTransportAllowance,
+          calculatedSalary: data.calculatedSalary,
+          calculatedMealAllowance: data.calculatedMealAllowance,
+          calculatedTransportAllowance: data.calculatedTransportAllowance,
+          totalHours: data.totalHours,
+          totalDays: data.totalDays,
+          createdAt: data.createdAt.toDate(),
+          updatedAt: data.updatedAt.toDate()
+        });
+      });
+
+      return history;
+    } catch (error) {
+      console.error('Maaş geçmişi getirme hatası:', error);
+      throw error;
+    }
   }
 }
 
