@@ -1057,7 +1057,10 @@ const WorkTrackingPage: React.FC = () => {
                     <span className="text-gray-500">Ödenen:</span>
                     <span className="font-medium">
                       {formatCurrency(
-                        yearlySalaryHistory.reduce((sum, history) => sum + (history.paidSalary || 0), 0)
+                        yearlySalaryHistory.reduce((sum, history) => {
+                          const paidAmount = Number(history.paidSalary) || 0;
+                          return sum + paidAmount;
+                        }, 0)
                       )}
                     </span>
                   </div>
@@ -1098,7 +1101,10 @@ const WorkTrackingPage: React.FC = () => {
                     <span className="text-gray-500">Ödenen:</span>
                     <span className="font-medium">
                       {formatCurrency(
-                        yearlySalaryHistory.reduce((sum, history) => sum + (history.paidMealAllowance || 0), 0)
+                        yearlySalaryHistory.reduce((sum, history) => {
+                          const paidAmount = Number(history.paidMealAllowance) || 0;
+                          return sum + paidAmount;
+                        }, 0)
                       )}
                     </span>
                   </div>
@@ -1140,7 +1146,10 @@ const WorkTrackingPage: React.FC = () => {
                     <span className="text-gray-500">Ödenen:</span>
                     <span className="font-medium">
                       {formatCurrency(
-                        yearlySalaryHistory.reduce((sum, history) => sum + (history.paidTransportAllowance || 0), 0)
+                        yearlySalaryHistory.reduce((sum, history) => {
+                          const paidAmount = Number(history.paidTransportAllowance) || 0;
+                          return sum + paidAmount;
+                        }, 0)
                       )}
                     </span>
                   </div>
