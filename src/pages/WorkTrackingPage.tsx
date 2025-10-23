@@ -118,7 +118,7 @@ const WorkTrackingPage: React.FC = () => {
   // Maaş geçmişi verilerini Firebase'a kaydet
   useEffect(() => {
     const saveSalaryHistory = async () => {
-      if (user && salaryBreakdown && (paidSalary || mealAllowancePaid || transportAllowancePaid)) {
+      if (user && salaryBreakdown) {
         try {
           const now = new Date();
           await workTrackingService.saveSalaryHistory({
@@ -168,7 +168,7 @@ const WorkTrackingPage: React.FC = () => {
 
   useEffect(() => {
     const saveMealAllowanceHistory = async () => {
-      if (user && salaryBreakdown && mealAllowancePaid) {
+      if (user && salaryBreakdown) {
         try {
           const now = new Date();
           await workTrackingService.saveSalaryHistory({
@@ -209,7 +209,7 @@ const WorkTrackingPage: React.FC = () => {
 
   useEffect(() => {
     const saveTransportAllowanceHistory = async () => {
-      if (user && salaryBreakdown && transportAllowancePaid) {
+      if (user && salaryBreakdown) {
         try {
           const now = new Date();
           await workTrackingService.saveSalaryHistory({
@@ -277,8 +277,20 @@ const WorkTrackingPage: React.FC = () => {
     
     try {
       const yearlyHistory = await workTrackingService.getSalaryHistoryForYear(user.id, selectedYear);
-      console.log('Loaded yearly salary history:', yearlyHistory);
-      console.log('Number of months with data:', yearlyHistory.length);
+      console.log('Yearly Salary History Debug:', {
+        year: selectedYear,
+        historyCount: yearlyHistory.length,
+        totalPaidSalary: yearlyHistory.reduce((sum, history) => sum + (history.paidSalary || 0), 0),
+        totalPaidMeal: yearlyHistory.reduce((sum, history) => sum + (history.paidMealAllowance || 0), 0),
+        totalPaidTransport: yearlyHistory.reduce((sum, history) => sum + (history.paidTransportAllowance || 0), 0),
+        historyData: yearlyHistory.map(h => ({
+          month: h.month,
+          year: h.year,
+          paidSalary: h.paidSalary,
+          paidMealAllowance: h.paidMealAllowance,
+          paidTransportAllowance: h.paidTransportAllowance
+        }))
+      });
       setYearlySalaryHistory(yearlyHistory);
     } catch (error) {
       console.error('Yıllık maaş geçmişi yükleme hatası:', error);
