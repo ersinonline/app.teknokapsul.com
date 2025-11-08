@@ -9,7 +9,8 @@ import HizliIslemler from '../components/Bankam/HizliIslemler';
 import SonIslemler from '../components/Bankam/SonIslemler';
 import AylikOzet from '../components/Bankam/AylikOzet';
 import FinansalAraclar from '../components/Bankam/FinansalAraclar';
-import GelecekOzellikler from '../components/Bankam/GelecekOzellikler';
+import YaklasanOdemeler from '../components/Bankam/YaklasanOdemeler';
+import KisisellestirilmisIpuclari from '../components/Bankam/KisisellestirilmisIpuclari';
 import { DollarSign } from 'lucide-react';
 
 interface Transaction {
@@ -112,8 +113,8 @@ const BankamPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <GelecekOzellikler title="Yaklaşan Ödemeler" icon="clock" />
-          <GelecekOzellikler title="Kişiselleştirilmiş İpuçları" icon="lightbulb" />
+          <YaklasanOdemeler />
+          <KisisellestirilmisIpuclari incomes={incomes} expenses={expenses} loading={loading} />
         </div>
 
         <FinansalAraclar />

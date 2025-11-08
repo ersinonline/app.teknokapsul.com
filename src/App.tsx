@@ -43,6 +43,10 @@ import CreditScorePage from './pages/financial/CreditScorePage';
 import { WarrantyTrackingPage } from './pages/warranty/WarrantyTrackingPage';
 import { PortfolioPage } from './pages/portfolio/PortfolioPage';
 import StockMarketPage from './pages/financial/StockMarketPage';
+import TransferPage from './pages/financial/TransferPage';
+import BillsPage from './pages/financial/BillsPage';
+import CreditApplicationPage from './pages/financial/CreditApplicationPage';
+import SavingsPage from './pages/financial/SavingsPage';
 
 import CreditCalculatorPage2 from './pages/CreditCalculatorPage';
 
@@ -142,6 +146,22 @@ const router = createBrowserRouter([
   {
     path: '/dashboard',
     element: <Navigate to="/" replace />
+  },
+  {
+    path: '/transfer',
+    element: <TeknoRoute><TransferPage /></TeknoRoute>
+  },
+  {
+    path: '/bills',
+    element: <TeknoRoute><BillsPage /></TeknoRoute>
+  },
+  {
+    path: '/credit-application',
+    element: <TeknoRoute><CreditApplicationPage /></TeknoRoute>
+  },
+  {
+    path: '/savings',
+    element: <TeknoRoute><SavingsPage /></TeknoRoute>
   },
 
 
