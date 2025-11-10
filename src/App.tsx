@@ -43,6 +43,10 @@ import CreditScorePage from './pages/financial/CreditScorePage';
 import { WarrantyTrackingPage } from './pages/warranty/WarrantyTrackingPage';
 import { PortfolioPage } from './pages/portfolio/PortfolioPage';
 import StockMarketPage from './pages/financial/StockMarketPage';
+import TransferPage from './pages/financial/TransferPage';
+import BillsPage from './pages/financial/BillsPage';
+import CreditApplicationPage from './pages/financial/CreditApplicationPage';
+import SavingsPage from './pages/financial/SavingsPage';
 
 import CreditCalculatorPage2 from './pages/CreditCalculatorPage';
 
@@ -143,6 +147,22 @@ const router = createBrowserRouter([
     path: '/dashboard',
     element: <Navigate to="/" replace />
   },
+  {
+    path: '/transfer',
+    element: <TeknoRoute><TransferPage /></TeknoRoute>
+  },
+  {
+    path: '/bills',
+    element: <TeknoRoute><BillsPage /></TeknoRoute>
+  },
+  {
+    path: '/credit-application',
+    element: <TeknoRoute><CreditApplicationPage /></TeknoRoute>
+  },
+  {
+    path: '/savings',
+    element: <TeknoRoute><SavingsPage /></TeknoRoute>
+  },
 
 
   {
@@ -159,7 +179,7 @@ const router = createBrowserRouter([
     element: <TeknoRoute><IncomePage /></TeknoRoute>
   },
   {
-    path: '/expenses',
+    path: '/expense',
     element: <TeknoRoute><ExpensePage /></TeknoRoute>
   },
   {
@@ -564,9 +584,9 @@ function App() {
   }, []);
   
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <div className="min-h-screen bg-gray-50 transition-colors duration-300">
+    <ThemeProvider>
+      <AuthProvider>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
           {/* Mobil uygulamadan gelen kimlik doğrulama token'ını işle */}
           <MobileAuthHandler 
             onAuthSuccess={() => {

@@ -566,3 +566,89 @@ body {
     -webkit-text-size-adjust: 100% !important;
   }
 }
+/* Dark Mode Styles */
+.dark body {
+  @apply bg-gray-900 text-gray-300;
+}
+
+.dark .bg-white {
+  @apply bg-gray-800;
+}
+
+.dark .bg-gray-50 {
+  @apply bg-gray-900;
+}
+
+.dark .bg-gray-100 {
+  @apply bg-gray-800;
+}
+
+.dark .bg-gray-200 {
+  @apply bg-gray-700;
+}
+
+.dark .text-gray-900 {
+  @apply text-gray-100;
+}
+
+.dark .text-gray-800 {
+  @apply text-gray-200;
+}
+
+.dark .text-gray-700 {
+  @apply text-gray-300;
+}
+
+.dark .text-gray-600 {
+  @apply text-gray-400;
+}
+
+.dark .text-gray-500 {
+  @apply text-gray-500;
+}
+
+.dark .border-gray-200 {
+  @apply border-gray-700;
+}
+
+.dark .border-gray-300 {
+  @apply border-gray-600;
+}
+
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.dark .shadow-md {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+}
+
+.dark .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+}
+
+
+/* Specific component adjustments for dark mode */
+.dark .hover\:bg-gray-50:hover {
+  @apply bg-gray-700/50;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  @apply bg-gray-700;
+}
+
+.dark .sidebar-item-active {
+  @apply bg-yellow-500/10 text-yellow-400;
+}
+
+.dark .modal-content {
+  @apply bg-gray-800;
+}
+
+.dark input, .dark select, .dark textarea {
+  @apply bg-gray-700 border-gray-600 text-white placeholder-gray-400;
+}
+
+.dark input:disabled, .dark select:disabled, .dark textarea:disabled {
+  @apply bg-gray-900 border-gray-700 text-gray-500;
+}
