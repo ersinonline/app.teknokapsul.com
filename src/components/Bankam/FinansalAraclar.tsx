@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown, Target, PieChart, Calculator, Database } from
 
 const financialTools = [
   { title: 'Gelirlerim', icon: TrendingUp, route: '/income', color: 'text-green-500' },
-  { title: 'Giderlerim', icon: TrendingDown, route: '/expenses', color: 'text-red-500' },
+  { title: 'Giderlerim', icon: TrendingDown, route: '/expense', color: 'text-red-500' },
   { title: 'Hedeflerim', icon: Target, route: '/goals', color: 'text-blue-500' },
   { title: 'Portföyüm', icon: PieChart, route: '/portfolio', color: 'text-purple-500' },
   { title: 'Kredi Hesapla', icon: Calculator, route: '/credit-calculator', color: 'text-teal-500' },

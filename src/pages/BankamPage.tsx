@@ -37,12 +37,12 @@ const BankamPage: React.FC = () => {
       }
 
       try {
-        const expensesRef = collection(db, 'teknokapsul', user.id, 'expenses');
+        const expensesRef = collection(db, 'users', user.id, 'expenses');
         const expensesQuery = query(expensesRef, where('isActive', '==', true), orderBy('date', 'desc'), limit(50));
         const expensesSnapshot = await getDocs(expensesQuery);
         const expensesData = expensesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Expense[];
 
-        const incomesRef = collection(db, 'teknokapsul', user.id, 'incomes');
+        const incomesRef = collection(db, 'users', user.id, 'incomes');
         const incomesQuery = query(incomesRef, where('isActive', '==', true), orderBy('date', 'desc'), limit(50));
         const incomesSnapshot = await getDocs(incomesQuery);
         const incomesData = incomesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Income[];

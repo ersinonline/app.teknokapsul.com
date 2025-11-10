@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, TrendingDown, ArrowLeft } from 'lucide-react';
+import { Plus, TrendingDown, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
 import { Expense } from '../../types/expense';
-import { getUserExpenses, deleteExpense } from '../../services/expense.service';
+import { getUserExpenses, deleteExpense, updateExpense } from '../../services/expense.service';
 import { ExpenseForm } from '../../components/expense/ExpenseForm';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -47,7 +47,7 @@ export const ExpensePage: React.FC = () => {
     setEditingExpense(expense);
     setShowForm(true);
   };
-  
+
   const handleDelete = async (id: string) => {
     if (window.confirm("Bu gideri silmek istediğinizden emin misiniz?")) {
       try {
@@ -59,7 +59,16 @@ export const ExpensePage: React.FC = () => {
     }
   };
 
-  const { totalExpense, installmentCount, regularCount, categoryData } = useMemo(() => {
+  const togglePaidStatus = async (expense: Expense) => {
+    try {
+      await updateExpense(user!.id, expense.id, { ...expense, isPaid: !expense.isPaid });
+      loadExpenses();
+    } catch (error) {
+      console.error("Error updating expense status: ", error);
+    }
+  };
+
+  const { totalExpense, paidAmount, unpaidAmount, categoryData } = useMemo(() => {
     const activeExpenses = expenses.filter(e => e.isActive);
     const categoryMap: { [key: string]: number } = {};
     activeExpenses.forEach(exp => {
@@ -68,8 +77,8 @@ export const ExpensePage: React.FC = () => {
 
     return {
       totalExpense: activeExpenses.reduce((sum, e) => sum + e.amount, 0),
-      installmentCount: activeExpenses.filter(e => e.isInstallment).length,
-      regularCount: activeExpenses.filter(e => !e.isInstallment).length,
+      paidAmount: activeExpenses.filter(e => e.isPaid).reduce((sum, e) => sum + e.amount, 0),
+      unpaidAmount: activeExpenses.filter(e => !e.isPaid).reduce((sum, e) => sum + e.amount, 0),
       categoryData: {
         labels: Object.keys(categoryMap),
         datasets: [{
@@ -120,13 +129,16 @@ export const ExpensePage: React.FC = () => {
 
               <div className="space-y-3">
                 {loading ? <p>Yükleniyor...</p> : expenses.map(expense => (
-                  <div key={expense.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div key={expense.id} className={`flex items-center justify-between p-3 rounded-lg ${expense.isPaid ? 'bg-green-50' : 'bg-red-50'}`}>
                     <div>
                       <p className="font-semibold text-sm text-gray-800">{expense.title}</p>
                       <p className="text-xs text-gray-500">{format(parseISO(expense.date), 'd MMMM yyyy', { locale: tr })}</p>
                     </div>
                     <div className="flex items-center gap-4">
                       <p className="font-bold text-sm text-red-600">-₺{expense.amount.toLocaleString('tr-TR')}</p>
+                      <button onClick={() => togglePaidStatus(expense)} className={`p-2 rounded-full ${expense.isPaid ? 'hover:bg-green-200' : 'hover:bg-red-200'}`}>
+                        {expense.isPaid ? <CheckCircle size={20} className="text-green-600" /> : <XCircle size={20} className="text-red-600" />}
+                      </button>
                       <div className="flex gap-2">
                         <button onClick={() => handleEdit(expense)} className="text-xs text-blue-500 hover:underline">Düzenle</button>
                         <button onClick={() => handleDelete(expense.id)} className="text-xs text-red-500 hover:underline">Sil</button>
@@ -143,8 +155,8 @@ export const ExpensePage: React.FC = () => {
               <h2 className="font-bold text-gray-800 mb-4">Özet</h2>
               <div className="space-y-3">
                 <div className="flex justify-between"><span>Toplam Gider:</span> <span className="font-bold">₺{totalExpense.toLocaleString('tr-TR')}</span></div>
-                <div className="flex justify-between"><span>Taksitli Gider Sayısı:</span> <span className="font-bold">{installmentCount}</span></div>
-                <div className="flex justify-between"><span>Tek Seferlik Gider Sayısı:</span> <span className="font-bold">{regularCount}</span></div>
+                <div className="flex justify-between text-green-600"><span>Ödenen:</span> <span className="font-bold">₺{paidAmount.toLocaleString('tr-TR')}</span></div>
+                <div className="flex justify-between text-red-600"><span>Ödenmemiş:</span> <span className="font-bold">₺{unpaidAmount.toLocaleString('tr-TR')}</span></div>
               </div>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-sm">

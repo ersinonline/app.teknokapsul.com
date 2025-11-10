@@ -33,7 +33,7 @@ const YaklasanOdemeler: React.FC = () => {
 
         // Fetch active subscriptions
         const subsQuery = query(
-          collection(db, 'teknokapsul', user.id, 'subscriptions'),
+          collection(db, 'users', user.id, 'subscriptions'),
           where('isActive', '==', true),
           where('autoRenew', '==', true)
         );
@@ -58,7 +58,7 @@ const YaklasanOdemeler: React.FC = () => {
 
         // Fetch active loans
         const loansQuery = query(
-          collection(db, 'teknokapsul', user.id, 'loans'),
+          collection(db, 'users', user.id, 'loans'),
           where('isActive', '==', true)
         );
         const loansSnapshot = await getDocs(loansQuery);

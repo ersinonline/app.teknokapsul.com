@@ -179,7 +179,7 @@ const router = createBrowserRouter([
     element: <TeknoRoute><IncomePage /></TeknoRoute>
   },
   {
-    path: '/expenses',
+    path: '/expense',
     element: <TeknoRoute><ExpensePage /></TeknoRoute>
   },
   {
@@ -584,9 +584,9 @@ function App() {
   }, []);
   
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <div className="min-h-screen bg-gray-50 transition-colors duration-300">
+    <ThemeProvider>
+      <AuthProvider>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
           {/* Mobil uygulamadan gelen kimlik doğrulama token'ını işle */}
           <MobileAuthHandler 
             onAuthSuccess={() => {
