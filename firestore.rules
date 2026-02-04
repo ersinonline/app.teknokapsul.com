@@ -84,6 +84,12 @@ service cloud.firestore {
     match /teknokapsul/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+
+    match /sharedPaymentPlans/{planId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
     
     // Deny all other access
     match /{document=**} {

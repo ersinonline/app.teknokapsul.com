@@ -2,10 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { Home, Car, CreditCard, Building, Calculator, CheckCircle, Plus, Trash2, Save, ArrowLeft } from 'lucide-react';
+import { Home, Car, CreditCard, Building, Calculator, CheckCircle, Plus, Trash2, Save, ArrowLeft, DollarSign } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface DownPayment {
+  id: string;
+  amount: number;
+  description: string;
+}
+
+interface MonthlyIncomeItem {
   id: string;
   amount: number;
   description: string;
@@ -33,12 +39,21 @@ interface SelectedCredit {
   term: number;
 }
 
+interface AdditionalExpenseItem {
+  id: string;
+  amount: number;
+  description: string;
+}
+
 interface AdditionalExpenses {
   titleDeedFee: number;
   loanAllocationFee: number;
   appraisalFee: number;
   mortgageEstablishmentFee: number;
   daskInsurancePremium: number;
+  revolvingFundFee: number;
+  customExpenses: AdditionalExpenseItem[];
+  total: number;
 }
 
 interface PaymentPlan {
@@ -49,8 +64,10 @@ interface PaymentPlan {
   downPayments: DownPayment[];
   housingCredit: SelectedCredit | null;
   personalCredits: SelectedCredit[];
+  monthlyIncomes?: MonthlyIncomeItem[];
   monthlyPayments: any[];
   totalMonthlyPayment: number;
+  additionalExpenses?: AdditionalExpenses;
   createdAt: any;
   sharedWith: string | null;
   userId: string;
@@ -67,11 +84,15 @@ const PaymentPlanEditPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   // Form states
-  const [currentStep, setCurrentStep] = useState<'type' | 'price' | 'down-payments' | 'housing-credit' | 'personal-credits' | 'plan-summary'>('type');
+  const [currentStep, setCurrentStep] = useState<'type' | 'price' | 'additional-expenses' | 'down-payments' | 'housing-credit' | 'personal-credits' | 'incomes' | 'plan-summary'>('type');
   const [planType, setPlanType] = useState<'housing' | 'vehicle'>('housing');
   const [price, setPrice] = useState<number>(0);
   const [downPayments, setDownPayments] = useState<DownPayment[]>([]);
   const [newDownPayment, setNewDownPayment] = useState({ amount: 0, description: '' });
+  const [additionalExpenses, setAdditionalExpenses] = useState<AdditionalExpenses | null>(null);
+  const [newAdditionalExpense, setNewAdditionalExpense] = useState({ amount: 0, description: '' });
+  const [monthlyIncomes, setMonthlyIncomes] = useState<MonthlyIncomeItem[]>([]);
+  const [newMonthlyIncome, setNewMonthlyIncome] = useState({ amount: 0, description: '' });
   
   // Plan save states
   const [planName, setPlanName] = useState<string>('');
@@ -93,14 +114,156 @@ const PaymentPlanEditPage: React.FC = () => {
   const [vehicleCreditAmount, setVehicleCreditAmount] = useState<number>(0);
   const [vehicleCreditTerm, setVehicleCreditTerm] = useState<number>(36);
 
-  const calculateAdditionalExpenses = (housePrice: number): AdditionalExpenses => {
-    return {
-      titleDeedFee: housePrice * 0.004, // %0.4
-      loanAllocationFee: housePrice * 0.001, // %0.1
-      appraisalFee: Math.min(housePrice * 0.002, 5000), // %0.2, max 5000 TL
-      mortgageEstablishmentFee: housePrice * 0.0015, // %0.15
-      daskInsurancePremium: Math.min(housePrice * 0.0005, 1000) // %0.05, max 1000 TL
+  const calculateAdditionalExpensesTotal = (expenses: Omit<AdditionalExpenses, 'total'>): number => {
+    const customTotal = expenses.customExpenses.reduce((sum, item) => sum + (item.amount || 0), 0);
+    return (
+      (expenses.titleDeedFee || 0) +
+      (expenses.loanAllocationFee || 0) +
+      (expenses.appraisalFee || 0) +
+      (expenses.mortgageEstablishmentFee || 0) +
+      (expenses.daskInsurancePremium || 0) +
+      (expenses.revolvingFundFee || 0) +
+      customTotal
+    );
+  };
+
+  const calculateAdditionalExpenses = (housePrice: number, customExpenses: AdditionalExpenseItem[] = []): AdditionalExpenses => {
+    const titleDeedFee = housePrice * 0.04;
+    const loanAllocationFee = 13750;
+    const appraisalFee = 33000;
+    const mortgageEstablishmentFee = 3750;
+    const daskInsurancePremium = 3000;
+    const revolvingFundFee = 20000;
+
+    const base = {
+      titleDeedFee,
+      loanAllocationFee,
+      appraisalFee,
+      mortgageEstablishmentFee,
+      daskInsurancePremium,
+      revolvingFundFee,
+      customExpenses
     };
+
+    return {
+      ...base,
+      total: calculateAdditionalExpensesTotal(base)
+    };
+  };
+
+  const normalizeAdditionalExpenses = (housePrice: number, expenses?: Partial<AdditionalExpenses> | null): AdditionalExpenses => {
+    if (!expenses) return calculateAdditionalExpenses(housePrice, []);
+    const customExpenses = Array.isArray((expenses as any).customExpenses) ? ((expenses as any).customExpenses as AdditionalExpenseItem[]) : [];
+    const normalized: Omit<AdditionalExpenses, 'total'> = {
+      titleDeedFee: Number((expenses as any).titleDeedFee ?? housePrice * 0.04),
+      loanAllocationFee: Number((expenses as any).loanAllocationFee ?? 13750),
+      appraisalFee: Number((expenses as any).appraisalFee ?? 33000),
+      mortgageEstablishmentFee: Number((expenses as any).mortgageEstablishmentFee ?? 3750),
+      daskInsurancePremium: Number((expenses as any).daskInsurancePremium ?? 3000),
+      revolvingFundFee: Number((expenses as any).revolvingFundFee ?? 20000),
+      customExpenses
+    };
+    const total = Number((expenses as any).total ?? calculateAdditionalExpensesTotal(normalized));
+    return { ...normalized, total };
+  };
+
+  useEffect(() => {
+    if (planType !== 'housing') {
+      setAdditionalExpenses(null);
+      return;
+    }
+    if (!price || price <= 0) {
+      setAdditionalExpenses(null);
+      return;
+    }
+    setAdditionalExpenses(prev => calculateAdditionalExpenses(price, prev?.customExpenses || []));
+  }, [planType, price]);
+
+  const updateAdditionalExpenseField = (field: keyof Omit<AdditionalExpenses, 'customExpenses' | 'total'>, value: number) => {
+    setAdditionalExpenses(prev => {
+      const current = prev ?? calculateAdditionalExpenses(price, []);
+      const next = {
+        ...current,
+        [field]: value
+      } as AdditionalExpenses;
+      const total = calculateAdditionalExpensesTotal({
+        titleDeedFee: next.titleDeedFee,
+        loanAllocationFee: next.loanAllocationFee,
+        appraisalFee: next.appraisalFee,
+        mortgageEstablishmentFee: next.mortgageEstablishmentFee,
+        daskInsurancePremium: next.daskInsurancePremium,
+        revolvingFundFee: next.revolvingFundFee,
+        customExpenses: next.customExpenses
+      });
+      return { ...next, total };
+    });
+  };
+
+  const addCustomAdditionalExpense = () => {
+    if (!newAdditionalExpense.amount || !newAdditionalExpense.description.trim()) return;
+    setAdditionalExpenses(prev => {
+      const current = prev ?? calculateAdditionalExpenses(price, []);
+      const customExpenses = [
+        ...current.customExpenses,
+        {
+          id: Date.now().toString(),
+          amount: newAdditionalExpense.amount,
+          description: newAdditionalExpense.description.trim()
+        }
+      ];
+      return calculateAdditionalExpenses(price, customExpenses);
+    });
+    setNewAdditionalExpense({ amount: 0, description: '' });
+  };
+
+  const removeCustomAdditionalExpense = (id: string) => {
+    setAdditionalExpenses(prev => {
+      if (!prev) return prev;
+      const customExpenses = prev.customExpenses.filter(item => item.id !== id);
+      return calculateAdditionalExpenses(price, customExpenses);
+    });
+  };
+
+  const addMonthlyIncome = () => {
+    if (!newMonthlyIncome.amount || !newMonthlyIncome.description.trim()) return;
+    const item: MonthlyIncomeItem = {
+      id: Date.now().toString(),
+      amount: newMonthlyIncome.amount,
+      description: newMonthlyIncome.description.trim()
+    };
+    setMonthlyIncomes(prev => [...prev, item]);
+    setNewMonthlyIncome({ amount: 0, description: '' });
+  };
+
+  const removeMonthlyIncome = (id: string) => {
+    setMonthlyIncomes(prev => prev.filter(item => item.id !== id));
+  };
+
+  const calculatePeriodicPayments = () => {
+    const allCredits = [selectedCredit, ...personalCredits].filter(Boolean) as SelectedCredit[];
+    const validCredits = allCredits.filter(c => c.monthlyPayment > 0 && c.term > 0);
+    if (validCredits.length === 0) return [];
+
+    const endMonths = Array.from(new Set(validCredits.map(c => c.term))).sort((a, b) => a - b);
+    const periods: Array<{ startMonth: number; endMonth: number; monthlyPayment: number; activeCredits: string[]; description: string }> = [];
+
+    for (let i = 0; i < endMonths.length; i++) {
+      const startMonth = i === 0 ? 1 : endMonths[i - 1] + 1;
+      const endMonth = endMonths[i];
+      const active = validCredits.filter(c => c.term >= startMonth);
+      if (active.length === 0) continue;
+      const monthlyPayment = active.reduce((sum, c) => sum + c.monthlyPayment, 0);
+      const activeCredits = active.map(c => `${c.type === 'konut' ? 'Konut Kredisi' : c.type === 'tasit' ? 'Taşıt Kredisi' : 'İhtiyaç Kredisi'} (${c.bankName})`);
+      periods.push({
+        startMonth,
+        endMonth,
+        monthlyPayment,
+        activeCredits,
+        description: `${startMonth}. aydan ${endMonth}. aya kadar`
+      });
+    }
+
+    return periods;
   };
 
   // Vehicle credit limits calculation
@@ -417,6 +580,8 @@ const PaymentPlanEditPage: React.FC = () => {
           setShareEmail(planData.sharedWith || '');
           setSelectedCredit(planData.housingCredit);
           setPersonalCredits(planData.personalCredits || []);
+          setAdditionalExpenses(planData.type === 'housing' ? normalizeAdditionalExpenses(planData.price, planData.additionalExpenses) : null);
+          setMonthlyIncomes(planData.monthlyIncomes || []);
         } else {
           setError('Plan bulunamadı');
         }
@@ -433,10 +598,17 @@ const PaymentPlanEditPage: React.FC = () => {
 
   // Calculate remaining amount after down payments
   const totalDownPayment = downPayments.reduce((sum, dp) => sum + dp.amount, 0);
-  const remainingAfterDownPayment = price - totalDownPayment;
+  const additionalExpensesTotal = planType === 'housing' ? (additionalExpenses?.total || 0) : 0;
+  const targetTotal = planType === 'housing' ? price + additionalExpensesTotal : price;
+  const remainingAfterDownPayment = targetTotal - totalDownPayment;
   const actualCreditAmount = selectedCredit ? selectedCredit.amount : 0;
   const totalPersonalCreditAmount = personalCredits.reduce((sum, credit) => sum + credit.amount, 0);
   const totalPersonalCreditMonthly = personalCredits.reduce((sum, credit) => sum + credit.monthlyPayment, 0);
+  const totalPayments = totalDownPayment + actualCreditAmount + totalPersonalCreditAmount;
+  const remainingAmount = targetTotal - totalPayments;
+  const isExactMatch = Math.abs(remainingAmount) < 1;
+  const isOverPaid = remainingAmount < -1;
+  const totalMonthlyIncome = monthlyIncomes.reduce((sum, item) => sum + item.amount, 0);
 
   const addDownPayment = () => {
     if (newDownPayment.amount > 0 && newDownPayment.description.trim()) {
@@ -463,7 +635,7 @@ const PaymentPlanEditPage: React.FC = () => {
       const sendPaymentPlanEmail = httpsCallable(functions, 'sendPaymentPlanEmail');
       
       // Ek masrafları hesapla
-      const additionalExpenses = planType === 'housing' ? calculateAdditionalExpenses(plan.price) : null;
+      const additionalExpenses = plan?.type === 'housing' ? (plan.additionalExpenses || calculateAdditionalExpenses(plan.price)) : null;
       
       const planData = {
         name: plan.name,
@@ -491,7 +663,7 @@ const PaymentPlanEditPage: React.FC = () => {
     
     setSaving(true);
     try {
-      const additionalExpenses = planType === 'housing' ? calculateAdditionalExpenses(price) : null;
+      const additionalExpensesToSave = planType === 'housing' ? (additionalExpenses ?? calculateAdditionalExpenses(price)) : null;
       
       const planData = {
         name: planName.trim(),
@@ -500,9 +672,10 @@ const PaymentPlanEditPage: React.FC = () => {
         downPayments: downPayments,
         housingCredit: selectedCredit,
         personalCredits: personalCredits,
+        monthlyIncomes: monthlyIncomes,
         monthlyPayments: [], // Will be calculated
         totalMonthlyPayment: (selectedCredit?.monthlyPayment || 0) + totalPersonalCreditMonthly,
-        additionalExpenses: additionalExpenses,
+        additionalExpenses: additionalExpensesToSave,
         sharedWith: shareEmail.trim() || null,
         updatedAt: new Date()
       };
@@ -537,9 +710,11 @@ const PaymentPlanEditPage: React.FC = () => {
     const steps = [
       { key: 'type', label: 'Tip', shortLabel: 'Tip', icon: planType === 'vehicle' ? Car : Home },
       { key: 'price', label: planType === 'vehicle' ? 'Araç Fiyatı' : 'Ev Fiyatı', shortLabel: 'Fiyat', icon: planType === 'vehicle' ? Car : Home },
+      ...(planType === 'housing' ? [{ key: 'additional-expenses', label: 'Ek Masraflar', shortLabel: 'Masraf', icon: DollarSign }] : []),
       { key: 'down-payments', label: 'Peşinatlar', shortLabel: 'Peşinat', icon: CreditCard },
       { key: 'housing-credit', label: planType === 'vehicle' ? 'Taşıt Kredisi' : 'Konut Kredisi', shortLabel: planType === 'vehicle' ? 'Taşıt' : 'Konut', icon: Building },
       { key: 'personal-credits', label: 'İhtiyaç Kredisi', shortLabel: 'İhtiyaç', icon: Calculator },
+      { key: 'incomes', label: 'Gelirler', shortLabel: 'Gelir', icon: DollarSign },
       { key: 'plan-summary', label: 'Plan Özeti', shortLabel: 'Özet', icon: CheckCircle }
     ];
 
@@ -738,9 +913,178 @@ const PaymentPlanEditPage: React.FC = () => {
                     Geri
                   </button>
                   <button
-                    onClick={() => setCurrentStep('down-payments')}
+                    onClick={() => {
+                      if (planType === 'housing') {
+                        setAdditionalExpenses(prev => prev ?? calculateAdditionalExpenses(price, []));
+                        setCurrentStep('additional-expenses');
+                        return;
+                      }
+                      setCurrentStep('down-payments');
+                    }}
                     disabled={!price || price <= 0}
                     className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-manipulation active:bg-[#d49400] w-full sm:w-auto"
+                  >
+                    Devam Et
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Additional Expenses Step */}
+          {currentStep === 'additional-expenses' && planType === 'housing' && (
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Ek Masrafları Düzenleyin</h2>
+
+              <div className="max-w-3xl mx-auto space-y-6">
+                <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Tapu Masrafı (TL)</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={additionalExpenses?.titleDeedFee || ''}
+                        onChange={(e) => updateAdditionalExpenseField('titleDeedFee', Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                        placeholder="Örn: 200000"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Kredi Tahsis Ücreti (TL)</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={additionalExpenses?.loanAllocationFee || ''}
+                        onChange={(e) => updateAdditionalExpenseField('loanAllocationFee', Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                        placeholder="Örn: 13750"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Ekspertiz Ücreti (TL)</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={additionalExpenses?.appraisalFee || ''}
+                        onChange={(e) => updateAdditionalExpenseField('appraisalFee', Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                        placeholder="Örn: 33000"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">İpotek Tesis Ücreti (TL)</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={additionalExpenses?.mortgageEstablishmentFee || ''}
+                        onChange={(e) => updateAdditionalExpenseField('mortgageEstablishmentFee', Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                        placeholder="Örn: 3750"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">DASK Sigorta Primi (TL)</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={additionalExpenses?.daskInsurancePremium || ''}
+                        onChange={(e) => updateAdditionalExpenseField('daskInsurancePremium', Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                        placeholder="Örn: 3000"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Döner Sermaye Bedeli (TL)</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={additionalExpenses?.revolvingFundFee || ''}
+                        onChange={(e) => updateAdditionalExpenseField('revolvingFundFee', Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                        placeholder="Örn: 20000"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 border-t pt-4">
+                    <h3 className="text-base sm:text-lg font-medium text-gray-800 mb-4">Diğer Ek Masraflar</h3>
+                    <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-3 sm:gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Tutar (TL)</label>
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          value={newAdditionalExpense.amount || ''}
+                          onChange={(e) => setNewAdditionalExpense({ ...newAdditionalExpense, amount: Number(e.target.value) })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                          placeholder="Örn: 25000"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Açıklama</label>
+                        <input
+                          type="text"
+                          value={newAdditionalExpense.description}
+                          onChange={(e) => setNewAdditionalExpense({ ...newAdditionalExpense, description: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                          placeholder="Örn: Taşınma masrafı"
+                        />
+                      </div>
+                      <div className="sm:flex sm:items-end">
+                        <button
+                          onClick={addCustomAdditionalExpense}
+                          disabled={!newAdditionalExpense.amount || !newAdditionalExpense.description.trim()}
+                          className="w-full bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a500] active:bg-[#d49400] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center touch-manipulation"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Ekle
+                        </button>
+                      </div>
+                    </div>
+
+                    {additionalExpenses?.customExpenses?.length ? (
+                      <div className="mt-4 space-y-2">
+                        {additionalExpenses.customExpenses.map((item) => (
+                          <div key={item.id} className="flex items-center justify-between bg-white rounded-lg p-3 border">
+                            <div>
+                              <p className="font-medium text-gray-800">{item.description}</p>
+                              <p className="text-sm text-gray-600">{formatCurrency(item.amount)}</p>
+                            </div>
+                            <button
+                              onClick={() => removeCustomAdditionalExpense(item.id)}
+                              className="text-red-600 hover:text-red-700 transition-colors p-2 touch-manipulation"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-6 bg-white rounded-lg p-4 border">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-gray-700">Toplam Ek Masraf</p>
+                      <p className="text-lg font-semibold text-gray-900">{formatCurrency(additionalExpenses?.total || 0)}</p>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <p className="text-sm font-medium text-gray-700">Toplam Hedef Tutar</p>
+                      <p className="text-lg font-semibold text-gray-900">{formatCurrency(price + (additionalExpenses?.total || 0))}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 justify-between">
+                  <button
+                    onClick={() => setCurrentStep('price')}
+                    className="w-full sm:w-auto bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition-colors touch-manipulation"
+                  >
+                    Geri
+                  </button>
+                  <button
+                    onClick={() => setCurrentStep('down-payments')}
+                    className="w-full sm:w-auto bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] active:bg-[#d49400] transition-colors touch-manipulation"
                   >
                     Devam Et
                   </button>
@@ -821,7 +1165,7 @@ const PaymentPlanEditPage: React.FC = () => {
               {/* Navigation */}
               <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
                 <button
-                  onClick={() => setCurrentStep('price')}
+                  onClick={() => setCurrentStep(planType === 'housing' ? 'additional-expenses' : 'price')}
                   className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors touch-manipulation active:bg-gray-700 w-full sm:w-auto"
                 >
                   Geri
@@ -865,31 +1209,24 @@ const PaymentPlanEditPage: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Vade (Ay)
                     </label>
-                    <select
-                      value={planType === 'vehicle' ? vehicleCreditTerm : housingCreditTerm}
-                      onChange={(e) => planType === 'vehicle' 
-                        ? setVehicleCreditTerm(Number(e.target.value))
-                        : setHousingCreditTerm(Number(e.target.value))
-                      }
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={planType === 'vehicle' ? 60 : 240}
+                      value={planType === 'vehicle' ? (vehicleCreditTerm || '') : (housingCreditTerm || '')}
+                      onChange={(e) => {
+                        const raw = Number(e.target.value);
+                        const value = Number.isFinite(raw) ? raw : 0;
+                        if (planType === 'vehicle') {
+                          setVehicleCreditTerm(value);
+                        } else {
+                          setHousingCreditTerm(value);
+                        }
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
-                    >
-                      {planType === 'vehicle' ? (
-                        <>
-                          <option value={12}>12 Ay</option>
-                          <option value={24}>24 Ay</option>
-                          <option value={36}>36 Ay</option>
-                          <option value={48}>48 Ay</option>
-                          <option value={60}>60 Ay</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value={60}>60 Ay (5 Yıl)</option>
-                          <option value={120}>120 Ay (10 Yıl)</option>
-                          <option value={180}>180 Ay (15 Yıl)</option>
-                          <option value={240}>240 Ay (20 Yıl)</option>
-                        </>
-                      )}
-                    </select>
+                      placeholder="Örn: 79"
+                    />
                   </div>
                 </div>
                 
@@ -1115,6 +1452,140 @@ const PaymentPlanEditPage: React.FC = () => {
                   Geri
                 </button>
                 <button
+                  onClick={() => setCurrentStep('incomes')}
+                  className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors touch-manipulation active:bg-[#d49400] w-full sm:w-auto"
+                >
+                  Gelir Adımına Geç
+                </button>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 'incomes' && (
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Aylık Gelirlerinizi Ekleyin</h2>
+
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <h3 className="text-base sm:text-lg font-medium text-gray-800 mb-4">Yeni Gelir Ekle</h3>
+                <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-3 sm:gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Tutar (TL)</label>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={newMonthlyIncome.amount || ''}
+                      onChange={(e) => setNewMonthlyIncome({ ...newMonthlyIncome, amount: Number(e.target.value) })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                      placeholder="Örn: 75000"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Açıklama</label>
+                    <input
+                      type="text"
+                      value={newMonthlyIncome.description}
+                      onChange={(e) => setNewMonthlyIncome({ ...newMonthlyIncome, description: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                      placeholder="Örn: Maaş"
+                    />
+                  </div>
+                  <div className="sm:flex sm:items-end">
+                    <button
+                      onClick={addMonthlyIncome}
+                      disabled={!newMonthlyIncome.amount || !newMonthlyIncome.description.trim()}
+                      className="w-full bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a500] active:bg-[#d49400] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center touch-manipulation"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Ekle
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {monthlyIncomes.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium text-gray-800 mb-4">Eklenen Gelirler</h3>
+                  <div className="space-y-3">
+                    {monthlyIncomes.map((income) => (
+                      <div key={income.id} className="flex items-center justify-between p-3 sm:p-4 bg-white border border-gray-200 rounded-lg">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{income.description}</p>
+                          <p className="text-xs sm:text-sm text-gray-600">{formatCurrency(income.amount)}</p>
+                        </div>
+                        <button
+                          onClick={() => removeMonthlyIncome(income.id)}
+                          className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors touch-manipulation active:bg-red-100 ml-2 flex-shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-gray-700">Toplam Aylık Gelir</p>
+                  <p className="text-lg font-semibold text-gray-900">{formatCurrency(totalMonthlyIncome)}</p>
+                </div>
+              </div>
+
+              <div className="mb-6 bg-gray-50 rounded-lg p-4">
+                <h3 className="text-base sm:text-lg font-medium text-gray-800 mb-4">Gelir / Taksit Uygunluğu</h3>
+                {(() => {
+                  const periods = calculatePeriodicPayments();
+                  const monthlyPaymentNow = (selectedCredit?.monthlyPayment || 0) + totalPersonalCreditMonthly;
+
+                  if (periods.length === 0) {
+                    return (
+                      <div className="bg-white rounded-lg p-4 border">
+                        <p className="text-sm text-gray-700">Henüz kredi seçilmediği için dönemsel ödeme oluşmadı.</p>
+                        <p className="text-sm text-gray-700 mt-2">Mevcut aylık toplam taksit: {formatCurrency(monthlyPaymentNow)}</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-3">
+                      {periods.map((p, idx) => {
+                        const diff = totalMonthlyIncome - p.monthlyPayment;
+                        const ok = diff >= 0;
+                        return (
+                          <div key={idx} className="bg-white rounded-lg p-4 border">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium text-gray-900">{p.description}</p>
+                                <p className="text-xs text-gray-600">{p.activeCredits.length} aktif kredi</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-gray-600">Aylık Taksit</p>
+                                <p className="text-lg font-semibold text-gray-900">{formatCurrency(p.monthlyPayment)}</p>
+                              </div>
+                            </div>
+                            <div className="mt-3 flex items-center justify-between">
+                              <p className="text-sm text-gray-600">Gelir - Taksit</p>
+                              <p className={`text-sm font-semibold ${ok ? 'text-green-700' : 'text-red-700'}`}>
+                                {formatCurrency(diff)} {ok ? '(Yeterli)' : '(Yetersiz)'}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
+                <button
+                  onClick={() => setCurrentStep('personal-credits')}
+                  className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors touch-manipulation active:bg-gray-700 w-full sm:w-auto"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Geri
+                </button>
+                <button
                   onClick={() => setCurrentStep('plan-summary')}
                   className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors touch-manipulation active:bg-[#d49400] w-full sm:w-auto"
                 >
@@ -1136,6 +1607,12 @@ const PaymentPlanEditPage: React.FC = () => {
                     <p className="text-xs sm:text-sm text-gray-600">{planType === 'vehicle' ? 'Araç Fiyatı' : 'Ev Fiyatı'}</p>
                     <p className="text-base sm:text-lg font-semibold text-gray-900">{formatCurrency(price)}</p>
                   </div>
+                  {planType === 'housing' && (
+                    <div className="bg-white p-3 sm:p-4 rounded-lg">
+                      <p className="text-xs sm:text-sm text-gray-600">Ek Masraflar</p>
+                      <p className="text-base sm:text-lg font-semibold text-purple-600">{formatCurrency(additionalExpensesTotal)}</p>
+                    </div>
+                  )}
                   <div className="bg-white p-3 sm:p-4 rounded-lg">
                     <p className="text-xs sm:text-sm text-gray-600">Toplam Peşinat</p>
                     <p className="text-base sm:text-lg font-semibold text-green-600">{formatCurrency(totalDownPayment)}</p>
@@ -1148,7 +1625,71 @@ const PaymentPlanEditPage: React.FC = () => {
                     <p className="text-xs sm:text-sm text-gray-600">İhtiyaç Kredileri</p>
                     <p className="text-base sm:text-lg font-semibold text-orange-600">{formatCurrency(totalPersonalCreditAmount)}</p>
                   </div>
+                  {monthlyIncomes.length > 0 && (
+                    <div className="bg-white p-3 sm:p-4 rounded-lg">
+                      <p className="text-xs sm:text-sm text-gray-600">Toplam Aylık Gelir</p>
+                      <p className="text-base sm:text-lg font-semibold text-emerald-700">{formatCurrency(totalMonthlyIncome)}</p>
+                    </div>
+                  )}
                 </div>
+
+                <div className={`mt-4 p-4 rounded-lg border-2 ${
+                  isExactMatch 
+                    ? 'bg-green-50 border-green-200' 
+                    : isOverPaid 
+                    ? 'bg-red-50 border-red-200' 
+                    : 'bg-yellow-50 border-yellow-200'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-700">Toplam Ödeme</p>
+                      <p className="text-lg font-semibold text-gray-900">{formatCurrency(totalPayments)}</p>
+                      <p className="text-sm text-gray-600">Hedef: {formatCurrency(targetTotal)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-700">Durum</p>
+                      <p className={`text-lg font-semibold ${
+                        isExactMatch 
+                          ? 'text-green-600' 
+                          : isOverPaid 
+                          ? 'text-red-600' 
+                          : 'text-yellow-600'
+                      }`}>
+                        {isExactMatch 
+                          ? '✓ Tam Eşit' 
+                          : isOverPaid 
+                          ? `⚠ ${formatCurrency(Math.abs(remainingAmount))} Fazla` 
+                          : `⚠ ${formatCurrency(remainingAmount)} Eksik`
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {monthlyIncomes.length > 0 && (
+                  <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
+                    {(() => {
+                      const periods = calculatePeriodicPayments();
+                      const maxMonthly = periods.reduce((max, p) => Math.max(max, p.monthlyPayment), 0);
+                      const diff = totalMonthlyIncome - maxMonthly;
+                      const ok = diff >= 0;
+                      return (
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-700">En Yüksek Aylık Taksit</p>
+                            <p className="text-lg font-semibold text-gray-900">{formatCurrency(maxMonthly)}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-gray-700">Gelir - Taksit</p>
+                            <p className={`text-lg font-semibold ${ok ? 'text-emerald-700' : 'text-red-700'}`}>
+                              {formatCurrency(diff)} {ok ? '(Yeterli)' : '(Yetersiz)'}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
               </div>
 
               {/* Save Plan */}
@@ -1182,7 +1723,7 @@ const PaymentPlanEditPage: React.FC = () => {
                 </div>
                 <button
                   onClick={savePlan}
-                  disabled={!planName.trim() || saving}
+                  disabled={!planName.trim() || saving || !isExactMatch}
                   className="mt-4 w-full sm:w-auto bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center touch-manipulation active:bg-[#d49400]"
                 >
                   {saving ? (
@@ -1197,6 +1738,11 @@ const PaymentPlanEditPage: React.FC = () => {
                     </>
                   )}
                 </button>
+                {!isExactMatch && (
+                  <p className="mt-2 text-sm text-red-600">
+                    ⚠️ Plan güncellenebilmesi için peşinat + krediler toplamının {planType === 'vehicle' ? 'araç' : 'ev'} ücreti{planType === 'housing' ? ' + ek masraflara' : ''} tam eşit olması gerekir.
+                  </p>
+                )}
               </div>
 
               {/* Navigation */}

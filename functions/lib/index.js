@@ -21,5 +21,5 @@ __exportStar(require("./auth"), exports);
 __exportStar(require("./emailService"), exports);
 __exportStar(require("./imapService"), exports);
 __exportStar(require("./statementProcessor"), exports);
-__exportStar(require("./expenseReminderService"), exports);
+__exportStar(require("./creditService"), exports);
 //# sourceMappingURL=index.js.map

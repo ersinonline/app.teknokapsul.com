@@ -15,6 +15,7 @@ const createTransporter = () => {
 };
 // Email gönderme fonksiyonu
 exports.sendPaymentPlanEmail = functions.https.onCall(async (data, context) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     // Kullanıcı doğrulaması
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'Kullanıcı doğrulaması gerekli');
@@ -64,13 +65,20 @@ exports.sendPaymentPlanEmail = functions.https.onCall(async (data, context) => {
           <div style="margin-top: 20px;">
             <h4 style="color: #333; margin-bottom: 10px;">Ek Masraflar:</h4>
             <ul style="list-style: none; padding: 0;">
-              <li style="padding: 4px 0;">• Tapu Masrafı: ${formatCurrency(planData.additionalExpenses.titleDeed)}</li>
-              <li style="padding: 4px 0;">• Kredi Tahsis Ücreti: ${formatCurrency(planData.additionalExpenses.creditAllocation)}</li>
-              <li style="padding: 4px 0;">• Ekspertiz Ücreti: ${formatCurrency(planData.additionalExpenses.appraisal)}</li>
-              <li style="padding: 4px 0;">• İpotek Tesis Ücreti: ${formatCurrency(planData.additionalExpenses.mortgageEstablishment)}</li>
-              <li style="padding: 4px 0;">• DASK Sigorta Primi: ${formatCurrency(planData.additionalExpenses.daskInsurance)}/yıl</li>
+              <li style="padding: 4px 0;">• Tapu Masrafı: ${formatCurrency((_b = (_a = planData.additionalExpenses.titleDeedFee) !== null && _a !== void 0 ? _a : planData.additionalExpenses.titleDeed) !== null && _b !== void 0 ? _b : 0)}</li>
+              <li style="padding: 4px 0;">• Kredi Tahsis Ücreti: ${formatCurrency((_d = (_c = planData.additionalExpenses.loanAllocationFee) !== null && _c !== void 0 ? _c : planData.additionalExpenses.creditAllocation) !== null && _d !== void 0 ? _d : 0)}</li>
+              <li style="padding: 4px 0;">• Ekspertiz Ücreti: ${formatCurrency((_f = (_e = planData.additionalExpenses.appraisalFee) !== null && _e !== void 0 ? _e : planData.additionalExpenses.appraisal) !== null && _f !== void 0 ? _f : 0)}</li>
+              <li style="padding: 4px 0;">• İpotek Tesis Ücreti: ${formatCurrency((_h = (_g = planData.additionalExpenses.mortgageEstablishmentFee) !== null && _g !== void 0 ? _g : planData.additionalExpenses.mortgageEstablishment) !== null && _h !== void 0 ? _h : 0)}</li>
+              <li style="padding: 4px 0;">• DASK Sigorta Primi: ${formatCurrency((_k = (_j = planData.additionalExpenses.daskInsurancePremium) !== null && _j !== void 0 ? _j : planData.additionalExpenses.daskInsurance) !== null && _k !== void 0 ? _k : 0)}/yıl</li>
+              <li style="padding: 4px 0;">• Döner Sermaye Bedeli: ${formatCurrency((_l = planData.additionalExpenses.revolvingFundFee) !== null && _l !== void 0 ? _l : 0)}</li>
+              ${Array.isArray(planData.additionalExpenses.customExpenses) ? planData.additionalExpenses.customExpenses.map((item) => {
+            var _a;
+            return `
+                <li style="padding: 4px 0;">• ${item.description}: ${formatCurrency((_a = item.amount) !== null && _a !== void 0 ? _a : 0)}</li>
+              `;
+        }).join('') : ''}
             </ul>
-            <p style="font-weight: bold; margin-top: 10px;">Toplam Ek Masraf: ${formatCurrency(planData.additionalExpenses.total)}</p>
+            <p style="font-weight: bold; margin-top: 10px;">Toplam Ek Masraf: ${formatCurrency((_m = planData.additionalExpenses.total) !== null && _m !== void 0 ? _m : 0)}</p>
           </div>
           ` : ''}
         </div>
@@ -128,15 +136,14 @@ const sendExpenseReminder = async (data) => {
           </div>
           
           <p style="color: #666; line-height: 1.6;">
-            Ödemenizi zamanında yapmayı unutmayın. TeknoKapsül uygulaması üzerinden giderlerinizi takip edebilirsiniz.
+            Lütfen ödeme tarihinizi kaçırmayın. TeknoKapsül uygulamasına giriş yaparak giderinizi ödendi olarak işaretleyebilirsiniz.
           </p>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px; padding: 20px; background-color: #f0f0f0; border-radius: 8px;">
-          <p style="margin: 0; color: #666;">Bu hatırlatma TeknoKapsül uygulaması tarafından otomatik olarak gönderilmiştir.</p>
-          <p style="margin: 10px 0 0 0; color: #666; font-size: 12px;">
-            <a href="https://app.teknokapsul.com" style="color: #ffb700; text-decoration: none;">TeknoKapsül'e Git</a>
-          </p>
+          
+          <div style="text-align: center; margin: 20px 0;">
+            <p style="color: #999; font-size: 12px;">
+              Bu hatırlatma TeknoKapsül uygulaması tarafından otomatik olarak gönderilmiştir.
+            </p>
+          </div>
         </div>
       </div>
     `;

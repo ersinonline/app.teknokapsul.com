@@ -93,13 +93,17 @@ export const sendPaymentPlanEmail = functions.https.onCall(async (data: EmailReq
           <div style="margin-top: 20px;">
             <h4 style="color: #333; margin-bottom: 10px;">Ek Masraflar:</h4>
             <ul style="list-style: none; padding: 0;">
-              <li style="padding: 4px 0;">• Tapu Masrafı: ${formatCurrency(planData.additionalExpenses.titleDeed)}</li>
-              <li style="padding: 4px 0;">• Kredi Tahsis Ücreti: ${formatCurrency(planData.additionalExpenses.creditAllocation)}</li>
-              <li style="padding: 4px 0;">• Ekspertiz Ücreti: ${formatCurrency(planData.additionalExpenses.appraisal)}</li>
-              <li style="padding: 4px 0;">• İpotek Tesis Ücreti: ${formatCurrency(planData.additionalExpenses.mortgageEstablishment)}</li>
-              <li style="padding: 4px 0;">• DASK Sigorta Primi: ${formatCurrency(planData.additionalExpenses.daskInsurance)}/yıl</li>
+              <li style="padding: 4px 0;">• Tapu Masrafı: ${formatCurrency(planData.additionalExpenses.titleDeedFee ?? planData.additionalExpenses.titleDeed ?? 0)}</li>
+              <li style="padding: 4px 0;">• Kredi Tahsis Ücreti: ${formatCurrency(planData.additionalExpenses.loanAllocationFee ?? planData.additionalExpenses.creditAllocation ?? 0)}</li>
+              <li style="padding: 4px 0;">• Ekspertiz Ücreti: ${formatCurrency(planData.additionalExpenses.appraisalFee ?? planData.additionalExpenses.appraisal ?? 0)}</li>
+              <li style="padding: 4px 0;">• İpotek Tesis Ücreti: ${formatCurrency(planData.additionalExpenses.mortgageEstablishmentFee ?? planData.additionalExpenses.mortgageEstablishment ?? 0)}</li>
+              <li style="padding: 4px 0;">• DASK Sigorta Primi: ${formatCurrency(planData.additionalExpenses.daskInsurancePremium ?? planData.additionalExpenses.daskInsurance ?? 0)}/yıl</li>
+              <li style="padding: 4px 0;">• Döner Sermaye Bedeli: ${formatCurrency(planData.additionalExpenses.revolvingFundFee ?? 0)}</li>
+              ${Array.isArray(planData.additionalExpenses.customExpenses) ? planData.additionalExpenses.customExpenses.map((item: any) => `
+                <li style="padding: 4px 0;">• ${item.description}: ${formatCurrency(item.amount ?? 0)}</li>
+              `).join('') : ''}
             </ul>
-            <p style="font-weight: bold; margin-top: 10px;">Toplam Ek Masraf: ${formatCurrency(planData.additionalExpenses.total)}</p>
+            <p style="font-weight: bold; margin-top: 10px;">Toplam Ek Masraf: ${formatCurrency(planData.additionalExpenses.total ?? 0)}</p>
           </div>
           ` : ''}
         </div>

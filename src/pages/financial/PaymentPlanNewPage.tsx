@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
-import { Home, Car, CreditCard, Building, Calculator, CheckCircle, Plus, Trash2, Save, ArrowLeft } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Home, Car, CreditCard, Building, Calculator, CheckCircle, Plus, Trash2, Save, ArrowLeft, DollarSign } from 'lucide-react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 interface DownPayment {
+  id: string;
+  amount: number;
+  description: string;
+}
+
+interface MonthlyIncomeItem {
   id: string;
   amount: number;
   description: string;
@@ -33,12 +39,20 @@ interface SelectedCredit {
   term: number;
 }
 
+interface AdditionalExpenseItem {
+  id: string;
+  amount: number;
+  description: string;
+}
+
 interface AdditionalExpenses {
   titleDeedFee: number;
   loanAllocationFee: number;
   appraisalFee: number;
   mortgageEstablishmentFee: number;
   daskInsurancePremium: number;
+  revolvingFundFee: number;
+  customExpenses: AdditionalExpenseItem[];
   total: number;
 }
 
@@ -47,11 +61,15 @@ const PaymentPlanNewPage: React.FC = () => {
   const navigate = useNavigate();
   
   // Form states
-  const [currentStep, setCurrentStep] = useState<'type' | 'price' | 'down-payments' | 'housing-credit' | 'personal-credits' | 'plan-summary'>('type');
+  const [currentStep, setCurrentStep] = useState<'type' | 'price' | 'additional-expenses' | 'down-payments' | 'housing-credit' | 'personal-credits' | 'incomes' | 'plan-summary'>('type');
   const [planType, setPlanType] = useState<'housing' | 'vehicle'>('housing');
   const [price, setPrice] = useState<number>(0);
   const [downPayments, setDownPayments] = useState<DownPayment[]>([]);
   const [newDownPayment, setNewDownPayment] = useState({ amount: 0, description: '' });
+  const [additionalExpenses, setAdditionalExpenses] = useState<AdditionalExpenses | null>(null);
+  const [newAdditionalExpense, setNewAdditionalExpense] = useState({ amount: 0, description: '' });
+  const [monthlyIncomes, setMonthlyIncomes] = useState<MonthlyIncomeItem[]>([]);
+  const [newMonthlyIncome, setNewMonthlyIncome] = useState({ amount: 0, description: '' });
   
   // Housing/Vehicle credit states
   const [selectedCredits, setSelectedCredits] = useState<SelectedCredit[]>([]);
@@ -370,9 +388,13 @@ const PaymentPlanNewPage: React.FC = () => {
   
   // Toplam ödeme kontrolü - peşinat + krediler = ev/araç değeri
   const totalPayments = totalDownPayment + selectedHousingVehicleCreditAmount + totalPersonalCreditAmount;
-  const remainingAmount = price - totalPayments;
+  const normalizedAdditionalExpenses = planType === 'housing' ? (additionalExpenses ?? null) : null;
+  const additionalExpensesTotal = planType === 'housing' ? (normalizedAdditionalExpenses?.total || 0) : 0;
+  const targetTotal = planType === 'housing' ? price + additionalExpensesTotal : price;
+  const remainingAmount = targetTotal - totalPayments;
   const isExactMatch = Math.abs(remainingAmount) < 1; // 1 TL tolerans
   const isOverPaid = remainingAmount < -1;
+  const totalMonthlyIncome = monthlyIncomes.reduce((sum, item) => sum + item.amount, 0);
   
   // Eski hesaplamalar (geriye uyumluluk için)
   const remainingAfterDownPayment = price - totalDownPayment - selectedHousingVehicleCreditAmount;
@@ -387,23 +409,139 @@ const PaymentPlanNewPage: React.FC = () => {
     }).format(amount);
   };
 
-  const calculateAdditionalExpenses = (housePrice: number): AdditionalExpenses => {
-    const titleDeedFee = housePrice * 0.04; // %4 tapu masrafı
-    const loanAllocationFee = 500; // 500 TL kredi tahsis ücreti
-    const appraisalFee = 15874; // 15.874 TL ekspertiz ücreti
-    const mortgageEstablishmentFee = 2700; // 2.700 TL ipotek tesis ücreti
-    const daskInsurancePremium = 1500; // 1.500 TL DASK sigorta primi (yıllık)
-    
-    const total = titleDeedFee + loanAllocationFee + appraisalFee + mortgageEstablishmentFee + daskInsurancePremium;
-    
-    return {
+  const calculateAdditionalExpensesTotal = (expenses: Omit<AdditionalExpenses, 'total'>): number => {
+    const customTotal = expenses.customExpenses.reduce((sum, item) => sum + (item.amount || 0), 0);
+    return (
+      (expenses.titleDeedFee || 0) +
+      (expenses.loanAllocationFee || 0) +
+      (expenses.appraisalFee || 0) +
+      (expenses.mortgageEstablishmentFee || 0) +
+      (expenses.daskInsurancePremium || 0) +
+      (expenses.revolvingFundFee || 0) +
+      customTotal
+    );
+  };
+
+  const calculateAdditionalExpenses = (housePrice: number, customExpenses: AdditionalExpenseItem[] = []): AdditionalExpenses => {
+    const titleDeedFee = housePrice * 0.04;
+    const loanAllocationFee = 13750;
+    const appraisalFee = 33000;
+    const mortgageEstablishmentFee = 3750;
+    const daskInsurancePremium = 3000;
+    const revolvingFundFee = 20000;
+
+    const base = {
       titleDeedFee,
       loanAllocationFee,
       appraisalFee,
       mortgageEstablishmentFee,
       daskInsurancePremium,
-      total
+      revolvingFundFee,
+      customExpenses
     };
+
+    return {
+      ...base,
+      total: calculateAdditionalExpensesTotal(base)
+    };
+  };
+
+  useEffect(() => {
+    if (planType !== 'housing') {
+      setAdditionalExpenses(null);
+      return;
+    }
+    if (!price || price <= 0) {
+      setAdditionalExpenses(null);
+      return;
+    }
+    setAdditionalExpenses(prev => calculateAdditionalExpenses(price, prev?.customExpenses || []));
+  }, [planType, price]);
+
+  const updateAdditionalExpenseField = (field: keyof Omit<AdditionalExpenses, 'customExpenses' | 'total'>, value: number) => {
+    setAdditionalExpenses(prev => {
+      const current = prev ?? calculateAdditionalExpenses(price, []);
+      const next = {
+        ...current,
+        [field]: value
+      } as AdditionalExpenses;
+      const total = calculateAdditionalExpensesTotal({
+        titleDeedFee: next.titleDeedFee,
+        loanAllocationFee: next.loanAllocationFee,
+        appraisalFee: next.appraisalFee,
+        mortgageEstablishmentFee: next.mortgageEstablishmentFee,
+        daskInsurancePremium: next.daskInsurancePremium,
+        revolvingFundFee: next.revolvingFundFee,
+        customExpenses: next.customExpenses
+      });
+      return { ...next, total };
+    });
+  };
+
+  const addCustomAdditionalExpense = () => {
+    if (!newAdditionalExpense.amount || !newAdditionalExpense.description.trim()) return;
+    setAdditionalExpenses(prev => {
+      const current = prev ?? calculateAdditionalExpenses(price, []);
+      const customExpenses = [
+        ...current.customExpenses,
+        {
+          id: Date.now().toString(),
+          amount: newAdditionalExpense.amount,
+          description: newAdditionalExpense.description.trim()
+        }
+      ];
+      return calculateAdditionalExpenses(price, customExpenses);
+    });
+    setNewAdditionalExpense({ amount: 0, description: '' });
+  };
+
+  const removeCustomAdditionalExpense = (id: string) => {
+    setAdditionalExpenses(prev => {
+      if (!prev) return prev;
+      const customExpenses = prev.customExpenses.filter(item => item.id !== id);
+      return calculateAdditionalExpenses(price, customExpenses);
+    });
+  };
+
+  const addMonthlyIncome = () => {
+    if (!newMonthlyIncome.amount || !newMonthlyIncome.description.trim()) return;
+    const item: MonthlyIncomeItem = {
+      id: Date.now().toString(),
+      amount: newMonthlyIncome.amount,
+      description: newMonthlyIncome.description.trim()
+    };
+    setMonthlyIncomes(prev => [...prev, item]);
+    setNewMonthlyIncome({ amount: 0, description: '' });
+  };
+
+  const removeMonthlyIncome = (id: string) => {
+    setMonthlyIncomes(prev => prev.filter(item => item.id !== id));
+  };
+
+  const calculatePeriodicPayments = () => {
+    const allCredits = [...selectedCredits, ...personalCredits].filter(c => c.monthlyPayment > 0 && c.term > 0);
+    if (allCredits.length === 0) return [];
+
+    const endMonths = Array.from(new Set(allCredits.map(c => c.term))).sort((a, b) => a - b);
+    const periods: Array<{ startMonth: number; endMonth: number; monthlyPayment: number; activeCredits: string[]; description: string }> = [];
+
+    for (let i = 0; i < endMonths.length; i++) {
+      const startMonth = i === 0 ? 1 : endMonths[i - 1] + 1;
+      const endMonth = endMonths[i];
+      const active = allCredits.filter(c => c.term >= startMonth);
+      if (active.length === 0) continue;
+      const monthlyPayment = active.reduce((sum, c) => sum + c.monthlyPayment, 0);
+      const activeCredits = active.map(c => `${c.type === 'konut' ? 'Konut Kredisi' : c.type === 'tasit' ? 'Taşıt Kredisi' : 'İhtiyaç Kredisi'} (${c.bankName})`);
+      periods.push({
+        startMonth,
+        endMonth,
+        monthlyPayment,
+        activeCredits,
+        description: `${startMonth}. aydan ${endMonth}. aya kadar`
+      });
+    }
+
+    return periods;
   };
 
   const addDownPayment = () => {
@@ -431,7 +569,7 @@ const PaymentPlanNewPage: React.FC = () => {
       const sendPaymentPlanEmail = httpsCallable(functions, 'sendPaymentPlanEmail');
       
       // Ek masrafları hesapla
-      const additionalExpenses = planType === 'housing' ? calculateAdditionalExpenses(plan.price) : null;
+      const additionalExpenses = plan?.type === 'housing' ? (plan.additionalExpenses || calculateAdditionalExpenses(plan.price)) : null;
       
       const planData = {
         name: plan.name,
@@ -459,7 +597,7 @@ const PaymentPlanNewPage: React.FC = () => {
     
     setIsSaving(true);
     try {
-      const additionalExpenses = planType === 'housing' ? calculateAdditionalExpenses(price) : null;
+      const additionalExpensesToSave = planType === 'housing' ? (additionalExpenses ?? calculateAdditionalExpenses(price)) : null;
       
       const planData = {
         name: planName.trim(),
@@ -468,9 +606,10 @@ const PaymentPlanNewPage: React.FC = () => {
         downPayments: downPayments,
         housingCredit: selectedCredits.find(c => c.type === 'konut' || c.type === 'tasit') || null,
         personalCredits: personalCredits,
+        monthlyIncomes: monthlyIncomes,
         monthlyPayments: [], // Will be calculated
         totalMonthlyPayment: selectedCredits.reduce((sum, credit) => sum + credit.monthlyPayment, 0) + totalPersonalCreditMonthly,
-        additionalExpenses: additionalExpenses,
+        additionalExpenses: additionalExpensesToSave,
         createdAt: new Date(),
         sharedWith: shareEmail.trim() || null,
         userId: user.id
@@ -504,9 +643,11 @@ const PaymentPlanNewPage: React.FC = () => {
     const steps = [
       { key: 'type', label: 'Tip', shortLabel: 'Tip', icon: planType === 'vehicle' ? Car : Home },
       { key: 'price', label: planType === 'vehicle' ? 'Araç Fiyatı' : 'Ev Fiyatı', shortLabel: 'Fiyat', icon: planType === 'vehicle' ? Car : Home },
+      ...(planType === 'housing' ? [{ key: 'additional-expenses', label: 'Ek Masraflar', shortLabel: 'Masraf', icon: DollarSign }] : []),
       { key: 'down-payments', label: 'Peşinatlar', shortLabel: 'Peşinat', icon: CreditCard },
       { key: 'housing-credit', label: planType === 'vehicle' ? 'Taşıt Kredisi' : 'Konut Kredisi', shortLabel: planType === 'vehicle' ? 'Taşıt' : 'Konut', icon: Building },
       { key: 'personal-credits', label: 'İhtiyaç Kredisi', shortLabel: 'İhtiyaç', icon: Calculator },
+      { key: 'incomes', label: 'Gelirler', shortLabel: 'Gelir', icon: DollarSign },
       { key: 'plan-summary', label: 'Plan Özeti', shortLabel: 'Özet', icon: CheckCircle }
     ];
 
@@ -679,9 +820,178 @@ const PaymentPlanNewPage: React.FC = () => {
                     Geri
                   </button>
                   <button
-                    onClick={() => setCurrentStep('down-payments')}
+                    onClick={() => {
+                      if (planType === 'housing') {
+                        setAdditionalExpenses(prev => prev ?? calculateAdditionalExpenses(price, []));
+                        setCurrentStep('additional-expenses');
+                        return;
+                      }
+                      setCurrentStep('down-payments');
+                    }}
                     disabled={!price || price <= 0}
                     className="w-full sm:w-auto bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] active:bg-[#d49400] disabled:opacity-50 disabled:cursor-not-allowed transition-colors touch-manipulation"
+                  >
+                    Devam Et
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Additional Expenses Step */}
+          {currentStep === 'additional-expenses' && planType === 'housing' && (
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Ek Masrafları Düzenleyin</h2>
+
+              <div className="max-w-3xl mx-auto space-y-6">
+                <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Tapu Masrafı (TL)</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={additionalExpenses?.titleDeedFee || ''}
+                        onChange={(e) => updateAdditionalExpenseField('titleDeedFee', Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                        placeholder="Örn: 200000"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Kredi Tahsis Ücreti (TL)</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={additionalExpenses?.loanAllocationFee || ''}
+                        onChange={(e) => updateAdditionalExpenseField('loanAllocationFee', Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                        placeholder="Örn: 13750"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Ekspertiz Ücreti (TL)</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={additionalExpenses?.appraisalFee || ''}
+                        onChange={(e) => updateAdditionalExpenseField('appraisalFee', Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                        placeholder="Örn: 33000"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">İpotek Tesis Ücreti (TL)</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={additionalExpenses?.mortgageEstablishmentFee || ''}
+                        onChange={(e) => updateAdditionalExpenseField('mortgageEstablishmentFee', Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                        placeholder="Örn: 3750"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">DASK Sigorta Primi (TL)</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={additionalExpenses?.daskInsurancePremium || ''}
+                        onChange={(e) => updateAdditionalExpenseField('daskInsurancePremium', Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                        placeholder="Örn: 3000"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Döner Sermaye Bedeli (TL)</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        value={additionalExpenses?.revolvingFundFee || ''}
+                        onChange={(e) => updateAdditionalExpenseField('revolvingFundFee', Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                        placeholder="Örn: 20000"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 border-t pt-4">
+                    <h3 className="text-base sm:text-lg font-medium text-gray-800 mb-4">Diğer Ek Masraflar</h3>
+                    <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-3 sm:gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Tutar (TL)</label>
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          value={newAdditionalExpense.amount || ''}
+                          onChange={(e) => setNewAdditionalExpense({ ...newAdditionalExpense, amount: Number(e.target.value) })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                          placeholder="Örn: 25000"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Açıklama</label>
+                        <input
+                          type="text"
+                          value={newAdditionalExpense.description}
+                          onChange={(e) => setNewAdditionalExpense({ ...newAdditionalExpense, description: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                          placeholder="Örn: Taşınma masrafı"
+                        />
+                      </div>
+                      <div className="sm:flex sm:items-end">
+                        <button
+                          onClick={addCustomAdditionalExpense}
+                          disabled={!newAdditionalExpense.amount || !newAdditionalExpense.description.trim()}
+                          className="w-full bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a500] active:bg-[#d49400] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center touch-manipulation"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Ekle
+                        </button>
+                      </div>
+                    </div>
+
+                    {additionalExpenses?.customExpenses?.length ? (
+                      <div className="mt-4 space-y-2">
+                        {additionalExpenses.customExpenses.map((item) => (
+                          <div key={item.id} className="flex items-center justify-between bg-white rounded-lg p-3 border">
+                            <div>
+                              <p className="font-medium text-gray-800">{item.description}</p>
+                              <p className="text-sm text-gray-600">{formatCurrency(item.amount)}</p>
+                            </div>
+                            <button
+                              onClick={() => removeCustomAdditionalExpense(item.id)}
+                              className="text-red-600 hover:text-red-700 transition-colors p-2 touch-manipulation"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-6 bg-white rounded-lg p-4 border">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-gray-700">Toplam Ek Masraf</p>
+                      <p className="text-lg font-semibold text-gray-900">{formatCurrency(additionalExpenses?.total || 0)}</p>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <p className="text-sm font-medium text-gray-700">Toplam Hedef Tutar</p>
+                      <p className="text-lg font-semibold text-gray-900">{formatCurrency(price + (additionalExpenses?.total || 0))}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 justify-between">
+                  <button
+                    onClick={() => setCurrentStep('price')}
+                    className="w-full sm:w-auto bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition-colors touch-manipulation"
+                  >
+                    Geri
+                  </button>
+                  <button
+                    onClick={() => setCurrentStep('down-payments')}
+                    className="w-full sm:w-auto bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] active:bg-[#d49400] transition-colors touch-manipulation"
                   >
                     Devam Et
                   </button>
@@ -819,10 +1129,15 @@ const PaymentPlanNewPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Vade (Ay)</label>
-                    <select
-                      value={planType === 'vehicle' ? vehicleCreditTerm : housingCreditTerm}
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={planType === 'vehicle' ? 60 : 240}
+                      value={planType === 'vehicle' ? (vehicleCreditTerm || '') : (housingCreditTerm || '')}
                       onChange={(e) => {
-                        const value = Number(e.target.value);
+                        const raw = Number(e.target.value);
+                        const value = Number.isFinite(raw) ? raw : 0;
                         if (planType === 'vehicle') {
                           setVehicleCreditTerm(value);
                         } else {
@@ -830,24 +1145,8 @@ const PaymentPlanNewPage: React.FC = () => {
                         }
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
-                    >
-                      {planType === 'vehicle' ? (
-                        <>
-                          <option value={12}>12 Ay</option>
-                          <option value={24}>24 Ay</option>
-                          <option value={36}>36 Ay</option>
-                          <option value={48}>48 Ay</option>
-                          <option value={60}>60 Ay</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value={60}>60 Ay (5 Yıl)</option>
-                          <option value={120}>120 Ay (10 Yıl)</option>
-                          <option value={180}>180 Ay (15 Yıl)</option>
-                          <option value={240}>240 Ay (20 Yıl)</option>
-                        </>
-                      )}
-                    </select>
+                      placeholder="Örn: 79"
+                    />
                   </div>
                   <div className="flex items-end">
                     <button
@@ -1232,6 +1531,143 @@ const PaymentPlanNewPage: React.FC = () => {
                   Geri
                 </button>
                 <button
+                  onClick={() => setCurrentStep('incomes')}
+                  className="bg-[#ffb700] text-white px-4 sm:px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors text-sm sm:text-base flex items-center justify-center"
+                >
+                  Gelir Adımına Geç
+                  <CheckCircle className="w-4 h-4 ml-2" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 'incomes' && (
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Aylık Gelirlerinizi Ekleyin</h2>
+
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <h3 className="text-base sm:text-lg font-medium text-gray-800 mb-4">Yeni Gelir Ekle</h3>
+                <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-3 sm:gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Tutar (TL)</label>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={newMonthlyIncome.amount || ''}
+                      onChange={(e) => setNewMonthlyIncome({ ...newMonthlyIncome, amount: Number(e.target.value) })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                      placeholder="Örn: 75000"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Açıklama</label>
+                    <input
+                      type="text"
+                      value={newMonthlyIncome.description}
+                      onChange={(e) => setNewMonthlyIncome({ ...newMonthlyIncome, description: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent touch-manipulation"
+                      placeholder="Örn: Maaş"
+                    />
+                  </div>
+                  <div className="sm:flex sm:items-end">
+                    <button
+                      onClick={addMonthlyIncome}
+                      disabled={!newMonthlyIncome.amount || !newMonthlyIncome.description.trim()}
+                      className="w-full bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a500] active:bg-[#d49400] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center touch-manipulation"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Ekle
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {monthlyIncomes.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium text-gray-800 mb-4">Eklenen Gelirler</h3>
+                  <div className="space-y-3">
+                    {monthlyIncomes.map((income) => (
+                      <div key={income.id} className="flex items-center justify-between p-3 sm:p-4 bg-white border border-gray-200 rounded-lg">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{income.description}</p>
+                          <p className="text-xs sm:text-sm text-gray-600">{formatCurrency(income.amount)}</p>
+                        </div>
+                        <button
+                          onClick={() => removeMonthlyIncome(income.id)}
+                          className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors touch-manipulation active:bg-red-100 ml-2 flex-shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-gray-700">Toplam Aylık Gelir</p>
+                  <p className="text-lg font-semibold text-gray-900">{formatCurrency(totalMonthlyIncome)}</p>
+                </div>
+              </div>
+
+              <div className="mb-6 bg-gray-50 rounded-lg p-4">
+                <h3 className="text-base sm:text-lg font-medium text-gray-800 mb-4">Gelir / Taksit Uygunluğu</h3>
+                {(() => {
+                  const periods = calculatePeriodicPayments();
+                  const monthlyPaymentNow = selectedHousingVehicleCreditAmount > 0 || totalPersonalCreditAmount > 0
+                    ? selectedCredits.reduce((sum, c) => sum + c.monthlyPayment, 0) + totalPersonalCreditMonthly
+                    : 0;
+
+                  if (periods.length === 0) {
+                    return (
+                      <div className="bg-white rounded-lg p-4 border">
+                        <p className="text-sm text-gray-700">Henüz kredi seçilmediği için dönemsel ödeme oluşmadı.</p>
+                        <p className="text-sm text-gray-700 mt-2">Mevcut aylık toplam taksit: {formatCurrency(monthlyPaymentNow)}</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-3">
+                      {periods.map((p, idx) => {
+                        const diff = totalMonthlyIncome - p.monthlyPayment;
+                        const ok = diff >= 0;
+                        return (
+                          <div key={idx} className="bg-white rounded-lg p-4 border">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium text-gray-900">{p.description}</p>
+                                <p className="text-xs text-gray-600">{p.activeCredits.length} aktif kredi</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-gray-600">Aylık Taksit</p>
+                                <p className="text-lg font-semibold text-gray-900">{formatCurrency(p.monthlyPayment)}</p>
+                              </div>
+                            </div>
+                            <div className="mt-3 flex items-center justify-between">
+                              <p className="text-sm text-gray-600">Gelir - Taksit</p>
+                              <p className={`text-sm font-semibold ${ok ? 'text-green-700' : 'text-red-700'}`}>
+                                {formatCurrency(diff)} {ok ? '(Yeterli)' : '(Yetersiz)'}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-between gap-3">
+                <button
+                  onClick={() => setCurrentStep('personal-credits')}
+                  className="bg-gray-500 text-white px-4 sm:px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors text-sm sm:text-base flex items-center justify-center"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Geri
+                </button>
+                <button
                   onClick={() => setCurrentStep('plan-summary')}
                   className="bg-[#ffb700] text-white px-4 sm:px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors text-sm sm:text-base flex items-center justify-center"
                 >
@@ -1254,6 +1690,12 @@ const PaymentPlanNewPage: React.FC = () => {
                     <p className="text-sm text-gray-600">{planType === 'vehicle' ? 'Araç Fiyatı' : 'Ev Fiyatı'}</p>
                     <p className="text-lg font-semibold text-gray-900">{formatCurrency(price)}</p>
                   </div>
+                  {planType === 'housing' && (
+                    <div className="bg-white p-4 rounded-lg">
+                      <p className="text-sm text-gray-600">Ek Masraflar</p>
+                      <p className="text-lg font-semibold text-purple-600">{formatCurrency(additionalExpensesTotal)}</p>
+                    </div>
+                  )}
                   <div className="bg-white p-4 rounded-lg">
                     <p className="text-sm text-gray-600">Toplam Peşinat</p>
                     <p className="text-lg font-semibold text-green-600">{formatCurrency(totalDownPayment)}</p>
@@ -1266,6 +1708,12 @@ const PaymentPlanNewPage: React.FC = () => {
                     <p className="text-sm text-gray-600">İhtiyaç Kredileri</p>
                     <p className="text-lg font-semibold text-orange-600">{formatCurrency(totalPersonalCreditAmount)}</p>
                   </div>
+                  {monthlyIncomes.length > 0 && (
+                    <div className="bg-white p-4 rounded-lg">
+                      <p className="text-sm text-gray-600">Toplam Aylık Gelir</p>
+                      <p className="text-lg font-semibold text-emerald-700">{formatCurrency(totalMonthlyIncome)}</p>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Ödeme Durumu Kontrolü */}
@@ -1305,13 +1753,38 @@ const PaymentPlanNewPage: React.FC = () => {
                         isOverPaid ? 'text-red-700' : 'text-yellow-700'
                       }`}>
                         {isOverPaid 
-                          ? '⚠️ Toplam ödeme tutarı araç/ev değerini aşıyor. Lütfen kredi tutarlarını azaltın.' 
-                          : '⚠️ Toplam ödeme tutarı araç/ev değerinden az. Lütfen eksik tutarı tamamlayın.'
+                          ? `⚠️ Toplam ödeme tutarı hedef toplamı aşıyor. Lütfen kredi/peşinat tutarlarını azaltın.` 
+                          : `⚠️ Toplam ödeme tutarı hedef toplamdan az. Lütfen eksik tutarı tamamlayın.`
                         }
                       </p>
                     </div>
                   )}
                 </div>
+
+                {monthlyIncomes.length > 0 && (
+                  <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
+                    {(() => {
+                      const periods = calculatePeriodicPayments();
+                      const maxMonthly = periods.reduce((max, p) => Math.max(max, p.monthlyPayment), 0);
+                      const diff = totalMonthlyIncome - maxMonthly;
+                      const ok = diff >= 0;
+                      return (
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-700">En Yüksek Aylık Taksit</p>
+                            <p className="text-lg font-semibold text-gray-900">{formatCurrency(maxMonthly)}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-gray-700">Gelir - Taksit</p>
+                            <p className={`text-lg font-semibold ${ok ? 'text-emerald-700' : 'text-red-700'}`}>
+                              {formatCurrency(diff)} {ok ? '(Yeterli)' : '(Yetersiz)'}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
               </div>
 
               {/* Save Plan */}
@@ -1362,7 +1835,7 @@ const PaymentPlanNewPage: React.FC = () => {
                 </button>
                 {!isExactMatch && (
                   <p className="mt-2 text-sm text-red-600">
-                    ⚠️ Plan kaydedilebilmesi için peşinat + krediler toplamının {planType === 'vehicle' ? 'araç' : 'ev'} değerine tam eşit olması gerekir.
+                    ⚠️ Plan kaydedilebilmesi için peşinat + krediler toplamının {planType === 'vehicle' ? 'araç' : 'ev'} ücreti{planType === 'housing' ? ' + ek masraflara' : ''} tam eşit olması gerekir.
                   </p>
                 )}
               </div>

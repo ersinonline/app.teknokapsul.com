@@ -66,29 +66,40 @@ const parseMoney = (value: string): number => {
   return Math.round(parseFloat(String(value).replace(/[^\d.-]/g, '')) || 0);
 };
 
-const getFunctionsBaseUrl = (): string => {
-  const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || 'superapp-37db4';
-  const region = import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || 'us-central1';
-  return import.meta.env.VITE_FUNCTIONS_BASE_URL || `https://${region}-${projectId}.cloudfunctions.net`;
-};
-
 const fetchCreditOffers = async (query: 'konut' | 'tasit' | 'ihtiyac', amount: number, term: number): Promise<CreditOffer[]> => {
-  const baseUrl = getFunctionsBaseUrl();
-  const response = await fetch(`${baseUrl}/creditBidProxy?query=${encodeURIComponent(query)}&price=${encodeURIComponent(String(amount))}&month=${encodeURIComponent(String(term))}`);
-  const data = await response.json();
-  if (!data?.success || !Array.isArray(data?.result)) return [];
+  const apiKey = import.meta.env.VITE_COLLECTAPI_KEY;
+  if (!apiKey) {
+    console.error('API key missing');
+    return [];
+  }
 
-  const sorted = sortOffersByInterestRate(data.result);
-  return sorted.map((offer: any) => {
-    const bankCode = String(offer['bank-code'] || '');
-    return {
-      bankCode,
-      bankName: formatBankNameFromCode(bankCode),
-      interestRate: String(offer.oran || ''),
-      monthlyPayment: parseMoney(offer.ay),
-      totalPayment: parseMoney(offer.tl)
-    };
-  });
+  try {
+    const response = await fetch(`https://api.collectapi.com/credit/${query}?data.query=${encodeURIComponent(query)}&data.price=${encodeURIComponent(String(amount))}&data.month=${encodeURIComponent(String(term))}`, {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'authorization': `apikey ${apiKey}`
+      }
+    });
+
+    const data = await response.json();
+    if (!data?.success || !Array.isArray(data?.result)) return [];
+
+    const sorted = sortOffersByInterestRate(data.result);
+    return sorted.map((offer: any) => {
+      const bankCode = String(offer['bank-code'] || '');
+      return {
+        bankCode,
+        bankName: formatBankNameFromCode(bankCode),
+        interestRate: String(offer.oran || ''),
+        monthlyPayment: parseMoney(offer.ay),
+        totalPayment: parseMoney(offer.tl)
+      };
+    });
+  } catch (err) {
+    console.error('Fetch error:', err);
+    return [];
+  }
 };
 
 const generatePlanIdCandidate = (): string => {

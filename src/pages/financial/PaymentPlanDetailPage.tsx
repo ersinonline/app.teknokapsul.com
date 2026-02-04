@@ -13,6 +13,12 @@ interface DownPayment {
   description: string;
 }
 
+interface MonthlyIncomeItem {
+  id: string;
+  amount: number;
+  description: string;
+}
+
 interface SelectedCredit {
   id: string;
   type: string;
@@ -26,12 +32,20 @@ interface SelectedCredit {
   term: number;
 }
 
+interface AdditionalExpenseItem {
+  id: string;
+  amount: number;
+  description: string;
+}
+
 interface AdditionalExpenses {
   titleDeedFee: number;
   loanAllocationFee: number;
   appraisalFee: number;
   mortgageEstablishmentFee: number;
   daskInsurancePremium: number;
+  revolvingFundFee: number;
+  customExpenses?: AdditionalExpenseItem[];
   total: number;
 }
 
@@ -43,6 +57,7 @@ interface PaymentPlan {
   downPayments: DownPayment[];
   housingCredit: SelectedCredit | null;
   personalCredits: SelectedCredit[];
+  monthlyIncomes?: MonthlyIncomeItem[];
   monthlyPayments: any[];
   totalMonthlyPayment: number;
   additionalExpenses?: AdditionalExpenses;
@@ -194,24 +209,73 @@ const PaymentPlanDetailPage: React.FC = () => {
   };
 
   const periodicPayments = plan ? calculatePeriodicPayments(plan) : [];
+  const maxCreditTerm = plan ? Math.max(plan.housingCredit?.term || 0, ...plan.personalCredits.map(c => c.term)) : 0;
+  const firstYearEndMonth = Math.min(12, maxCreditTerm || 12);
+  const isFixedPaymentFullTerm = periodicPayments.length > 0
+    ? periodicPayments[0].startMonth === 1 &&
+      periodicPayments[periodicPayments.length - 1].endMonth === maxCreditTerm &&
+      periodicPayments.every(p => p.monthlyPayment === periodicPayments[0].monthlyPayment)
+    : false;
+  const isFixedPaymentFirstYear = !isFixedPaymentFullTerm && periodicPayments.length > 0
+    ? periodicPayments[0].startMonth === 1 &&
+      periodicPayments[0].endMonth >= firstYearEndMonth &&
+      (periodicPayments.length === 1 || periodicPayments[1].startMonth > firstYearEndMonth)
+    : false;
+  const fixedPaymentLabel = isFixedPaymentFullTerm
+    ? `Sabit Ödemeli (${maxCreditTerm} Ay)`
+    : isFixedPaymentFirstYear
+    ? `Sabit Ödemeli (İlk ${firstYearEndMonth} Ay)`
+    : null;
 
-  const calculateAdditionalExpenses = (housePrice: number): AdditionalExpenses => {
-    const titleDeedFee = housePrice * 0.04; // %4 tapu masrafı
-    const loanAllocationFee = 500; // 500 TL kredi tahsis ücreti
-    const appraisalFee = 15874; // 15.874 TL ekspertiz ücreti
-    const mortgageEstablishmentFee = 2700; // 2.700 TL ipotek tesis ücreti
-    const daskInsurancePremium = 1500; // 1.500 TL DASK sigorta primi (yıllık)
-    
-    const total = titleDeedFee + loanAllocationFee + appraisalFee + mortgageEstablishmentFee + daskInsurancePremium;
-    
-    return {
+  const calculateAdditionalExpensesTotal = (expenses: Omit<AdditionalExpenses, 'total'>): number => {
+    const customExpenses = expenses.customExpenses || [];
+    const customTotal = customExpenses.reduce((sum, item) => sum + (item.amount || 0), 0);
+    return (
+      (expenses.titleDeedFee || 0) +
+      (expenses.loanAllocationFee || 0) +
+      (expenses.appraisalFee || 0) +
+      (expenses.mortgageEstablishmentFee || 0) +
+      (expenses.daskInsurancePremium || 0) +
+      (expenses.revolvingFundFee || 0) +
+      customTotal
+    );
+  };
+
+  const calculateAdditionalExpenses = (housePrice: number, customExpenses: AdditionalExpenseItem[] = []): AdditionalExpenses => {
+    const titleDeedFee = housePrice * 0.04;
+    const loanAllocationFee = 13750;
+    const appraisalFee = 33000;
+    const mortgageEstablishmentFee = 3750;
+    const daskInsurancePremium = 3000;
+    const revolvingFundFee = 20000;
+
+    const base: Omit<AdditionalExpenses, 'total'> = {
       titleDeedFee,
       loanAllocationFee,
       appraisalFee,
       mortgageEstablishmentFee,
       daskInsurancePremium,
-      total
+      revolvingFundFee,
+      customExpenses
     };
+
+    return { ...base, total: calculateAdditionalExpensesTotal(base) };
+  };
+
+  const normalizeAdditionalExpenses = (housePrice: number, expenses?: Partial<AdditionalExpenses> | null): AdditionalExpenses => {
+    if (!expenses) return calculateAdditionalExpenses(housePrice, []);
+    const customExpenses = Array.isArray((expenses as any).customExpenses) ? ((expenses as any).customExpenses as AdditionalExpenseItem[]) : [];
+    const normalized: Omit<AdditionalExpenses, 'total'> = {
+      titleDeedFee: Number((expenses as any).titleDeedFee ?? housePrice * 0.04),
+      loanAllocationFee: Number((expenses as any).loanAllocationFee ?? 13750),
+      appraisalFee: Number((expenses as any).appraisalFee ?? 33000),
+      mortgageEstablishmentFee: Number((expenses as any).mortgageEstablishmentFee ?? 3750),
+      daskInsurancePremium: Number((expenses as any).daskInsurancePremium ?? 3000),
+      revolvingFundFee: Number((expenses as any).revolvingFundFee ?? 20000),
+      customExpenses
+    };
+    const total = Number((expenses as any).total ?? calculateAdditionalExpensesTotal(normalized));
+    return { ...normalized, total };
   };
 
   const handleEdit = () => {
@@ -248,58 +312,73 @@ const PaymentPlanDetailPage: React.FC = () => {
     if (!plan) return;
     
     try {
-      // Create a temporary div with the plan content
-      const tempDiv = document.createElement('div');
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.width = '800px';
-      tempDiv.style.backgroundColor = 'white';
-      tempDiv.style.padding = '40px';
-      tempDiv.style.fontFamily = 'Arial, sans-serif';
-      
       // Calculate totals
       const totalDownPayment = plan.downPayments.reduce((sum, dp) => sum + dp.amount, 0);
 
-      
-      tempDiv.innerHTML = `
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #ffb700; font-size: 28px; margin-bottom: 10px;">TeknoKapsül - Ödeme Planı</h1>
-          <h2 style="color: #333; font-size: 24px; margin-bottom: 20px;">${plan.name}</h2>
-          <p style="color: #666; font-size: 14px;">Oluşturulma Tarihi: ${formatDate(plan.createdAt)}</p>
+      const pageWidthPx = 794;
+      const pageHeightPx = Math.floor((pageWidthPx * 297) / 210);
+      const pagePaddingPx = 32;
+
+      const source = document.createElement('div');
+      source.style.position = 'absolute';
+      source.style.left = '-9999px';
+      source.style.top = '0';
+      source.style.width = `${pageWidthPx}px`;
+      source.style.backgroundColor = 'white';
+      source.style.fontFamily = 'Arial, sans-serif';
+      source.style.color = '#111827';
+
+      source.innerHTML = `
+        <div class="pdf-section" style="margin-bottom: 18px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 14px;">
+            <div style="display:flex; align-items:center; gap: 10px;">
+              <div style="width:12px; height:12px; background:#ffb700; border-radius:999px;"></div>
+              <div style="font-weight:700; font-size:16px; color:#111827;">TeknoTech</div>
+            </div>
+            <div style="font-size:11px; color:#6b7280;">${formatDate(plan.createdAt)}</div>
+          </div>
+          <div style="text-align:left;">
+            <div style="font-size:22px; font-weight:800; color:#111827; line-height: 1.15;">Ödeme Planı</div>
+            <div style="font-size:14px; color:#374151; margin-top: 4px;">${plan.name}</div>
+          </div>
         </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-            <h3 style="color: #666; font-size: 14px; margin-bottom: 5px;">${plan.type === 'vehicle' ? 'Araç Fiyatı' : 'Ev Fiyatı'}</h3>
-            <p style="color: #333; font-size: 20px; font-weight: bold;">${formatCurrency(plan.price)}</p>
-          </div>
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-            <h3 style="color: #666; font-size: 14px; margin-bottom: 5px;">Toplam Peşinat</h3>
-            <p style="color: #28a745; font-size: 20px; font-weight: bold;">${formatCurrency(totalDownPayment)}</p>
-          </div>
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-            <h3 style="color: #666; font-size: 14px; margin-bottom: 5px;">Aylık Ödeme</h3>
-            <p style="color: #dc3545; font-size: 20px; font-weight: bold;">${formatCurrency(plan.totalMonthlyPayment)}</p>
+
+        <div class="pdf-section" style="margin-bottom: 18px;">
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+            <div style="background:#f8f9fa; padding: 14px; border-radius: 10px;">
+              <div style="font-size: 11px; color:#6b7280; margin-bottom: 6px;">${plan.type === 'vehicle' ? 'Araç Ücreti' : 'Ev Ücreti'}</div>
+              <div style="font-size: 18px; font-weight: 800; color:#111827;">${formatCurrency(plan.price)}</div>
+            </div>
+            <div style="background:#f8f9fa; padding: 14px; border-radius: 10px;">
+              <div style="font-size: 11px; color:#6b7280; margin-bottom: 6px;">Toplam Peşinat</div>
+              <div style="font-size: 18px; font-weight: 800; color:#16a34a;">${formatCurrency(totalDownPayment)}</div>
+            </div>
+            <div style="background:#f8f9fa; padding: 14px; border-radius: 10px;">
+              <div style="font-size: 11px; color:#6b7280; margin-bottom: 6px;">Aylık Ödeme</div>
+              <div style="font-size: 18px; font-weight: 800; color:#dc2626;">${formatCurrency(plan.totalMonthlyPayment)}</div>
+            </div>
           </div>
         </div>
         
         ${plan.downPayments.length > 0 ? `
-          <div style="margin-bottom: 30px;">
-            <h3 style="color: #333; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #ffb700; padding-bottom: 5px;">Peşinat Detayları</h3>
-            ${plan.downPayments.map(dp => `
-              <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
-                <span>${dp.description}</span>
-                <span style="font-weight: bold;">${formatCurrency(dp.amount)}</span>
-              </div>
-            `).join('')}
+          <div class="pdf-section" style="margin-bottom: 18px;">
+            <div style="font-size: 14px; font-weight: 800; color:#111827; border-bottom: 2px solid #ffb700; padding-bottom: 6px; margin-bottom: 10px;">Peşinat Detayları</div>
+            <div style="border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden;">
+              ${plan.downPayments.map(dp => `
+                <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-bottom: 1px solid #f1f5f9;">
+                  <div style="font-size: 12px; color:#111827;">${dp.description}</div>
+                  <div style="font-size: 12px; font-weight: 700; color:#111827; white-space: nowrap;">${formatCurrency(dp.amount)}</div>
+                </div>
+              `).join('')}
+            </div>
           </div>
         ` : ''}
         
         ${plan.housingCredit ? `
-          <div style="margin-bottom: 30px;">
-            <h3 style="color: #333; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #ffb700; padding-bottom: 5px;">${plan.type === 'vehicle' ? 'Taşıt Kredisi' : 'Konut Kredisi'}</h3>
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="pdf-section" style="margin-bottom: 18px;">
+            <div style="font-size: 14px; font-weight: 800; color:#111827; border-bottom: 2px solid #ffb700; padding-bottom: 6px; margin-bottom: 10px;">${plan.type === 'vehicle' ? 'Taşıt Kredisi' : 'Konut Kredisi'}</div>
+            <div style="background: #f8f9fa; padding: 14px; border-radius: 10px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; color:#111827;">
                 <div><strong>Banka:</strong> ${plan.housingCredit.bankName}</div>
                 <div><strong>Kredi Tutarı:</strong> ${formatCurrency(plan.housingCredit.amount)}</div>
                 <div><strong>Faiz Oranı:</strong> ${plan.housingCredit.interestRate}%</div>
@@ -312,13 +391,15 @@ const PaymentPlanDetailPage: React.FC = () => {
         ` : ''}
         
         ${plan.personalCredits.length > 0 ? `
-          <div style="margin-bottom: 30px;">
-            <h3 style="color: #333; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #ffb700; padding-bottom: 5px;">İhtiyaç Kredileri</h3>
+          <div class="pdf-section" style="margin-bottom: 18px;">
+            <div style="font-size: 14px; font-weight: 800; color:#111827; border-bottom: 2px solid #ffb700; padding-bottom: 6px; margin-bottom: 10px;">İhtiyaç Kredileri</div>
             ${plan.personalCredits.map(credit => `
-              <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                  <div><strong>Banka:</strong> ${credit.bankName}</div>
-                  <div><strong>Kredi Tutarı:</strong> ${formatCurrency(credit.amount)}</div>
+              <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; margin-bottom: 10px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap: 10px; margin-bottom: 8px;">
+                  <div style="font-weight: 800; font-size: 12px; color:#111827;">${credit.bankName}</div>
+                  <div style="font-weight: 800; font-size: 12px; color:#ea580c; white-space: nowrap;">${formatCurrency(credit.amount)}</div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color:#111827;">
                   <div><strong>Faiz Oranı:</strong> ${credit.interestRate}%</div>
                   <div><strong>Vade:</strong> ${credit.term} Ay</div>
                   <div><strong>Aylık Taksit:</strong> ${formatCurrency(credit.monthlyPayment)}</div>
@@ -328,94 +409,142 @@ const PaymentPlanDetailPage: React.FC = () => {
             `).join('')}
           </div>
         ` : ''}
+
+        ${(() => {
+          const incomes = plan.monthlyIncomes || [];
+          if (incomes.length === 0) return '';
+          const totalIncome = incomes.reduce((sum, i) => sum + (i.amount || 0), 0);
+          return `
+            <div class="pdf-section" style="margin-bottom: 18px;">
+              <div style="font-size: 14px; font-weight: 800; color:#111827; border-bottom: 2px solid #ffb700; padding-bottom: 6px; margin-bottom: 10px;">Aylık Gelirler</div>
+              <div style="border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden;">
+                ${incomes.map(income => `
+                  <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-bottom: 1px solid #f1f5f9;">
+                    <div style="font-size: 12px; color:#111827;">${income.description}</div>
+                    <div style="font-size: 12px; font-weight: 800; color:#111827; white-space: nowrap;">${formatCurrency(income.amount)}</div>
+                  </div>
+                `).join('')}
+                <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px; background: #ecfdf5;">
+                  <div style="font-size: 12px; font-weight: 900; color:#111827;">Toplam Aylık Gelir</div>
+                  <div style="font-size: 12px; font-weight: 900; color:#111827; white-space: nowrap;">${formatCurrency(totalIncome)}</div>
+                </div>
+              </div>
+            </div>
+            ${periodicPayments.length > 0 ? `
+              <div class="pdf-section" style="margin-bottom: 18px;">
+                <div style="font-size: 14px; font-weight: 800; color:#111827; border-bottom: 2px solid #ffb700; padding-bottom: 6px; margin-bottom: 10px;">Gelir / Taksit Uygunluğu</div>
+                <div style="border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden;">
+                  ${periodicPayments.map((p) => {
+                    const diff = totalIncome - p.monthlyPayment;
+                    const ok = diff >= 0;
+                    return `
+                      <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-bottom: 1px solid #f1f5f9;">
+                        <div style="font-size: 12px; color:#111827;">
+                          <div style="font-weight: 800;">${p.description}</div>
+                          <div style="font-size: 11px; color:#6b7280; margin-top: 2px;">${p.startMonth}. ay - ${p.endMonth}. ay</div>
+                        </div>
+                        <div style="text-align: right;">
+                          <div style="font-size: 12px; color:#6b7280;">Gelir - Taksit</div>
+                          <div style="font-size: 12px; font-weight: 900; color:${ok ? '#047857' : '#b91c1c'};">${formatCurrency(diff)} ${ok ? '(Yeterli)' : '(Yetersiz)'}</div>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            ` : ''}
+          `;
+        })()}
         
         ${periodicPayments.length > 0 ? `
-          <div style="margin-bottom: 30px;">
-            <h3 style="color: #333; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #ffb700; padding-bottom: 5px;">Dönemsel Ödeme Planı</h3>
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-              <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Kredilerinizin farklı sürelerle bitmesi nedeniyle aylık ödemeniz dönemsel olarak değişecektir:</p>
+          <div class="pdf-section" style="margin-bottom: 18px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap: 12px; border-bottom: 2px solid #ffb700; padding-bottom: 6px; margin-bottom: 10px;">
+              <div style="font-size: 14px; font-weight: 800; color:#111827;">Dönemsel Ödeme Planı</div>
+              ${fixedPaymentLabel ? `<div style="font-size: 11px; font-weight: 800; color:#047857; background:#ecfdf5; border:1px solid #a7f3d0; padding: 4px 10px; border-radius: 999px;">${fixedPaymentLabel}</div>` : ''}
+            </div>
+            <div style="background: #f8f9fa; padding: 14px; border-radius: 10px;">
+              <div style="font-size: 12px; color:#4b5563; margin-bottom: 10px;">Kredilerinizin farklı sürelerle bitmesi nedeniyle aylık ödemeniz dönemsel olarak değişecektir:</div>
               ${periodicPayments.map((period) => `
-                <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #ffb700;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="background: white; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #ffb700;">
+                  <div style="display: flex; justify-content: space-between; gap: 12px; align-items: flex-start;">
                     <div>
-                      <h4 style="color: #333; font-size: 16px; margin: 0;">${period.description}</h4>
-                      <p style="color: #666; font-size: 12px; margin: 2px 0 0 0;">${period.startMonth}. ay - ${period.endMonth}. ay (${period.endMonth - period.startMonth + 1} ay)</p>
+                      <div style="font-weight: 800; font-size: 12px; color:#111827;">${period.description}</div>
+                      <div style="font-size: 11px; color:#6b7280; margin-top: 2px;">${period.startMonth}. ay - ${period.endMonth}. ay (${period.endMonth - period.startMonth + 1} ay)</div>
                     </div>
                     <div style="text-align: right;">
-                      <p style="color: #ffb700; font-size: 18px; font-weight: bold; margin: 0;">${formatCurrency(period.monthlyPayment)}</p>
-                      <p style="color: #666; font-size: 12px; margin: 2px 0 0 0;">aylık ödeme</p>
+                      <div style="color: #ffb700; font-size: 14px; font-weight: 900;">${formatCurrency(period.monthlyPayment)}</div>
+                      <div style="color: #6b7280; font-size: 11px;">aylık ödeme</div>
                     </div>
                   </div>
-                  <div>
-                    <p style="color: #666; font-size: 12px; margin: 0 0 5px 0; font-weight: bold;">Bu dönemde aktif krediler:</p>
-                    ${period.activeCredits.map(credit => `
-                      <p style="color: #666; font-size: 11px; margin: 0 0 2px 15px;">• ${credit}</p>
-                    `).join('')}
-                  </div>
+                  ${period.activeCredits.length > 0 ? `
+                    <div style="margin-top: 10px;">
+                      <div style="color: #6b7280; font-size: 11px; font-weight: 700; margin-bottom: 4px;">Bu dönemde aktif krediler:</div>
+                      ${period.activeCredits.map((credit: string) => `
+                        <div style="color: #6b7280; font-size: 11px; margin-left: 12px;">• ${credit}</div>
+                      `).join('')}
+                    </div>
+                  ` : ''}
                 </div>
               `).join('')}
             </div>
           </div>
         ` : ''}
         
-        <div style="margin-bottom: 30px;">
-          <h3 style="color: #333; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #ffb700; padding-bottom: 5px;">Ek Masraflar</h3>
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-            ${(() => {
-              const additionalExpenses = plan.additionalExpenses || calculateAdditionalExpenses(plan.price);
-              return `
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
-                  <span>Tapu Masrafı (%4)</span>
-                  <span style="font-weight: bold;">${formatCurrency(additionalExpenses.titleDeedFee)}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
-                  <span>Kredi Tahsis Ücreti</span>
-                  <span style="font-weight: bold;">${formatCurrency(additionalExpenses.loanAllocationFee)}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
-                  <span>Ekspertiz Ücreti</span>
-                  <span style="font-weight: bold;">${formatCurrency(additionalExpenses.appraisalFee)}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
-                  <span>İpotek Tesis Ücreti</span>
-                  <span style="font-weight: bold;">${formatCurrency(additionalExpenses.mortgageEstablishmentFee)}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
-                  <span>DASK Sigorta Primi (Yıllık)</span>
-                  <span style="font-weight: bold;">${formatCurrency(additionalExpenses.daskInsurancePremium)}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 12px 0; margin-top: 10px; border-top: 2px solid #ffb700; font-weight: bold; font-size: 16px;">
-                  <span>Toplam Ek Masraf</span>
-                  <span>${formatCurrency(additionalExpenses.total)}</span>
-                </div>
-              `;
-            })()} 
+        ${plan.type === 'housing' ? `
+          <div class="pdf-section" style="margin-bottom: 18px;">
+            <div style="font-size: 14px; font-weight: 800; color:#111827; border-bottom: 2px solid #ffb700; padding-bottom: 6px; margin-bottom: 10px;">Ek Masraflar</div>
+            <div style="border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden;">
+              ${(() => {
+                const additionalExpenses = normalizeAdditionalExpenses(plan.price, plan.additionalExpenses);
+                const customExpenses = additionalExpenses.customExpenses || [];
+                const rows = [
+                  { label: 'Tapu Masrafı', value: additionalExpenses.titleDeedFee },
+                  { label: 'Kredi Tahsis Ücreti', value: additionalExpenses.loanAllocationFee },
+                  { label: 'Ekspertiz Ücreti', value: additionalExpenses.appraisalFee },
+                  { label: 'İpotek Tesis Ücreti', value: additionalExpenses.mortgageEstablishmentFee },
+                  { label: 'DASK Sigorta Primi (Yıllık)', value: additionalExpenses.daskInsurancePremium },
+                  { label: 'Döner Sermaye Bedeli', value: additionalExpenses.revolvingFundFee },
+                  ...customExpenses.map(item => ({ label: item.description, value: item.amount }))
+                ];
+                return rows.map((row) => `
+                  <div style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-bottom: 1px solid #f1f5f9;">
+                    <div style="font-size: 12px; color:#111827;">${row.label}</div>
+                    <div style="font-size: 12px; font-weight: 800; color:#111827; white-space: nowrap;">${formatCurrency(row.value)}</div>
+                  </div>
+                `).join('') + `
+                  <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px; background: #fffbeb;">
+                    <div style="font-size: 12px; font-weight: 900; color:#111827;">Toplam Ek Masraf</div>
+                    <div style="font-size: 12px; font-weight: 900; color:#111827; white-space: nowrap;">${formatCurrency(additionalExpenses.total)}</div>
+                  </div>
+                `;
+              })()}
+            </div>
           </div>
-        </div>
+        ` : ''}
         
         ${plan.monthlyPayments && plan.monthlyPayments.length > 0 ? `
-          <div style="margin-bottom: 30px;">
-            <h3 style="color: #333; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #ffb700; padding-bottom: 5px;">Aylık Ödeme Planı</h3>
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-size: 12px; font-weight: bold; padding: 10px; background: #ffb700; color: white; border-radius: 4px; margin-bottom: 10px;">
+          <div class="pdf-section" style="margin-bottom: 18px;">
+            <div style="font-size: 14px; font-weight: 800; color:#111827; border-bottom: 2px solid #ffb700; padding-bottom: 6px; margin-bottom: 10px;">Aylık Ödeme Planı</div>
+            <div style="border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden;">
+              <div style="display: grid; grid-template-columns: 0.6fr 1fr 1fr 1fr; gap: 8px; font-size: 11px; font-weight: 900; padding: 10px 12px; background: #ffb700; color: #111827;">
                 <div>Ay</div>
                 <div>${plan.type === 'vehicle' ? 'Taşıt Kredisi' : 'Konut Kredisi'}</div>
                 <div>Kişisel Krediler</div>
-                <div>Toplam Aylık</div>
+                <div>Toplam</div>
               </div>
               ${plan.monthlyPayments.slice(0, 24).map(payment => {
                 const personalTotal = payment.personalPayments ? payment.personalPayments.reduce((sum: number, pp: any) => sum + pp.amount, 0) : 0;
                 return `
-                  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-size: 12px; padding: 8px; border-bottom: 1px solid #ddd;">
-                    <div><strong>${payment.month}. Ay</strong></div>
+                  <div style="display: grid; grid-template-columns: 0.6fr 1fr 1fr 1fr; gap: 8px; font-size: 11px; padding: 9px 12px; border-top: 1px solid #f1f5f9;">
+                    <div style="font-weight: 800;">${payment.month}. Ay</div>
                     <div>${formatCurrency(payment.housingPayment || 0)}</div>
                     <div>${formatCurrency(personalTotal)}</div>
-                    <div style="color: #dc3545; font-weight: bold;">${formatCurrency(payment.totalPayment || 0)}</div>
+                    <div style="font-weight: 900; color:#dc2626;">${formatCurrency(payment.totalPayment || 0)}</div>
                   </div>
                 `;
               }).join('')}
               ${plan.monthlyPayments.length > 24 ? `
-                <div style="text-align: center; padding: 15px; color: #666; font-style: italic;">
+                <div style="text-align: center; padding: 12px; color: #6b7280; font-size: 11px;">
                   ... ve ${plan.monthlyPayments.length - 24} ay daha (Toplam ${plan.monthlyPayments.length} ay)
                 </div>
               ` : ''}
@@ -423,58 +552,122 @@ const PaymentPlanDetailPage: React.FC = () => {
           </div>
         ` : ''}
         
-        <div style="margin-bottom: 30px;">
-          <h3 style="color: #333; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #ffb700; padding-bottom: 5px;">Ödeme Özeti</h3>
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+        <div class="pdf-section" style="margin-bottom: 0;">
+          <div style="font-size: 14px; font-weight: 800; color:#111827; border-bottom: 2px solid #ffb700; padding-bottom: 6px; margin-bottom: 10px;">Ödeme Özeti</div>
+          <div style="background: #f8f9fa; padding: 14px; border-radius: 10px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; text-align: center;">
               <div>
-                <p style="color: #666; font-size: 14px; margin-bottom: 5px;">Toplam Vade</p>
-                <p style="color: #333; font-size: 18px; font-weight: bold;">${Math.max(plan.housingCredit?.term || 0, ...plan.personalCredits.map(c => c.term))} Ay</p>
+                <div style="color: #6b7280; font-size: 11px; margin-bottom: 6px;">Toplam Vade</div>
+                <div style="color: #111827; font-size: 14px; font-weight: 900;">${Math.max(plan.housingCredit?.term || 0, ...plan.personalCredits.map(c => c.term))} Ay</div>
               </div>
               <div>
-                <p style="color: #666; font-size: 14px; margin-bottom: 5px;">Aylık Ödeme</p>
-                <p style="color: #dc3545; font-size: 18px; font-weight: bold;">${formatCurrency(plan.totalMonthlyPayment)}</p>
+                <div style="color: #6b7280; font-size: 11px; margin-bottom: 6px;">Aylık Ödeme</div>
+                <div style="color: #dc2626; font-size: 14px; font-weight: 900;">${formatCurrency(plan.totalMonthlyPayment)}</div>
               </div>
               <div>
-                <p style="color: #666; font-size: 14px; margin-bottom: 5px;">Toplam Ödeme</p>
-                <p style="color: #333; font-size: 18px; font-weight: bold;">${formatCurrency((plan.housingCredit?.totalPayment || 0) + plan.personalCredits.reduce((sum, c) => sum + c.totalPayment, 0))}</p>
+                <div style="color: #6b7280; font-size: 11px; margin-bottom: 6px;">Toplam Ödeme</div>
+                <div style="color: #111827; font-size: 14px; font-weight: 900;">${formatCurrency((plan.housingCredit?.totalPayment || 0) + plan.personalCredits.reduce((sum, c) => sum + c.totalPayment, 0))}</div>
               </div>
             </div>
           </div>
         </div>
       `;
-      
-      document.body.appendChild(tempDiv);
-      
-      // Convert to canvas
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff'
-      });
-      
-      // Remove temp div
-      document.body.removeChild(tempDiv);
-      
-      // Create PDF
-      const imgData = canvas.toDataURL('image/png');
+
+      document.body.appendChild(source);
+
+      const sourceSections = Array.from(source.querySelectorAll('.pdf-section')) as HTMLElement[];
+
+      const pageEls: HTMLDivElement[] = [];
+      let currentPage = document.createElement('div');
+      currentPage.style.position = 'absolute';
+      currentPage.style.left = '-9999px';
+      currentPage.style.top = '0';
+      currentPage.style.width = `${pageWidthPx}px`;
+      currentPage.style.minHeight = `${pageHeightPx}px`;
+      currentPage.style.backgroundColor = 'white';
+      currentPage.style.padding = `${pagePaddingPx}px`;
+      currentPage.style.boxSizing = 'border-box';
+      currentPage.style.fontFamily = 'Arial, sans-serif';
+      currentPage.style.color = '#111827';
+      document.body.appendChild(currentPage);
+
+      const currentPageContent = () => currentPage;
+
+      for (const section of sourceSections) {
+        const clone = section.cloneNode(true) as HTMLElement;
+        currentPageContent().appendChild(clone);
+        if (currentPage.scrollHeight > pageHeightPx) {
+          currentPageContent().removeChild(clone);
+          if (currentPage.childElementCount > 0) {
+            pageEls.push(currentPage);
+            currentPage = document.createElement('div');
+            currentPage.style.position = 'absolute';
+            currentPage.style.left = '-9999px';
+            currentPage.style.top = '0';
+            currentPage.style.width = `${pageWidthPx}px`;
+            currentPage.style.minHeight = `${pageHeightPx}px`;
+            currentPage.style.backgroundColor = 'white';
+            currentPage.style.padding = `${pagePaddingPx}px`;
+            currentPage.style.boxSizing = 'border-box';
+            currentPage.style.fontFamily = 'Arial, sans-serif';
+            currentPage.style.color = '#111827';
+            document.body.appendChild(currentPage);
+            currentPageContent().appendChild(clone);
+          } else {
+            currentPageContent().appendChild(clone);
+          }
+        }
+      }
+
+      if (currentPage.childElementCount > 0) {
+        pageEls.push(currentPage);
+      } else {
+        document.body.removeChild(currentPage);
+      }
+
+      document.body.removeChild(source);
+
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 295;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      
-      let position = 0;
-      
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      const marginMm = 10;
+      const contentWidthMm = 210 - marginMm * 2;
+      const contentHeightMm = 297 - marginMm * 2;
+
+      for (let i = 0; i < pageEls.length; i++) {
+        const pageEl = pageEls[i];
+        const canvas = await html2canvas(pageEl, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        });
+
+        const mmPerPx = contentWidthMm / canvas.width;
+        const sliceHeightPx = Math.floor(contentHeightMm / mmPerPx);
+
+        let offsetPx = 0;
+        while (offsetPx < canvas.height) {
+          const remainingPx = canvas.height - offsetPx;
+          const currentSliceHeightPx = Math.min(sliceHeightPx, remainingPx);
+
+          const sliceCanvas = document.createElement('canvas');
+          sliceCanvas.width = canvas.width;
+          sliceCanvas.height = currentSliceHeightPx;
+          const ctx = sliceCanvas.getContext('2d');
+          if (!ctx) break;
+          ctx.drawImage(canvas, 0, offsetPx, canvas.width, currentSliceHeightPx, 0, 0, canvas.width, currentSliceHeightPx);
+
+          const imgData = sliceCanvas.toDataURL('image/png');
+          const imgHeightMm = (currentSliceHeightPx * contentWidthMm) / canvas.width;
+
+          if (i > 0 || offsetPx > 0) {
+            pdf.addPage();
+          }
+          pdf.addImage(imgData, 'PNG', marginMm, marginMm, contentWidthMm, imgHeightMm);
+
+          offsetPx += currentSliceHeightPx;
+        }
+
+        document.body.removeChild(pageEl);
       }
       
       // Download PDF with secure filename
@@ -519,7 +712,10 @@ const PaymentPlanDetailPage: React.FC = () => {
   const totalDownPayment = plan.downPayments.reduce((sum, dp) => sum + dp.amount, 0);
   const totalPersonalCreditAmount = plan.personalCredits.reduce((sum, credit) => sum + credit.amount, 0);
   const housingCreditAmount = plan.housingCredit?.amount || 0;
-  const remainingAmount = plan.price - totalDownPayment - housingCreditAmount - totalPersonalCreditAmount;
+  const additionalExpenses = plan.type === 'housing' ? normalizeAdditionalExpenses(plan.price, plan.additionalExpenses) : null;
+  const targetTotal = plan.price + (additionalExpenses?.total || 0);
+  const remainingAmount = targetTotal - totalDownPayment - housingCreditAmount - totalPersonalCreditAmount;
+  const totalMonthlyIncome = (plan.monthlyIncomes || []).reduce((sum, income) => sum + income.amount, 0);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -705,6 +901,67 @@ const PaymentPlanDetailPage: React.FC = () => {
           </div>
         )}
 
+        {/* Monthly Incomes */}
+        {(plan.monthlyIncomes || []).length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Aylık Gelirler</h2>
+            <div className="space-y-3">
+              {(plan.monthlyIncomes || []).map((income) => (
+                <div key={income.id} className="flex items-center justify-between p-3 sm:p-4 bg-emerald-50 rounded-lg">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{income.description}</p>
+                  </div>
+                  <p className="text-sm sm:text-lg font-semibold text-emerald-700 ml-3 whitespace-nowrap">
+                    {formatCurrency(income.amount)}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 p-3 sm:p-4 bg-emerald-50 rounded-lg">
+              <p className="text-sm font-medium text-emerald-800">Toplam Aylık Gelir: {formatCurrency(totalMonthlyIncome)}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Income / Installment Fit */}
+        {(plan.monthlyIncomes || []).length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Gelir / Taksit Uygunluğu</h2>
+            {periodicPayments.length > 0 ? (
+              <div className="space-y-3">
+                {periodicPayments.map((period, index) => {
+                  const diff = totalMonthlyIncome - period.monthlyPayment;
+                  const ok = diff >= 0;
+                  return (
+                    <div key={index} className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 text-sm sm:text-base">{period.description}</p>
+                          <p className="text-xs sm:text-sm text-gray-600">{period.startMonth}. ay - {period.endMonth}. ay</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs sm:text-sm text-gray-600">Aylık Taksit</p>
+                          <p className="text-sm sm:text-lg font-semibold text-gray-900">{formatCurrency(period.monthlyPayment)}</p>
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center justify-between">
+                        <p className="text-xs sm:text-sm text-gray-600">Gelir - Taksit</p>
+                        <p className={`text-xs sm:text-sm font-semibold ${ok ? 'text-emerald-700' : 'text-red-700'}`}>
+                          {formatCurrency(diff)} {ok ? '(Yeterli)' : '(Yetersiz)'}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-sm text-gray-700">Kredi seçimi olmadığı için dönemsel taksit hesaplanamadı.</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Financial Summary */}
         <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Finansal Özet</h2>
@@ -713,6 +970,12 @@ const PaymentPlanDetailPage: React.FC = () => {
               <span className="text-gray-600">{plan.type === 'vehicle' ? 'Araç Fiyatı' : 'Ev Fiyatı'}</span>
               <span className="font-semibold">{formatCurrency(plan.price)}</span>
             </div>
+            {plan.type === 'housing' && additionalExpenses && (
+              <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                <span className="text-gray-600">Ek Masraflar</span>
+                <span className="font-semibold">{formatCurrency(additionalExpenses.total)}</span>
+              </div>
+            )}
             <div className="flex justify-between items-center py-2 border-b border-gray-200">
               <span className="text-gray-600">Toplam Peşinat</span>
               <span className="font-semibold text-green-600">-{formatCurrency(totalDownPayment)}</span>
@@ -742,45 +1005,59 @@ const PaymentPlanDetailPage: React.FC = () => {
         </div>
 
         {/* Additional Expenses */}
-        <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Ek Masraflar</h2>
-          {(() => {
-            const additionalExpenses = plan.additionalExpenses || calculateAdditionalExpenses(plan.price);
-            return (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="text-gray-600">Tapu Masrafı (%4)</span>
-                  <span className="font-semibold">{formatCurrency(additionalExpenses.titleDeedFee)}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="text-gray-600">Kredi Tahsis Ücreti</span>
-                  <span className="font-semibold">{formatCurrency(additionalExpenses.loanAllocationFee)}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="text-gray-600">Ekspertiz Ücreti</span>
-                  <span className="font-semibold">{formatCurrency(additionalExpenses.appraisalFee)}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="text-gray-600">İpotek Tesis Ücreti</span>
-                  <span className="font-semibold">{formatCurrency(additionalExpenses.mortgageEstablishmentFee)}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="text-gray-600">DASK Sigorta Primi (Yıllık)</span>
-                  <span className="font-semibold">{formatCurrency(additionalExpenses.daskInsurancePremium)}</span>
-                </div>
-                <div className="flex justify-between items-center py-3 bg-[#ffb700]/10 rounded-lg px-4">
-                  <span className="font-semibold text-gray-900">Toplam Ek Masraf</span>
-                  <span className="font-bold text-lg text-[#ffb700]">{formatCurrency(additionalExpenses.total)}</span>
-                </div>
+        {plan.type === 'housing' && additionalExpenses && (
+          <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Ek Masraflar</h2>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                <span className="text-gray-600">Tapu Masrafı</span>
+                <span className="font-semibold">{formatCurrency(additionalExpenses.titleDeedFee)}</span>
               </div>
-            );
-          })()}
-        </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                <span className="text-gray-600">Kredi Tahsis Ücreti</span>
+                <span className="font-semibold">{formatCurrency(additionalExpenses.loanAllocationFee)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                <span className="text-gray-600">Ekspertiz Ücreti</span>
+                <span className="font-semibold">{formatCurrency(additionalExpenses.appraisalFee)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                <span className="text-gray-600">İpotek Tesis Ücreti</span>
+                <span className="font-semibold">{formatCurrency(additionalExpenses.mortgageEstablishmentFee)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                <span className="text-gray-600">DASK Sigorta Primi (Yıllık)</span>
+                <span className="font-semibold">{formatCurrency(additionalExpenses.daskInsurancePremium)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                <span className="text-gray-600">Döner Sermaye Bedeli</span>
+                <span className="font-semibold">{formatCurrency(additionalExpenses.revolvingFundFee)}</span>
+              </div>
+              {(additionalExpenses.customExpenses || []).map((item) => (
+                <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-200">
+                  <span className="text-gray-600">{item.description}</span>
+                  <span className="font-semibold">{formatCurrency(item.amount)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between items-center py-3 bg-[#ffb700]/10 rounded-lg px-4">
+                <span className="font-semibold text-gray-900">Toplam Ek Masraf</span>
+                <span className="font-bold text-lg text-[#ffb700]">{formatCurrency(additionalExpenses.total)}</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Periodic Payment Schedule */}
         {periodicPayments.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Dönemsel Ödeme Planı</h2>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Dönemsel Ödeme Planı</h2>
+              {fixedPaymentLabel && (
+                <span className="text-xs sm:text-sm font-semibold bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200">
+                  {fixedPaymentLabel}
+                </span>
+              )}
+            </div>
             <div className="space-y-3 sm:space-y-4">
               {periodicPayments.map((period, index) => (
                 <div key={index} className="bg-gray-50 p-3 sm:p-4 rounded-lg">
