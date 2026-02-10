@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Target, Plus, Calendar, TrendingUp, CheckCircle, Clock, DollarSign, Pause, PlusCircle } from 'lucide-react';
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
+import { Target, Plus, Calendar, TrendingUp, CheckCircle, Clock, DollarSign, Pause, PlusCircle, ArrowLeft, Settings } from 'lucide-react';
+import { addDoc, collection, doc, updateDoc, query, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
@@ -8,7 +8,7 @@ import { ErrorMessage } from '../../components/common/ErrorMessage';
 import { Modal } from '../../components/common/Modal';
 import { formatCurrency } from '../../utils/currency';
 import { calculateDaysRemaining } from '../../utils/date';
-import { useFirebaseData } from '../../hooks/useFirebaseData';
+import { useNavigate } from 'react-router-dom';
 
 interface Goal {
   id: string;
@@ -16,36 +16,72 @@ interface Goal {
   description?: string;
   targetAmount: number;
   currentAmount: number;
-  currency: 'TL' | 'USD' | 'EUR';
+  currency: 'TRY' | 'USD' | 'EUR';
   category: string;
   priority: 'low' | 'medium' | 'high';
   status: 'active' | 'completed' | 'paused';
-  deadline: Date;
+  targetDate: string; // Store as ISO string
   userId: string;
-  createdAt: Date;
-  targetDate?: Date;
+  createdAt: { seconds: number; nanoseconds: number; };
 }
 
-const GOAL_CATEGORIES = {
+const GOAL_CATEGORIES: { [key: string]: { label: string; color: string; icon: React.ElementType } } = {
   savings: { label: 'Tasarruf', color: 'bg-green-500', icon: DollarSign },
   investment: { label: 'Yatırım', color: 'bg-blue-500', icon: TrendingUp },
   debt: { label: 'Borç Ödeme', color: 'bg-red-500', icon: Target },
-  purchase: { label: 'Alışveriş', color: 'bg-yellow-500', icon: Calendar },
+  purchase: { label: 'Büyük Alışveriş', color: 'bg-purple-500', icon: Calendar },
   other: { label: 'Diğer', color: 'bg-gray-500', icon: Target }
 };
 
-const PRIORITY_COLORS = {
-  low: 'bg-gray-100 text-gray-800',
-  medium: 'bg-yellow-100 text-yellow-800',
-  high: 'bg-red-100 text-red-800'
+const PRIORITY_STYLES = {
+  low: { text: 'Düşük', className: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300' },
+  medium: { text: 'Orta', className: 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300' },
+  high: { text: 'Yüksek', className: 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300' }
 };
 
 export const GoalsPage = () => {
   const { user } = useAuth();
-  const { data: goals = [], loading, error, reload } = useFirebaseData<Goal>('goals');
+  const navigate = useNavigate();
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentRates, setCurrentRates] = useState<any>(null);
 
-  // Anlık kurları al
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const [depositAmount, setDepositAmount] = useState('');
+
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    targetAmount: '',
+    targetDate: '',
+    category: 'savings',
+    priority: 'medium',
+    currency: 'TRY' as Goal['currency']
+  });
+
+  const fetchGoals = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const q = query(collection(db, `users/${user.id}/goals`));
+      const querySnapshot = await getDocs(q);
+      const goalsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Goal));
+      setGoals(goalsData);
+    } catch (err) {
+      setError('Hedefler yüklenirken bir hata oluştu.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
+    fetchGoals();
+
     const fetchCurrentRates = async () => {
       try {
         const response = await fetch('https://doviz-api.onrender.com/api');
@@ -59,114 +95,62 @@ export const GoalsPage = () => {
     };
 
     fetchCurrentRates();
-    // Her 30 saniyede bir kurları güncelle
-    const interval = setInterval(fetchCurrentRates, 30000);
+    const interval = setInterval(fetchCurrentRates, 60000); // Update every minute
     return () => clearInterval(interval);
-  }, []);
 
-  // Kur hesaplaması yapan fonksiyon
-  const calculateRealTimeProgress = (goal: Goal) => {
-    if (!currentRates || goal.currency === 'TL') {
-      return calculateProgress(goal.currentAmount, goal.targetAmount);
-    }
+  }, [user]);
 
-    let currentAmountInTL = goal.currentAmount;
-    let targetAmountInTL = goal.targetAmount;
-
-    if (goal.currency === 'USD' && currentRates.Dolar) {
-      const usdRate = parseFloat(currentRates.Dolar.replace(',', '.'));
-      currentAmountInTL = goal.currentAmount * usdRate;
-      targetAmountInTL = goal.targetAmount * usdRate;
-    } else if (goal.currency === 'EUR' && currentRates.Euro) {
-      const eurRate = parseFloat(currentRates.Euro.replace(',', '.'));
-      currentAmountInTL = goal.currentAmount * eurRate;
-      targetAmountInTL = goal.targetAmount * eurRate;
-    }
-
-    return calculateProgress(currentAmountInTL, targetAmountInTL);
+  const openModalForNew = () => {
+    setEditingGoal(null);
+    setFormData({ title: '', description: '', targetAmount: '', targetDate: '', category: 'savings', priority: 'medium', currency: 'TRY' });
+    setIsModalOpen(true);
   };
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
-  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [depositData, setDepositData] = useState({
-    amount: '',
-    currency: 'TL' as 'TL' | 'USD' | 'EUR',
-    description: ''
-  });
-  const [exchangeRates, setExchangeRates] = useState<any>(null);
-  const [currentRates, setCurrentRates] = useState<any>(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    targetAmount: '',
-    targetDate: '',
-    category: 'savings' as Goal['category'],
-    priority: 'medium' as Goal['priority'],
-    currency: 'TL' as Goal['currency']
-  });
 
-  const userGoals = goals.filter(goal => goal.userId === user?.id);
-  const activeGoals = userGoals.filter(goal => goal.status !== 'completed');
-  const completedGoals = userGoals.filter(goal => goal.status === 'completed');
+  const openModalForEdit = (goal: Goal) => {
+    setEditingGoal(goal);
+    setFormData({
+      title: goal.title,
+      description: goal.description || '',
+      targetAmount: String(goal.targetAmount),
+      targetDate: goal.targetDate,
+      category: goal.category,
+      priority: goal.priority,
+      currency: goal.currency
+    });
+    setIsModalOpen(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
-    try {
-      const goalData = {
-        ...formData,
-        targetAmount: parseFloat(formData.targetAmount),
-        currentAmount: 0,
-        userId: user.id,
-        status: 'active' as Goal['status'],
-        deadline: new Date(formData.targetDate),
-        createdAt: new Date()
-      };
+    const goalData = {
+      ...formData,
+      targetAmount: parseFloat(formData.targetAmount),
+      userId: user.id,
+      updatedAt: new Date(),
+    };
 
+    try {
       if (editingGoal) {
-        // Güncelleme işlemi
-        await updateDoc(doc(db, 'teknokapsul', user.id, 'goals', editingGoal.id), goalData);
+        const goalRef = doc(db, 'users', user.id, 'goals', editingGoal.id);
+        await updateDoc(goalRef, goalData);
       } else {
-        // Yeni hedef ekleme
-        await addDoc(collection(db, 'teknokapsul', user.id, 'goals'), goalData);
+        const newGoalData = {
+          ...goalData,
+          currentAmount: 0,
+          status: 'active' as Goal['status'],
+          createdAt: new Date(),
+        };
+        await addDoc(collection(db, 'users', user.id, 'goals'), newGoalData);
       }
       
       setIsModalOpen(false);
       setEditingGoal(null);
-      resetForm();
-      await reload();
+      fetchGoals();
     } catch (error) {
       console.error('Error saving goal:', error);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      description: '',
-      targetAmount: '',
-      targetDate: '',
-      category: 'savings',
-      priority: 'medium',
-      currency: 'TL'
-    });
-  };
-
-
-
-  const handlePause = async (goalId: string) => {
-    if (!user || !window.confirm('Bu hedefi pasife almak istediğinizden emin misiniz?')) return;
-
-    try {
-      await updateDoc(doc(db, 'teknokapsul', user.id, 'goals', goalId), {
-        status: 'paused',
-        updatedAt: new Date()
-      });
-      await reload();
-    } catch (error) {
-      console.error('Error pausing goal:', error);
+      setError('Hedef kaydedilirken bir hata oluştu.');
     }
   };
 
@@ -174,528 +158,262 @@ export const GoalsPage = () => {
     e.preventDefault();
     if (!user || !selectedGoal) return;
 
-    try {
-      let depositAmount = parseFloat(depositData.amount);
-      
-      // Döviz kurunu al ve TL'ye çevir
-       if (depositData.currency !== 'TL') {
-         try {
-           const response = await fetch('https://doviz-api.onrender.com/api');
-           const data = await response.json();
-           
-           if (data.success && data.data && data.data.length > 0) {
-             const rates = data.data[0];
-             if (depositData.currency === 'USD' && rates.Dolar) {
-               const usdRate = parseFloat(rates.Dolar.replace(',', '.'));
-               depositAmount = depositAmount * usdRate;
-             } else if (depositData.currency === 'EUR' && rates.Euro) {
-               const eurRate = parseFloat(rates.Euro.replace(',', '.'));
-               depositAmount = depositAmount * eurRate;
-             }
-           }
-         } catch (error) {
-           console.error('Döviz kuru alınamadı:', error);
-           alert('Döviz kuru alınamadı. Lütfen tekrar deneyin.');
-           return;
-         }
-       }
+    const amount = parseFloat(depositAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setError('Geçerli bir tutar girin.');
+      return;
+    }
 
-      const newCurrentAmount = selectedGoal.currentAmount + depositAmount;
+    try {
+      const newCurrentAmount = selectedGoal.currentAmount + amount;
       const newStatus = newCurrentAmount >= selectedGoal.targetAmount ? 'completed' : 'active';
 
-      await updateDoc(doc(db, 'teknokapsul', user.id, 'goals', selectedGoal.id), {
-        currentAmount: newCurrentAmount,
-        status: newStatus,
-        updatedAt: new Date()
-      });
-      
+      const goalRef = doc(db, 'users', user.id, 'goals', selectedGoal.id);
+      await updateDoc(goalRef, { currentAmount: newCurrentAmount, status: newStatus });
+
       setIsDepositModalOpen(false);
       setSelectedGoal(null);
-      setDepositData({ amount: '', currency: 'TL', description: '' });
-      await reload();
+      setDepositAmount('');
+      fetchGoals();
     } catch (error) {
       console.error('Error depositing to goal:', error);
+      setError('Para yatırma işleminde hata oluştu.');
     }
   };
 
-  const openDepositModal = async (goal: Goal) => {
-    setSelectedGoal(goal);
-    setIsDepositModalOpen(true);
-    
-    // Döviz kurlarını al
-     try {
-       const response = await fetch('https://doviz-api.onrender.com/api');
-       const data = await response.json();
-       if (data.success && data.data && data.data.length > 0) {
-         setExchangeRates(data.data[0]);
-       }
-     } catch (error) {
-       console.error('Error fetching exchange rates:', error);
-     }
+  const toggleGoalStatus = async (goal: Goal, status: 'active' | 'paused' | 'completed') => {
+    if (!user) return;
+    try {
+      const goalRef = doc(db, 'users', user.id, 'goals', goal.id);
+      await updateDoc(goalRef, { status });
+      fetchGoals();
+    } catch (error) {
+      console.error(`Error updating goal status to ${status}:`, error);
+      setError(`Hedef durumu güncellenirken bir hata oluştu.`);
+    }
   };
 
-
-
   const calculateProgress = (current: number, target: number) => {
+    if (target === 0) return 0;
     return Math.min((current / target) * 100, 100);
   };
 
   if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message="Hedefler yüklenirken bir hata oluştu." />;
+  if (error) return <ErrorMessage message={error} />;
+
+  const activeGoals = goals.filter(g => g.status === 'active');
+  const pausedGoals = goals.filter(g => g.status === 'paused');
+  const completedGoals = goals.filter(g => g.status === 'completed');
 
   return (
-    <div className="bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Target className="w-6 h-6" style={{ color: '#ffb700' }} />
-              <h1 className="text-xl font-semibold text-gray-900">Hedeflerim</h1>
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
+      <header className="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-20">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center">
+              <button onClick={() => navigate(-1)} className="mr-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                <ArrowLeft className="w-6 h-6 text-gray-800 dark:text-gray-200" />
+              </button>
+              <div className="flex items-center gap-2">
+                <Target className="w-7 h-7 text-yellow-500" />
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Hedeflerim</h1>
+              </div>
             </div>
-            <button
-              onClick={() => {
-                setEditingGoal(null);
-                resetForm();
-                setIsModalOpen(true);
-              }}
-              className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl"
-              style={{ backgroundColor: '#ffb700' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
-            >
-              <Plus className="w-4 h-4" />
-              Ekle
-            </button>
+          <button onClick={openModalForNew} className="bg-yellow-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-yellow-600">
+            <Plus size={16} />
+            Yeni Hedef
+          </button>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto p-4 space-y-6">
+        {goals.length === 0 ? (
+          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+            <Target className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-200">Henüz hedef oluşturulmadı.</h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">İlk hedefini oluşturarak birikime başla.</p>
+            <div className="mt-6">
+              <button onClick={openModalForNew} type="button" className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                <Plus className="-ml-1 mr-2 h-5 w-5" />
+                Yeni Hedef Ekle
+              </button>
+            </div>
           </div>
+        ) : (
+          <>
+            <GoalSection title="Aktif Hedefler" goals={activeGoals} onDeposit={setSelectedGoal} onToggleStatus={toggleGoalStatus} onEdit={openModalForEdit} calculateProgress={calculateProgress} rates={currentRates} />
+            <GoalSection title="Durdurulan Hedefler" goals={pausedGoals} onDeposit={setSelectedGoal} onToggleStatus={toggleGoalStatus} onEdit={openModalForEdit} calculateProgress={calculateProgress} rates={currentRates} />
+            <GoalSection title="Tamamlanan Hedefler" goals={completedGoals} onDeposit={setSelectedGoal} onToggleStatus={toggleGoalStatus} onEdit={openModalForEdit} calculateProgress={calculateProgress} rates={currentRates} />
+          </>
+        )}
+      </main>
+
+      {isModalOpen && (
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <div className="p-6 bg-white dark:bg-gray-800 rounded-lg">
+            <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100">{editingGoal ? 'Hedefi Düzenle' : 'Yeni Hedef Ekle'}</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <input type="text" placeholder="Hedef Başlığı (Örn: Tatil Fonu)" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required />
+              <textarea placeholder="Açıklama" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+              <div className="grid grid-cols-2 gap-4">
+                <input type="number" placeholder="Hedef Tutar" value={formData.targetAmount} onChange={(e) => setFormData({ ...formData, targetAmount: e.target.value })} className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required />
+                <select value={formData.currency} onChange={(e) => setFormData({ ...formData, currency: e.target.value as Goal['currency'] })} className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  <option value="TRY">TRY</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                </select>
+              </div>
+              <input type="date" value={formData.targetDate} onChange={(e) => setFormData({ ...formData, targetDate: e.target.value })} className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required />
+              <div className="grid grid-cols-2 gap-4">
+                <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  {Object.entries(GOAL_CATEGORIES).map(([key, { label }]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+                <select value={formData.priority} onChange={(e) => setFormData({ ...formData, priority: e.target.value as Goal['priority'] })} className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  <option value="low">Düşük</option>
+                  <option value="medium">Orta</option>
+                  <option value="high">Yüksek</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-4 pt-4">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">İptal</button>
+                <button type="submit" className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">Kaydet</button>
+              </div>
+            </form>
+          </div>
+        </Modal>
+      )}
+
+      {selectedGoal && (
+        <Modal onClose={() => setSelectedGoal(null)}>
+          <div className="p-6 bg-white dark:bg-gray-800 rounded-lg">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Para Ekle: {selectedGoal.title}</h2>
+            <form onSubmit={handleDeposit} className="space-y-4">
+              <input type="number" placeholder="Eklenecek Tutar" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required />
+              <div className="flex justify-end gap-4 pt-4">
+                <button type="button" onClick={() => setSelectedGoal(null)} className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500">İptal</button>
+                <button type="submit" className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Ekle</button>
+              </div>
+            </form>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+};
+
+interface GoalSectionProps {
+  title: string;
+  goals: Goal[];
+  rates: any;
+  onDeposit: (goal: Goal) => void;
+  onToggleStatus: (goal: Goal, status: 'active' | 'paused' | 'completed') => void;
+  onEdit: (goal: Goal) => void;
+  calculateProgress: (current: number, target: number) => number;
+}
+
+const GoalSection: React.FC<GoalSectionProps> = ({ title, goals, onDeposit, onToggleStatus, onEdit, calculateProgress, rates }) => {
+  if (goals.length === 0) return null;
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+      <div className="p-4 border-b dark:border-gray-700">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{title}</h2>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+        {goals.map(goal => (
+          <GoalCard key={goal.id} goal={goal} rates={rates} onDeposit={onDeposit} onToggleStatus={onToggleStatus} onEdit={onEdit} calculateProgress={calculateProgress} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+interface GoalCardProps {
+  goal: Goal;
+  rates: any;
+  onDeposit: (goal: Goal) => void;
+  onToggleStatus: (goal: Goal, status: 'active' | 'paused' | 'completed') => void;
+  onEdit: (goal: Goal) => void;
+  calculateProgress: (current: number, target: number) => number;
+}
+
+const GoalCard: React.FC<GoalCardProps> = ({ goal, rates, onDeposit, onToggleStatus, onEdit, calculateProgress }) => {
+  const getRate = (currency: 'USD' | 'EUR') => {
+    if (!rates) return 1;
+    const rateStr = currency === 'USD' ? rates.Dolar : rates.Euro;
+    return parseFloat(rateStr.replace(',', '.')) || 1;
+  };
+
+  const currentAmountInTRY = goal.currency === 'TRY' ? goal.currentAmount : goal.currentAmount * getRate(goal.currency);
+  const targetAmountInTRY = goal.currency === 'TRY' ? goal.targetAmount : goal.targetAmount * getRate(goal.currency);
+
+  const progress = calculateProgress(currentAmountInTRY, targetAmountInTRY);
+  const daysRemaining = calculateDaysRemaining(goal.targetDate);
+  const category = GOAL_CATEGORIES[goal.category] || GOAL_CATEGORIES.other;
+  const CategoryIcon = category.icon;
+  const priority = PRIORITY_STYLES[goal.priority];
+  const isCompleted = goal.status === 'completed';
+
+  return (
+    <div className={`border dark:border-gray-700 rounded-lg p-4 flex flex-col justify-between transition-shadow hover:shadow-lg ${isCompleted ? 'bg-green-50 dark:bg-green-900/20' : 'bg-white dark:bg-gray-800'}`}>
+      <div>
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-full ${category.color} text-white`}>
+              <CategoryIcon size={20} />
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-800 dark:text-gray-100">{goal.title}</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{category.label}</p>
+            </div>
+          </div>
+          <span className={`text-xs px-2 py-1 rounded-full ${priority.className}`}>{priority.text}</span>
+        </div>
+
+        <div className="my-4">
+          <div className="flex justify-between text-sm mb-1">
+            <span className="font-semibold text-gray-700 dark:text-gray-200">{formatCurrency(goal.currentAmount, goal.currency)}</span>
+            <span className="text-gray-500 dark:text-gray-400">{formatCurrency(goal.targetAmount, goal.currency)}</span>
+          </div>
+           {goal.currency !== 'TRY' && (
+             <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 text-right">
+                ~ {formatCurrency(targetAmountInTRY, 'TRY')}
+             </div>
+           )}
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+            <div className={`${category.color} h-2.5 rounded-full`} style={{ width: `${progress}%` }}></div>
+          </div>
+          <div className="text-right text-sm font-bold text-gray-700 dark:text-gray-200 mt-1">{progress.toFixed(0)}%</div>
+        </div>
+
+        <div className="text-xs text-gray-500 dark:text-gray-400 flex justify-between items-center">
+          <div className="flex items-center gap-1">
+            <Calendar size={14} />
+            <span>{daysRemaining >= 0 ? `${daysRemaining} gün kaldı` : 'Süre doldu'}</span>
+          </div>
+          {goal.status === 'paused' && <span className="text-orange-500 font-semibold">Durduruldu</span>}
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Target className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Toplam Hedef</p>
-                <p className="text-xl font-bold text-gray-900">{userGoals.length}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Tamamlanan</p>
-                <p className="text-xl font-bold text-gray-900">{completedGoals.length}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Clock className="w-5 h-5 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Aktif</p>
-                <p className="text-xl font-bold text-gray-900">{activeGoals.length}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <DollarSign className="w-5 h-5 text-yellow-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Toplam Hedef</p>
-                <p className="text-lg font-bold text-gray-900">
-                  {formatCurrency(activeGoals.reduce((sum, goal) => sum + goal.targetAmount, 0))}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Active Goals */}
-        {activeGoals.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Aktif Hedefler</h2>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {activeGoals.map(goal => {
-                  const progress = calculateRealTimeProgress(goal);
-                  const targetDateStr = goal.targetDate instanceof Date ? goal.targetDate.toISOString().split('T')[0] : goal.targetDate;
-                  const deadlineStr = goal.deadline instanceof Date ? goal.deadline.toISOString().split('T')[0] : goal.deadline;
-                  const daysRemaining = calculateDaysRemaining(targetDateStr || deadlineStr || '');
-                  const category = GOAL_CATEGORIES[goal.category as keyof typeof GOAL_CATEGORIES];
-                  const CategoryIcon = category.icon;
-                  
-                  return (
-                    <div key={goal.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className={`p-2 rounded-lg ${category.color} text-white`}>
-                            <CategoryIcon className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-gray-900 text-sm">{goal.title}</h3>
-                            <span className={`text-xs px-2 py-1 rounded-full ${PRIORITY_COLORS[goal.priority]}`}>
-                              {goal.priority === 'high' ? 'Yüksek' : goal.priority === 'medium' ? 'Orta' : 'Düşük'}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() => openDepositModal(goal)}
-                            className="p-1 text-gray-400 hover:text-green-600 transition-colors"
-                            title="Para Yatır"
-                          >
-                            <PlusCircle className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handlePause(goal.id)}
-                            className="p-1 text-gray-400 hover:text-orange-600 transition-colors"
-                            title="Pasife Al"
-                          >
-                            <Pause className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <p className="text-xs text-gray-600 mb-3">{goal.description}</p>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">İlerleme</span>
-                          <span className="font-medium">{progress.toFixed(1)}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${progress}%` }}
-                          ></div>
-                        </div>
-                        <div className="flex justify-between text-xs text-gray-600">
-                          <span>{goal.currentAmount.toFixed(2)} {goal.currency}</span>
-                          <span>{goal.targetAmount.toFixed(2)} {goal.currency}</span>
-                        </div>
-                        
-                        {/* Anlık Kur Bilgisi */}
-                        {currentRates && goal.currency !== 'TL' && (
-                          <div className="mt-1 text-xs text-blue-600">
-                            {goal.currency === 'USD' && currentRates.Dolar && (
-                              <span>1 USD = {currentRates.Dolar} TL</span>
-                            )}
-                            {goal.currency === 'EUR' && currentRates.Euro && (
-                              <span>1 EUR = {currentRates.Euro} TL</span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="mt-3 pt-3 border-t border-gray-100">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-gray-600">
-                            {daysRemaining > 0 ? `${daysRemaining} gün kaldı` : 'Süre doldu'}
-                          </span>
-                          <span className="text-gray-600">{category.label}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+      <div className="border-t dark:border-gray-700 mt-4 pt-3 flex items-center justify-end gap-2">
+        {!isCompleted && (
+          <button onClick={() => onDeposit(goal)} className="p-2 text-green-600 hover:bg-green-100 dark:hover:bg-gray-700 rounded-full" title="Para Ekle">
+            <PlusCircle size={18} />
+          </button>
         )}
-
-        {/* Completed Goals */}
-        {completedGoals.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Tamamlanan Hedefler</h2>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {completedGoals.map(goal => {
-                  return (
-                    <div key={goal.id} className="border border-green-200 rounded-lg p-4 bg-green-50">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="p-2 rounded-lg bg-green-500 text-white">
-                          <CheckCircle className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-gray-900 text-sm">{goal.title}</h3>
-                          <span className="text-xs text-green-600">Tamamlandı</span>
-                        </div>
-                      </div>
-                      
-                      <p className="text-xs text-gray-600 mb-3">{goal.description}</p>
-                      
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Hedef Tutar:</span>
-                        <span className="font-medium">{formatCurrency(goal.targetAmount)}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+        <button onClick={() => onEdit(goal)} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full" title="Düzenle">
+          <Settings size={18} />
+        </button>
+        {goal.status === 'active' && (
+          <button onClick={() => onToggleStatus(goal, 'paused')} className="p-2 text-orange-600 hover:bg-orange-100 dark:hover:bg-gray-700 rounded-full" title="Durdur">
+            <Pause size={18} />
+          </button>
         )}
-
-        {/* Empty State */}
-        {userGoals.length === 0 && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12">
-            <div className="text-center">
-              <Target className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Henüz hedef yok</h3>
-              <p className="text-gray-500 mb-6">
-                İlk hedefinizi oluşturmak için yukarıdaki "Yeni Hedef Ekle" butonunu kullanın.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Goal Form Modal */}
-        {isModalOpen && (
-          <Modal onClose={() => setIsModalOpen(false)}>
-            <div className="p-6">
-              <h2 className="text-xl font-bold mb-6">
-                {editingGoal ? 'Hedef Düzenle' : 'Yeni Hedef Ekle'}
-              </h2>
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hedef Başlığı
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Örn: Acil durum fonu"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Açıklama
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Hedef hakkında detaylar..."
-                    rows={3}
-                  />
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Hedef Tutar
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.targetAmount}
-                      onChange={(e) => setFormData(prev => ({ ...prev, targetAmount: e.target.value }))}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0"
-                      min="0"
-                      step="0.01"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Para Birimi
-                    </label>
-                    <select
-                      value={formData.currency}
-                      onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value as Goal['currency'] }))}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="TL">Türk Lirası (TL)</option>
-                      <option value="USD">Amerikan Doları (USD)</option>
-                      <option value="EUR">Euro (EUR)</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hedef Tarihi
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.targetDate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, targetDate: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kategori
-                    </label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as Goal['category'] }))}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      {Object.entries(GOAL_CATEGORIES).map(([key, value]) => (
-                        <option key={key} value={key}>{value.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Öncelik
-                    </label>
-                    <select
-                      value={formData.priority}
-                      onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as Goal['priority'] }))}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="low">Düşük</option>
-                      <option value="medium">Orta</option>
-                      <option value="high">Yüksek</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    İptal
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-6 py-3 text-white rounded-lg transition-colors"
-                    style={{ backgroundColor: '#ffb700' }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
-                  >
-                    {editingGoal ? 'Güncelle' : 'Kaydet'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </Modal>
-        )}
-
-        {/* Para Yatırma Modalı */}
-        {isDepositModalOpen && selectedGoal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-              <h2 className="text-xl font-bold mb-4">Para Yatır - {selectedGoal.title}</h2>
-              
-              <form onSubmit={handleDeposit} className="space-y-4">
-                <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                     Para Birimi
-                   </label>
-                   <select
-                     value={depositData.currency}
-                     onChange={(e) => setDepositData({ ...depositData, currency: e.target.value as 'TL' | 'USD' | 'EUR' })}
-                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                   >
-                     <option value="TL">Türk Lirası (TL)</option>
-                     <option value="USD">Amerikan Doları (USD)</option>
-                     <option value="EUR">Euro (EUR)</option>
-                   </select>
-                   
-                   {/* Anlık Kur Bilgisi */}
-                   {exchangeRates && depositData.currency !== 'TL' && (
-                     <div className="mt-2 p-2 bg-blue-50 rounded-md text-sm">
-                       <div className="font-medium text-blue-800">Anlık Kur:</div>
-                       {depositData.currency === 'USD' && exchangeRates.Dolar && (
-                         <div className="text-blue-700">
-                           1 USD = {exchangeRates.Dolar} TL
-                         </div>
-                       )}
-                       {depositData.currency === 'EUR' && exchangeRates.Euro && (
-                         <div className="text-blue-700">
-                           1 EUR = {exchangeRates.Euro} TL
-                         </div>
-                       )}
-                     </div>
-                   )}
-                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tutar
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={depositData.amount}
-                    onChange={(e) => setDepositData({ ...depositData, amount: e.target.value })}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Yatırılacak tutar"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Açıklama (İsteğe bağlı)
-                  </label>
-                  <input
-                    type="text"
-                    value={depositData.description}
-                    onChange={(e) => setDepositData({ ...depositData, description: e.target.value })}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Para yatırma açıklaması"
-                  />
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsDepositModalOpen(false);
-                      setSelectedGoal(null);
-                      setDepositData({ amount: '', currency: 'TL', description: '' });
-                    }}
-                    className="flex-1 px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                  >
-                    İptal
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    Para Yatır
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+        {goal.status === 'paused' && (
+          <button onClick={() => onToggleStatus(goal, 'active')} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-gray-700 rounded-full" title="Devam Ettir">
+            <Clock size={18} />
+          </button>
         )}
       </div>
     </div>
