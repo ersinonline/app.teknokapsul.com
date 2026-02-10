@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, CreditCard, DollarSign, Star, Shield, Smartphone, ShoppingBag, Server, User } from 'lucide-react';
+import { Home, CreditCard, DollarSign, TrendingUp, Shield, Zap, ArrowRight, Star, ChevronRight } from 'lucide-react';
 
 interface SlideData {
   id: number;
@@ -16,12 +16,7 @@ interface CategoryCard {
   icon: React.ReactNode;
   color: string;
   route: string;
-}
-
-interface Brand {
-  id: string;
-  name: string;
-  logo: string;
+  description: string;
 }
 
 interface Campaign {
@@ -29,507 +24,291 @@ interface Campaign {
   title: string;
   subtitle: string;
   description: string;
-  discount: string;
   icon: React.ComponentType<any>;
-  color: string;
-  bgColor: string;
-  textColor: string;
-  borderColor: string;
   link: string;
-  features: string[];
 }
 
 const ProfessionalHomePage: React.FC = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [showAllBrands, setShowAllBrands] = useState(false);
-  const [showAllCampaigns, setShowAllCampaigns] = useState(false);
-  const brandsRef = useRef<HTMLDivElement>(null);
-  const campaignsRef = useRef<HTMLDivElement>(null);
-  const brandScrollInterval = useRef<NodeJS.Timeout | null>(null);
-  const campaignScrollInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Slideshow data
   const slides: SlideData[] = [
     {
       id: 1,
-      title: "Dijital Hayatınızı Kolaylaştırın",
-      description: "Tüm ihtiyaçlarınız için tek platform. Bankacılık, alışveriş, eğlence ve daha fazlası.",
-      image: "https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      buttonText: "Keşfet"
+      title: "Finansal Gücünüzü Keşfedin",
+      description: "Tüm finansal işlemlerinizi tek platformdan yönetin. Güvenli, hızlı ve kolay.",
+      image: "https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+      buttonText: "Başlayın"
     },
     {
       id: 2,
-      title: "Akıllı Finansal Çözümler",
-      description: "Bütçenizi yönetin, tasarruf edin ve finansal hedeflerinize ulaşın.",
-      image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2026&q=80",
-      buttonText: "Başla"
+      title: "Akıllı Tasarruf Çözümleri",
+      description: "Hedeflerinize ulaşın, bütçenizi optimize edin, geleceğinizi planlayın.",
+      image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2026&q=80",
+      buttonText: "Keşfet"
     },
     {
       id: 3,
-      title: "Özel Hizmetler",
-      description: "Size özel hizmetler ve avantajlarla farkı yaşayın.",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2015&q=80",
-      buttonText: "Keşfet"
+      title: "7/24 Hizmetinizdeyiz",
+      description: "Her an, her yerde. Dijital bankacılığın gücünü yaşayın.",
+      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2015&q=80",
+      buttonText: "Daha Fazla"
     }
   ];
 
-  // Category cards data
   const categories: CategoryCard[] = [
     {
       id: 'kendim',
       title: 'Kapsülüm',
-      icon: <User className="w-8 h-8 text-white" />,
-      color: 'bg-[#FFB700]',
-      route: '/kapsulum'
+      icon: <Zap className="w-6 h-6" />,
+      color: 'bg-[#ffb700]',
+      route: '/kapsulum',
+      description: 'Kişisel bilgileriniz'
     },
     {
       id: 'evim',
       title: 'Evim',
-      icon: <Home className="w-8 h-8 text-white" />,
+      icon: <Home className="w-6 h-6" />,
       color: 'bg-emerald-500',
-      route: '/evim'
+      route: '/evim',
+      description: 'Ev yönetimi'
     },
     {
       id: 'bankam',
       title: 'Bankam',
-      icon: <CreditCard className="w-8 h-8 text-white" />,
-      color: 'bg-red-500',
-      route: '/bankam'
+      icon: <CreditCard className="w-6 h-6" />,
+      color: 'bg-blue-500',
+      route: '/bankam',
+      description: 'Finansal işlemler'
     },
     {
       id: 'maasim',
       title: 'İşim',
-      icon: <DollarSign className="w-8 h-8 text-white" />,
+      icon: <DollarSign className="w-6 h-6" />,
       color: 'bg-purple-500',
-      route: '/work-tracking'
+      route: '/work-tracking',
+      description: 'İş takibi'
     }
   ];
 
-  // Info boxes data (unused - keeping for future use)
-  /*
-  const infoBoxes: InfoBox[] = [
-    {
-      id: 'bankam-info',
-      title: 'Bankam',
-      description: 'Tüm banka hesaplarınızı tek yerden yönetin',
-      icon: <CreditCard className="w-12 h-12" />,
-      color: 'bg-gradient-to-br from-[#FFB700] to-[#FF9500]'
-    },
-    {
-      id: 'maasim-info',
-      title: 'İşim',
-      description: 'İş takibi ve maaş hesaplamalarınızı kolayca yapın',
-      icon: <DollarSign className="w-12 h-12" />,
-      color: 'bg-gradient-to-br from-emerald-500 to-emerald-600'
-    },
-    {
-      id: 'hizmetlerim',
-      title: 'Hizmetlerim',
-      description: 'Size özel hizmetleri keşfedin',
-      icon: <Star className="w-12 h-12" />,
-      color: 'bg-gradient-to-br from-purple-500 to-purple-600'
-    }
-  ];
-  */
-
-  // Brand logos data
-  const brands: Brand[] = [
-    { id: 'digiturk', name: 'Digitürk', logo: '' },
-    { id: 'tod', name: 'TOD', logo: '' },
-    { id: 'dsmart', name: 'D-Smart', logo: '' },
-    { id: 'turkcell', name: 'Turkcell', logo: '' },
-    { id: 'vodafone', name: 'Vodafone', logo: '' },
-    { id: 'turknet', name: 'TürkNet', logo: '' },
-    { id: 'google', name: 'Google', logo: '' },
-    { id: 'apple', name: 'Apple', logo: '' },
-    { id: 'samsung', name: 'Samsung', logo: '' },
-    { id: 'xiaomi', name: 'Xiaomi', logo: '' },
-    { id: 'huawei', name: 'Huawei', logo: '' },
-    { id: 'oppo', name: 'OPPO', logo: '' },
-    { id: 'microsoft', name: 'Microsoft', logo: '' },
-    { id: 'razer', name: 'Razer', logo: '' },
-    { id: 'garena', name: 'Garena', logo: '' },
-    { id: 'gameforge', name: 'Gameforge', logo: '' }
-  ];
-
-  // Campaign data from TeknoFirsat page
   const campaigns: Campaign[] = [
     {
       id: 'sigortam',
       title: 'Sigortam.net',
-      subtitle: '300 TL İndirim Kampanyası',
-      description: 'Doğru ürün, iyi fiyat ve 7/24 hizmet ile sigorta ihtiyaçlarınızı karşılayın. 30\'a yakın sigorta şirketinden teklifleri karşılaştırın.',
-      discount: '300 TL İndirim',
+      subtitle: '300 TL İndirim',
+      description: 'Sigorta ihtiyaçlarınız için özel fırsatlar',
       icon: Shield,
-      color: 'bg-blue-500',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-700',
-      borderColor: 'border-blue-200',
-      link: 'http://sgrtm.net/8J9L8400495JU',
-      features: [
-        'Trafik Sigortası',
-        'Kasko Sigortası',
-        'DASK Sigortası',
-        'Konut Sigortası',
-        'Sağlık Sigortası'
-      ]
+      link: 'http://sgrtm.net/8J9L8400495JU'
     },
     {
-      id: 'vodafone',
-      title: 'Vodafone',
-      subtitle: 'İndirimli Tarifeler',
-      description: 'Numara taşıma ve yeni hat kampanyalarından yararlanın. Online\'a özel avantajlar ve hediye GB\'ler sizi bekliyor.',
-      discount: 'Online Avantajları',
-      icon: Smartphone,
-      color: 'bg-red-500',
-      bgColor: 'bg-red-50',
-      textColor: 'text-red-700',
-      borderColor: 'border-red-200',
-      link: 'https://www.vodafone.com.tr/numara-tasima-yeni-hat/tarifeler/MNP/postpaid/ALL?referer=amb-593d36a6-2508-4d2e-98b7-13dffd2dd9db&couponCode=TERCIH47BZG4K98&cid=perf-ambaff',
-      features: [
-        '12 Ay İndirimli Tarifeler',
-        'Hediye GB Paketleri',
-        'Ücretsiz Teslimat',
-        'Online Özel Fiyatlar',
-        'Tıkla Gel Al Hizmeti'
-      ]
+      id: 'investment',
+      title: 'Yatırım Fırsatları',
+      subtitle: 'Özel Oranlar',
+      description: 'Yatırımlarınızı değerlendirin',
+      icon: TrendingUp,
+      link: '#'
     },
     {
-      id: 'ideasoft',
-      title: 'IdeaSoft',
-      subtitle: 'E-Ticaret Paketi İndirimi',
-      description: '2005\'ten bu yana 45.000+ işletmenin tercihi IdeaSoft ile e-ticaret sitenizi kurun. Uzman e-ticaret altyapı çözümleri.',
-      discount: 'Özel İndirim',
-      icon: ShoppingBag,
-      color: 'bg-green-500',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-700',
-      borderColor: 'border-green-200',
-      link: 'https://www.ideasoft.com.tr/?sc=676573096&scu=7342',
-      features: [
-        'Anahtar Teslim E-Ticaret',
-        '7/24 Teknik Destek',
-        '%99.9 Kesintisiz Altyapı',
-        'Kullanıcı Dostu Arayüz',
-        'VIP Danışman Desteği'
-      ]
-    },
-    {
-      id: 'hosting',
-      title: 'Hosting.com.tr',
-      subtitle: 'Web Hosting İndirimleri',
-      description: 'Profesyonel web hosting hizmetleri ile sitenizi güvenli ve hızlı bir şekilde yayınlayın. Kurumsal e-posta ve hazır site çözümleri.',
-      discount: '%30-72 İndirim',
-      icon: Server,
-      color: 'bg-purple-500',
-      bgColor: 'bg-purple-50',
-      textColor: 'text-purple-700',
-      borderColor: 'border-purple-200',
-      link: 'https://www.hosting.com.tr/aff.php?aff=484',
-      features: [
-        '%30 İndirimli Hosting',
-        '%72 İndirimli Hazır Site',
-        '%50 İndirimli Kurumsal E-Posta',
-        '7/24 Teknik Destek',
-        'Ücretsiz SSL Sertifikası'
-      ]
+      id: 'loan',
+      title: 'Krediler',
+      subtitle: 'Avantajlı Faiz',
+      description: 'Size özel kredi teklifleri',
+      icon: Star,
+      link: '#'
     }
   ];
 
-  // Auto-rotate slideshow
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
-
     return () => clearInterval(timer);
   }, [slides.length]);
 
   const handleCategoryClick = (route: string) => {
-    // Navigate to the specified route
-    console.log(`Navigating to: ${route}`);
     navigate(route);
   };
 
-  // Auto scroll functions
-  const startBrandAutoScroll = () => {
-    if (brandScrollInterval.current) clearInterval(brandScrollInterval.current);
-    brandScrollInterval.current = setInterval(() => {
-      if (brandsRef.current && !showAllBrands) {
-        const container = brandsRef.current;
-        const cardWidth = 96; // 80px min-width + 16px gap
-        const currentScroll = container.scrollLeft;
-        const maxScroll = container.scrollWidth - container.clientWidth;
-        
-        if (currentScroll >= maxScroll) {
-          container.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          container.scrollTo({ left: currentScroll + cardWidth, behavior: 'smooth' });
-        }
-      }
-    }, 10000); // 10 seconds
-  };
-  
-  const startCampaignAutoScroll = () => {
-    if (campaignScrollInterval.current) clearInterval(campaignScrollInterval.current);
-    campaignScrollInterval.current = setInterval(() => {
-      if (campaignsRef.current && !showAllCampaigns) {
-        const container = campaignsRef.current;
-        const cardWidth = 216; // 200px min-width + 16px gap
-        const currentScroll = container.scrollLeft;
-        const maxScroll = container.scrollWidth - container.clientWidth;
-        
-        if (currentScroll >= maxScroll) {
-          container.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          container.scrollTo({ left: currentScroll + cardWidth, behavior: 'smooth' });
-        }
-      }
-    }, 15000); // 15 seconds
-  };
-  
-  // Mouse wheel scroll handler
-  const handleWheelScroll = (e: React.WheelEvent, ref: React.RefObject<HTMLDivElement>) => {
-    if (ref.current && window.innerWidth >= 768) { // Only on desktop/tablet
-      e.preventDefault();
-      const scrollAmount = e.deltaY > 0 ? 100 : -100; // Scroll right or left
-      ref.current.scrollBy({
-        left: scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  // Mouse drag scroll handler
-  const handleMouseDown = (e: React.MouseEvent, ref: React.RefObject<HTMLDivElement>) => {
-    if (!ref.current || window.innerWidth < 768) return;
-    
-    const container = ref.current;
-    const startX = e.pageX - container.offsetLeft;
-    const scrollLeft = container.scrollLeft;
-    let isDown = true;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - container.offsetLeft;
-      const walk = (x - startX) * 2; // Scroll speed multiplier
-      container.scrollLeft = scrollLeft - walk;
-    };
-
-    const handleMouseUp = () => {
-      isDown = false;
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      container.style.cursor = 'grab';
-    };
-
-    container.style.cursor = 'grabbing';
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-  
-  useEffect(() => {
-    startBrandAutoScroll();
-    startCampaignAutoScroll();
-  
-    return () => {
-      if (brandScrollInterval.current) clearInterval(brandScrollInterval.current);
-      if (campaignScrollInterval.current) clearInterval(campaignScrollInterval.current);
-    };
-  }, [showAllBrands, showAllCampaigns]);
-
   return (
     <div className="min-h-screen bg-gray-50 pb-0">
-      {/* Enhanced Hero Slideshow */}
-      <section className="relative bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 px-4 pt-6 pb-4">
+      {/* Hero Section - Banking Style */}
+      <section className="relative bg-white px-4 pt-6 pb-8 border-b border-gray-100">
         <div className="max-w-6xl mx-auto">
-          {/* Slideshow Container */}
-          <div className="relative mb-4 rounded-2xl overflow-hidden w-full">
-            <div className="relative h-48 md:h-64 lg:h-80 bg-gradient-to-r from-blue-600 to-purple-600">
+          {/* Hero Slideshow */}
+          <div className="relative mb-6 rounded-2xl overflow-hidden bg-[#ffb700] shadow-lg">
+            <div className="relative h-52 md:h-64">
               {slides.map((slide, index) => (
                 <div
                   key={slide.id}
-                  className={`absolute inset-0 transition-opacity duration-500 ${
+                  className={`absolute inset-0 transition-opacity duration-700 ${
                     index === currentSlide ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{
-                    backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${slide.image})`,
+                    backgroundImage: `linear-gradient(rgba(255, 183, 0, 0.9), rgba(255, 183, 0, 0.95)), url(${slide.image})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                   }}
                 >
-                  <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-12 text-white">
-                    <h2 className="text-xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-4">{slide.title}</h2>
-                    <p className="text-sm md:text-base lg:text-lg opacity-90 mb-4 md:mb-6 leading-relaxed max-w-2xl">{slide.description}</p>
-                    <button className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-4 py-2 md:px-6 md:py-3 rounded-lg text-sm md:text-base font-semibold transition-all duration-300 self-start">
-                      {slide.buttonText}
+                  <div className="h-full flex flex-col justify-center px-6 md:px-10 text-white">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight">
+                      {slide.title}
+                    </h2>
+                    <p className="text-sm md:text-base opacity-95 mb-6 leading-relaxed max-w-2xl">
+                      {slide.description}
+                    </p>
+                    <button className="bg-white text-[#ffb700] px-6 py-3 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors self-start flex items-center gap-2">
+                      <span>{slide.buttonText}</span>
+                      <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               ))}
               
-
+              {/* Slide Indicators */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+                {slides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`h-2 rounded-full transition-all ${
+                      index === currentSlide 
+                        ? 'w-8 bg-white' 
+                        : 'w-2 bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Horizontally Scrollable Quick Access Categories */}
-      <section className="bg-gray-50 px-4 py-6">
+      {/* Quick Access - Banking Style */}
+      <section className="bg-white px-4 py-6 border-b border-gray-100">
         <div className="max-w-6xl mx-auto">
-          <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-2 md:flex md:justify-center md:gap-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <h2 className="section-header">Hızlı Erişim</h2>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {categories.map((category) => (
               <div
                 key={category.id}
+                data-testid={`category-${category.id}`}
                 onClick={() => handleCategoryClick(category.route)}
-                className="bg-white rounded-xl p-4 md:p-8 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex-shrink-0 min-w-[100px] md:min-w-[140px]"
+                className="bank-card-interactive p-6 text-center"
               >
-                <div className="flex flex-col items-center text-center">
-                  <div className={`mb-3 md:mb-5 p-3 md:p-5 ${category.color} rounded-full group-hover:scale-110 transition-transform duration-300`}>
-                    {category.icon}
-                  </div>
-                  <h3 className="text-sm md:text-base lg:text-lg font-medium text-gray-700 whitespace-nowrap">{category.title}</h3>
+                <div className={`${category.color} text-white w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4`}>
+                  {category.icon}
                 </div>
+                <h3 className="text-base font-bold text-gray-900 mb-1">
+                  {category.title}
+                </h3>
+                <p className="text-xs text-gray-500">
+                  {category.description}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Senin İçin Derledik Section */}
-      <section className="bg-white px-4 py-6">
+      {/* Feature Cards - Banking Style */}
+      <section className="px-4 py-8 bg-gray-50">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Senin İçin Derledik</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+          <h2 className="section-header">Sizin İçin</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Maaşım Card */}
             <div 
+              data-testid="maasim-card"
               onClick={() => navigate('/work-tracking')}
-              className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 md:p-6 text-white relative overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300"
+              className="bank-card-interactive p-6"
             >
-              <div className="relative z-10">
-                <div className="mb-3 md:mb-4">
-                  <DollarSign className="w-6 h-6 md:w-8 md:h-8" />
-                </div>
-                <h3 className="text-sm md:text-base font-bold mb-1 md:mb-2">Maaşım+</h3>
-                <p className="text-xs md:text-sm opacity-90">Maaş işlemleriniz tek yerde!</p>
+              <div className="bg-blue-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+                <DollarSign className="w-6 h-6 text-blue-600" />
               </div>
-              <div className="absolute -right-2 -bottom-2 w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-full"></div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Maaşım+</h3>
+              <p className="text-sm text-gray-600 mb-4">Maaş işlemleriniz tek yerde</p>
+              <div className="flex items-center text-[#ffb700] text-sm font-semibold">
+                <span>Detayları Gör</span>
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </div>
             </div>
+
+            {/* Bankam Card */}
             <div 
+              data-testid="bankam-card"
               onClick={() => navigate('/bankam')}
-              className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 md:p-6 text-white relative overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300"
+              className="bank-card-interactive p-6"
             >
-              <div className="relative z-10">
-                <div className="mb-3 md:mb-4">
-                  <CreditCard className="w-6 h-6 md:w-8 md:h-8" />
-                </div>
-                <h3 className="text-sm md:text-base font-bold mb-1 md:mb-2">Bankam+ Durumum</h3>
-                <p className="text-xs md:text-sm opacity-90">Gelir - gider yönetiminiz tek ekranda!</p>
+              <div className="bg-emerald-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+                <CreditCard className="w-6 h-6 text-emerald-600" />
               </div>
-              <div className="absolute -right-2 -bottom-2 w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-full"></div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Bankam Durumum</h3>
+              <p className="text-sm text-gray-600 mb-4">Gelir - gider yönetiminiz</p>
+              <div className="flex items-center text-[#ffb700] text-sm font-semibold">
+                <span>Detayları Gör</span>
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </div>
             </div>
+
+            {/* Evim Card */}
             <div 
+              data-testid="evim-card"
               onClick={() => navigate('/evim')}
-              className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl p-4 md:p-6 text-white relative overflow-hidden col-span-2 md:col-span-1 lg:col-span-2 cursor-pointer hover:scale-105 transition-transform duration-300"
+              className="bank-card-interactive p-6"
             >
-              <div className="relative z-10">
-                <div className="mb-3 md:mb-4">
-                  <Star className="w-6 h-6 md:w-8 md:h-8" />
-                </div>
-                <h3 className="text-sm md:text-base font-bold mb-1 md:mb-2">Ev ve eve dair her işlem tek yerde</h3>
-                <p className="text-xs md:text-sm opacity-90">Ev işlemlerinizi kolayca yönetin</p>
+              <div className="bg-purple-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+                <Home className="w-6 h-6 text-purple-600" />
               </div>
-              <div className="absolute -right-2 -bottom-2 w-16 h-16 md:w-20 md:h-20 bg-white/10 rounded-full"></div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Evim</h3>
+              <p className="text-sm text-gray-600 mb-4">Ev işlemlerinizi yönetin</p>
+              <div className="flex items-center text-[#ffb700] text-sm font-semibold">
+                <span>Detayları Gör</span>
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Horizontally Scrollable Benim Dünyam Markaları Section */}
-      <section className="bg-gray-50 px-4 py-6">
+      {/* Campaigns - Banking Style */}
+      <section className="px-4 py-8 bg-white border-t border-gray-100">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">Benim Dünyam Markaları</h2>
-            <button 
-              onClick={() => setShowAllBrands(!showAllBrands)}
-              className="text-blue-600 text-sm md:text-base font-medium"
-            >
-              {showAllBrands ? 'Daha Az Göster' : 'Tümünü Gör'}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="section-header mb-0">Fırsatlar</h2>
+            <button className="text-[#ffb700] text-sm font-semibold flex items-center gap-1">
+              <span>Tümü</span>
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
-          <div 
-            ref={brandsRef}
-            onWheel={(e) => handleWheelScroll(e, brandsRef)}
-            onMouseDown={(e) => handleMouseDown(e, brandsRef)}
-            className={`${showAllBrands ? 'grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4' : 'flex overflow-x-auto scrollbar-hide gap-4 pb-2 cursor-grab select-none'}`} 
-            style={!showAllBrands ? { scrollbarWidth: 'none', msOverflowStyle: 'none' } : {}}
-          >
-            {brands.map((brand) => (
-              <div key={brand.id} className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex-shrink-0 min-w-[80px] md:min-w-0 flex flex-col items-center border border-gray-100">
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                  <span className="text-white text-sm md:text-base font-bold">{brand.name.charAt(0)}</span>
-                </div>
-                <span className="text-xs md:text-sm text-gray-700 text-center font-medium whitespace-nowrap">{brand.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Horizontally Scrollable Kampanyalar Section */}
-      <section className="bg-white px-4 py-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">Kampanyalar</h2>
-            <button 
-              onClick={() => setShowAllCampaigns(!showAllCampaigns)}
-              className="text-blue-600 text-sm md:text-base font-medium"
-            >
-              {showAllCampaigns ? 'Daha Az Göster' : 'Tümünü Gör'}
-            </button>
-          </div>
-          <div 
-            ref={campaignsRef}
-            onWheel={(e) => handleWheelScroll(e, campaignsRef)}
-            onMouseDown={(e) => handleMouseDown(e, campaignsRef)}
-            className={`${showAllCampaigns ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6' : 'flex overflow-x-auto scrollbar-hide gap-4 md:gap-6 pb-2 cursor-grab select-none'}`} 
-            style={!showAllCampaigns ? { scrollbarWidth: 'none', msOverflowStyle: 'none' } : {}}
-          >
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {campaigns.map((campaign) => {
               const IconComponent = campaign.icon;
               return (
                 <div
                   key={campaign.id}
+                  data-testid={`campaign-${campaign.id}`}
                   onClick={() => window.open(campaign.link, '_blank')}
-                  className={`${campaign.bgColor} ${campaign.borderColor} rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer border ${showAllCampaigns ? '' : 'flex-shrink-0 min-w-[200px] max-w-[200px]'} ${showAllCampaigns ? '' : 'md:min-w-0 md:max-w-none'}`}
+                  className="bank-card-interactive p-6"
                 >
-                  <div className="p-4 md:p-6">
-                    <div className="flex items-start justify-between mb-3 md:mb-4">
-                      <div className={`${campaign.color} rounded-lg p-2 md:p-3 flex-shrink-0`}>
-                        <IconComponent className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                      </div>
-                      <div className={`${campaign.color} text-white px-2 py-1 md:px-3 md:py-2 rounded text-xs md:text-sm font-semibold`}>
-                        {campaign.discount}
-                      </div>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="bg-[#ffb700]/10 w-12 h-12 rounded-xl flex items-center justify-center">
+                      <IconComponent className="w-6 h-6 text-[#ffb700]" />
                     </div>
-                    <h3 className={`text-sm md:text-base font-bold ${campaign.textColor} mb-1 md:mb-2`}>
-                      {campaign.title}
-                    </h3>
-                    <p className={`text-xs md:text-sm ${campaign.textColor} opacity-80 mb-1 md:mb-2`}>
-                      {campaign.subtitle}
-                    </p>
-                    <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4 line-clamp-2">
-                      {campaign.description}
-                    </p>
-                    <div className="space-y-1 md:space-y-2">
-                      {campaign.features.slice(0, 3).map((feature, index) => (
-                        <div key={index} className="flex items-center text-xs md:text-sm text-gray-600">
-                          <div className={`w-1 h-1 md:w-2 md:h-2 ${campaign.color} rounded-full mr-2 flex-shrink-0`}></div>
-                          <span className="line-clamp-1">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <span className="badge badge-primary">{campaign.subtitle}</span>
+                  </div>
+                  
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {campaign.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    {campaign.description}
+                  </p>
+                  
+                  <div className="flex items-center text-[#ffb700] text-sm font-semibold">
+                    <span>İncele</span>
+                    <ArrowRight className="w-4 h-4 ml-1" />
                   </div>
                 </div>
               );
