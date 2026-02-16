@@ -16,10 +16,11 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 // export * from './expenseReminders'; // Temporarily disabled
 // export * from './stripe'; // Temporarily disabled due to secret key issue
-__exportStar(require("./priceUpdater"), exports);
+// export * from './priceUpdater'; // Temporarily disabled - 2nd Gen Cloud Run health check fails
 __exportStar(require("./auth"), exports);
 __exportStar(require("./emailService"), exports);
 __exportStar(require("./imapService"), exports);
 __exportStar(require("./statementProcessor"), exports);
-__exportStar(require("./creditService"), exports);
+// export * from './creditService'; // Temporarily disabled - requires COLLECTAPI_KEY secret
+__exportStar(require("./iyzico"), exports);
 //# sourceMappingURL=index.js.map
