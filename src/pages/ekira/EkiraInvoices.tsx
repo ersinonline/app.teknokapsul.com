@@ -56,8 +56,14 @@ const EkiraInvoices: React.FC = () => {
       }
 
       allInvoices.sort((a, b) => {
-        if (a.dueDate && b.dueDate) return b.dueDate.localeCompare(a.dueDate);
-        return 0;
+        const getTime = (d: any) => {
+          if (!d) return 0;
+          if (d.seconds) return d.seconds * 1000;
+          if (d.toDate) return d.toDate().getTime();
+          if (typeof d === 'string') return new Date(d).getTime();
+          return new Date(d).getTime();
+        };
+        return getTime(b.dueDate) - getTime(a.dueDate);
       });
 
       setInvoices(allInvoices);

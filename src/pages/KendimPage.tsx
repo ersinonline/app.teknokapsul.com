@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Calendar, ChevronRight, StickyNote, ClipboardList, Users } from 'lucide-react';
+import { FileText, Calendar, ChevronRight, StickyNote, ClipboardList, Users, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { useNavigate } from 'react-router-dom';
@@ -123,6 +123,20 @@ const KendimPage: React.FC = () => {
       textColor: 'text-indigo-700',
       borderColor: 'border-indigo-200',
       route: '/attendance',
+      count: 0,
+      loading: false,
+      items: []
+    },
+    {
+      id: 'digital-codes',
+      title: 'Dijital Kodlar',
+      description: 'Dijital ürün ve kod satın alın',
+      icon: ShoppingBag,
+      color: 'bg-violet-500',
+      bgColor: 'bg-violet-50',
+      textColor: 'text-violet-700',
+      borderColor: 'border-violet-200',
+      route: '/dijital-kodlar',
       count: 0,
       loading: false,
       items: []

@@ -6,3 +6,4 @@ export * from './emailService';
 export * from './imapService';
 export * from './statementProcessor';
 export * from './creditService';
+export * from './iyzico';

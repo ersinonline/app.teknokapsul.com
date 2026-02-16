@@ -57,9 +57,16 @@ const EkiraContractDetail: React.FC = () => {
   const loadContract = async () => {
     if (!id) return;
     try {
-      const docSnap = await getDoc(doc(db, 'ekira_contracts', id));
+      // Önce yeni ekira_contracts koleksiyonunda ara
+      let docSnap = await getDoc(doc(db, 'ekira_contracts', id));
       if (docSnap.exists()) {
         setContract({ id: docSnap.id, ...docSnap.data() } as Contract);
+      } else if (uid) {
+        // Eski accounts/{uid}/contracts koleksiyonunda ara
+        docSnap = await getDoc(doc(db, 'accounts', uid, 'contracts', id));
+        if (docSnap.exists()) {
+          setContract({ id: docSnap.id, ...docSnap.data() } as Contract);
+        }
       }
     } catch (err) {
       console.error('Sözleşme yüklenirken hata:', err);

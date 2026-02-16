@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { ShoppingBag, CreditCard, Package, CheckCircle, Search, Tag, Loader } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ShoppingBag, CreditCard, Package, CheckCircle, Search, Tag, Loader, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { getActiveDigitalCodes, createDigitalOrder, getUserDigitalOrders, DigitalCode, DigitalOrder } from '../../services/digitalCode.service';
-import { simulatePayment } from '../../services/iyzico.service';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 const EarnAsYouSpendPage: React.FC = () => {
   const { user } = useAuth();
@@ -17,6 +17,8 @@ const EarnAsYouSpendPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [lastOrder, setLastOrder] = useState<{ productName: string; price: number; paymentId: string } | null>(null);
+  const [checkoutHtml, setCheckoutHtml] = useState<string | null>(null);
+  const checkoutRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadProducts();
@@ -45,6 +47,25 @@ const EarnAsYouSpendPage: React.FC = () => {
     }
   };
 
+  // Checkout form HTML'ini render ettikten sonra script'leri çalıştır
+  useEffect(() => {
+    if (checkoutHtml && checkoutRef.current) {
+      const container = checkoutRef.current;
+      container.innerHTML = checkoutHtml;
+      // Iyzico script'lerini çalıştır
+      const scripts = container.querySelectorAll('script');
+      scripts.forEach((oldScript) => {
+        const newScript = document.createElement('script');
+        if (oldScript.src) {
+          newScript.src = oldScript.src;
+        } else {
+          newScript.textContent = oldScript.textContent;
+        }
+        oldScript.parentNode?.replaceChild(newScript, oldScript);
+      });
+    }
+  }, [checkoutHtml]);
+
   const handleBuyNow = async (product: DigitalCode) => {
     if (!user) {
       navigate('/login');
@@ -53,29 +74,36 @@ const EarnAsYouSpendPage: React.FC = () => {
 
     setBuyingId(product.id!);
     try {
-      // İyzico ile ödeme (şimdilik simüle)
-      const result = await simulatePayment(user.uid, product.id!, product.name, product.price);
+      const functions = getFunctions();
+      const initCheckout = httpsCallable(functions, 'iyzicoCheckoutInitialize');
 
-      if (result.success) {
-        // Sipariş oluştur
-        await createDigitalOrder({
-          userId: user.uid,
-          productId: product.id!,
-          productName: product.name,
-          productCategory: product.category,
-          price: product.price,
-          status: 'completed',
-          paymentId: result.paymentId,
-          paymentMethod: 'iyzico'
-        });
+      const nameParts = (user.displayName || 'Kullanıcı TeknoKapsül').split(' ');
+      const buyerName = nameParts[0];
+      const buyerSurname = nameParts.slice(1).join(' ') || 'TeknoKapsül';
 
-        setLastOrder({ productName: product.name, price: product.price, paymentId: result.paymentId });
-        setShowSuccessModal(true);
-        await loadOrders();
+      const result = await initCheckout({
+        productId: product.id,
+        productName: product.name,
+        productCategory: product.category,
+        price: product.price.toString(),
+        buyerName,
+        buyerSurname,
+        buyerEmail: user.email,
+        buyerPhone: user.phoneNumber || '+905000000000',
+        callbackUrl: `${window.location.origin}/dijital-kodlar/odeme-sonuc`,
+      });
+
+      const data = result.data as any;
+
+      if (data.status === 'success' && data.checkoutFormContent) {
+        // Iyzico checkout form HTML'ini göster
+        setCheckoutHtml(data.checkoutFormContent);
+      } else {
+        alert('Ödeme formu oluşturulamadı. Lütfen tekrar deneyin.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Satın alma hatası:', error);
-      alert('Ödeme işlemi sırasında bir hata oluştu.');
+      alert(error.message || 'Ödeme işlemi sırasında bir hata oluştu.');
     } finally {
       setBuyingId(null);
     }
@@ -314,6 +342,21 @@ const EarnAsYouSpendPage: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* Iyzico Checkout Form Modal */}
+      {checkoutHtml && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto relative">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-sm font-semibold">Ödeme</h3>
+              <button onClick={() => setCheckoutHtml(null)} className="p-1.5 rounded-lg hover:bg-gray-100">
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            </div>
+            <div ref={checkoutRef} className="p-4" />
+          </div>
+        </div>
+      )}
 
       {/* Success Modal */}
       {showSuccessModal && lastOrder && (

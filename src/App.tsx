@@ -50,6 +50,7 @@ import { ShopRewardsPage } from './pages/other/ShopRewardsPage';
 import MyOrdersPage from './pages/other/MyOrdersPage';
 
 import EarnAsYouSpendPage from './pages/other/EarnAsYouSpendPage';
+import DigitalPaymentResultPage from './pages/other/DigitalPaymentResultPage';
 import CheckoutPage from './pages/other/CheckoutPage';
 import OrderSuccessPage from './pages/other/OrderSuccessPage';
 import { GoalsPage } from './pages/goals/GoalsPage';
@@ -285,6 +286,10 @@ const router = createBrowserRouter([
   {
     path: '/dijital-kodlar',
     element: <TeknoRoute><EarnAsYouSpendPage /></TeknoRoute>
+  },
+  {
+    path: '/dijital-kodlar/odeme-sonuc',
+    element: <TeknoRoute><DigitalPaymentResultPage /></TeknoRoute>
   },
   {
     path: '/other/earn-as-you-spend',
