@@ -3,28 +3,54 @@ import * as admin from "firebase-admin";
 import * as crypto from "crypto";
 import axios from "axios";
 
-// Iyzico API credentials - Firebase Functions config'den alınır
+// Iyzico API credentials
 const IYZICO_API_KEY = functions.config().iyzico?.api_key || "kgvpLKB9EUfzNV64Y40a2wV0JijXbSEK";
 const IYZICO_SECRET_KEY = functions.config().iyzico?.secret_key || "Qb1HcmeZEnSjIygCtVASbpUpiMrXrIPb";
 const IYZICO_BASE_URL = functions.config().iyzico?.base_url || "https://sandbox-api.iyzipay.com";
 
-// Iyzico auth header oluştur (v2 HMAC-SHA256)
-function iyzicoAuthHeader(requestBody: any): Record<string, string> {
-  const randomKey = new Date().getTime().toString();
-  const payload = JSON.stringify(requestBody);
-  const dataToSign = randomKey + payload;
-  const signature = crypto.createHmac("sha256", IYZICO_SECRET_KEY)
-    .update(dataToSign)
-    .digest("base64");
+// Iyzico PKI string oluştur (resmi format)
+function toPkiString(obj: any): string {
+  let result = "[";
+  const keys = Object.keys(obj);
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const value = obj[key];
+    if (value === null || value === undefined) continue;
+    if (Array.isArray(value)) {
+      result += `${key}=[`;
+      for (let j = 0; j < value.length; j++) {
+        if (typeof value[j] === "object") {
+          result += toPkiString(value[j]);
+        } else {
+          result += String(value[j]);
+        }
+        if (j < value.length - 1) result += ", ";
+      }
+      result += "]";
+    } else if (typeof value === "object") {
+      result += `${key}=${toPkiString(value)}`;
+    } else {
+      result += `${key}=${value}`;
+    }
+    if (i < keys.length - 1) result += ",";
+  }
+  result += "]";
+  return result;
+}
 
-  const authorizationData = Buffer.from(
-    `apiKey:${IYZICO_API_KEY}&randomKey:${randomKey}&signature:${signature}`
-  ).toString("base64");
+// Iyzico v1 auth header (SHA-1)
+function iyzicoHeaders(requestBody: any): Record<string, string> {
+  const pkiString = toPkiString(requestBody);
+  const randomHeaderValue = Date.now().toString() + Math.random().toString(36).substring(2, 7);
+  const shaSum = crypto.createHash("sha1");
+  shaSum.update(IYZICO_API_KEY + randomHeaderValue + IYZICO_SECRET_KEY + pkiString, "utf8");
+  const hashValue = shaSum.digest("base64");
 
   return {
     "Content-Type": "application/json",
-    "Authorization": `IYZWSv2 ${authorizationData}`,
-    "x-iyzi-rnd": randomKey,
+    "Authorization": `IYZWS ${IYZICO_API_KEY}:${hashValue}`,
+    "x-iyzi-rnd": randomHeaderValue,
+    "x-iyzi-client-version": "iyzipay-node-2.0.56",
   };
 }
 
@@ -96,7 +122,7 @@ export const iyzicoCheckoutInitialize = functions.https.onCall(async (data, cont
   };
 
   try {
-    const headers = iyzicoAuthHeader(requestBody);
+    const headers = iyzicoHeaders(requestBody);
     const response = await axios.post(
       `${IYZICO_BASE_URL}/payment/iyzipos/checkoutform/initialize/auth/ecom`,
       requestBody,
@@ -156,7 +182,7 @@ export const iyzicoCheckoutVerify = functions.https.onCall(async (data, context)
   };
 
   try {
-    const headers = iyzicoAuthHeader(requestBody);
+    const headers = iyzicoHeaders(requestBody);
     const response = await axios.post(
       `${IYZICO_BASE_URL}/payment/iyzipos/checkoutform/auth/ecom/detail`,
       requestBody,
@@ -220,7 +246,7 @@ export const iyzicoCallback = functions.https.onRequest(async (req, res) => {
       token,
     };
 
-    const headers = iyzicoAuthHeader(requestBody);
+    const headers = iyzicoHeaders(requestBody);
     const response = await axios.post(
       `${IYZICO_BASE_URL}/payment/iyzipos/checkoutform/auth/ecom/detail`,
       requestBody,
