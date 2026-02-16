@@ -11,6 +11,9 @@ export interface AuthState {
 export interface AuthContextType extends AuthState {
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, displayName: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   isWebView: boolean;
   isMobile: boolean;
 }
