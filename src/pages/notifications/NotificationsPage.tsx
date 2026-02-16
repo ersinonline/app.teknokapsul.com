@@ -121,53 +121,47 @@ export const NotificationsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-16 pb-20 lg:pt-0 lg:pb-0">
-        <div className="max-w-4xl mx-auto p-6">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-20 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-          </div>
+      <div className="page-container bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Bildirimler yükleniyor...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16 pb-20 lg:pt-0 lg:pb-0">
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <Bell className="w-8 h-8 text-primary" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Bildirimler</h1>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <Bell className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Bildirimler</h1>
+                {unreadCount > 0 && (
+                  <p className="text-white/60 text-xs">{unreadCount} okunmamış</p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setShowSettings(!showSettings)} className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <Settings className="w-5 h-5 text-white" />
+              </button>
               {unreadCount > 0 && (
-                <p className="text-sm text-gray-600">{unreadCount} okunmamış bildirim</p>
+                <button onClick={markAllAsRead} className="px-3 py-2 bg-white/15 text-white rounded-xl text-xs font-medium hover:bg-white/25 transition-colors">
+                  Tümünü Oku
+                </button>
               )}
             </div>
           </div>
-          
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={() => setShowSettings(!showSettings)}
-              className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors"
-              title="Bildirim Ayarları"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllAsRead}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm"
-              >
-                Tümünü Okundu İşaretle
-              </button>
-            )}
-          </div>
         </div>
+      </div>
+
+      <div className="page-content -mt-5">
 
         {/* Notification Settings Panel */}
         {showSettings && (

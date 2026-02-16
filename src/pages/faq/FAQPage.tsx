@@ -21,169 +21,126 @@ export const FAQPage = () => {
   })).filter(category => category.questions.length > 0);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-4 lg:p-6">
-        <div className="w-full space-y-6">
-          {/* Header Section */}
-          <div className="text-center space-y-4">
-            <div className="flex items-center justify-center gap-3">
-              <HelpCircle className="w-8 h-8" style={{ color: '#ffb700' }} />
-              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Yardım Merkezi</h1>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient-purple px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <HelpCircle className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Yardım Merkezi</h1>
+                <p className="text-white/60 text-xs">SSS ve destek</p>
+              </div>
             </div>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Sık sorulan sorular ve cevapları aşağıda bulabilirsiniz. Aradığınızı bulamazsanız bizimle iletişime geçebilirsiniz.
-            </p>
           </div>
+        </div>
+      </div>
 
-          {/* Navigation Tabs */}
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-2">
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setActiveTab('faq')}
-                className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
-                  activeTab === 'faq'
-                    ? 'bg-[#ffb700] text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <BookOpen className="w-4 h-4" />
-                Sorular
-              </button>
-              
-              {user && (
-                <>
-                  <button
-                    onClick={() => setActiveTab('support')}
-                    className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
-                      activeTab === 'support'
-                        ? 'bg-[#ffb700] text-white'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    Talep İlet
-                  </button>
-                  
-                  <button
-                    onClick={() => setActiveTab('my-tickets')}
-                    className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
-                      activeTab === 'my-tickets'
-                        ? 'bg-[#ffb700] text-white'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Headphones className="w-4 h-4" />
-                    Taleplerim
-                  </button>
-                </>
+      <div className="page-content -mt-5">
+        {/* Tabs */}
+        <div className="bank-card p-1.5 mb-4">
+          <div className="flex gap-1">
+            <button onClick={() => setActiveTab('faq')} className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${activeTab === 'faq' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-muted'}`}>
+              <BookOpen className="w-3.5 h-3.5" /> Sorular
+            </button>
+            {user && (
+              <>
+                <button onClick={() => setActiveTab('support')} className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${activeTab === 'support' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-muted'}`}>
+                  <MessageSquare className="w-3.5 h-3.5" /> Talep
+                </button>
+                <button onClick={() => setActiveTab('my-tickets')} className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-colors ${activeTab === 'my-tickets' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-muted'}`}>
+                  <Headphones className="w-3.5 h-3.5" /> Taleplerim
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {activeTab === 'faq' && (
+          <>
+            {/* Search */}
+            <div className="bank-card p-3 mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <input
+                  type="search"
+                  placeholder="Soru ara..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg text-sm bg-card text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+            </div>
+
+            {/* FAQ List */}
+            <div className="space-y-3 mb-6">
+              {filteredFAQs.length === 0 ? (
+                <div className="bank-card p-10 text-center">
+                  <BookOpen className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
+                  <h3 className="text-sm font-semibold text-foreground mb-1">Sonuç bulunamadı</h3>
+                  <p className="text-xs text-muted-foreground">Farklı arama terimleri deneyin.</p>
+                </div>
+              ) : (
+                filteredFAQs.map(category => (
+                  <div key={category.id} className="bank-card overflow-hidden">
+                    <button
+                      onClick={() => setOpenCategory(openCategory === category.id ? null : category.id)}
+                      className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <BookOpen className="w-4 h-4 text-primary" />
+                        <h2 className="text-sm font-semibold text-foreground">{category.title}</h2>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
+                          {category.questions.length}
+                        </span>
+                      </div>
+                      {openCategory === category.id ? (
+                        <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                      )}
+                    </button>
+                    {openCategory === category.id && (
+                      <div className="border-t border-border/50">
+                        {category.questions.map(item => (
+                          <div key={item.id} className="border-b border-border/30 last:border-b-0">
+                            <button
+                              onClick={() => setOpenQuestion(openQuestion === item.id ? null : item.id)}
+                              className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/20 transition-colors"
+                            >
+                              <span className="text-sm text-foreground pr-3">{item.question}</span>
+                              {openQuestion === item.id ? (
+                                <ChevronUp className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                              )}
+                            </button>
+                            {openQuestion === item.id && (
+                              <div className="px-4 pb-4 bg-muted/20">
+                                <p className="text-xs text-muted-foreground leading-relaxed">{item.answer}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
               )}
             </div>
-          </div>
+          </>
+        )}
 
-          {/* Content based on active tab */}
-          {activeTab === 'faq' && (
-            <>
-              {/* Search Bar */}
-              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Filter className="w-5 h-5" style={{ color: '#ffb700' }} />
-                  <h2 className="text-lg font-semibold text-gray-900">Arama</h2>
-                </div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="search"
-                    placeholder="Soru ara..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent bg-white text-gray-900"
-                    style={{ '--tw-ring-color': '#ffb700' } as React.CSSProperties}
-                  />
-                </div>
-              </div>
+        {activeTab === 'support' && (
+          <SupportTicketForm onSuccess={() => setActiveTab('my-tickets')} />
+        )}
 
-              {/* FAQ List */}
-              <div className="space-y-4">
-                {filteredFAQs.length === 0 ? (
-                  <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12">
-                    <div className="text-center">
-                      <BookOpen className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        Arama sonucu bulunamadı
-                      </h3>
-                      <p className="text-gray-500">
-                        Farklı arama terimleri deneyebilir veya tüm kategorileri inceleyebilirsiniz.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  filteredFAQs.map(category => (
-                    <div key={category.id} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                      {/* Category Header */}
-                      <button
-                        onClick={() => setOpenCategory(openCategory === category.id ? null : category.id)}
-                        className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <BookOpen className="w-5 h-5" style={{ color: '#ffb700' }} />
-                          <h2 className="text-lg font-semibold text-gray-900">{category.title}</h2>
-                          <span className="px-2 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#ffb700', color: 'white' }}>
-                            {category.questions.length} soru
-                          </span>
-                        </div>
-                        {openCategory === category.id ? (
-                          <ChevronUp className="w-5 h-5 text-gray-500" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-gray-500" />
-                        )}
-                      </button>
-
-                      {/* Category Questions */}
-                      {openCategory === category.id && (
-                        <div className="border-t border-gray-200">
-                          {category.questions.map(item => (
-                            <div key={item.id} className="border-b border-gray-200 last:border-b-0">
-                              <button
-                                onClick={() => setOpenQuestion(openQuestion === item.id ? null : item.id)}
-                                className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition-colors"
-                              >
-                                <span className="font-medium text-gray-900 pr-4">{item.question}</span>
-                                {openQuestion === item.id ? (
-                                  <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                                ) : (
-                                  <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                                )}
-                              </button>
-                              {openQuestion === item.id && (
-                                <div className="px-6 pb-6 bg-gray-50">
-                                  <p className="text-gray-600 leading-relaxed">{item.answer}</p>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-            </>
-          )}
-
-          {/* Support Ticket Form */}
-          {activeTab === 'support' && (
-            <SupportTicketForm
-              onSuccess={() => {
-                setActiveTab('my-tickets');
-              }}
-            />
-          )}
-
-          {/* My Support Tickets */}
-          {activeTab === 'my-tickets' && (
-            <SupportTicketList />
-          )}
-        </div>
+        {activeTab === 'my-tickets' && (
+          <SupportTicketList />
+        )}
       </div>
     </div>
   );

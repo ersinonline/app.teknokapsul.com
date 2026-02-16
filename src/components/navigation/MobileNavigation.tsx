@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Bell,
   PieChart,
   Zap,
   Briefcase,
-  Building
+  Home,
+  ChevronLeft,
+  Settings
 } from 'lucide-react';
-// import { usePremium } from '../../contexts/PremiumContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { UserButton } from '@clerk/clerk-react';
@@ -17,150 +17,169 @@ import { UserButton } from '@clerk/clerk-react';
 interface NavigationItem {
   path: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  badge?: number;
+  icon: React.ComponentType<any>;
 }
 
-const bottomNavigationItems: NavigationItem[] = [
+const navItems: NavigationItem[] = [
+  { path: '/', label: 'Ana Sayfa', icon: Home },
   { path: '/kapsulum', label: 'Kapsülüm', icon: Zap },
-  { path: '/evim', label: 'Evim', icon: Building },
+  { path: '/evim', label: 'Evim', icon: Home },
   { path: '/bankam', label: 'Bankam', icon: PieChart },
   { path: '/work-tracking', label: 'İşim', icon: Briefcase },
 ];
 
+const pageTitles: Record<string, string> = {
+  '/': 'TeknoKapsül',
+  '/kapsulum': 'Kapsülüm',
+  '/evim': 'Evim',
+  '/bankam': 'Bankam',
+  '/work-tracking': 'İşim',
+  '/income': 'Gelirlerim',
+  '/expenses': 'Giderlerim',
+  '/goals': 'Hedeflerim',
+  '/budget': 'Bütçem',
+  '/portfolio': 'Portföyüm',
+  '/stock-market': 'Borsa',
+  '/financial-data': 'Finansal Veriler',
+  '/credit-score': 'Kredi Notu',
+  '/credit-calculator': 'Kredi Hesaplama',
+  '/payment-plan': 'Ödeme Planı',
+  '/subscriptions': 'Abonelikler',
+  '/cargo-tracking': 'Kargo Takibi',
+  '/warranty-tracking': 'Garanti Takibi',
+  '/calendar': 'Takvim',
+  '/notes': 'Notlar',
+  '/documents': 'Belgeler',
+  '/notifications': 'Bildirimler',
+  '/settings': 'Ayarlar',
+  '/ai-assistant': 'AI Asistan',
+  '/analytics': 'Analitik',
+  '/accounts': 'Hesaplar',
+  '/all-transactions': 'Tüm İşlemler',
+  '/applications': 'Başvurular',
+  '/attendance': 'Yoklama',
+  '/pharmacy': 'Eczane',
+};
+
 export const MobileNavigation: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  // const { isPremium } = usePremium();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Ana sayfada mobil alt menüyü gizle
   const isHomePage = location.pathname === '/';
-
-  const handleNotificationClick = () => {
-    navigate('/notifications');
-  };
+  const isSubPage = !navItems.some(item => item.path === location.pathname);
+  const currentTitle = pageTitles[location.pathname] || 'TeknoKapsül';
 
   useEffect(() => {
     if (!user) return;
-
     const notificationsRef = collection(db, 'teknokapsul', user.id, 'notifications');
     const q = query(notificationsRef, where('read', '==', false));
-
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setUnreadCount(snapshot.size);
     });
-
     return () => unsubscribe();
   }, [user]);
 
   return (
     <>
-      {/* Mobile Header - Tamamen gizli */}
-      <div className="hidden fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 z-40">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">T</span>
-            </div>
-            <button 
-                 onClick={() => navigate('/')}
-                 className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
-               >
-              <h1 className="text-lg font-semibold text-gray-900">TeknoKapsül</h1>
-              <p className="text-xs text-gray-500">Dijital Çözümler</p>
-              {/* {isPremium && (
-                <img src="https://i.hizliresim.com/indgl7s.png" alt="TeknoKapsül" className="h-4 object-contain" />
-              )} */}
-            </button>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <button 
-              onClick={handleNotificationClick}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
-            >
-              <Bell className="w-5 h-5 text-gray-600" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </button>
+      {/* ===== DESKTOP TOP NAV ===== */}
+      <div className="top-nav">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+          >
+            <img src="/logo.ico" alt="TeknoKapsül" className="w-8 h-8" />
+            <span className="text-base font-bold text-foreground">TeknoKapsül</span>
+          </button>
+          <div className="w-px h-6 bg-border/60 mx-1" />
+          <nav className="flex items-center gap-1">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path || 
+                (item.path !== '/' && location.pathname.startsWith(item.path));
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-150
+                    ${isActive
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+                    }`}
+                >
+                  <Icon className="w-4 h-4" strokeWidth={isActive ? 2.5 : 2} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
 
-            <UserButton />
-          </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate('/notifications')}
+            className="relative p-2.5 rounded-xl hover:bg-muted/60 transition-colors"
+          >
+            <Bell className="w-5 h-5 text-muted-foreground" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-destructive text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => navigate('/settings')}
+            className="p-2.5 rounded-xl hover:bg-muted/60 transition-colors"
+          >
+            <Settings className="w-5 h-5 text-muted-foreground" />
+          </button>
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: "w-8 h-8 rounded-xl",
+                userButtonPopoverCard: "rounded-2xl shadow-xl",
+                userButtonPopoverActionButton: "rounded-xl"
+              }
+            }}
+          />
         </div>
       </div>
 
-
-
-      {/* Top Navigation for Tablet and Desktop */}
+      {/* ===== MOBILE HEADER ===== */}
       {!isHomePage && (
-        <div className="hidden md:block fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 z-40">
-          <div className="flex items-center justify-between px-4 py-4">
-            {/* Left side - Logo */}
-            <div className="flex items-center space-x-3">
-              <img src="/logo.ico" alt="TeknoKapsül" className="w-8 h-8 object-contain" />
-              <button 
-                onClick={() => navigate('/')}
-                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
-              >
-                <h1 className="text-lg font-semibold text-gray-900">TeknoKapsül</h1>
-              </button>
+        <div className="md:hidden page-header">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-2">
+              {isSubPage && (
+                <button
+                  onClick={() => navigate(-1)}
+                  className="p-2 -ml-2 rounded-xl hover:bg-muted/60 transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5 text-foreground" />
+                </button>
+              )}
+              <h1 className="text-lg font-bold text-foreground">{currentTitle}</h1>
             </div>
-            
-            {/* Center - Navigation Items */}
-            <div className="flex items-center space-x-1">
-              {bottomNavigationItems.map((item) => {
-                const isActive = location.pathname === item.path;
-                const Icon = item.icon;
-                
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`
-                      flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200
-                      ${isActive 
-                        ? 'text-[#ffb700] bg-[#ffb700]/10' 
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                      }
-                    `}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="text-sm font-medium">{item.label}</span>
-                    {item.badge && (
-                      <span className="w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                        {item.badge}
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
-            
-            {/* Right side - User actions */}
-            <div className="flex items-center space-x-2">
-              <button 
-                onClick={handleNotificationClick}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => navigate('/notifications')}
+                className="relative p-2.5 rounded-xl hover:bg-muted/60 transition-colors"
               >
-                <Bell className="w-5 h-5 text-gray-600" />
+                <Bell className="w-5 h-5 text-muted-foreground" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-destructive text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </button>
-
-              <UserButton 
+              <UserButton
                 appearance={{
                   elements: {
-                    avatarBox: "w-8 h-8 rounded-lg",
-                    userButtonPopoverCard: "rounded-[12px]",
-                    userButtonPopoverActionButton: "rounded-[10px]"
+                    avatarBox: "w-8 h-8 rounded-xl",
+                    userButtonPopoverCard: "rounded-2xl shadow-xl",
+                    userButtonPopoverActionButton: "rounded-xl"
                   }
                 }}
               />
@@ -169,40 +188,33 @@ export const MobileNavigation: React.FC = () => {
         </div>
       )}
 
-      {/* Bottom Navigation for Mobile Only */}
-      {!isHomePage && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-40">
-        <div className="grid grid-cols-4 gap-1 px-2 py-2">
-          {bottomNavigationItems.map((item) => {
-            const isActive = location.pathname === item.path;
+      {/* ===== MOBILE BOTTOM NAV ===== */}
+      <div className="bottom-nav">
+        <div className="grid grid-cols-5 px-2 py-1">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path ||
+              (item.path !== '/' && location.pathname.startsWith(item.path));
             const Icon = item.icon;
-            
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`
-                  flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all duration-200
-                  ${isActive 
-                    ? 'text-[#ffb700] bg-[#ffb700]/10' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }
-                `}
+                className={`bottom-nav-item ${isActive ? 'active' : ''}`}
               >
-                <Icon className="w-5 h-5 mb-1" />
-                <span className="text-xs font-medium truncate">{item.label}</span>
-                {item.badge && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {item.badge}
-                  </span>
-                )}
+                <div className={`relative ${isActive ? '' : ''}`}>
+                  <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  {isActive && (
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                  )}
+                </div>
+                <span className={`text-[10px] mt-0.5 ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                  {item.label}
+                </span>
               </Link>
             );
           })}
         </div>
       </div>
-      )}
-
     </>
   );
 };

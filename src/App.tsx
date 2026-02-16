@@ -81,7 +81,7 @@ import BankamPage from './pages/BankamPage';
 import WebViewAuthPage from './pages/auth/WebViewAuthPage';
 import { VerifyPage } from './pages/auth/VerifyPage';
 import { IsBankCallbackPage } from './pages/auth/IsBankCallbackPage';
-import AppTabs from './components/common/AppTabs';
+// AppTabs removed - navigation handled by MobileNavigation
 import { useLocation } from 'react-router-dom';
 
 const TeknoRouteContent = ({ children }: { children: React.ReactNode }) => {
@@ -92,20 +92,12 @@ const TeknoRouteContent = ({ children }: { children: React.ReactNode }) => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
   
-  const getCurrentApp = (): 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' | 'tekno-firsat' | null => {
-    if (location.pathname === '/dashboard' || location.pathname === '/') return null;
-    if (location.pathname.startsWith('/tekno-finans')) return 'tekno-finans';
-    if (location.pathname.startsWith('/tekno-hizmet')) return 'tekno-hizmet';
-    if (location.pathname.startsWith('/tekno-firsat')) return 'tekno-firsat';
-    return 'tekno-kapsul';
-  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <AppTabs currentApp={getCurrentApp()} />
+    <div className="min-h-screen bg-background">
       <MobileNavigation />
       <OfflineIndicator />
-      <div className="pb-20">
+      <div className="md:pt-16 pb-20 md:pb-4">
         {children}
       </div>
     </div>

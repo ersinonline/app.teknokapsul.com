@@ -70,97 +70,79 @@ export const SubscriptionsPage = () => {
   );
 
   return (
-    <div className="bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10 border-b">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Calendar className="w-6 h-6" style={{ color: '#ffb700' }} />
-            <h1 className="text-xl font-semibold text-gray-900">Aboneliklerim</h1>
+      <div className="bank-gradient-green px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <CreditCard className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Aboneliklerim</h1>
+                <p className="text-white/60 text-xs">{subscriptions.length} abonelik</p>
+              </div>
+            </div>
             <button
               onClick={() => setShowForm(!showForm)}
-              className="ml-auto text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
-              style={{ backgroundColor: '#ffb700' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
             >
-              <Plus className={`w-4 h-4 transition-transform duration-200 ${showForm ? 'rotate-45' : ''}`} />
-              {showForm ? 'Kapat' : 'Yeni'}
+              <Plus className={`w-5 h-5 text-white transition-transform duration-200 ${showForm ? 'rotate-45' : ''}`} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
+      <div className="page-content -mt-5">
         {successMessage && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 shadow-md">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500 rounded-lg">
-                <AlertCircle className="w-5 h-5 text-white" />
-              </div>
-              <p className="text-green-700 font-medium text-sm">
-                {successMessage}
-              </p>
+          <div className="bank-card p-3 mb-4 border-l-4 border-l-emerald-400">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-emerald-500" />
+              <p className="text-emerald-700 font-medium text-xs">{successMessage}</p>
             </div>
           </div>
         )}
 
         {showForm && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mb-6">
-            <div className="bg-[#ffb700]/10 p-6 border-b border-gray-100">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-[#ffb700] rounded-xl shadow-lg">
-                  <Plus className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">Yeni Abonelik Ekle</h2>
-                  <p className="text-gray-600 text-sm">Abonelik bilgilerini girerek takibinizi başlatın</p>
-                </div>
+          <div className="bank-card overflow-hidden mb-4">
+            <div className="px-4 py-3 border-b border-border/50 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                <Plus className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-foreground">Yeni Abonelik Ekle</h2>
+                <p className="text-[11px] text-muted-foreground">Abonelik bilgilerini girin</p>
               </div>
             </div>
-            <div className="p-6">
+            <div className="p-4">
               <SubscriptionForm onSubmit={handleSubmit} isLoading={isSubmitting} />
             </div>
           </div>
         )}
 
         {subscriptions.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-4">
             <SubscriptionStats subscriptions={sortedSubscriptions} />
           </div>
         )}
 
         {subscriptions.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-12">
-            <EmptyState
-              icon={Clock}
-              title="Abonelik Bulunamadı"
-              description="Henüz hiç abonelik eklemediniz. Yukarıdaki formu kullanarak ilk aboneliğinizi ekleyin."
-            />
+          <div className="bank-card p-10 text-center">
+            <Clock className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
+            <h3 className="text-sm font-semibold text-foreground mb-1">Abonelik Bulunamadı</h3>
+            <p className="text-xs text-muted-foreground">İlk aboneliğinizi eklemek için + butonunu kullanın.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-            <div className="bg-[#ffb700]/10 p-6 border-b border-gray-100">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-[#ffb700] rounded-xl shadow-lg">
-                    <CreditCard className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">Abonelik Listesi</h2>
-                    <p className="text-gray-600 text-sm">Tüm aboneliklerinizi görüntüleyin.</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#ffb700]/20 text-[#ffb700] px-4 py-2 rounded-full">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4" />
-                      <span className="font-semibold text-sm">{subscriptions.length} abonelik</span>
-                    </div>
-                  </div>
-                </div>
+          <div className="bank-card overflow-hidden mb-6">
+            <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <CreditCard className="w-4 h-4 text-muted-foreground" />
+                <h2 className="text-sm font-semibold text-foreground">Abonelik Listesi</h2>
               </div>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
+                {subscriptions.length}
+              </span>
             </div>
             <SubscriptionTable subscriptions={sortedSubscriptions} onUpdate={loadSubscriptions} />
           </div>

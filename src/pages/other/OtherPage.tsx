@@ -24,149 +24,83 @@ export const OtherPage = () => {
   // Get most common FAQs
   const commonFaqs = FAQ_DATA[0].questions.slice(0, 3);
 
+  const sections = [
+    { icon: Package, label: 'Siparişlerim', desc: 'Siparişlerinizi takip edin', path: '/other/my-orders', color: 'bg-orange-50', iconColor: 'text-orange-500' },
+    { icon: StickyNote, label: 'Notlar', desc: `${notes.length} not`, path: '/notes', color: 'bg-amber-50', iconColor: 'text-amber-500' },
+    { icon: Calendar, label: 'Takvim', desc: `${upcomingEvents.length} yaklaşan etkinlik`, path: '/calendar', color: 'bg-green-50', iconColor: 'text-green-500' },
+    { icon: HelpCircle, label: 'Yardım', desc: 'SSS ve destek', path: '/faq', color: 'bg-blue-50', iconColor: 'text-blue-500' },
+    { icon: Settings, label: 'Ayarlar', desc: 'Profil ve tercihler', path: '/settings', color: 'bg-slate-50', iconColor: 'text-slate-500' },
+  ];
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Diğer İşlemler</h1>
-
-      {/* Orders Section */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Package className="w-5 h-5 text-orange-600" />
-              </div>
-              <h2 className="text-lg font-medium">Siparişlerim</h2>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient-purple px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <Settings className="w-5 h-5 text-white" />
             </div>
-            <button
-              onClick={() => navigate('/other/my-orders')}
-              className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1"
-            >
-              Tümünü Gör
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            <div>
+              <h1 className="text-xl font-bold text-white">Diğer İşlemler</h1>
+              <p className="text-white/60 text-xs">Hızlı erişim menüsü</p>
+            </div>
           </div>
-        </div>
-        <div className="p-4">
-          <p className="text-sm text-gray-600">
-            Siparişlerinizi takip edin, durumlarını görüntüleyin ve geçmiş alışverişlerinizi inceleyin.
-          </p>
         </div>
       </div>
 
-      {/* Notes Section */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <StickyNote className="w-5 h-5 text-yellow-600" />
-              </div>
-              <h2 className="text-lg font-medium">Notlar</h2>
-            </div>
+      <div className="page-content -mt-5 space-y-3 mb-6">
+        {sections.map((section) => {
+          const Icon = section.icon;
+          return (
             <button
-              onClick={() => navigate('/notes')}
-              className="text-sm text-yellow-600 hover:text-yellow-700 flex items-center gap-1"
+              key={section.path}
+              onClick={() => navigate(section.path)}
+              className="bank-card p-4 w-full flex items-center gap-3 hover:shadow-md transition-shadow text-left"
             >
-              Tümünü Gör
-              <ChevronRight className="w-4 h-4" />
+              <div className={`w-10 h-10 rounded-xl ${section.color} flex items-center justify-center flex-shrink-0`}>
+                <Icon className={`w-5 h-5 ${section.iconColor}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-foreground">{section.label}</h3>
+                <p className="text-[11px] text-muted-foreground">{section.desc}</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
             </button>
-          </div>
-        </div>
-        <div className="divide-y">
-          {latestNotes.map(note => (
-            <div key={note.id} className="p-4 hover:bg-gray-50">
-              <h3 className="font-medium">{note.title}</h3>
-              <p className="text-sm text-gray-600 mt-1 line-clamp-2">{note.content}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+          );
+        })}
 
-      {/* Calendar Section */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Calendar className="w-5 h-5 text-yellow-600" />
+        {/* Recent Notes */}
+        {latestNotes.length > 0 && (
+          <div className="bank-card overflow-hidden">
+            <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">
+              <h2 className="text-xs font-semibold text-foreground">Son Notlar</h2>
+              <button onClick={() => navigate('/notes')} className="text-[11px] text-primary font-medium">Tümü</button>
+            </div>
+            {latestNotes.map(note => (
+              <div key={note.id} className="px-4 py-3 border-b border-border/20 last:border-b-0">
+                <h3 className="text-xs font-medium text-foreground">{note.title}</h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{note.content}</p>
               </div>
-              <h2 className="text-lg font-medium">Takvim</h2>
-            </div>
-            <button
-              onClick={() => navigate('/calendar')}
-              className="text-sm text-yellow-600 hover:text-yellow-700 flex items-center gap-1"
-            >
-              Tümünü Gör
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            ))}
           </div>
-        </div>
-        <div className="divide-y">
-          {upcomingEvents.map(event => (
-            <div key={event.id} className="p-4 hover:bg-gray-50">
-              <h3 className="font-medium">{event.title}</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                {new Date(event.date).toLocaleDateString('tr-TR')}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
+        )}
 
-      {/* Help Section */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <HelpCircle className="w-5 h-5 text-blue-600" />
+        {/* Upcoming Events */}
+        {upcomingEvents.length > 0 && (
+          <div className="bank-card overflow-hidden">
+            <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">
+              <h2 className="text-xs font-semibold text-foreground">Yaklaşan Etkinlikler</h2>
+              <button onClick={() => navigate('/calendar')} className="text-[11px] text-primary font-medium">Tümü</button>
+            </div>
+            {upcomingEvents.map(event => (
+              <div key={event.id} className="px-4 py-3 border-b border-border/20 last:border-b-0">
+                <h3 className="text-xs font-medium text-foreground">{event.title}</h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{new Date(event.date).toLocaleDateString('tr-TR')}</p>
               </div>
-              <h2 className="text-lg font-medium">Yardım</h2>
-            </div>
-            <button
-              onClick={() => navigate('/faq')}
-              className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-            >
-              Tümünü Gör
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            ))}
           </div>
-        </div>
-        <div className="divide-y">
-          {commonFaqs.map((faq, index) => (
-            <div key={index} className="p-4 hover:bg-gray-50">
-              <h3 className="font-medium">{faq.question}</h3>
-              <p className="text-sm text-gray-600 mt-1 line-clamp-2">{faq.answer}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Settings Section */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gray-100 rounded-lg">
-                <Settings className="w-5 h-5 text-gray-600" />
-              </div>
-              <h2 className="text-lg font-medium">Ayarlar</h2>
-            </div>
-            <button
-              onClick={() => navigate('/settings')}
-              className="text-sm text-gray-600 hover:text-gray-700 flex items-center gap-1"
-            >
-              Tümünü Gör
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-        <div className="p-4">
-          <p className="text-sm text-gray-600">
-            Profil ayarları, bildirimler ve diğer tercihlerinizi yönetin.
-          </p>
-        </div>
+        )}
       </div>
     </div>
   );

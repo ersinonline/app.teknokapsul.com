@@ -624,94 +624,115 @@ const WorkTrackingPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="page-container bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Yükleniyor...</p>
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Yükleniyor...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <Clock className="w-6 h-6 text-blue-600" />
-                İş Takibi
-              </h1>
-              <p className="text-gray-600 mt-1">Çalışma saatlerinizi takip edin ve maaşınızı hesaplayın</p>
-            </div>
-            
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setShowSettingsModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                <Settings className="w-4 h-4" />
-                Ayarlar
-              </button>
-              
-
-              
-              <button
-                onClick={() => setShowSalaryHistoryModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-              >
-                <DollarSign className="w-4 h-4" />
-                Maaş Geçmişi
-              </button>
-              
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`flex items-center gap-2 px-3 py-1 rounded-md transition-colors ${
-                    viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  <List className="w-4 h-4" />
-                  Liste
-                </button>
-                <button
-                  onClick={() => setViewMode('calendar')}
-                  className={`flex items-center gap-2 px-3 py-1 rounded-md transition-colors ${
-                    viewMode === 'calendar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  <Grid className="w-4 h-4" />
-                  Takvim
-                </button>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient-purple px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-white" />
               </div>
-              
+              <div>
+                <h1 className="text-xl font-bold text-white">İş Takibi</h1>
+                <p className="text-white/60 text-xs">Çalışma saatleri ve maaş hesaplama</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                const today = new Date();
+                const formattedDate = today.toISOString().split('T')[0];
+                setWorkDate(formattedDate);
+                setShowAddModal(true);
+              }}
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
+            >
+              <Plus className="w-5 h-5 text-white" />
+            </button>
+          </div>
+
+          {/* Quick Stats in Header */}
+          {summary && (
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-white/10 rounded-xl p-3 text-center">
+                <Clock className="w-4 h-4 text-white/70 mx-auto mb-1" />
+                <p className="text-white font-bold text-sm">{summary.totalHours.toFixed(1)}</p>
+                <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Saat</p>
+              </div>
+              <div className="bg-white/10 rounded-xl p-3 text-center">
+                <Calendar className="w-4 h-4 text-white/70 mx-auto mb-1" />
+                <p className="text-white font-bold text-sm">{summary.totalDays}</p>
+                <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Gün</p>
+              </div>
+              <div className="bg-white/10 rounded-xl p-3 text-center">
+                <DollarSign className="w-4 h-4 text-white/70 mx-auto mb-1" />
+                <p className="text-white font-bold text-sm">{formatCurrency(summary.totalSalary)}</p>
+                <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Toplam</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="page-content -mt-5">
+        {/* Action Buttons */}
+        <div className="bank-card p-3 mb-4">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setShowSettingsModal(true)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors text-xs font-medium"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              Ayarlar
+            </button>
+            <button
+              onClick={() => setShowSalaryHistoryModal(true)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors text-xs font-medium"
+            >
+              <DollarSign className="w-3.5 h-3.5" />
+              Maaş Geçmişi
+            </button>
+            <div className="flex bg-muted rounded-lg p-0.5 ml-auto">
               <button
-                onClick={() => {
-                  // Bugünün tarihini ayarla
-                  const today = new Date();
-                  const formattedDate = today.toISOString().split('T')[0];
-                  setWorkDate(formattedDate);
-                  setShowAddModal(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                onClick={() => setViewMode('list')}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-colors text-xs ${
+                  viewMode === 'list' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
+                }`}
               >
-                <Plus className="w-4 h-4" />
-                Çalışma Ekle
+                <List className="w-3.5 h-3.5" />
+                Liste
+              </button>
+              <button
+                onClick={() => setViewMode('calendar')}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-colors text-xs ${
+                  viewMode === 'calendar' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
+                }`}
+              >
+                <Grid className="w-3.5 h-3.5" />
+                Takvim
               </button>
             </div>
           </div>
         </div>
 
         {/* Month/Year Selector */}
-        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <Calendar className="w-5 h-5 text-gray-600" />
+        <div className="bank-card p-3 mb-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <Calendar className="w-4 h-4 text-muted-foreground" />
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-              className="px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm bg-card text-foreground"
             >
               {Array.from({ length: 12 }, (_, i) => (
                 <option key={i} value={i}>
@@ -719,19 +740,14 @@ const WorkTrackingPage: React.FC = () => {
                 </option>
               ))}
             </select>
-            
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+              className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm bg-card text-foreground"
             >
               {Array.from({ length: 5 }, (_, i) => {
                 const year = new Date().getFullYear() - 2 + i;
-                return (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                );
+                return <option key={year} value={year}>{year}</option>;
               })}
             </select>
           </div>
@@ -739,78 +755,64 @@ const WorkTrackingPage: React.FC = () => {
 
         {/* Summary Cards */}
         {summary && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+            <div className="bank-card p-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-blue-500" />
                 </div>
                 <div>
-                  <p className="text-xs sm:text-sm text-gray-600">Toplam Saat</p>
-                  <p className="text-lg sm:text-xl font-bold text-gray-900">{summary.totalHours.toFixed(1)}</p>
+                  <p className="text-[11px] text-muted-foreground">Toplam Saat</p>
+                  <p className="text-sm font-bold text-foreground">{summary.totalHours.toFixed(1)}</p>
                   {summary.monthlyHourLimit && (
-                    <p className={`text-xs ${
-                      summary.isOverMonthlyLimit ? 'text-red-600' : 'text-gray-500'
-                    }`}>
-                      Limit: {summary.monthlyHourLimit} saat
+                    <p className={`text-[10px] ${summary.isOverMonthlyLimit ? 'text-red-500' : 'text-muted-foreground'}`}>
+                      Limit: {summary.monthlyHourLimit}h
                     </p>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+            <div className="bank-card p-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-4 h-4 text-purple-500" />
                 </div>
                 <div>
-                  <p className="text-xs sm:text-sm text-gray-600">Çalışılan Gün</p>
-                  <p className="text-lg sm:text-xl font-bold text-gray-900">{summary.totalDays}</p>
+                  <p className="text-[11px] text-muted-foreground">Çalışma Ücreti</p>
+                  <p className="text-sm font-bold text-foreground">{formatCurrency((summary.totalHours * (workSettings?.hourlyRate || 0)))}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
+            <div className="bank-card p-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-4 h-4 text-orange-500" />
                 </div>
                 <div>
-                  <p className="text-xs sm:text-sm text-gray-600">Çalışma Ücreti</p>
-                  <p className="text-lg sm:text-xl font-bold text-gray-900">{formatCurrency((summary.totalHours * (workSettings?.hourlyRate || 0)))}</p>
+                  <p className="text-[11px] text-muted-foreground">Yemek Ücreti</p>
+                  <p className="text-sm font-bold text-foreground">{formatCurrency(summary.mealAllowance)}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
+            <div className="bank-card p-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-4 h-4 text-teal-500" />
                 </div>
                 <div>
-                  <p className="text-xs sm:text-sm text-gray-600">Yemek Ücreti</p>
-                  <p className="text-lg sm:text-xl font-bold text-gray-900">{formatCurrency(summary.mealAllowance)}</p>
+                  <p className="text-[11px] text-muted-foreground">Yol Ücreti</p>
+                  <p className="text-sm font-bold text-foreground">{formatCurrency(summary.transportAllowance)}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-teal-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600" />
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-600">Yol Ücreti</p>
-                  <p className="text-lg sm:text-xl font-bold text-gray-900">{formatCurrency(summary.transportAllowance)}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 lg:p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600" />
+            <div className="bank-card p-3 col-span-2 sm:col-span-1">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-4 h-4 text-amber-500" />
                 </div>
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600">Toplam Maaş</p>

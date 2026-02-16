@@ -154,59 +154,63 @@ const KendimPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3">
-              <FileText className="w-6 h-6" style={{ color: '#ffb700' }} />
-              <h1 className="text-2xl font-bold text-gray-900">Kapsülüm</h1>
+      <div className="bank-gradient-purple px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">Kapsülüm</h1>
+              <p className="text-white/60 text-xs">Kişisel yönetim merkezi</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <p className="text-white font-bold text-lg">{eventsLoading ? '...' : upcomingEvents.length}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Etkinlik</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <p className="text-white font-bold text-lg">{notesLoading ? '...' : notes.length}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Not</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <p className="text-white font-bold text-lg">{applicationsLoading ? '...' : activeApplications.length}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Başvuru</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
-        <div className="grid grid-cols-1 gap-4">
+      {/* Menu Items */}
+      <div className="page-content -mt-5">
+        <div className="bank-card p-1 mb-6">
           {sections.map((section) => {
             const IconComponent = section.icon;
             return (
-              <div
+              <button
                 key={section.id}
                 onClick={() => handleSectionClick(section.route)}
-                className={`${section.bgColor} ${section.borderColor} border rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-300 group`}
+                className="menu-item w-full"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className={`${section.color} p-3 rounded-full text-white group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold ${section.textColor} text-lg`}>
-                        {section.title}
-                      </h3>
-                      <p className="text-gray-600 text-sm mt-1">
-                        {section.description}
-                      </p>
-                      {section.id !== 'calendar' && section.id !== 'applications' && section.id !== 'attendance' && (section.loading ? (
-                        <div className="flex items-center gap-2 mt-2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-                          <span className="text-xs text-gray-500">Yükleniyor...</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className={`text-sm font-medium ${section.textColor}`}>
-                            {section.count} {section.id === 'documents' ? 'belge' : section.id === 'notes' ? 'not' : 'öğe'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <ChevronRight className={`w-5 h-5 ${section.textColor} group-hover:translate-x-1 transition-transform duration-300`} />
+                <div className={`menu-icon ${section.bgColor}`}>
+                  <IconComponent className={`w-5 h-5 ${section.textColor}`} />
                 </div>
-              </div>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-medium text-foreground">{section.title}</p>
+                  <p className="text-xs text-muted-foreground">{section.description}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!section.loading && section.count > 0 && (
+                    <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                      {section.count}
+                    </span>
+                  )}
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </button>
             );
           })}
         </div>

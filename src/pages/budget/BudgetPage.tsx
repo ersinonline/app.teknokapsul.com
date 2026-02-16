@@ -222,130 +222,85 @@ export const BudgetPage = () => {
   const remainingBudget = totalBudget - totalSpent;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-4 lg:p-6 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <PieChart className="w-6 h-6" style={{ color: '#ffb700' }} />
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Bütçe Planlama</h1>
-          </div>
-          <button
-            onClick={() => {
-              setEditingPlan(null);
-              resetForm();
-              setIsModalOpen(true);
-            }}
-            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl w-full sm:w-auto justify-center"
-            style={{ backgroundColor: '#ffb700' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
-          >
-            <Plus className="w-4 h-4" />
-            Yeni Bütçe Planı
-          </button>
-        </div>
-
-        {/* Current Month Overview */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient-blue px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <PieChart className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Aylık Gelir</p>
-                <p className="text-lg font-bold text-gray-900">{formatCurrency(totalIncome)}</p>
+                <h1 className="text-xl font-bold text-white">Bütçe Planlama</h1>
+                <p className="text-white/60 text-xs">{currentDate.toLocaleString('tr-TR', { month: 'long', year: 'numeric' })}</p>
               </div>
             </div>
+            <button
+              onClick={() => { setEditingPlan(null); resetForm(); setIsModalOpen(true); }}
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
+            >
+              <Plus className="w-5 h-5 text-white" />
+            </button>
           </div>
-          
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <DollarSign className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Toplam Bütçe</p>
-                <p className="text-lg font-bold text-gray-900">{formatCurrency(totalBudget)}</p>
-              </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <TrendingUp className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">{formatCurrency(totalIncome)}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Gelir</p>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <TrendingDown className="w-5 h-5 text-red-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Harcanan</p>
-                <p className="text-lg font-bold text-gray-900">{formatCurrency(totalSpent)}</p>
-              </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <TrendingDown className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">{formatCurrency(totalSpent)}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Harcanan</p>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${
-                remainingBudget >= 0 ? 'bg-green-100' : 'bg-red-100'
-              }`}>
-                <DollarSign className={`w-5 h-5 ${
-                  remainingBudget >= 0 ? 'text-green-600' : 'text-red-600'
-                }`} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Kalan</p>
-                <p className={`text-lg font-bold ${
-                  remainingBudget >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {formatCurrency(remainingBudget)}
-                </p>
-              </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <DollarSign className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">{formatCurrency(totalBudget)}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Bütçe</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <DollarSign className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className={`font-bold text-sm ${remainingBudget >= 0 ? 'text-emerald-300' : 'text-red-300'}`}>{formatCurrency(remainingBudget)}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Kalan</p>
             </div>
           </div>
         </div>
+      </div>
 
+      <div className="page-content -mt-5">
         {/* Current Plan Categories */}
         {currentPlan && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {currentPlan.name} - {currentDate.toLocaleString('tr-TR', { month: 'long', year: 'numeric' })}
-                </h2>
-                <button
-                  onClick={() => {
-                    setSelectedPlan(currentPlan);
-                    resetCategoryForm();
-                    setIsCategoryModalOpen(true);
-                  }}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  Kategori Ekle
-                </button>
-              </div>
+          <div className="bank-card overflow-hidden mb-4">
+            <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-foreground">{currentPlan.name}</h2>
+              <button
+                onClick={() => { setSelectedPlan(currentPlan); resetCategoryForm(); setIsCategoryModalOpen(true); }}
+                className="text-xs text-primary font-medium flex items-center gap-1"
+              >
+                <Plus className="w-3.5 h-3.5" /> Kategori
+              </button>
             </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+            <div className="p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {Object.values(currentPlan.categories).map((category: any) => {
                   const spentAmount = calculateCategorySpent(category.name);
                   const percentage = category.budgetAmount > 0 ? (spentAmount / category.budgetAmount) * 100 : 0;
                   const status = getBudgetStatus(spentAmount, category.budgetAmount);
                   
                   return (
-                    <div key={category.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
-                      <div className="flex items-center justify-between mb-3">
+                    <div key={category.id} className="border border-border/50 rounded-xl p-3">
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-lg">{category.icon}</span>
-                          <h3 className="font-medium text-gray-900 text-sm">{category.name}</h3>
+                          <span className="text-base">{category.icon}</span>
+                          <h3 className="font-medium text-foreground text-xs">{category.name}</h3>
                         </div>
-                        <div className="flex gap-1">
-                          <button className="p-1 text-gray-400 hover:text-blue-600 transition-colors">
-                            <Edit className="w-4 h-4" />
+                        <div className="flex gap-0.5">
+                          <button className="p-1 text-muted-foreground hover:text-primary transition-colors">
+                            <Edit className="w-3.5 h-3.5" />
                           </button>
-                          <button className="p-1 text-gray-400 hover:text-red-600 transition-colors">
-                            <Trash2 className="w-4 h-4" />
+                          <button className="p-1 text-muted-foreground hover:text-red-500 transition-colors">
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>

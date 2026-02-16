@@ -238,67 +238,51 @@ const DocumentsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-gray-50">
-        {/* Header */}
-        <div className="bg-white shadow-sm sticky top-0 z-10 border-b">
-          <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-            <div className="flex items-center gap-3">
-              <FolderOpen className="w-6 h-6" style={{ color: '#ffb700' }} />
-              <h1 className="text-xl font-semibold text-gray-900">Belgelerim</h1>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ffb700]"></div>
-          </div>
+      <div className="page-container bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Belgeler yükleniyor...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          <div className="flex items-center justify-between">
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <FolderOpen className="w-6 h-6" style={{ color: '#ffb700' }} />
-              <h1 className="text-xl font-semibold text-gray-900">Belgelerim</h1>
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <FolderOpen className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Belgelerim</h1>
+                <p className="text-white/60 text-xs">{documents.length} belge</p>
+              </div>
             </div>
             <button
               onClick={() => setShowUploadModal(true)}
-              className="flex items-center gap-2 bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a600] transition-colors"
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-5 h-5 text-white" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
-
+      <div className="page-content -mt-5">
         {/* Categories */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Kategoriler</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="bank-card p-3 mb-4">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`p-4 rounded-xl border-2 transition-all ${
-                selectedCategory === 'all'
-                  ? 'border-[#ffb700] bg-[#fff7e6] text-[#ffb700]'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+              className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                selectedCategory === 'all' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
               }`}
             >
-              <FileText className="w-6 h-6 mx-auto mb-2" />
-              <span className="text-sm font-medium">Tümü</span>
-              <span className="block text-xs text-gray-500 mt-1">
-                {documents.length} dosya
-              </span>
+              Tümü ({documents.length})
             </button>
             {categories.map((category) => {
               const categoryCount = documents.filter(doc => doc.category === category.id).length;
@@ -306,112 +290,72 @@ const DocumentsPage: React.FC = () => {
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    selectedCategory === category.id
-                      ? `${category.borderColor} ${category.bgColor} ${category.color}`
-                      : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                  className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                    selectedCategory === category.id ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
                   }`}
                 >
-                  <div className="flex justify-center mb-2">{category.icon}</div>
-                  <span className="text-sm font-medium block">{category.name}</span>
-                  <span className="block text-xs text-gray-500 mt-1">
-                    {categoryCount} dosya
-                  </span>
+                  {category.name} ({categoryCount})
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Search and Filter */}
-        <div className="mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Dosya ara..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
-              />
-            </div>
+        {/* Search */}
+        <div className="bank-card p-3 mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Dosya ara..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg text-sm bg-card text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            />
           </div>
         </div>
 
         {/* Documents Grid */}
         {filteredDocuments.length === 0 ? (
-          <div className="text-center py-12">
-            <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="bank-card p-10 text-center">
+            <FileText className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
+            <h3 className="text-sm font-semibold text-foreground mb-1">
               {searchTerm || selectedCategory !== 'all' ? 'Dosya bulunamadı' : 'Henüz dosya yok'}
             </h3>
-            <p className="text-gray-600">
-              {searchTerm || selectedCategory !== 'all'
-                ? 'Arama kriterlerinize uygun dosya bulunamadı.'
-                : 'İlk dosyanızı yükleyerek başlayın.'}
+            <p className="text-xs text-muted-foreground">
+              {searchTerm || selectedCategory !== 'all' ? 'Farklı filtreler deneyin.' : 'İlk dosyanızı yükleyin.'}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="space-y-2 mb-6">
             {filteredDocuments.map((document) => {
               const category = categories.find(cat => cat.id === document.category);
               return (
-                <div
-                  key={document.id}
-                  className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow flex flex-col h-full"
-                >
-                  {/* Top section with file icon and name */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{getFileIcon(document.type)}</span>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 text-sm leading-tight">
-                          {document.name}
-                        </h3>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatFileSize(document.size)}
-                        </p>
+                <div key={document.id} className="bank-card p-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl flex-shrink-0">{getFileIcon(document.type)}</span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-foreground text-sm truncate">{document.name}</h3>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[11px] text-muted-foreground">{formatFileSize(document.size)}</span>
+                        <span className="text-muted-foreground/30">•</span>
+                        <span className="text-[11px] text-muted-foreground">{document.uploadDate.toLocaleDateString('tr-TR')}</span>
+                        {category && (
+                          <>
+                            <span className="text-muted-foreground/30">•</span>
+                            <span className={`text-[11px] ${category.color}`}>{category.name}</span>
+                          </>
+                        )}
                       </div>
                     </div>
-                  </div>
-                  
-                  {/* Spacer to push bottom content down */}
-                  <div className="flex-1"></div>
-                  
-                  {/* Bottom section with category, date, and buttons */}
-                  <div className="mt-auto space-y-3">
-                    {category && (
-                      <div className="flex justify-center">
-                        <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${category.bgColor} ${category.color}`}>
-                          {category.icon}
-                          <span>{category.name}</span>
-                        </div>
-                      </div>
-                    )}
-                    
-                    <p className="text-xs text-gray-500 text-center">
-                      {document.uploadDate.toLocaleDateString('tr-TR')}
-                    </p>
-                    
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleDownload(document)}
-                        className="flex-1 flex items-center justify-center gap-1 bg-[#ffb700] text-white px-3 py-2 rounded-lg hover:bg-[#e6a600] transition-colors text-sm"
-                      >
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button onClick={() => handleDownload(document)} className="p-2 text-muted-foreground hover:text-primary rounded-lg hover:bg-muted transition-colors">
                         <Eye className="w-4 h-4" />
-                        Görüntüle
                       </button>
-                      <button
-                        onClick={() => handleDownload(document)}
-                        className="flex items-center justify-center gap-1 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm"
-                      >
+                      <button onClick={() => handleDownload(document)} className="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors">
                         <Download className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => handleDeleteDocument(document)}
-                        className="flex items-center justify-center gap-1 bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors text-sm"
-                      >
+                      <button onClick={() => handleDeleteDocument(document)} className="p-2 text-muted-foreground hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -424,105 +368,56 @@ const DocumentsPage: React.FC = () => {
 
         {/* Upload Modal */}
         {showUploadModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-lg w-full p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                Belge Yükleme
-              </h3>
-              
-              {/* Drag and Drop Area */}
-              <div className="mb-6">
-                <div
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                    dragActive ? 'border-[#ffb700] bg-[#fff7e6]' : 'border-gray-300 bg-gray-50'
-                  }`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                    Belge Yükle
-                  </h4>
-                  <p className="text-gray-600 mb-4">
-                    Belgelerinizi buraya sürükleyip bırakın veya seçin
-                  </p>
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(e) => handleFileSelect(e.target.files)}
-                    className="hidden"
-                    id="modal-file-upload"
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.xlsx,.xls"
-                  />
-                  <label
-                    htmlFor="modal-file-upload"
-                    className="inline-flex items-center gap-2 bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a600] transition-colors cursor-pointer"
-                  >
-                    <Plus className="w-5 h-5" />
-                    Belge Seç
-                  </label>
-                  {uploading && (
-                    <div className="mt-4">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#ffb700] mx-auto"></div>
-                      <p className="text-sm text-gray-600 mt-2">Yükleniyor...</p>
-                    </div>
-                  )}
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center z-50 animate-fade-in">
+            <div className="bg-card rounded-t-2xl md:rounded-2xl p-5 w-full md:max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bank-gradient flex items-center justify-center">
+                  <Upload className="w-5 h-5 text-white" />
                 </div>
+                <h3 className="text-lg font-bold text-foreground">Belge Yükleme</h3>
               </div>
               
-              <div className="space-y-4">
+              <div
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors mb-4 ${
+                  dragActive ? 'border-primary bg-primary/5' : 'border-border bg-muted/30'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground mb-3">Sürükle-bırak veya seçin</p>
+                <input type="file" multiple onChange={(e) => handleFileSelect(e.target.files)} className="hidden" id="modal-file-upload" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.xlsx,.xls" />
+                <label htmlFor="modal-file-upload" className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm cursor-pointer hover:bg-primary/90 transition-colors">
+                  <Plus className="w-4 h-4" /> Belge Seç
+                </label>
+                {uploading && (
+                  <div className="mt-3">
+                    <div className="w-6 h-6 loading-spinner mx-auto" />
+                    <p className="text-xs text-muted-foreground mt-1">Yükleniyor...</p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Belge Adı
-                  </label>
-                  <input
-                    type="text"
-                    value={uploadFileName}
-                    onChange={(e) => setUploadFileName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
-                    placeholder="Belge adını girin"
-                  />
+                  <label className="block text-xs font-medium text-foreground mb-1">Belge Adı</label>
+                  <input type="text" value={uploadFileName} onChange={(e) => setUploadFileName(e.target.value)} className="w-full px-3 py-2.5 border border-border rounded-lg text-sm bg-card text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary" placeholder="Belge adını girin" />
                 </div>
-                
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kategori
-                  </label>
-                  <select
-                    value={uploadCategory}
-                    onChange={(e) => setUploadCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
-                  >
+                  <label className="block text-xs font-medium text-foreground mb-1">Kategori</label>
+                  <select value={uploadCategory} onChange={(e) => setUploadCategory(e.target.value)} className="w-full px-3 py-2.5 border border-border rounded-lg text-sm bg-card text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary">
                     {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
+                      <option key={category.id} value={category.id}>{category.name}</option>
                     ))}
                   </select>
                 </div>
               </div>
               
-              <div className="mt-6 flex gap-3">
-                <button
-                  onClick={() => {
-                    setShowUploadModal(false);
-                    setSelectedFiles(null);
-                    setUploadFileName('');
-                    setUploadCategory('other');
-                  }}
-                  className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  İptal
-                </button>
-                <button
-                  onClick={handleFileUpload}
-                  disabled={!uploadFileName.trim() || uploading}
-                  className="flex-1 bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a600] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {uploading ? 'Yükleniyor...' : 'Yükle'}
-                </button>
+              <div className="mt-4 flex gap-3">
+                <button onClick={() => { setShowUploadModal(false); setSelectedFiles(null); setUploadFileName(''); setUploadCategory('other'); }} className="flex-1 btn-outline text-foreground">İptal</button>
+                <button onClick={handleFileUpload} disabled={!uploadFileName.trim() || uploading} className="flex-1 bg-primary text-white px-4 py-2.5 rounded-xl text-sm font-medium disabled:opacity-50">{uploading ? 'Yükleniyor...' : 'Yükle'}</button>
               </div>
             </div>
           </div>

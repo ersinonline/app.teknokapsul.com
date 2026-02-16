@@ -89,178 +89,104 @@ export const WarrantyTrackingPage = () => {
   if (error) return <ErrorMessage message="Garanti bilgileri yüklenirken bir hata oluştu." />;
 
   return (
-    <div className="bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10 border-b">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Shield className="w-6 h-6" style={{ color: '#ffb700' }} />
-            <h1 className="text-xl font-semibold text-gray-900">Garanti Takibi</h1>
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Garanti Takibi</h1>
+                <p className="text-white/60 text-xs">{stats.total} ürün</p>
+              </div>
+            </div>
             <button
               onClick={() => setIsFormOpen(true)}
-              className="ml-auto flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl"
-              style={{ backgroundColor: '#ffb700' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Yeni Garanti Ekle</span>
-              <span className="sm:hidden">Ekle</span>
+              <Plus className="w-5 h-5 text-white" />
             </button>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <CheckCircle className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-lg">{stats.active}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Aktif</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <Clock className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-lg">{stats.expiringSoon}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Yakında</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <AlertCircle className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-lg">{stats.expired}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Dolmuş</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4 space-y-6">
-        {/* Statistics */}
-        <div className="space-y-3">
-          {/* Toplam Ürün - Geniş */}
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center gap-3">
-              <Package className="w-8 h-8 text-blue-600" />
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                <p className="text-sm text-gray-600">Toplam Ürün</p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Aktif ve Yakında Bitiyor - Yan Yana */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="w-8 h-8 text-green-600" />
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.active}</p>
-                  <p className="text-sm text-gray-600">Aktif</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <div className="flex items-center gap-3">
-                <Clock className="w-8 h-8 text-yellow-600" />
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.expiringSoon}</p>
-                  <p className="text-sm text-gray-600">Yakında Bitiyor</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Süresi Dolmuş - Geniş (sadece varsa göster) */}
-          {stats.expired > 0 && (
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="w-8 h-8 text-red-600" />
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.expired}</p>
-                  <p className="text-sm text-gray-600">Süresi Dolmuş</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
+      <div className="page-content -mt-5">
         {/* Search and Filter */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="bg-[#ffb700]/10 p-6 border-b border-gray-100">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-[#ffb700] rounded-xl shadow-lg">
-                <Search className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Arama ve Filtreleme</h2>
-                <p className="text-gray-600 text-sm">Garantilerinizi kolayca bulun</p>
-              </div>
+        <div className="bank-card p-3 mb-4">
+          <div className="flex gap-2 mb-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Ürün, marka ara..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg text-sm bg-card text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
             </div>
           </div>
-          
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Ürün, marka veya model ara..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
-                  onFocus={(e) => e.currentTarget.style.borderColor = '#ffb700'}
-                  onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
-                />
-              </div>
-
-              {/* Category Filter */}
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <select
-                  value={selectedCategory || ''}
-                  onChange={(e) => setSelectedCategory(e.target.value || null)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent appearance-none bg-white"
-                  onFocus={(e) => e.currentTarget.style.borderColor = '#ffb700'}
-                  onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
-                >
-                  <option value="">Tüm Kategoriler</option>
-                  {Array.from(new Set(warranties.map(w => w.category))).map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Status Filter */}
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent appearance-none bg-white"
-                  onFocus={(e) => e.currentTarget.style.borderColor = '#ffb700'}
-                  onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
-                >
-                  <option value="all">Tüm Durumlar</option>
-                  <option value="active">Aktif</option>
-                  <option value="expiring_soon">Yakında Bitiyor</option>
-                  <option value="expired">Süresi Dolmuş</option>
-                </select>
-              </div>
-            </div>
+          <div className="flex gap-2">
+            <select
+              value={selectedCategory || ''}
+              onChange={(e) => setSelectedCategory(e.target.value || null)}
+              className="flex-1 px-3 py-2 border border-border rounded-lg text-xs bg-card text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            >
+              <option value="">Tüm Kategoriler</option>
+              {Array.from(new Set(warranties.map(w => w.category))).map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="flex-1 px-3 py-2 border border-border rounded-lg text-xs bg-card text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            >
+              <option value="all">Tüm Durumlar</option>
+              <option value="active">Aktif</option>
+              <option value="expiring_soon">Yakında Bitiyor</option>
+              <option value="expired">Süresi Dolmuş</option>
+            </select>
           </div>
         </div>
 
         {/* Warranty List */}
         {filteredWarranties.length === 0 ? (
-          <div className="bg-white rounded-lg p-12 text-center border border-gray-200">
-            <Shield className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {warranties.length === 0 ? 'Henüz garanti kaydınız yok' : 'Arama kriterlerinize uygun garanti bulunamadı'}
+          <div className="bank-card p-10 text-center">
+            <Shield className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
+            <h3 className="text-sm font-semibold text-foreground mb-1">
+              {warranties.length === 0 ? 'Henüz garanti kaydı yok' : 'Sonuç bulunamadı'}
             </h3>
-            <p className="text-gray-500 mb-4">
-              {warranties.length === 0 
-                ? 'İlk garanti kaydınızı oluşturmak için yukarıdaki "Yeni Garanti Ekle" butonunu kullanın.'
-                : 'İlk garanti kaydınızı oluşturmak için yukarıdaki "Yeni Garanti Ekle" butonunu kullanın.'
-              }
+            <p className="text-xs text-muted-foreground mb-3">
+              {warranties.length === 0 ? 'İlk garanti kaydınızı oluşturun.' : 'Farklı filtreler deneyin.'}
             </p>
             {(searchTerm || selectedCategory || statusFilter !== 'all') && (
-              <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedCategory(null);
-                  setStatusFilter('all');
-                }}
-                className="font-medium"
-                style={{ color: '#ffb700' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#e6a500'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#ffb700'}
-              >
+              <button onClick={() => { setSearchTerm(''); setSelectedCategory(null); setStatusFilter('all'); }} className="text-xs font-medium text-primary">
                 Filtreleri temizle
               </button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
             {filteredWarranties.map(warranty => (
               <WarrantyCard
                 key={warranty.id}
@@ -277,15 +203,8 @@ export const WarrantyTrackingPage = () => {
         {isFormOpen && (
           <WarrantyForm
             warranty={editingWarranty}
-            onClose={() => {
-              setIsFormOpen(false);
-              setEditingWarranty(null);
-            }}
-            onSave={async () => {
-              await reload();
-              setIsFormOpen(false);
-              setEditingWarranty(null);
-            }}
+            onClose={() => { setIsFormOpen(false); setEditingWarranty(null); }}
+            onSave={async () => { await reload(); setIsFormOpen(false); setEditingWarranty(null); }}
           />
         )}
       </div>

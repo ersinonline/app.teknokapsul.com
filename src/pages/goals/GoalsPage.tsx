@@ -244,229 +244,145 @@ export const GoalsPage = () => {
   if (error) return <ErrorMessage message="Hedefler yüklenirken bir hata oluştu." />;
 
   return (
-    <div className="bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          <div className="flex items-center justify-between">
+      <div className="bank-gradient-blue px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <Target className="w-6 h-6" style={{ color: '#ffb700' }} />
-              <h1 className="text-xl font-semibold text-gray-900">Hedeflerim</h1>
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <Target className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Hedeflerim</h1>
+                <p className="text-white/60 text-xs">Finansal hedef takibi</p>
+              </div>
             </div>
             <button
-              onClick={() => {
-                setEditingGoal(null);
-                resetForm();
-                setIsModalOpen(true);
-              }}
-              className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl"
-              style={{ backgroundColor: '#ffb700' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
+              onClick={() => { setEditingGoal(null); resetForm(); setIsModalOpen(true); }}
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              Ekle
+              <Plus className="w-5 h-5 text-white" />
             </button>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <p className="text-white font-bold text-lg">{activeGoals.length}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Aktif</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <p className="text-white font-bold text-lg">{completedGoals.length}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Tamamlanan</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <p className="text-white font-bold text-sm">{formatCurrency(activeGoals.reduce((sum, g) => sum + g.targetAmount, 0))}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Hedef</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Target className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Toplam Hedef</p>
-                <p className="text-xl font-bold text-gray-900">{userGoals.length}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Tamamlanan</p>
-                <p className="text-xl font-bold text-gray-900">{completedGoals.length}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Clock className="w-5 h-5 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Aktif</p>
-                <p className="text-xl font-bold text-gray-900">{activeGoals.length}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <DollarSign className="w-5 h-5 text-yellow-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Toplam Hedef</p>
-                <p className="text-lg font-bold text-gray-900">
-                  {formatCurrency(activeGoals.reduce((sum, goal) => sum + goal.targetAmount, 0))}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
+      <div className="page-content -mt-5">
         {/* Active Goals */}
         {activeGoals.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Aktif Hedefler</h2>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {activeGoals.map(goal => {
-                  const progress = calculateRealTimeProgress(goal);
-                  const targetDateStr = goal.targetDate instanceof Date ? goal.targetDate.toISOString().split('T')[0] : goal.targetDate;
-                  const deadlineStr = goal.deadline instanceof Date ? goal.deadline.toISOString().split('T')[0] : goal.deadline;
-                  const daysRemaining = calculateDaysRemaining(targetDateStr || deadlineStr || '');
-                  const category = GOAL_CATEGORIES[goal.category as keyof typeof GOAL_CATEGORIES];
-                  const CategoryIcon = category.icon;
-                  
-                  return (
-                    <div key={goal.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className={`p-2 rounded-lg ${category.color} text-white`}>
-                            <CategoryIcon className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-gray-900 text-sm">{goal.title}</h3>
-                            <span className={`text-xs px-2 py-1 rounded-full ${PRIORITY_COLORS[goal.priority]}`}>
-                              {goal.priority === 'high' ? 'Yüksek' : goal.priority === 'medium' ? 'Orta' : 'Düşük'}
-                            </span>
-                          </div>
+          <div className="mb-4">
+            <h2 className="section-title mb-3">Aktif Hedefler</h2>
+            <div className="space-y-3">
+              {activeGoals.map(goal => {
+                const progress = calculateRealTimeProgress(goal);
+                const targetDateStr = goal.targetDate instanceof Date ? goal.targetDate.toISOString().split('T')[0] : goal.targetDate;
+                const deadlineStr = goal.deadline instanceof Date ? goal.deadline.toISOString().split('T')[0] : goal.deadline;
+                const daysRemaining = calculateDaysRemaining(targetDateStr || deadlineStr || '');
+                const category = GOAL_CATEGORIES[goal.category as keyof typeof GOAL_CATEGORIES];
+                const CategoryIcon = category.icon;
+                
+                return (
+                  <div key={goal.id} className="bank-card p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-9 h-9 rounded-lg ${category.color} text-white flex items-center justify-center`}>
+                          <CategoryIcon className="w-4 h-4" />
                         </div>
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() => openDepositModal(goal)}
-                            className="p-1 text-gray-400 hover:text-green-600 transition-colors"
-                            title="Para Yatır"
-                          >
-                            <PlusCircle className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handlePause(goal.id)}
-                            className="p-1 text-gray-400 hover:text-orange-600 transition-colors"
-                            title="Pasife Al"
-                          >
-                            <Pause className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <p className="text-xs text-gray-600 mb-3">{goal.description}</p>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">İlerleme</span>
-                          <span className="font-medium">{progress.toFixed(1)}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${progress}%` }}
-                          ></div>
-                        </div>
-                        <div className="flex justify-between text-xs text-gray-600">
-                          <span>{goal.currentAmount.toFixed(2)} {goal.currency}</span>
-                          <span>{goal.targetAmount.toFixed(2)} {goal.currency}</span>
-                        </div>
-                        
-                        {/* Anlık Kur Bilgisi */}
-                        {currentRates && goal.currency !== 'TL' && (
-                          <div className="mt-1 text-xs text-blue-600">
-                            {goal.currency === 'USD' && currentRates.Dolar && (
-                              <span>1 USD = {currentRates.Dolar} TL</span>
-                            )}
-                            {goal.currency === 'EUR' && currentRates.Euro && (
-                              <span>1 EUR = {currentRates.Euro} TL</span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="mt-3 pt-3 border-t border-gray-100">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-gray-600">
-                            {daysRemaining > 0 ? `${daysRemaining} gün kaldı` : 'Süre doldu'}
+                        <div>
+                          <h3 className="font-semibold text-foreground text-sm">{goal.title}</h3>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full ${PRIORITY_COLORS[goal.priority]}`}>
+                            {goal.priority === 'high' ? 'Yüksek' : goal.priority === 'medium' ? 'Orta' : 'Düşük'}
                           </span>
-                          <span className="text-gray-600">{category.label}</span>
                         </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <button onClick={() => openDepositModal(goal)} className="p-1.5 text-muted-foreground hover:text-emerald-500 transition-colors" title="Para Yatır">
+                          <PlusCircle className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handlePause(goal.id)} className="p-1.5 text-muted-foreground hover:text-amber-500 transition-colors" title="Pasife Al">
+                          <Pause className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                    {goal.description && <p className="text-xs text-muted-foreground mb-3">{goal.description}</p>}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">İlerleme</span>
+                        <span className="font-semibold text-foreground">{progress.toFixed(1)}%</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div className="bg-primary h-2 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+                      </div>
+                      <div className="flex justify-between text-[11px] text-muted-foreground">
+                        <span>{goal.currentAmount.toFixed(2)} {goal.currency}</span>
+                        <span>{goal.targetAmount.toFixed(2)} {goal.currency}</span>
+                      </div>
+                      {currentRates && goal.currency !== 'TL' && (
+                        <div className="text-[11px] text-primary">
+                          {goal.currency === 'USD' && currentRates.Dolar && <span>1 USD = {currentRates.Dolar} TL</span>}
+                          {goal.currency === 'EUR' && currentRates.Euro && <span>1 EUR = {currentRates.Euro} TL</span>}
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-border/50 flex justify-between items-center text-[11px] text-muted-foreground">
+                      <span>{daysRemaining > 0 ? `${daysRemaining} gün kaldı` : 'Süre doldu'}</span>
+                      <span>{category.label}</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
 
         {/* Completed Goals */}
         {completedGoals.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Tamamlanan Hedefler</h2>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {completedGoals.map(goal => {
-                  return (
-                    <div key={goal.id} className="border border-green-200 rounded-lg p-4 bg-green-50">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="p-2 rounded-lg bg-green-500 text-white">
-                          <CheckCircle className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-gray-900 text-sm">{goal.title}</h3>
-                          <span className="text-xs text-green-600">Tamamlandı</span>
-                        </div>
-                      </div>
-                      
-                      <p className="text-xs text-gray-600 mb-3">{goal.description}</p>
-                      
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Hedef Tutar:</span>
-                        <span className="font-medium">{formatCurrency(goal.targetAmount)}</span>
-                      </div>
+          <div className="mb-4">
+            <h2 className="section-title mb-3">Tamamlanan Hedefler</h2>
+            <div className="space-y-3">
+              {completedGoals.map(goal => (
+                <div key={goal.id} className="bank-card p-4 border-l-4 border-l-emerald-400">
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4" />
                     </div>
-                  );
-                })}
-              </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground text-sm">{goal.title}</h3>
+                      <span className="text-[10px] text-emerald-600">Tamamlandı</span>
+                    </div>
+                  </div>
+                  {goal.description && <p className="text-xs text-muted-foreground mb-2">{goal.description}</p>}
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Hedef Tutar:</span>
+                    <span className="font-semibold text-foreground">{formatCurrency(goal.targetAmount)}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
         {/* Empty State */}
         {userGoals.length === 0 && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12">
-            <div className="text-center">
-              <Target className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Henüz hedef yok</h3>
-              <p className="text-gray-500 mb-6">
-                İlk hedefinizi oluşturmak için yukarıdaki "Yeni Hedef Ekle" butonunu kullanın.
-              </p>
-            </div>
+          <div className="bank-card p-10 text-center">
+            <Target className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
+            <h3 className="text-sm font-semibold text-foreground mb-1">Henüz hedef yok</h3>
+            <p className="text-xs text-muted-foreground">İlk hedefinizi oluşturmak için + butonunu kullanın.</p>
           </div>
         )}
 

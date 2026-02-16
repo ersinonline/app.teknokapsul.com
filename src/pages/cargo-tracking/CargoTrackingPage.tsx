@@ -384,131 +384,78 @@ export const CargoTrackingPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="bg-white shadow-sm sticky top-0 z-10 border-b">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          {/* Header */}
-          <div className="flex items-center justify-between">
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient-blue px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <Truck className="w-6 h-6" style={{ color: '#ffb700' }} />
-              <h1 className="text-xl font-semibold text-gray-900">Kargo Takip</h1>
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <Truck className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Kargo Takip</h1>
+                <p className="text-white/60 text-xs">{cargoList.length} kargo</p>
+              </div>
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl text-white"
-              style={{ backgroundColor: '#ffb700' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Yeni Kargo Ekle</span>
-              <span className="sm:hidden">Ekle</span>
+              <Plus className="w-5 h-5 text-white" />
             </button>
           </div>
-
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <Package className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-lg">{cargoList.length}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Toplam</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <Clock className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-lg">{pendingCargos.length}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Bekleyen</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <CheckCircle className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-lg">{deliveredCargos.length}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Teslim</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-6">
-
-        {/* Actions */}
-        <div className="flex flex-col gap-4 mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Kargo adı, takip numarası veya firma ara..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent focus:ring-[#ffb700]"
-                  onFocus={(e) => e.currentTarget.style.borderColor = '#ffb700'}
-                  onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
-                />
-              </div>
+      <div className="page-content -mt-5">
+        {/* Search & Filter */}
+        <div className="bank-card p-3 mb-4">
+          <div className="flex gap-2 mb-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Kargo ara..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg text-sm bg-card text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
             </div>
-            
-            <div className="flex gap-2">
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value as 'all' | 'delivered' | 'pending')}
-                  className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent focus:ring-[#ffb700] appearance-none min-w-[100px] w-[100px] sm:min-w-[140px] sm:w-auto bg-white"
-                  onFocus={(e) => e.currentTarget.style.borderColor = '#ffb700'}
-                  onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
-                >
-                  <option value="all">Tümü ({cargoList.length})</option>
-                  <option value="pending">Bekleyen ({cargoList.filter((c: CargoTracking) => !c.isDelivered).length})</option>
-                  <option value="delivered">Teslim Edilen ({cargoList.filter((c: CargoTracking) => c.isDelivered).length})</option>
-                </select>
-              </div>
-              
-              <div className="flex border border-gray-300 rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`px-3 sm:px-6 py-3 transition-colors flex-1 flex items-center justify-center ${
-                    viewMode === 'grid'
-                      ? 'text-white'
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                  style={{ backgroundColor: viewMode === 'grid' ? '#ffb700' : undefined }}
-                  title="Kutu görünümü"
-                >
-                  <Grid className="w-5 h-5 sm:w-6 sm:h-6" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-3 sm:px-6 py-3 transition-colors flex-1 flex items-center justify-center ${
-                    viewMode === 'list'
-                      ? 'text-white'
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                  style={{ backgroundColor: viewMode === 'list' ? '#ffb700' : undefined }}
-                  title="Liste görünümü"
-                >
-                  <List className="w-5 h-5 sm:w-6 sm:h-6" />
-                </button>
-              </div>
-            </div>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'delivered' | 'pending')}
+              className="px-3 py-2.5 border border-border rounded-lg text-sm bg-card text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            >
+              <option value="all">Tümü</option>
+              <option value="pending">Bekleyen</option>
+              <option value="delivered">Teslim</option>
+            </select>
           </div>
-        </div>
-
-        {/* Statistics */}
-        <div className="space-y-3 mb-6">
-          {/* Toplam Kargo - Geniş */}
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center gap-3">
-              <Package className="w-8 h-8 text-blue-600" />
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{cargoList.length}</p>
-                <p className="text-sm text-gray-600">Toplam Kargo</p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Bekleyen ve Teslim Edilen - Yan Yana */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <div className="flex items-center gap-3">
-                <Clock className="w-8 h-8 text-yellow-600" />
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{pendingCargos.length}</p>
-                  <p className="text-sm text-gray-600">Bekleyen</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="w-8 h-8 text-green-600" />
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{deliveredCargos.length}</p>
-                  <p className="text-sm text-gray-600">Teslim</p>
-                </div>
-              </div>
-            </div>
+          <div className="flex bg-muted rounded-lg p-0.5">
+            <button onClick={() => setViewMode('grid')} className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs transition-colors ${viewMode === 'grid' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}>
+              <Grid className="w-3.5 h-3.5" /> Kutu
+            </button>
+            <button onClick={() => setViewMode('list')} className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs transition-colors ${viewMode === 'list' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`}>
+              <List className="w-3.5 h-3.5" /> Liste
+            </button>
           </div>
         </div>
 

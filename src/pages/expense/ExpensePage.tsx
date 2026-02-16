@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, CreditCard, Calendar, DollarSign, AlertTriangle, ChevronLeft, ChevronRight, PieChart, TrendingUp } from 'lucide-react';
+import { Plus, CreditCard, Calendar, AlertTriangle, ChevronLeft, ChevronRight, PieChart, TrendingUp } from 'lucide-react';
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { Expense } from '../../types/expense';
 import { getUserExpenses, addExpense } from '../../services/expense.service';
@@ -96,154 +96,101 @@ export const ExpensePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-500"></div>
+      <div className="page-container bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Giderler yükleniyor...</p>
+        </div>
       </div>
     );
   }
 
+  const totalExpenseAmount = activeExpenses.reduce((sum, e) => sum + e.amount, 0);
+
   return (
-    <div className="bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <CreditCard className="w-6 h-6" style={{ color: '#ffb700' }} />
-              <h1 className="text-xl font-semibold text-gray-900">Giderler</h1>
+    <div className="page-container bg-background">
+      {/* Summary Header */}
+      <div className="bank-gradient-red px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-white/60 text-xs uppercase tracking-wider font-medium">
+                {monthNames[currentMonth - 1]} {currentYear}
+              </p>
+              <p className="text-3xl font-bold text-white mt-1">
+                {formatCurrency(totalExpenseAmount)}
+              </p>
+              <p className="text-white/50 text-xs mt-1">Toplam Gider</p>
             </div>
             <button
               onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl"
-              style={{ backgroundColor: '#ffb700' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
+              className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors active:scale-95"
             >
-              <Plus className="w-4 h-4" />
-              Ekle
+              <Plus className="w-6 h-6 text-white" />
             </button>
+          </div>
+
+          {/* Month Navigation */}
+          <div className="flex items-center justify-center gap-4 mb-5">
+            <button onClick={() => navigateMonth('prev')} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors">
+              <ChevronLeft className="w-5 h-5 text-white" />
+            </button>
+            <span className="text-white font-semibold text-sm min-w-[140px] text-center">
+              {monthNames[currentMonth - 1]} {currentYear}
+            </span>
+            <button onClick={() => navigateMonth('next')} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors">
+              <ChevronRight className="w-5 h-5 text-white" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <CreditCard className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">{expenses.length}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Kayıt</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <Calendar className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">{formatCurrency(totalMonthlyExpense)}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Taksit</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <AlertTriangle className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">{formatCurrency(unpaidAmount)}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Ödenmemiş</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
-        {/* Month Navigation */}
-        <div className="mb-6">
-          <div className="flex items-center justify-center">
-            <div className="flex items-center bg-white rounded-lg shadow-lg border border-gray-200 p-1 lg:p-2">
-              <button
-                onClick={() => navigateMonth('prev')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600" />
-              </button>
-              <div className="px-4 lg:px-6 py-2 text-center min-w-[160px] lg:min-w-[200px]">
-                <h2 className="text-base lg:text-lg font-semibold text-gray-900">
-                  {monthNames[currentMonth - 1]} {currentYear}
-                </h2>
-              </div>
-              <button
-                onClick={() => navigateMonth('next')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* İstatistikler */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
-          <div className="bg-white rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex-1">
-                <p className="text-xs lg:text-sm font-medium text-gray-600">Toplam Gider</p>
-                <p className="text-lg lg:text-2xl font-bold text-red-600">{expenses.length}</p>
-              </div>
-              <div className="p-2 lg:p-3 bg-red-100 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
-                <CreditCard className="w-4 h-4 lg:w-6 lg:h-6 text-red-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex-1">
-                <p className="text-xs lg:text-sm font-medium text-gray-600">Taksitli Ödemeler</p>
-                <p className="text-lg lg:text-2xl font-bold text-blue-600">{installmentExpenseCount}</p>
-              </div>
-              <div className="p-2 lg:p-3 bg-blue-100 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
-                <Calendar className="w-4 h-4 lg:w-6 lg:h-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200 col-span-2 lg:col-span-1">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex-1">
-                <p className="text-xs lg:text-sm font-medium text-gray-600">Aylık Taksit</p>
-                <p className="text-lg lg:text-2xl font-bold text-red-600">{formatCurrency(totalMonthlyExpense)}</p>
-              </div>
-              <div className="p-2 lg:p-3 bg-red-100 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
-                <DollarSign className="w-4 h-4 lg:w-6 lg:h-6 text-red-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-3 lg:p-6 shadow-lg border border-gray-200 col-span-2 lg:col-span-1">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex-1">
-                <p className="text-xs lg:text-sm font-medium text-gray-600">Ödenmemiş</p>
-                <p className="text-lg lg:text-2xl font-bold text-orange-600">{formatCurrency(unpaidAmount)}</p>
-                <p className="text-xs text-gray-500">{unpaidExpenses.length} adet</p>
-              </div>
-              <div className="p-2 lg:p-3 bg-orange-100 rounded-lg self-end lg:self-auto mt-2 lg:mt-0">
-                <AlertTriangle className="w-4 h-4 lg:w-6 lg:h-6 text-orange-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Uyarı - Ödenmemiş Giderler */}
+      <div className="page-content -mt-5">
+        {/* Unpaid Warning */}
         {unpaidExpenses.length > 0 && (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-8">
+          <div className="bank-card p-4 mb-4 border-l-4 border-l-amber-400">
             <div className="flex items-center gap-3">
-              <AlertTriangle className="w-5 h-5 text-orange-600" />
+              <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-4 h-4 text-amber-500" />
+              </div>
               <div>
-                <h3 className="text-sm font-medium text-orange-800">
-                  Ödenmemiş Giderler
-                </h3>
-                <p className="text-sm text-orange-700">
-                  {unpaidExpenses.length} adet gideriniz ödenmemiş durumda. Toplam tutar: {formatCurrency(unpaidAmount)}
-                </p>
+                <p className="text-sm font-medium text-foreground">{unpaidExpenses.length} ödenmemiş gider</p>
+                <p className="text-xs text-muted-foreground">Toplam: {formatCurrency(unpaidAmount)}</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Analiz Grafikleri */}
+        {/* Charts */}
         {categoryChartData.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Kategori Dağılımı */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <PieChart className="w-5 h-5 text-red-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Kategori Dağılımı</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            <div className="bank-card p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <PieChart className="w-4 h-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold text-foreground">Kategori Dağılımı</h3>
               </div>
-              <div className="h-64">
+              <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <RechartsPieChart>
-                    <Pie
-                      data={categoryChartData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
+                    <Pie data={categoryChartData} cx="50%" cy="50%" labelLine={false} outerRadius={70} fill="#8884d8" dataKey="value">
                       {categoryChartData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                       ))}
@@ -252,39 +199,32 @@ export const ExpensePage: React.FC = () => {
                   </RechartsPieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="mt-4 space-y-2">
-                {categoryChartData.slice(0, 5).map((category, index) => (
-                  <div key={category.name} className="flex items-center justify-between text-sm">
+              <div className="mt-3 space-y-2">
+                {categoryChartData.slice(0, 4).map((category, index) => (
+                  <div key={category.name} className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
-                      ></div>
-                      <span className="text-gray-700">{category.name}</span>
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }} />
+                      <span className="text-muted-foreground">{category.name}</span>
                     </div>
-                    <div className="text-right">
-                      <div className="font-medium text-gray-900">{formatCurrency(category.value)}</div>
-                      <div className="text-gray-500">{category.count} adet</div>
-                    </div>
+                    <span className="font-medium text-foreground">{formatCurrency(category.value)}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Aylık Trend */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <TrendingUp className="w-5 h-5 text-red-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Aylık Trend</h3>
+            <div className="bank-card p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold text-foreground">Aylık Trend</h3>
               </div>
-              <div className="h-64">
+              <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthlyTrendData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis tickFormatter={(value) => `₺${(value / 1000).toFixed(0)}K`} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 90%)" />
+                    <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                    <YAxis tickFormatter={(value) => `₺${(value / 1000).toFixed(0)}K`} tick={{ fontSize: 11 }} />
                     <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                    <Bar dataKey="amount" fill="#EF4444" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="amount" fill="hsl(0 72% 51%)" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -292,40 +232,46 @@ export const ExpensePage: React.FC = () => {
           </div>
         )}
 
-        {/* Giderler Tablosu */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200">
-          <div className="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-200">
-            <h2 className="text-base lg:text-lg font-semibold text-gray-900">Gider Listesi</h2>
+        {/* Expense List */}
+        <div className="bank-card overflow-hidden mb-6">
+          <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-foreground">Gider Listesi</h2>
+            <span className="text-xs text-muted-foreground">{expenses.length} kayıt</span>
           </div>
-          <div className="p-3 lg:p-6">
+          <div className="p-4">
             <ExpenseTable expenses={expenses} onUpdate={loadExpenses} />
           </div>
         </div>
-
-        {/* Form Modal */}
-        {showForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg p-4 lg:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-              <h3 className="text-base lg:text-lg font-medium mb-4 text-gray-900">Yeni Gider Ekle</h3>
-              <ExpenseForm onSubmit={async (data) => {
-                try {
-                  await addExpense(user!.id, data, user?.primaryEmailAddress?.emailAddress, user?.fullName || undefined);
-                  handleFormSubmit();
-                } catch (error) {
-                  console.error('Error adding expense:', error);
-                  alert('Taksit eklenirken bir hata oluştu.');
-                }
-              }} />
-              <button
-                onClick={() => setShowForm(false)}
-                className="mt-4 w-full rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 transition-colors"
-              >
-                İptal
-              </button>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center z-50 animate-fade-in">
+          <div className="bg-card rounded-t-2xl md:rounded-2xl p-5 w-full md:max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-slide-up">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bank-gradient-red flex items-center justify-center">
+                <Plus className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground">Yeni Gider Ekle</h3>
+            </div>
+            <ExpenseForm onSubmit={async (data) => {
+              try {
+                await addExpense(user!.id, data, user?.primaryEmailAddress?.emailAddress, user?.fullName || undefined);
+                handleFormSubmit();
+              } catch (error) {
+                console.error('Error adding expense:', error);
+                alert('Taksit eklenirken bir hata oluştu.');
+              }
+            }} />
+            <button
+              onClick={() => setShowForm(false)}
+              className="mt-4 w-full btn-outline text-foreground"
+            >
+              İptal
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

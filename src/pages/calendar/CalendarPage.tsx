@@ -22,56 +22,49 @@ export const CalendarPage = () => {
   if (error) return <ErrorMessage message="Etkinlikler yüklenirken bir hata oluştu." />;
 
   return (
-    <div className="bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10 border-b">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          <div className="flex items-center justify-between">
+      <div className="bank-gradient-green px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-            <CalendarIcon className="w-6 h-6" style={{ color: '#ffb700' }} />
-            <h1 className="text-xl font-semibold text-gray-900">Takvim</h1>
-          </div>
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <CalendarIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Takvim</h1>
+                <p className="text-white/60 text-xs">
+                  {selectedDate.toLocaleString('tr-TR', { month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+            </div>
             <button
               onClick={() => setIsEventFormOpen(true)}
-              className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition-colors shadow-lg hover:shadow-xl"
-              style={{ backgroundColor: '#ffb700' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-5 h-5 text-white" />
+            </button>
+          </div>
+          {/* Month Navigation */}
+          <div className="flex items-center justify-center gap-4">
+            <button onClick={() => changeMonth(-1)} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors">
+              <ChevronLeft className="w-5 h-5 text-white" />
+            </button>
+            <span className="text-white font-semibold text-sm min-w-[160px] text-center">
+              {selectedDate.toLocaleString('tr-TR', { month: 'long', year: 'numeric' })}
+            </span>
+            <button onClick={() => changeMonth(1)} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors">
+              <ChevronRight className="w-5 h-5 text-white" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="page-content -mt-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Calendar Section */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <Clock className="w-5 h-5" style={{ color: '#ffb700' }} />
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    {selectedDate.toLocaleString('tr-TR', { month: 'long', year: 'numeric' })}
-                  </h2>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => changeMonth(-1)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <ChevronLeft className="w-5 h-5 text-gray-600" />
-                  </button>
-                  <button
-                    onClick={() => changeMonth(1)}
-                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                  >
-                    <ChevronRight className="w-5 h-5 text-gray-600" />
-                  </button>
-                </div>
-              </div>
+            <div className="bank-card p-4">
               <Calendar
                 events={events}
                 selectedDate={selectedDate}
@@ -81,11 +74,11 @@ export const CalendarPage = () => {
           </div>
 
           {/* Event List Section */}
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5" style={{ color: '#ffb700' }} />
-                <h2 className="text-lg font-semibold text-gray-900">Etkinlikler</h2>
+          <div className="bank-card overflow-hidden">
+            <div className="px-4 py-3 border-b border-border/50">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-muted-foreground" />
+                <h2 className="text-sm font-semibold text-foreground">Etkinlikler</h2>
               </div>
             </div>
             <EventList
@@ -100,10 +93,7 @@ export const CalendarPage = () => {
         {isEventFormOpen && (
           <EventForm
             onClose={() => setIsEventFormOpen(false)}
-            onSave={async () => {
-              await reload();
-              setIsEventFormOpen(false);
-            }}
+            onSave={async () => { await reload(); setIsEventFormOpen(false); }}
             selectedDate={selectedDate}
           />
         )}

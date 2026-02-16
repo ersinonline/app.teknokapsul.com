@@ -1,16 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  TrendingUp, 
-  TrendingDown, 
-  Target, 
-  PieChart, 
-  BarChart3, 
-  Database, 
-  CreditCard, 
-  Calculator,
-  Calendar,
-  ArrowRight,
-  DollarSign
+  TrendingUp, TrendingDown, Target, PieChart, BarChart3, 
+  CreditCard, Calculator, Calendar, ChevronRight,
+  ArrowUpRight, ArrowDownRight, Wallet
 } from 'lucide-react';
 import { collection, query, getDocs, where, orderBy, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -31,11 +23,7 @@ interface Transaction {
 const BankamPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
-  // Firebase'den gerçek verileri çek
   const { data: goals, loading: goalsLoading } = useFirebaseData('goals');
-  
-  // Gelir ve gider verileri için ayrı state ve fetch fonksiyonları
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
@@ -43,343 +31,175 @@ const BankamPage: React.FC = () => {
 
   useEffect(() => {
     const fetchFinancialData = async () => {
-      if (!user?.id) {
-        setExpenses([]);
-        setIncomes([]);
-        setRecentTransactions([]);
-        setLoading(false);
-        return;
-      }
-
+      if (!user?.id) { setLoading(false); return; }
       try {
-        // Giderleri çek
         const expensesRef = collection(db, 'teknokapsul', user.id, 'expenses');
-        const expensesQuery = query(
-          expensesRef, 
-          where('isActive', '==', true),
-          orderBy('date', 'desc'),
-          limit(50)
-        );
-        const expensesSnapshot = await getDocs(expensesQuery);
-        const expensesData = expensesSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Expense[];
+        const expQ = query(expensesRef, where('isActive', '==', true), orderBy('date', 'desc'), limit(50));
+        const expSnap = await getDocs(expQ);
+        const expData = expSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Expense[];
 
-        // Gelirleri çek
         const incomesRef = collection(db, 'teknokapsul', user.id, 'incomes');
-        const incomesQuery = query(
-          incomesRef, 
-          where('isActive', '==', true),
-          orderBy('date', 'desc'),
-          limit(50)
-        );
-        const incomesSnapshot = await getDocs(incomesQuery);
-        const incomesData = incomesSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Income[];
+        const incQ = query(incomesRef, where('isActive', '==', true), orderBy('date', 'desc'), limit(50));
+        const incSnap = await getDocs(incQ);
+        const incData = incSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Income[];
 
-        setExpenses(expensesData);
-        setIncomes(incomesData);
+        setExpenses(expData);
+        setIncomes(incData);
 
-        // Son işlemleri birleştir ve sırala
-        const allTransactions: Transaction[] = [
-          ...expensesData.slice(0, 5).map(expense => ({
-            id: expense.id,
-            title: expense.title,
-            amount: expense.amount,
-            date: expense.date,
-            type: 'expense' as const
-          })),
-          ...incomesData.slice(0, 5).map(income => ({
-            id: income.id,
-            title: income.title,
-            amount: income.amount,
-            date: income.date,
-            type: 'income' as const
-          }))
+        const allTx: Transaction[] = [
+          ...expData.slice(0, 5).map(e => ({ id: e.id, title: e.title, amount: e.amount, date: e.date, type: 'expense' as const })),
+          ...incData.slice(0, 5).map(i => ({ id: i.id, title: i.title, amount: i.amount, date: i.date, type: 'income' as const }))
         ];
-
-        // Tarihe göre sırala ve ilk 3'ünü al
-        const sortedTransactions = allTransactions
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-          .slice(0, 3);
-
-        setRecentTransactions(sortedTransactions);
+        setRecentTransactions(allTx.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5));
       } catch (error) {
         console.error('Error fetching financial data:', error);
-        setExpenses([]);
-        setIncomes([]);
-        setRecentTransactions([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchFinancialData();
   }, [user]);
 
-  // Bu ayın verilerini hesapla
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
-  
-  const thisMonthExpenses = expenses.filter(expense => {
-    const expenseDate = new Date(expense.date);
-    return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear;
-  });
+  const monthName = new Date().toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
 
-  const thisMonthIncomes = incomes.filter(income => {
-    const incomeDate = new Date(income.date);
-    return incomeDate.getMonth() === currentMonth && incomeDate.getFullYear() === currentYear;
-  });
-
-  const totalIncome = thisMonthIncomes.reduce((sum, income) => sum + income.amount, 0);
-  const totalExpense = thisMonthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const thisMonthExp = expenses.filter(e => { const d = new Date(e.date); return d.getMonth() === currentMonth && d.getFullYear() === currentYear; });
+  const thisMonthInc = incomes.filter(i => { const d = new Date(i.date); return d.getMonth() === currentMonth && d.getFullYear() === currentYear; });
+  const totalIncome = thisMonthInc.reduce((s, i) => s + i.amount, 0);
+  const totalExpense = thisMonthExp.reduce((s, e) => s + e.amount, 0);
   const netBalance = totalIncome - totalExpense;
 
-  // Aktif hedefleri filtrele ve tip güvenliği için Goal interface'ini import et
-  const activeGoals = goals.filter((goal: any) => goal.status === 'active');
-  const goalProgress = activeGoals.length > 0 
-    ? Math.round((activeGoals.reduce((sum: number, goal: any) => sum + (goal.currentAmount / goal.targetAmount), 0) / activeGoals.length) * 100)
+  const activeGoals = goals.filter((g: any) => g.status === 'active');
+  const goalProgress = activeGoals.length > 0
+    ? Math.round((activeGoals.reduce((s: number, g: any) => s + (g.currentAmount / g.targetAmount), 0) / activeGoals.length) * 100)
     : 0;
 
-  const financialSections = [
-    {
-      id: 'income',
-      title: 'Gelirlerim',
-      description: 'Tüm gelir kaynaklarınızı takip edin',
-      icon: TrendingUp,
-      color: 'bg-green-500',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-700',
-      borderColor: 'border-green-200',
-      route: '/income'
-    },
-    {
-      id: 'expenses',
-      title: 'Giderlerim',
-      description: 'Harcamalarınızı analiz edin',
-      icon: TrendingDown,
-      color: 'bg-red-500',
-      bgColor: 'bg-red-50',
-      textColor: 'text-red-700',
-      borderColor: 'border-red-200',
-      route: '/expenses'
-    },
-    {
-      id: 'goals',
-      title: 'Hedeflerim',
-      description: 'Finansal hedeflerinizi belirleyin',
-      icon: Target,
-      color: 'bg-blue-500',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-700',
-      borderColor: 'border-blue-200',
-      route: '/goals'
-    },
-    {
-      id: 'portfolio',
-      title: 'Portföyüm',
-      description: 'Yatırım portföyünüzü yönetin',
-      icon: PieChart,
-      color: 'bg-purple-500',
-      bgColor: 'bg-purple-50',
-      textColor: 'text-purple-700',
-      borderColor: 'border-purple-200',
-      route: '/portfolio'
-    },
-    {
-      id: 'stock-tracking',
-      title: 'Borsa Takibi',
-      description: 'Borsa verilerini takip edin',
-      icon: BarChart3,
-      color: 'bg-indigo-500',
-      bgColor: 'bg-indigo-50',
-      textColor: 'text-indigo-700',
-      borderColor: 'border-indigo-200',
-      route: '/stock-market'
-    },
-    {
-      id: 'financial-data',
-      title: 'Finansal Verilerim',
-      description: 'Finansal verilerinizi görüntüleyin',
-      icon: Database,
-      color: 'bg-gray-500',
-      bgColor: 'bg-gray-50',
-      textColor: 'text-gray-700',
-      borderColor: 'border-gray-200',
-      route: '/financial-data'
-    },
-    {
-      id: 'findeks',
-      title: 'Findeks Kredi Notu',
-      description: 'Kredi notunuzu öğrenin',
-      icon: CreditCard,
-      color: 'bg-yellow-500',
-      bgColor: 'bg-yellow-50',
-      textColor: 'text-yellow-700',
-      borderColor: 'border-yellow-200',
-      route: '/credit-score'
-    },
-    {
-      id: 'credit-calculator',
-      title: 'Kredi Hesaplama',
-      description: 'Kredi hesaplamalarınızı yapın',
-      icon: Calculator,
-      color: 'bg-teal-500',
-      bgColor: 'bg-teal-50',
-      textColor: 'text-teal-700',
-      borderColor: 'border-teal-200',
-      route: '/credit-calculator'
-    },
-    {
-      id: 'payment-plan',
-      title: 'Ödeme Planı',
-      description: 'Ödeme planlarınızı oluşturun',
-      icon: Calendar,
-      color: 'bg-pink-500',
-      bgColor: 'bg-pink-50',
-      textColor: 'text-pink-700',
-      borderColor: 'border-pink-200',
-      route: '/payment-plan'
-    }
-  ];
+  const fmt = (v: number) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(v);
 
-  const quickStats = [
-    { 
-      label: 'Toplam Gelir', 
-      value: loading ? '...' : `₺${totalIncome.toLocaleString('tr-TR')}`, 
-      color: 'text-green-600' 
-    },
-    { 
-      label: 'Toplam Gider', 
-      value: loading ? '...' : `₺${totalExpense.toLocaleString('tr-TR')}`, 
-      color: 'text-red-600' 
-    },
-    { 
-      label: 'Net Bakiye', 
-      value: loading ? '...' : `₺${netBalance.toLocaleString('tr-TR')}`, 
-      color: netBalance >= 0 ? 'text-blue-600' : 'text-red-600' 
-    },
-    { 
-      label: 'Hedef İlerleme', 
-      value: goalsLoading ? '...' : `%${goalProgress}`, 
-      color: 'text-purple-600' 
-    }
+  const menuItems = [
+    { icon: TrendingUp, label: 'Gelirlerim', desc: 'Gelir kaynaklarınızı takip edin', route: '/income', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { icon: TrendingDown, label: 'Giderlerim', desc: 'Harcamalarınızı analiz edin', route: '/expenses', color: 'text-red-500', bg: 'bg-red-50' },
+    { icon: Target, label: 'Hedeflerim', desc: 'Finansal hedeflerinizi belirleyin', route: '/goals', color: 'text-blue-500', bg: 'bg-blue-50' },
+    { icon: PieChart, label: 'Portföyüm', desc: 'Yatırım portföyünüzü yönetin', route: '/portfolio', color: 'text-purple-500', bg: 'bg-purple-50' },
+    { icon: BarChart3, label: 'Borsa Takibi', desc: 'Borsa verilerini takip edin', route: '/stock-market', color: 'text-indigo-500', bg: 'bg-indigo-50' },
+    { icon: CreditCard, label: 'Kredi Notu', desc: 'Findeks kredi notunuzu öğrenin', route: '/credit-score', color: 'text-amber-500', bg: 'bg-amber-50' },
+    { icon: Calculator, label: 'Kredi Hesaplama', desc: 'Kredi hesaplamalarınızı yapın', route: '/credit-calculator', color: 'text-teal-500', bg: 'bg-teal-50' },
+    { icon: Calendar, label: 'Ödeme Planı', desc: 'Ödeme planlarınızı oluşturun', route: '/payment-plan', color: 'text-pink-500', bg: 'bg-pink-50' },
   ];
-
-  const handleSectionClick = (route: string) => {
-    console.log(`Navigating to: ${route}`);
-    navigate(route);
-  };
 
   return (
-    <div className="bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3">
-              <DollarSign className="w-6 h-6" style={{ color: '#ffb700' }} />
-              <h1 className="text-2xl font-bold text-gray-900">Bankam</h1>
+    <div className="page-container bg-background">
+      {/* Summary Header */}
+      <div className="bank-gradient-blue px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-white/60 text-xs uppercase tracking-wider font-medium">{monthName}</p>
+              <p className={`text-3xl font-bold mt-1 ${netBalance >= 0 ? 'text-white' : 'text-red-300'}`}>
+                {loading ? <span className="inline-block w-32 h-8 skeleton rounded-lg" /> : fmt(netBalance)}
+              </p>
+              <p className="text-white/50 text-xs mt-1">Net Bakiye</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center">
+              <Wallet className="w-6 h-6 text-white" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <ArrowUpRight className="w-4 h-4 text-emerald-300 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">{loading ? '...' : fmt(totalIncome)}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Gelir</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <ArrowDownRight className="w-4 h-4 text-red-300 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">{loading ? '...' : fmt(totalExpense)}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Gider</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <Target className="w-4 h-4 text-amber-300 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">{goalsLoading ? '...' : `%${goalProgress}`}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Hedef</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
-        {/* Quick Stats */}
-        <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <DollarSign className="w-5 h-5 mr-2" />
-            Finansal Özet
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            {quickStats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className={`text-xl font-bold ${stat.color}`}>{stat.value}</div>
-                <div className="text-xs text-gray-600">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Financial Sections */}
-        <div className="grid grid-cols-1 gap-4">
-          {financialSections.map((section) => {
-            const IconComponent = section.icon;
+      {/* Menu Items */}
+      <div className="page-content -mt-5">
+        <div className="bank-card p-1 mb-5">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
             return (
-              <div
-                key={section.id}
-                onClick={() => handleSectionClick(section.route)}
-                className={`${section.bgColor} ${section.borderColor} border rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-300 group`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className={`${section.color} p-3 rounded-full text-white group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold ${section.textColor} text-lg`}>
-                        {section.title}
-                      </h3>
-                      <p className="text-gray-600 text-sm mt-1">
-                        {section.description}
-                      </p>
-                    </div>
-                  </div>
-                  <ArrowRight className={`w-5 h-5 ${section.textColor} group-hover:translate-x-1 transition-transform duration-300`} />
+              <button key={item.route} onClick={() => navigate(item.route)} className="menu-item w-full">
+                <div className={`menu-icon ${item.bg}`}>
+                  <Icon className={`w-5 h-5 ${item.color}`} />
                 </div>
-              </div>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-medium text-foreground">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">{item.desc}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
             );
           })}
         </div>
 
         {/* Recent Transactions */}
-        <div className="bg-white rounded-xl p-6 shadow-sm mt-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Son İşlemler</h2>
-          {loading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg animate-pulse">
-                  <div className="flex-1">
-                    <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="section-title">Son İşlemler</h2>
+            <button onClick={() => navigate('/all-transactions')} className="text-xs font-medium text-primary flex items-center gap-0.5">
+              Tümü <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <div className="bank-card p-4">
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="flex justify-between items-center py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 skeleton rounded-xl" />
+                      <div>
+                        <div className="w-24 h-4 skeleton rounded mb-1" />
+                        <div className="w-16 h-3 skeleton rounded" />
+                      </div>
+                    </div>
+                    <div className="w-16 h-4 skeleton rounded" />
                   </div>
-                  <div className="h-4 bg-gray-300 rounded w-16"></div>
-                </div>
-              ))}
-            </div>
-          ) : recentTransactions.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>Henüz işlem bulunmuyor</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentTransactions.map((transaction) => (
-                <div key={transaction.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{transaction.title}</p>
-                    <p className="text-xs text-gray-500">
-                      {new Date(transaction.date).toLocaleDateString('tr-TR', {
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
+                ))}
+              </div>
+            ) : recentTransactions.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground text-sm">Henüz işlem bulunmuyor</p>
+              </div>
+            ) : (
+              <div>
+                {recentTransactions.map((tx) => (
+                  <div key={tx.id} className="transaction-item">
+                    <div className="flex items-center gap-3">
+                      <div className={`transaction-icon ${tx.type === 'income' ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                        {tx.type === 'income' 
+                          ? <ArrowUpRight className="w-5 h-5 text-emerald-500" />
+                          : <ArrowDownRight className="w-5 h-5 text-red-500" />
+                        }
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{tx.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(tx.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={tx.type === 'income' ? 'transaction-amount-positive' : 'transaction-amount-negative'}>
+                      {tx.type === 'income' ? '+' : '-'}{fmt(tx.amount)}
+                    </span>
                   </div>
-                  <span className={`font-semibold ${
-                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {transaction.type === 'income' ? '+' : '-'}₺{transaction.amount.toLocaleString('tr-TR')}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

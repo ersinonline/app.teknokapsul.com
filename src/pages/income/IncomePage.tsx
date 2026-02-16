@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, TrendingUp, Calendar, ChevronLeft, ChevronRight, Wallet, ArrowUpCircle } from 'lucide-react';
+import { Plus, TrendingUp, Calendar, ChevronLeft, ChevronRight, ArrowUpCircle } from 'lucide-react';
 import { Income } from '../../types/income';
 import { getUserIncomes, addIncome } from '../../services/income.service';
 import { IncomeForm } from '../../components/income/IncomeForm';
@@ -70,163 +70,112 @@ export const IncomePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-200 border-t-green-600 mb-4"></div>
-        <p className="text-green-700 font-medium">Gelirler yükleniyor...</p>
+      <div className="page-container bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Gelirler yükleniyor...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-br from-green-50/30 via-white to-emerald-50/30 min-h-screen">
-      {/* Header */}
-      <div className="bg-white/95 backdrop-blur-md shadow-lg border-b border-green-100 sticky top-0 z-10">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg">
-                <TrendingUp className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900">Gelirlerim</h1>
-                <p className="text-xs text-gray-500">Gelir takibi ve yönetimi</p>
-              </div>
+    <div className="page-container bg-background">
+      {/* Summary Header */}
+      <div className="bank-gradient-green px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-white/60 text-xs uppercase tracking-wider font-medium">
+                {monthNames[currentMonth - 1]} {currentYear}
+              </p>
+              <p className="text-3xl font-bold text-white mt-1">
+                {formatCurrency(totalMonthlyIncome + totalOneTimeIncome)}
+              </p>
+              <p className="text-white/50 text-xs mt-1">Toplam Gelir</p>
             </div>
             <button
               onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2.5 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 font-semibold"
+              className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors active:scale-95"
             >
-              <Plus className="w-5 h-5" />
-              <span className="hidden sm:inline">Yeni</span> Ekle
+              <Plus className="w-6 h-6 text-white" />
             </button>
+          </div>
+
+          {/* Month Navigation */}
+          <div className="flex items-center justify-center gap-4 mb-5">
+            <button onClick={() => navigateMonth('prev')} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors">
+              <ChevronLeft className="w-5 h-5 text-white" />
+            </button>
+            <span className="text-white font-semibold text-sm min-w-[140px] text-center">
+              {monthNames[currentMonth - 1]} {currentYear}
+            </span>
+            <button onClick={() => navigateMonth('next')} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors">
+              <ChevronRight className="w-5 h-5 text-white" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <TrendingUp className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">{incomes.length}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Kayıt</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <Calendar className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">{formatCurrency(totalMonthlyIncome)}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Düzenli</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <ArrowUpCircle className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className="text-white font-bold text-sm">{formatCurrency(totalOneTimeIncome)}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Tek Seferlik</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-6">
-        {/* Month Navigation */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center">
-            <div className="flex items-center bg-white rounded-2xl shadow-xl border-2 border-green-100 p-2 lg:p-3">
-              <button
-                onClick={() => navigateMonth('prev')}
-                className="p-2 hover:bg-green-50 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
-              >
-                <ChevronLeft className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
-              </button>
-              <div className="px-6 lg:px-8 py-2 text-center min-w-[180px] lg:min-w-[220px]">
-                <h2 className="text-lg lg:text-xl font-bold text-gray-900">
-                  {monthNames[currentMonth - 1]} {currentYear}
-                </h2>
-              </div>
-              <button
-                onClick={() => navigateMonth('next')}
-                className="p-2 hover:bg-green-50 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
-              >
-                <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
-              </button>
-            </div>
+      {/* Income List */}
+      <div className="page-content -mt-5">
+        <div className="bank-card overflow-hidden mb-6">
+          <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-foreground">Gelir Listesi</h2>
+            <span className="text-xs text-muted-foreground">{incomes.length} kayıt</span>
           </div>
-        </div>
-
-        {/* İstatistikler */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8 lg:mb-10">
-          <div className="bg-white rounded-2xl p-4 lg:p-7 shadow-xl border-2 border-green-100 hover:shadow-2xl hover:scale-105 transition-all duration-300">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex-1">
-                <p className="text-xs lg:text-sm font-semibold text-gray-600 mb-1">Toplam Gelir</p>
-                <p className="text-2xl lg:text-3xl font-bold text-green-600">{incomes.length}</p>
-              </div>
-              <div className="p-3 lg:p-4 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl self-end lg:self-auto mt-2 lg:mt-0 shadow-md">
-                <TrendingUp className="w-5 h-5 lg:w-7 lg:h-7 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-4 lg:p-7 shadow-xl border-2 border-blue-100 hover:shadow-2xl hover:scale-105 transition-all duration-300">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex-1">
-                <p className="text-xs lg:text-sm font-semibold text-gray-600 mb-1">Düzenli Gelirler</p>
-                <p className="text-2xl lg:text-3xl font-bold text-blue-600">{recurringIncomeCount}</p>
-              </div>
-              <div className="p-3 lg:p-4 bg-gradient-to-br from-blue-100 to-sky-100 rounded-2xl self-end lg:self-auto mt-2 lg:mt-0 shadow-md">
-                <Calendar className="w-5 h-5 lg:w-7 lg:h-7 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-4 lg:p-7 shadow-xl border-2 border-green-400 hover:shadow-2xl hover:scale-105 transition-all duration-300 col-span-2 lg:col-span-1">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex-1">
-                <p className="text-xs lg:text-sm font-semibold text-white/90 mb-1">Aylık Gelir</p>
-                <p className="text-xl lg:text-3xl font-bold text-white">{formatCurrency(totalMonthlyIncome)}</p>
-              </div>
-              <div className="p-3 lg:p-4 bg-white/20 backdrop-blur-sm rounded-2xl self-end lg:self-auto mt-2 lg:mt-0 shadow-lg">
-                <Wallet className="w-5 h-5 lg:w-7 lg:h-7 text-white" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-4 lg:p-7 shadow-xl border-2 border-yellow-300 hover:shadow-2xl hover:scale-105 transition-all duration-300 col-span-2 lg:col-span-1">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex-1">
-                <p className="text-xs lg:text-sm font-semibold text-white/90 mb-1">Tek Seferlik</p>
-                <p className="text-xl lg:text-3xl font-bold text-white">{formatCurrency(totalOneTimeIncome)}</p>
-              </div>
-              <div className="p-3 lg:p-4 bg-white/20 backdrop-blur-sm rounded-2xl self-end lg:self-auto mt-2 lg:mt-0 shadow-lg">
-                <ArrowUpCircle className="w-5 h-5 lg:w-7 lg:h-7 text-white" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Gelirler Tablosu */}
-        <div className="bg-white rounded-2xl shadow-2xl border-2 border-green-100">
-          <div className="px-5 lg:px-7 py-4 lg:py-5 border-b-2 border-green-100 bg-gradient-to-r from-green-50 to-emerald-50">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500 rounded-lg shadow-md">
-                <TrendingUp className="w-5 h-5 text-white" />
-              </div>
-              <h2 className="text-lg lg:text-xl font-bold text-gray-900">Gelir Listesi</h2>
-            </div>
-          </div>
-          <div className="p-4 lg:p-7">
+          <div className="p-4">
             <IncomeTable incomes={incomes} onUpdate={loadIncomes} />
           </div>
         </div>
-
-
-
-        {/* Form Modal */}
-        {showForm && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-            <div className="bg-white rounded-2xl p-5 lg:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-in">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg">
-                  <Plus className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl lg:text-2xl font-bold text-gray-900">Yeni Gelir Ekle</h3>
-              </div>
-              <IncomeForm onSubmit={async (data) => {
-                try {
-                  await addIncome(user!.id, data);
-                  handleFormSubmit();
-                } catch (error) {
-                  console.error('Error adding income:', error);
-                  alert('Gelir eklenirken bir hata oluştu.');
-                }
-              }} />
-              <button
-                onClick={() => setShowForm(false)}
-                className="mt-6 w-full rounded-xl bg-gray-200 px-5 py-3 text-gray-800 hover:bg-gray-300 transition-all duration-200 font-semibold hover:scale-105 active:scale-95"
-              >
-                İptal
-              </button>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center z-50 animate-fade-in">
+          <div className="bg-card rounded-t-2xl md:rounded-2xl p-5 w-full md:max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl animate-slide-up">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bank-gradient-green flex items-center justify-center">
+                <Plus className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground">Yeni Gelir Ekle</h3>
+            </div>
+            <IncomeForm onSubmit={async (data) => {
+              try {
+                await addIncome(user!.id, data);
+                handleFormSubmit();
+              } catch (error) {
+                console.error('Error adding income:', error);
+                alert('Gelir eklenirken bir hata oluştu.');
+              }
+            }} />
+            <button
+              onClick={() => setShowForm(false)}
+              className="mt-4 w-full btn-outline text-foreground"
+            >
+              İptal
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
