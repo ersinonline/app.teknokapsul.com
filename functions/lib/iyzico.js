@@ -4,64 +4,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.iyzicoCallback = exports.iyzicoCheckoutVerify = exports.iyzicoCheckoutInitialize = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const crypto = require("crypto");
-const axios_1 = require("axios");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Iyzipay = require("iyzipay");
 // Iyzico API credentials
-const IYZICO_API_KEY = ((_a = functions.config().iyzico) === null || _a === void 0 ? void 0 : _a.api_key) || "kgvpLKB9EUfzNV64Y40a2wV0JijXbSEK";
-const IYZICO_SECRET_KEY = ((_b = functions.config().iyzico) === null || _b === void 0 ? void 0 : _b.secret_key) || "Qb1HcmeZEnSjIygCtVASbpUpiMrXrIPb";
-const IYZICO_BASE_URL = ((_c = functions.config().iyzico) === null || _c === void 0 ? void 0 : _c.base_url) || "https://sandbox-api.iyzipay.com";
-// Iyzico PKI string oluştur (resmi format)
-function toPkiString(obj) {
-    let result = "[";
-    const keys = Object.keys(obj);
-    for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        const value = obj[key];
-        if (value === null || value === undefined)
-            continue;
-        if (Array.isArray(value)) {
-            result += `${key}=[`;
-            for (let j = 0; j < value.length; j++) {
-                if (typeof value[j] === "object") {
-                    result += toPkiString(value[j]);
-                }
-                else {
-                    result += String(value[j]);
-                }
-                if (j < value.length - 1)
-                    result += ", ";
-            }
-            result += "]";
-        }
-        else if (typeof value === "object") {
-            result += `${key}=${toPkiString(value)}`;
-        }
-        else {
-            result += `${key}=${value}`;
-        }
-        if (i < keys.length - 1)
-            result += ",";
-    }
-    result += "]";
-    return result;
+const iyzipay = new Iyzipay({
+    apiKey: ((_a = functions.config().iyzico) === null || _a === void 0 ? void 0 : _a.api_key) || "kgvpLKB9EUfzNV64Y40a2wV0JijXbSEK",
+    secretKey: ((_b = functions.config().iyzico) === null || _b === void 0 ? void 0 : _b.secret_key) || "Qb1HcmeZEnSjIygCtVASbpUpiMrXrIPb",
+    uri: ((_c = functions.config().iyzico) === null || _c === void 0 ? void 0 : _c.base_url) || "https://sandbox-api.iyzipay.com",
+});
+// Promise wrapper for iyzipay SDK callbacks
+function initializeCheckoutForm(request) {
+    return new Promise((resolve, reject) => {
+        iyzipay.checkoutFormInitialize.create(request, (err, result) => {
+            if (err)
+                return reject(err);
+            resolve(result);
+        });
+    });
 }
-// Iyzico v1 auth header (SHA-1)
-function iyzicoHeaders(requestBody) {
-    const pkiString = toPkiString(requestBody);
-    const randomHeaderValue = Date.now().toString() + Math.random().toString(36).substring(2, 7);
-    const shaSum = crypto.createHash("sha1");
-    shaSum.update(IYZICO_API_KEY + randomHeaderValue + IYZICO_SECRET_KEY + pkiString, "utf8");
-    const hashValue = shaSum.digest("base64");
-    return {
-        "Content-Type": "application/json",
-        "Authorization": `IYZWS ${IYZICO_API_KEY}:${hashValue}`,
-        "x-iyzi-rnd": randomHeaderValue,
-        "x-iyzi-client-version": "iyzipay-node-2.0.56",
-    };
+function retrieveCheckoutForm(request) {
+    return new Promise((resolve, reject) => {
+        iyzipay.checkoutForm.retrieve(request, (err, result) => {
+            if (err)
+                return reject(err);
+            resolve(result);
+        });
+    });
 }
 // Checkout Form Başlat
 exports.iyzicoCheckoutInitialize = functions.https.onCall(async (data, context) => {
-    var _a, _b, _c;
     if (!context.auth) {
         throw new functions.https.HttpsError("unauthenticated", "Giriş yapmanız gerekiyor.");
     }
@@ -69,103 +40,96 @@ exports.iyzicoCheckoutInitialize = functions.https.onCall(async (data, context) 
     const uid = context.auth.uid;
     const conversationId = `${uid}-${Date.now()}`;
     const basketId = `B-${Date.now()}`;
-    const requestBody = {
-        locale: "tr",
+    const priceStr = parseFloat(price).toFixed(1);
+    const request = {
+        locale: Iyzipay.LOCALE.TR,
         conversationId,
-        price: parseFloat(price).toFixed(2),
-        paidPrice: parseFloat(price).toFixed(2),
-        currency: "TRY",
+        price: priceStr,
+        paidPrice: priceStr,
+        currency: Iyzipay.CURRENCY.TRY,
         basketId,
-        paymentGroup: "PRODUCT",
-        callbackUrl: callbackUrl || "https://app.teknokapsul.info/dijital-kodlar/odeme-sonuc",
+        paymentGroup: Iyzipay.PAYMENT_GROUP.PRODUCT,
+        callbackUrl: callbackUrl || "https://us-central1-superapp-37db4.cloudfunctions.net/iyzicoCallback",
         enabledInstallments: [1],
         buyer: {
             id: uid,
-            name: buyerName || "Kullanıcı",
-            surname: buyerSurname || "TeknoKapsül",
+            name: buyerName || "Kullanici",
+            surname: buyerSurname || "TeknoKapsul",
             gsmNumber: buyerPhone || "+905000000000",
-            email: buyerEmail,
+            email: buyerEmail || "test@test.com",
             identityNumber: "11111111111",
-            registrationAddress: "İstanbul, Türkiye",
+            registrationAddress: "Istanbul, Turkiye",
             ip: "85.34.78.112",
             city: "Istanbul",
             country: "Turkey",
         },
         shippingAddress: {
-            contactName: `${buyerName || "Kullanıcı"} ${buyerSurname || "TeknoKapsül"}`,
+            contactName: `${buyerName || "Kullanici"} ${buyerSurname || "TeknoKapsul"}`,
             city: "Istanbul",
             country: "Turkey",
-            address: "İstanbul, Türkiye",
+            address: "Istanbul, Turkiye",
         },
         billingAddress: {
-            contactName: `${buyerName || "Kullanıcı"} ${buyerSurname || "TeknoKapsül"}`,
+            contactName: `${buyerName || "Kullanici"} ${buyerSurname || "TeknoKapsul"}`,
             city: "Istanbul",
             country: "Turkey",
-            address: "İstanbul, Türkiye",
+            address: "Istanbul, Turkiye",
         },
         basketItems: [
             {
-                id: productId,
-                name: productName,
-                category1: productCategory || "Dijital Ürün",
-                itemType: "VIRTUAL",
-                price: parseFloat(price).toFixed(2),
+                id: productId || "PROD1",
+                name: productName || "Dijital Urun",
+                category1: productCategory || "Dijital",
+                itemType: Iyzipay.BASKET_ITEM_TYPE.VIRTUAL,
+                price: priceStr,
             },
         ],
     };
     try {
-        const headers = iyzicoHeaders(requestBody);
-        const response = await axios_1.default.post(`${IYZICO_BASE_URL}/payment/iyzipos/checkoutform/initialize/auth/ecom`, requestBody, { headers });
-        if (response.data.status === "success") {
-            // Token'ı Firestore'a kaydet (doğrulama için)
+        console.log("Iyzico request:", JSON.stringify(request));
+        const result = await initializeCheckoutForm(request);
+        console.log("Iyzico response status:", result.status);
+        if (result.status === "success") {
             await admin.firestore().collection("iyzico_payments").doc(conversationId).set({
                 uid,
                 productId,
                 productName,
                 price: parseFloat(price),
-                token: response.data.token,
+                token: result.token,
                 status: "initialized",
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
             });
             return {
                 status: "success",
-                token: response.data.token,
-                checkoutFormContent: response.data.checkoutFormContent,
-                paymentPageUrl: response.data.paymentPageUrl,
+                token: result.token,
+                checkoutFormContent: result.checkoutFormContent,
+                paymentPageUrl: result.paymentPageUrl,
                 conversationId,
             };
         }
         else {
-            console.error("Iyzico error:", response.data);
-            throw new functions.https.HttpsError("internal", response.data.errorMessage || "Ödeme başlatılamadı.");
+            console.error("Iyzico error:", result);
+            throw new functions.https.HttpsError("internal", result.errorMessage || "Odeme baslatilamadi.");
         }
     }
     catch (error) {
-        console.error("Iyzico checkout init error:", ((_a = error.response) === null || _a === void 0 ? void 0 : _a.data) || error.message);
-        throw new functions.https.HttpsError("internal", ((_c = (_b = error.response) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.errorMessage) || "Ödeme başlatılırken bir hata oluştu.");
+        console.error("Iyzico checkout init error:", error);
+        throw new functions.https.HttpsError("internal", error.message || "Odeme baslatilirken bir hata olustu.");
     }
 });
 // Ödeme Sonucu Doğrula
 exports.iyzicoCheckoutVerify = functions.https.onCall(async (data, context) => {
-    var _a;
     if (!context.auth) {
-        throw new functions.https.HttpsError("unauthenticated", "Giriş yapmanız gerekiyor.");
+        throw new functions.https.HttpsError("unauthenticated", "Giris yapmaniz gerekiyor.");
     }
     const { token } = data;
     if (!token) {
         throw new functions.https.HttpsError("invalid-argument", "Token gerekli.");
     }
-    const requestBody = {
-        locale: "tr",
-        conversationId: `verify-${Date.now()}`,
-        token,
-    };
     try {
-        const headers = iyzicoHeaders(requestBody);
-        const response = await axios_1.default.post(`${IYZICO_BASE_URL}/payment/iyzipos/checkoutform/auth/ecom/detail`, requestBody, { headers });
-        const paymentStatus = response.data.paymentStatus;
-        const isSuccess = response.data.status === "success" && paymentStatus === "SUCCESS";
-        // Firestore'daki kaydı güncelle
+        const result = await retrieveCheckoutForm({ locale: Iyzipay.LOCALE.TR, token });
+        const paymentStatus = result.paymentStatus;
+        const isSuccess = result.status === "success" && paymentStatus === "SUCCESS";
         const paymentsSnap = await admin.firestore()
             .collection("iyzico_payments")
             .where("token", "==", token)
@@ -175,22 +139,22 @@ exports.iyzicoCheckoutVerify = functions.https.onCall(async (data, context) => {
             const paymentDoc = paymentsSnap.docs[0];
             await paymentDoc.ref.update({
                 status: isSuccess ? "completed" : "failed",
-                paymentId: response.data.paymentId || null,
+                paymentId: result.paymentId || null,
                 paymentStatus,
-                iyzicoResponse: JSON.stringify(response.data),
+                iyzicoResponse: JSON.stringify(result),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             });
         }
         return {
             status: isSuccess ? "success" : "failure",
-            paymentId: response.data.paymentId,
+            paymentId: result.paymentId,
             paymentStatus,
-            errorMessage: response.data.errorMessage,
+            errorMessage: result.errorMessage,
         };
     }
     catch (error) {
-        console.error("Iyzico verify error:", ((_a = error.response) === null || _a === void 0 ? void 0 : _a.data) || error.message);
-        throw new functions.https.HttpsError("internal", "Ödeme doğrulanırken bir hata oluştu.");
+        console.error("Iyzico verify error:", error);
+        throw new functions.https.HttpsError("internal", "Odeme dogrulanirken bir hata olustu.");
     }
 });
 // Callback endpoint (Iyzico'nun POST ile çağıracağı)
@@ -205,16 +169,8 @@ exports.iyzicoCallback = functions.https.onRequest(async (req, res) => {
         return;
     }
     try {
-        // Token ile ödeme durumunu sorgula
-        const requestBody = {
-            locale: "tr",
-            conversationId: `callback-${Date.now()}`,
-            token,
-        };
-        const headers = iyzicoHeaders(requestBody);
-        const response = await axios_1.default.post(`${IYZICO_BASE_URL}/payment/iyzipos/checkoutform/auth/ecom/detail`, requestBody, { headers });
-        const isSuccess = response.data.status === "success" && response.data.paymentStatus === "SUCCESS";
-        // Firestore güncelle
+        const result = await retrieveCheckoutForm({ locale: Iyzipay.LOCALE.TR, token });
+        const isSuccess = result.status === "success" && result.paymentStatus === "SUCCESS";
         const paymentsSnap = await admin.firestore()
             .collection("iyzico_payments")
             .where("token", "==", token)
@@ -225,11 +181,10 @@ exports.iyzicoCallback = functions.https.onRequest(async (req, res) => {
             const paymentData = paymentDoc.data();
             await paymentDoc.ref.update({
                 status: isSuccess ? "completed" : "failed",
-                paymentId: response.data.paymentId || null,
-                paymentStatus: response.data.paymentStatus,
+                paymentId: result.paymentId || null,
+                paymentStatus: result.paymentStatus,
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             });
-            // Başarılı ödeme ise dijital sipariş oluştur
             if (isSuccess && paymentData.uid && paymentData.productId) {
                 await admin.firestore().collection("teknokapsul").doc(paymentData.uid)
                     .collection("digitalOrders").add({
@@ -237,13 +192,12 @@ exports.iyzicoCallback = functions.https.onRequest(async (req, res) => {
                     productName: paymentData.productName,
                     price: paymentData.price,
                     status: "completed",
-                    paymentId: response.data.paymentId,
+                    paymentId: result.paymentId,
                     paymentMethod: "iyzico",
                     createdAt: admin.firestore.FieldValue.serverTimestamp(),
                 });
             }
         }
-        // Kullanıcıyı sonuç sayfasına yönlendir
         const redirectUrl = isSuccess
             ? `https://app.teknokapsul.info/dijital-kodlar/odeme-sonuc?status=success&token=${token}`
             : `https://app.teknokapsul.info/dijital-kodlar/odeme-sonuc?status=fail&token=${token}`;
