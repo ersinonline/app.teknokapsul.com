@@ -259,7 +259,7 @@ const EarnAsYouSpendPage: React.FC = () => {
                           )}
                         </div>
                         <div className="text-right flex-shrink-0 ml-3">
-                          <p className="text-lg font-bold text-primary">{product.price.toLocaleString('tr-TR')} ₺</p>
+                          <p className="text-lg font-bold text-primary">{(product.price ?? 0).toLocaleString('tr-TR')} ₺</p>
                           {product.stock > 0 && (
                             <p className="text-[10px] text-green-600">Stokta: {product.stock}</p>
                           )}
@@ -324,7 +324,7 @@ const EarnAsYouSpendPage: React.FC = () => {
                           ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
                           : 'Tarih yok'}
                       </span>
-                      <span className="font-bold text-foreground">{order.price.toLocaleString('tr-TR')} ₺</span>
+                      <span className="font-bold text-foreground">{(order.price ?? 0).toLocaleString('tr-TR')} ₺</span>
                     </div>
                     {order.code && (
                       <div className="mt-2 p-2 bg-green-50 rounded-lg border border-green-200">
@@ -367,7 +367,7 @@ const EarnAsYouSpendPage: React.FC = () => {
             </div>
             <h3 className="text-lg font-bold text-foreground mb-2">Satın Alma Başarılı!</h3>
             <p className="text-sm text-muted-foreground mb-1">{lastOrder.productName}</p>
-            <p className="text-xl font-bold text-primary mb-4">{lastOrder.price.toLocaleString('tr-TR')} ₺</p>
+            <p className="text-xl font-bold text-primary mb-4">{(lastOrder.price ?? 0).toLocaleString('tr-TR')} ₺</p>
             <p className="text-xs text-muted-foreground mb-4">Ödeme ID: {lastOrder.paymentId}</p>
             <div className="flex gap-2">
               <button
