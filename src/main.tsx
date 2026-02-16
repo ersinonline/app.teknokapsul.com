@@ -1,40 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
-import { ClerkProvider } from '@clerk/clerk-react';
-import { trTR } from '@clerk/localizations';
 import App from './App';
 import './index.css';
-
-// Dynamic Clerk key selection based on environment
-const getClerkPublishableKey = (): string => {
-  const hostname = window.location.hostname;
-  
-  // Test keys for localhost and local IPs
-  if (hostname === 'localhost' || 
-      hostname === '127.0.0.1' || 
-      hostname === '192.168.1.11' ||
-      hostname.startsWith('192.168.') || 
-      hostname.startsWith('10.') || 
-      hostname.startsWith('172.')) {
-    return import.meta.env.VITE_CLERK_PUBLISHABLE_KEY_TEST || 
-           import.meta.env.VITE_NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY_TEST || 
-           import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY_TEST || 
-           'pk_test_Y29udGVudC10ZXJtaXRlLTQ4LmNsZXJrLmFjY291bnRzLmRldiQ';
-  }
-  
-  // Production keys for all other domains
-  return import.meta.env.VITE_CLERK_PUBLISHABLE_KEY_PROD || 
-         import.meta.env.VITE_NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY_PROD || 
-         import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY_PROD || 
-         'pk_live_Y2xlcmsudGVrbm9rYXBzdWwuaW5mbyQ';
-};
-
-const PUBLISHABLE_KEY = getClerkPublishableKey();
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error('Missing Publishable Key');
-}
 
 // Initialize Sentry only in production
 if (import.meta.env.PROD) {
@@ -108,31 +76,7 @@ const renderApp = () => {
     const root = createRoot(container);
     root.render(
       <StrictMode>
-        <ClerkProvider 
-          publishableKey={PUBLISHABLE_KEY}
-          localization={trTR}
-          appearance={{
-            elements: {
-              card: 'w-full max-w-md mx-auto',
-              socialButtonsBlockButton: 'w-full py-3 text-sm md:text-base',
-              formButtonPrimary: 'w-full py-3 text-sm md:text-base',
-              formFieldInput: 'w-full py-3 px-4 text-sm md:text-base',
-              // Login formunda "Beni Hatırla" seçeneğini göster
-              formFieldAction: 'block',
-            },
-            variables: {
-              // CSS variables for theming
-              colorPrimary: '#3b82f6',
-            }
-          }}
-          signInFallbackRedirectUrl="/dashboard"
-          signUpFallbackRedirectUrl="/dashboard"
-          signInForceRedirectUrl="/dashboard"
-          signUpForceRedirectUrl="/dashboard"
-          afterSignOutUrl="/login"
-        >
-          <App />
-        </ClerkProvider>
+        <App />
       </StrictMode>
     );
     

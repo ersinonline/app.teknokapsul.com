@@ -1,0 +1,214 @@
+{
+  "project_info": {
+    "project_number": "488411585201",
+    "project_id": "superapp-37db4",
+    "storage_bucket": "superapp-37db4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488411585201:android:2dffb381f0961ca9156090",
+        "android_client_info": {
+          "package_name": "com.gorevlistesi.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "488411585201-8rsfk8s809hcp0hkoq9prl2q1m68gi12.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJvPHanRIOudEEyj3KA0hqM6G2VyIp_7E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "488411585201-2p3av37dc7ue3tdicfk2fgpofvidkobs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "488411585201-2rg4e735rp3f53rd25bvoe6gn9q1hccq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gorevlistesi.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488411585201:android:fa07255980562330156090",
+        "android_client_info": {
+          "package_name": "com.teknokapsul.teknoapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "488411585201-8jetu76raebs635qn3p9ii9fpcjjocv6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teknokapsul.teknoapp",
+            "certificate_hash": "3c9d69cbfbb64518b9d05d94f9c7b47e04172811"
+          }
+        },
+        {
+          "client_id": "488411585201-qqs78ujmdkcaavvt3eau01r4kjam2q6a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teknokapsul.teknoapp",
+            "certificate_hash": "db062c9c87f85995ac3916036fe4cda1f5269241"
+          }
+        },
+        {
+          "client_id": "488411585201-8rsfk8s809hcp0hkoq9prl2q1m68gi12.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJvPHanRIOudEEyj3KA0hqM6G2VyIp_7E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "488411585201-2p3av37dc7ue3tdicfk2fgpofvidkobs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "488411585201-2rg4e735rp3f53rd25bvoe6gn9q1hccq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gorevlistesi.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488411585201:android:1b2f5b817fdb9044156090",
+        "android_client_info": {
+          "package_name": "com.teknokapsul.teknosaat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "488411585201-tclusk0kul48p87gkqjh49vstp4ufo7m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teknokapsul.teknosaat",
+            "certificate_hash": "5e94ad6ec71ee69b70b1ff46efd08a0149d89375"
+          }
+        },
+        {
+          "client_id": "488411585201-8rsfk8s809hcp0hkoq9prl2q1m68gi12.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJvPHanRIOudEEyj3KA0hqM6G2VyIp_7E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "488411585201-2p3av37dc7ue3tdicfk2fgpofvidkobs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "488411585201-2rg4e735rp3f53rd25bvoe6gn9q1hccq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gorevlistesi.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488411585201:android:4ea1b32eea84045b156090",
+        "android_client_info": {
+          "package_name": "com.teknotech.blokezme"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "488411585201-8rsfk8s809hcp0hkoq9prl2q1m68gi12.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJvPHanRIOudEEyj3KA0hqM6G2VyIp_7E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "488411585201-2p3av37dc7ue3tdicfk2fgpofvidkobs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "488411585201-2rg4e735rp3f53rd25bvoe6gn9q1hccq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gorevlistesi.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488411585201:android:fbd1f0639f2f8351156090",
+        "android_client_info": {
+          "package_name": "com.teknotech.ekiraci"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "488411585201-8rsfk8s809hcp0hkoq9prl2q1m68gi12.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJvPHanRIOudEEyj3KA0hqM6G2VyIp_7E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "488411585201-2p3av37dc7ue3tdicfk2fgpofvidkobs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "488411585201-2rg4e735rp3f53rd25bvoe6gn9q1hccq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gorevlistesi.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

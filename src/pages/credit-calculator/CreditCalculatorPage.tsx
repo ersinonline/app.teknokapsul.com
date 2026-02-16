@@ -74,21 +74,27 @@ export const CreditCalculatorPage = () => {
   };
 
   return (
-    <div className="w-full p-4 sm:p-6">
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center">
-          <Calculator className="w-6 h-6 sm:w-8 sm:h-8 mr-2 sm:mr-3 text-blue-600" />
-          Kredi Hesaplama
-        </h1>
-        <p className="text-sm sm:text-base text-gray-600">
-          Kredi tutarı, faiz oranı ve vade bilgilerini girerek aylık ödeme tutarınızı hesaplayın.
-        </p>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient-blue px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <Calculator className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">Kredi Hesaplama</h1>
+              <p className="text-white/60 text-xs">Aylık ödeme tutarınızı hesaplayın</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+      <div className="page-content -mt-5 space-y-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Hesaplama Formu */}
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Kredi Bilgileri</h2>
+        <div className="bank-card p-4">
+          <h2 className="text-sm font-semibold text-foreground mb-4">Kredi Bilgileri</h2>
           
           <div className="space-y-4 sm:space-y-6">
             <div>
@@ -180,7 +186,7 @@ export const CreditCalculatorPage = () => {
             </div>
           </div>
         )}
-      </div>
+        </div>
 
       {/* Ödeme Planı */}
       {calculation && (
@@ -226,6 +232,7 @@ export const CreditCalculatorPage = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, TrendingUp, Wrench } from 'lucide-react';
-import { UserButton } from '@clerk/clerk-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface AppTabsProps {
   currentApp: 'tekno-kapsul' | 'tekno-finans' | 'tekno-hizmet' | 'tekno-firsat' | null;
@@ -9,6 +9,7 @@ interface AppTabsProps {
 
 const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const tabs = [
     {
@@ -113,15 +114,13 @@ const AppTabs: React.FC<AppTabsProps> = ({ currentApp }) => {
       {/* Right Section - User Info or Actions */}
       <div className="flex items-center px-3 sm:px-4 py-4 sm:py-3 sm:border-l sm:border-gray-200 min-w-0">
         <div className="flex items-center gap-3 min-w-0">
-          <UserButton 
-            appearance={{
-              elements: {
-                avatarBox: "w-9 h-9 rounded-[12px]",
-                userButtonPopoverCard: "rounded-[12px]",
-                userButtonPopoverActionButton: "rounded-[10px]"
-              }
-            }}
-          />
+          {user?.photoURL ? (
+            <img src={user.photoURL} alt="" className="w-9 h-9 rounded-[12px] object-cover" />
+          ) : (
+            <div className="w-9 h-9 rounded-[12px] bg-[#ffb700] flex items-center justify-center text-white font-bold text-sm">
+              {user?.displayName?.[0] || 'U'}
+            </div>
+          )}
 
         </div>
       </div>

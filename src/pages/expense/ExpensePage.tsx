@@ -28,7 +28,7 @@ export const ExpensePage: React.FC = () => {
     
     try {
       setLoading(true);
-      const userExpenses = await getUserExpenses(user.id, currentYear, currentMonth);
+      const userExpenses = await getUserExpenses(user.uid, currentYear, currentMonth);
       setExpenses(userExpenses);
     } catch (error) {
       console.error('Error loading expenses:', error);
@@ -256,7 +256,7 @@ export const ExpensePage: React.FC = () => {
             </div>
             <ExpenseForm onSubmit={async (data) => {
               try {
-                await addExpense(user!.id, data, user?.primaryEmailAddress?.emailAddress, user?.fullName || undefined);
+                await addExpense(user!.uid, data, user?.email, user?.displayName || undefined);
                 handleFormSubmit();
               } catch (error) {
                 console.error('Error adding expense:', error);

@@ -10,7 +10,7 @@ export const useNotifications = () => {
       if (!user) return;
 
       try {
-        await requestNotificationPermission(user.id);
+        await requestNotificationPermission(user.uid);
         
         setupNotificationListener((payload) => {
           console.log('Received notification:', payload);

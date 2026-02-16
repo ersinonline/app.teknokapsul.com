@@ -291,7 +291,7 @@ export const AccountsList: React.FC<AccountsListProps> = ({
                               onClick={async () => {
                                 if (window.confirm('Bu işlemi silmek istediğinizden emin misiniz?')) {
                                   try {
-                                    await deleteTransaction(user!.id, t.id);
+                                    await deleteTransaction(user!.uid, t.id);
                                     // Refresh transactions would be handled by parent component
                                   } catch (error) {
                                     console.error('İşlem silinirken hata oluştu:', error);

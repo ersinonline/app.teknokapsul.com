@@ -38,7 +38,7 @@ const PaymentPlansListPage: React.FC = () => {
     
     try {
       const plansQuery = query(
-        collection(db, `teknokapsul/${user.id}/paymentPlans`),
+        collection(db, `teknokapsul/${user.uid}/paymentPlans`),
         orderBy('createdAt', 'desc')
       );
       const snapshot = await getDocs(plansQuery);
@@ -48,7 +48,7 @@ const PaymentPlansListPage: React.FC = () => {
         createdAt: doc.data().createdAt?.toDate() || new Date()
       })) as PaymentPlan[];
       
-      setPlans(plansData.filter(plan => plan.userId === user.id));
+      setPlans(plansData.filter(plan => plan.userId === user.uid));
     } catch (error) {
       console.error('Planlar yüklenirken hata:', error);
     } finally {
@@ -62,7 +62,7 @@ const PaymentPlansListPage: React.FC = () => {
     
     setIsDeleting(planId);
     try {
-      await deleteDoc(doc(db, `teknokapsul/${user.id}/paymentPlans`, planId));
+      await deleteDoc(doc(db, `teknokapsul/${user.uid}/paymentPlans`, planId));
       setPlans(plans.filter(plan => plan.id !== planId));
     } catch (error) {
       console.error('Plan silinirken hata:', error);
@@ -173,55 +173,52 @@ const PaymentPlansListPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ffb700]"></div>
+      <div className="page-container bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Planlar yükleniyor...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6">
-        {/* Header */}
-        <div className="bg-white shadow-sm sticky top-0 z-10 border-b">
-          <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Home className="w-6 h-6" style={{ color: '#ffb700' }} />
-                <h1 className="text-lg font-semibold text-gray-900">Ödeme Planları</h1>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <Home className="w-5 h-5 text-white" />
               </div>
-              <button
-                onClick={() => navigate('/payment-plan/new')}
-                className="flex items-center gap-2 text-white px-3 py-2 rounded-lg transition-colors"
-                style={{ backgroundColor: '#ffb700' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
-              >
-                <Plus className="w-4 h-4" />
-                <span className="text-sm">Ekle</span>
-              </button>
+              <div>
+                <h1 className="text-xl font-bold text-white">Ödeme Planları</h1>
+                <p className="text-white/60 text-xs">{plans.length} plan</p>
+              </div>
             </div>
-          </div>
-        </div>
-
-        {/* Plans List */}
-        {plans.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm border p-8 text-center">
-            <div className="mb-4">
-              <Home className="w-16 h-16 text-gray-300 mx-auto" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Henüz ödeme planınız yok
-            </h3>
-            <p className="text-gray-600 mb-6">
-              İlk ödeme planınızı oluşturmak için aşağıdaki butona tıklayın.
-            </p>
             <button
               onClick={() => navigate('/payment-plan/new')}
-              className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors inline-flex items-center gap-2"
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
             >
-              <Plus className="w-5 h-5" />
-              Yeni Plan Oluştur
+              <Plus className="w-5 h-5 text-white" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="page-content -mt-5">
+        {/* Plans List */}
+        {plans.length === 0 ? (
+          <div className="bank-card p-10 text-center">
+            <Home className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
+            <h3 className="text-sm font-semibold text-foreground mb-1">Henüz plan yok</h3>
+            <p className="text-xs text-muted-foreground mb-4">İlk ödeme planınızı oluşturun.</p>
+            <button
+              onClick={() => navigate('/payment-plan/new')}
+              className="bg-primary text-white px-4 py-2 rounded-xl text-sm font-medium inline-flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" /> Yeni Plan
             </button>
           </div>
         ) : (

@@ -68,7 +68,7 @@ export const AIChatPage: React.FC = () => {
     const welcomeMessage: Message = {
       id: '1',
       type: 'ai',
-      content: `Merhaba ${user?.fullName || 'Kullanıcı'}! Ben TeknoKapsül AI asistanınızım. Finansal sorularınızda size yardımcı olmak için buradayım. Size nasıl yardımcı olabilirim?`,
+      content: `Merhaba ${user?.displayName || 'Kullanıcı'}! Ben TeknoKapsül AI asistanınızım. Finansal sorularınızda size yardımcı olmak için buradayım. Size nasıl yardımcı olabilirim?`,
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
@@ -192,16 +192,16 @@ export const AIChatPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bank-gradient px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-            <Bot className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+            <Bot className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-gray-900">AI Asistan</h1>
-            <p className="text-sm text-gray-600">Finansal danışmanınız</p>
+            <h1 className="text-lg font-bold text-white">AI Asistan</h1>
+            <p className="text-white/60 text-xs">Finansal danışmanınız</p>
           </div>
         </div>
       </div>

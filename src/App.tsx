@@ -49,8 +49,7 @@ import CreditCalculatorPage2 from './pages/CreditCalculatorPage';
 import { ShopRewardsPage } from './pages/other/ShopRewardsPage';
 import MyOrdersPage from './pages/other/MyOrdersPage';
 
-// Harcadıkça kazan sayfası geçici olarak kaldırıldı
-// import EarnAsYouSpendPage from './pages/other/EarnAsYouSpendPage';
+import EarnAsYouSpendPage from './pages/other/EarnAsYouSpendPage';
 import CheckoutPage from './pages/other/CheckoutPage';
 import OrderSuccessPage from './pages/other/OrderSuccessPage';
 import { GoalsPage } from './pages/goals/GoalsPage';
@@ -81,6 +80,14 @@ import BankamPage from './pages/BankamPage';
 import WebViewAuthPage from './pages/auth/WebViewAuthPage';
 import { VerifyPage } from './pages/auth/VerifyPage';
 import { IsBankCallbackPage } from './pages/auth/IsBankCallbackPage';
+// eKira imports
+import { EkiraProvider } from './pages/ekira/context/EkiraContext';
+import EkiraDashboard from './pages/ekira/EkiraDashboard';
+import EkiraProperties from './pages/ekira/EkiraProperties';
+import EkiraContracts from './pages/ekira/EkiraContracts';
+import EkiraInvoices from './pages/ekira/EkiraInvoices';
+import EkiraNewContract from './pages/ekira/EkiraNewContract';
+import EkiraContractDetail from './pages/ekira/EkiraContractDetail';
 // AppTabs removed - navigation handled by MobileNavigation
 import { useLocation } from 'react-router-dom';
 
@@ -275,11 +282,14 @@ const router = createBrowserRouter([
     element: <TeknoRoute><ShopRewardsPage /></TeknoRoute>
   },
 
-  // Harcadıkça kazan rotası geçici olarak kaldırıldı
-  // {
-  //   path: '/other/earn-as-you-spend',
-  //   element: <ProtectedRoute><EarnAsYouSpendPage /></ProtectedRoute>
-  // },
+  {
+    path: '/dijital-kodlar',
+    element: <TeknoRoute><EarnAsYouSpendPage /></TeknoRoute>
+  },
+  {
+    path: '/other/earn-as-you-spend',
+    element: <Navigate to="/dijital-kodlar" replace />
+  },
   {
     path: '/other/shop-rewards',
     element: <TeknoRoute><ShopRewardsPage /></TeknoRoute>
@@ -364,6 +374,31 @@ const router = createBrowserRouter([
   {
     path: '/pharmacy',
     element: <TeknoRoute><PharmacyPage /></TeknoRoute>
+  },
+  // eKira routes
+  {
+    path: '/ekira',
+    element: <TeknoRoute><EkiraProvider><EkiraDashboard /></EkiraProvider></TeknoRoute>
+  },
+  {
+    path: '/ekira/properties',
+    element: <TeknoRoute><EkiraProvider><EkiraProperties /></EkiraProvider></TeknoRoute>
+  },
+  {
+    path: '/ekira/contracts',
+    element: <TeknoRoute><EkiraProvider><EkiraContracts /></EkiraProvider></TeknoRoute>
+  },
+  {
+    path: '/ekira/invoices',
+    element: <TeknoRoute><EkiraProvider><EkiraInvoices /></EkiraProvider></TeknoRoute>
+  },
+  {
+    path: '/ekira/contracts/new',
+    element: <TeknoRoute><EkiraProvider><EkiraNewContract /></EkiraProvider></TeknoRoute>
+  },
+  {
+    path: '/ekira/contracts/:id',
+    element: <TeknoRoute><EkiraProvider><EkiraContractDetail /></EkiraProvider></TeknoRoute>
   },
   {
     path: '/credit-calculator',

@@ -60,7 +60,7 @@ const OrderSuccessPage: React.FC = () => {
             postalCode: orderInfo.shippingAddress.postalCode
           };
 
-          await createOrder(user!.id, {
+          await createOrder(user!.uid, {
             orderNumber,
             items: orderItems,
             total: orderInfo.cartTotal,
@@ -96,7 +96,7 @@ const OrderSuccessPage: React.FC = () => {
 
           // Puanları kullan
           if (orderInfo.pointsToUse > 0) {
-            await usePointsFunction(user!.id, orderInfo.pointsToUse);
+            await usePointsFunction(user!.uid, orderInfo.pointsToUse);
           }
 
           // Sipariş bilgilerini state'e kaydet
@@ -134,10 +134,10 @@ const OrderSuccessPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="page-container bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-yellow-500" />
-          <p className="text-gray-600">Ödemeniz işleniyor...</p>
+          <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground text-sm">Ödemeniz işleniyor...</p>
         </div>
       </div>
     );
@@ -145,16 +145,16 @@ const OrderSuccessPage: React.FC = () => {
 
   if (error || !orderData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Package className="w-12 h-12 text-red-600" />
+      <div className="page-container bg-background flex items-center justify-center">
+        <div className="text-center px-4">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Package className="w-8 h-8 text-red-600" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Bir Hata Oluştu</h2>
-          <p className="text-gray-600 mb-4">{error || 'Sipariş bilgileri bulunamadı.'}</p>
+          <h2 className="text-lg font-bold text-foreground mb-2">Bir Hata Oluştu</h2>
+          <p className="text-muted-foreground text-sm mb-4">{error || 'Sipariş bilgileri bulunamadı.'}</p>
           <button
             onClick={() => navigate('/other/shop-rewards')}
-            className="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors"
+            className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-medium"
           >
             Alışverişe Dön
           </button>
@@ -164,26 +164,26 @@ const OrderSuccessPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-transparent">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
+      <div className="bank-gradient-green px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/other/shop-rewards')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5 text-white" />
             </button>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Sipariş Onayı</h1>
-              <p className="text-sm text-gray-600">Siparişiniz başarıyla oluşturuldu</p>
+              <h1 className="text-xl font-bold text-white">Sipariş Onayı</h1>
+              <p className="text-white/60 text-xs">Siparişiniz başarıyla oluşturuldu</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="page-content -mt-5 mb-6">
         <div className="bg-white rounded-lg p-8 shadow-sm border text-center">
           {/* Başarı İkonu */}
           <div className="flex justify-center mb-6">

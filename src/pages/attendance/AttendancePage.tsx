@@ -40,10 +40,10 @@ const AttendancePage = () => {
 
   // Firebase helper functions
   const saveToFirebase = async (data: any, docPath: string) => {
-    if (!user?.id) return;
+    if (!user?.uid) return;
     
     try {
-      const userDocRef = doc(db, 'users', user.id, 'attendance', docPath);
+      const userDocRef = doc(db, 'users', user.uid, 'attendance', docPath);
       await setDoc(userDocRef, data, { merge: true });
     } catch (error) {
       console.error('Firebase kaydetme hatası:', error);
@@ -51,10 +51,10 @@ const AttendancePage = () => {
   };
 
   const loadFromFirebase = async (docPath: string) => {
-    if (!user?.id) return null;
+    if (!user?.uid) return null;
     
     try {
-      const userDocRef = doc(db, 'users', user.id, 'attendance', docPath);
+      const userDocRef = doc(db, 'users', user.uid, 'attendance', docPath);
       const docSnap = await getDoc(userDocRef);
       return docSnap.exists() ? docSnap.data() : null;
     } catch (error) {
@@ -76,7 +76,7 @@ const AttendancePage = () => {
       if (savedWeeks) setSemesterWeeks(parseInt(savedWeeks));
 
       // Then load from Firebase if user is authenticated
-      if (user?.id) {
+      if (user?.uid) {
         const firebaseCourses = await loadFromFirebase('courses');
         const firebaseRecords = await loadFromFirebase('records');
         const firebaseWeeks = await loadFromFirebase('settings');
@@ -88,29 +88,29 @@ const AttendancePage = () => {
     };
 
     loadData();
-  }, [user?.id]);
+  }, [user?.uid]);
 
   // Save data to localStorage and Firebase
   useEffect(() => {
     localStorage.setItem('attendance_courses', JSON.stringify(courses));
-    if (user?.id && courses.length > 0) {
+    if (user?.uid && courses.length > 0) {
       saveToFirebase({ courses }, 'courses');
     }
-  }, [courses, user?.id]);
+  }, [courses, user?.uid]);
 
   useEffect(() => {
     localStorage.setItem('attendance_records', JSON.stringify(attendanceRecords));
-    if (user?.id && attendanceRecords.length > 0) {
+    if (user?.uid && attendanceRecords.length > 0) {
       saveToFirebase({ records: attendanceRecords }, 'records');
     }
-  }, [attendanceRecords, user?.id]);
+  }, [attendanceRecords, user?.uid]);
 
   useEffect(() => {
     localStorage.setItem('semester_weeks', semesterWeeks.toString());
-    if (user?.id) {
+    if (user?.uid) {
       saveToFirebase({ semesterWeeks }, 'settings');
     }
-  }, [semesterWeeks, user?.id]);
+  }, [semesterWeeks, user?.uid]);
 
   const addCourse = () => {
     if (!courseName || !courseDay || !courseTime || !courseSemester) return;
@@ -183,21 +183,23 @@ const AttendancePage = () => {
   };
 
   return (
-    <div className="bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+      <div className="bank-gradient-purple px-4 pt-4 pb-10">
+        <div className="page-content">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3">
-              <Users className="w-6 h-6" style={{ color: '#6366f1' }} />
-              <h1 className="text-2xl font-bold text-gray-900">Yoklama Takibi</h1>
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <Users className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">Yoklama Takibi</h1>
+              <p className="text-white/60 text-xs">{courses.length} ders</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
+      <div className="page-content -mt-5 space-y-4 mb-6">
         {/* Semester Configuration */}
         <div className="bg-white rounded-lg shadow-sm border mb-6 p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">

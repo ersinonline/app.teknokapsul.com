@@ -31,14 +31,14 @@ const BankamPage: React.FC = () => {
 
   useEffect(() => {
     const fetchFinancialData = async () => {
-      if (!user?.id) { setLoading(false); return; }
+      if (!user?.uid) { setLoading(false); return; }
       try {
-        const expensesRef = collection(db, 'teknokapsul', user.id, 'expenses');
+        const expensesRef = collection(db, 'teknokapsul', user.uid, 'expenses');
         const expQ = query(expensesRef, where('isActive', '==', true), orderBy('date', 'desc'), limit(50));
         const expSnap = await getDocs(expQ);
         const expData = expSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Expense[];
 
-        const incomesRef = collection(db, 'teknokapsul', user.id, 'incomes');
+        const incomesRef = collection(db, 'teknokapsul', user.uid, 'incomes');
         const incQ = query(incomesRef, where('isActive', '==', true), orderBy('date', 'desc'), limit(50));
         const incSnap = await getDocs(incQ);
         const incData = incSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Income[];

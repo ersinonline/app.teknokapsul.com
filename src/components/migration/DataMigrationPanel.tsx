@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '../../contexts/AuthContext';
 import { userMigrationService, UserMigrationMapping, MigrationResult } from '../../services/user-migration.service';
 import { Loader2, CheckCircle, XCircle, AlertCircle, Database, ArrowRight } from 'lucide-react';
 
@@ -8,7 +8,8 @@ interface DataMigrationPanelProps {
 }
 
 export const DataMigrationPanel: React.FC<DataMigrationPanelProps> = ({ onMigrationComplete }) => {
-  const { user, isLoaded } = useUser();
+  const { user } = useAuth();
+  const isLoaded = !!user || true;
   const [migrationStatus, setMigrationStatus] = useState<UserMigrationMapping | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [migrationResult, setMigrationResult] = useState<MigrationResult | null>(null);
@@ -26,7 +27,7 @@ export const DataMigrationPanel: React.FC<DataMigrationPanelProps> = ({ onMigrat
     if (!user) return;
     
     try {
-      const status = await userMigrationService.getMigrationStatus(user.id);
+      const status = await userMigrationService.getMigrationStatus(user.uid);
       setMigrationStatus(status);
     } catch (error) {
       console.error('Error checking migration status:', error);
@@ -34,16 +35,16 @@ export const DataMigrationPanel: React.FC<DataMigrationPanelProps> = ({ onMigrat
   };
 
   const handleMigration = async () => {
-    if (!user || !user.primaryEmailAddress) return;
+    if (!user || !user.email) return;
     
     setIsLoading(true);
     setMigrationResult(null);
     
     try {
       const result = await userMigrationService.autoMigrateUser(
-        user.id,
-        user.primaryEmailAddress.emailAddress,
-        user.fullName || undefined
+        user.uid,
+        user.email,
+        user.displayName || undefined
       );
       
       setMigrationResult(result);
@@ -60,17 +61,17 @@ export const DataMigrationPanel: React.FC<DataMigrationPanelProps> = ({ onMigrat
   };
 
   const handleManualMigration = async () => {
-    if (!user || !user.primaryEmailAddress || !manualUid.trim()) return;
+    if (!user || !user.email || !manualUid.trim()) return;
     
     setIsLoading(true);
     setMigrationResult(null);
     
     try {
       const result = await userMigrationService.migrateUserByUid(
-        user.id,
+        user.uid,
         manualUid.trim(),
-        user.primaryEmailAddress.emailAddress,
-        user.fullName || undefined
+        user.email,
+        user.displayName || undefined
       );
       
       setMigrationResult(result);
@@ -140,9 +141,9 @@ export const DataMigrationPanel: React.FC<DataMigrationPanelProps> = ({ onMigrat
           <div className="bg-gray-50 p-4 rounded-lg">
             <h4 className="font-medium mb-2">Hesap Bilgileri</h4>
             <div className="space-y-1 text-sm text-gray-600">
-              <p><strong>Email:</strong> {user.primaryEmailAddress?.emailAddress}</p>
-              <p><strong>İsim:</strong> {user.fullName || 'Belirtilmemiş'}</p>
-              <p><strong>Clerk ID:</strong> {user.id}</p>
+              <p><strong>Email:</strong> {user.email}</p>
+              <p><strong>İsim:</strong> {user.displayName || 'Belirtilmemiş'}</p>
+              <p><strong>Clerk ID:</strong> {user.uid}</p>
             </div>
           </div>
 

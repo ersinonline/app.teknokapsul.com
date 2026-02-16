@@ -50,7 +50,7 @@ const WarrantyTrackingPage: React.FC = () => {
     
     try {
       const q = query(
-        collection(db, 'users', user.id, 'warranties'),
+        collection(db, 'users', user.uid, 'warranties'),
         orderBy('createdAt', 'desc')
       );
       const querySnapshot = await getDocs(q);
@@ -70,7 +70,7 @@ const WarrantyTrackingPage: React.FC = () => {
   const handleFileUpload = async (file: File): Promise<string> => {
     if (!user) throw new Error('User not authenticated');
     
-    const fileRef = ref(storage, `warranties/${user.id}/${Date.now()}_${file.name}`);
+    const fileRef = ref(storage, `warranties/${user.uid}/${Date.now()}_${file.name}`);
     await uploadBytes(fileRef, file);
     return await getDownloadURL(fileRef);
   };
@@ -94,9 +94,9 @@ const WarrantyTrackingPage: React.FC = () => {
       };
 
       if (editingWarranty) {
-        await updateDoc(doc(db, 'users', user.id, 'warranties', editingWarranty.id!), warrantyData);
+        await updateDoc(doc(db, 'users', user.uid, 'warranties', editingWarranty.id!), warrantyData);
       } else {
-        await addDoc(collection(db, 'users', user.id, 'warranties'), warrantyData);
+        await addDoc(collection(db, 'users', user.uid, 'warranties'), warrantyData);
       }
 
       await fetchWarranties();
@@ -112,7 +112,7 @@ const WarrantyTrackingPage: React.FC = () => {
     if (!user || !window.confirm('Bu garanti kaydını silmek istediğinizden emin misiniz?')) return;
 
     try {
-      await deleteDoc(doc(db, 'users', user.id, 'warranties', id));
+      await deleteDoc(doc(db, 'users', user.uid, 'warranties', id));
       await fetchWarranties();
     } catch (error) {
       console.error('Garanti silinirken hata:', error);

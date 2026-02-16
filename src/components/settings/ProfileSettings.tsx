@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 export const ProfileSettings = () => {
   const { user } = useAuth();
   const avatarUrl = user?.imageUrl || '';
-  const [displayName, setDisplayName] = useState(user?.fullName || '');
+  const [displayName, setDisplayName] = useState(user?.displayName || '');
 
   const handleProfileUpdate = async () => {
     // Profil güncelleme işlemleri

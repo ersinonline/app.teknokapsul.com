@@ -26,10 +26,10 @@ export const PersonalDebtForm: React.FC<PersonalDebtFormProps> = ({ onClose, onS
 
     try {
       // Get user email and name from Clerk user object
-      const userEmail = user.emailAddresses?.[0]?.emailAddress;
-      const userName = user.fullName || user.firstName || 'Kullanıcı';
+      const userEmail = user.email;
+      const userName = user.displayName || user.displayName?.split(" ")[0] || 'Kullanıcı';
       
-      await addPersonalDebt(user.id, formData, userEmail, userName);
+      await addPersonalDebt(user.uid, formData, userEmail, userName);
       onSave();
       onClose();
     } catch (err) {

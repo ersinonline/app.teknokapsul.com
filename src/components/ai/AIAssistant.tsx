@@ -56,11 +56,11 @@ export const AIAssistant: React.FC = () => {
       
       try {
         const [userExpenses, userIncomes, userCreditCards, userCashAdvance, userLoans] = await Promise.all([
-          getUserExpenses(user.id, currentYear, currentMonth),
-          getUserIncomes(user.id, currentYear, currentMonth),
-          getCreditCards(user.id),
-          getCashAdvanceAccounts(user.id),
-          getLoans(user.id)
+          getUserExpenses(user.uid, currentYear, currentMonth),
+          getUserIncomes(user.uid, currentYear, currentMonth),
+          getCreditCards(user.uid),
+          getCashAdvanceAccounts(user.uid),
+          getLoans(user.uid)
         ]);
         
         setExpenses(userExpenses);
@@ -88,7 +88,7 @@ export const AIAssistant: React.FC = () => {
     const welcomeMessage: Message = {
       id: Date.now().toString(),
       type: 'ai',
-      content: `Merhaba ${user?.firstName || 'Kullanıcı'}! 👋 Ben TeknoKapsül AI asistanınızım. Finansal yönetim konularında size yardımcı olmak için buradayım. Aşağıdaki hazır sorulardan birini seçebilir veya kendi sorunuzu yazabilirsiniz.`,
+      content: `Merhaba ${user?.displayName?.split(' ')[0] || 'Kullanıcı'}! 👋 Ben TeknoKapsül AI asistanınızım. Finansal yönetim konularında size yardımcı olmak için buradayım. Aşağıdaki hazır sorulardan birini seçebilir veya kendi sorunuzu yazabilirsiniz.`,
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);
@@ -166,7 +166,7 @@ export const AIAssistant: React.FC = () => {
       const savingPotential = Math.max(0, totalIncome * 0.2);
       response = `💰 **Tasarruf Önerileri:**\n\n• Hedef tasarruf: ${formatCurrency(savingPotential)} (gelirin %20'si)\n• Mevcut net durum: ${formatCurrency(netBalance)}\n\n**Stratejiler:**\n• Gereksiz abonelikleri iptal edin\n• Gıda harcamalarını optimize edin\n• Ulaşım maliyetlerini azaltın\n• Otomatik tasarruf planı oluşturun`;
     } else if (message.includes('merhaba') || message.includes('selam')) {
-      response = `Merhaba ${user?.firstName || 'Kullanıcı'}! 👋 Finansal verilerinizi analiz edebilir, öneriler sunabilirim. Size nasıl yardımcı olabilirim?`;
+      response = `Merhaba ${user?.displayName?.split(' ')[0] || 'Kullanıcı'}! 👋 Finansal verilerinizi analiz edebilir, öneriler sunabilirim. Size nasıl yardımcı olabilirim?`;
     } else if (message.includes('teşekkür') || message.includes('sağol')) {
       response = `Rica ederim! 😊 Finansal hedeflerinize ulaşmanızda yardımcı olmaktan mutluluk duyarım.`;
     } else {

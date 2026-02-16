@@ -57,7 +57,7 @@ export const CargoTrackingPage = () => {
     
     try {
       setLoading(true);
-      const data = await getUserCargoTrackings(user.id);
+      const data = await getUserCargoTrackings(user.uid);
       setCargoList(data);
     } catch (error) {
       console.error('Error loading cargo list:', error);
@@ -71,7 +71,7 @@ export const CargoTrackingPage = () => {
     if (!user || !formData.name || !formData.trackingNumber || !formData.company) return;
 
     try {
-      await addCargoTracking(user.id, {
+      await addCargoTracking(user.uid, {
         name: formData.name,
         trackingNumber: formData.trackingNumber,
         company: formData.company,
@@ -90,7 +90,7 @@ export const CargoTrackingPage = () => {
     if (!user || !window.confirm('Bu kargo takibini silmek istediğinizden emin misiniz?')) return;
     
     try {
-      await deleteCargoTracking(user!.id, id);
+      await deleteCargoTracking(user!.uid, id);
       loadCargoList();
     } catch (error) {
       console.error('Error deleting cargo:', error);
@@ -124,7 +124,7 @@ export const CargoTrackingPage = () => {
     if (!user) return;
     
     try {
-      await updateCargoTracking(user!.id, cargo.id, {
+      await updateCargoTracking(user!.uid, cargo.id, {
         isDelivered: !cargo.isDelivered
       });
       loadCargoList();

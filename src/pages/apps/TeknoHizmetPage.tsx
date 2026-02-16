@@ -358,7 +358,7 @@ const TeknoHizmetPage: React.FC = () => {
     const fetchApplications = async () => {
       if (user) {
         try {
-          const userApplications = await applicationService.getUserApplications(user.id);
+          const userApplications = await applicationService.getUserApplications(user.uid);
           setApplications(userApplications);
         } catch (error) {
           console.error('Error fetching applications:', error);
@@ -426,48 +426,46 @@ const TeknoHizmetPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-4 sm:p-6">
-        {/* Hero Section */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">TeknoHizmet</h1>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient-green px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <Wrench className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">TeknoHizmet</h1>
+              <p className="text-white/60 text-xs">Dijital hizmetler</p>
+            </div>
           </div>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-            Günlük işlemlerinizi kolaylaştıran dijital hizmetler. Vergi hesaplamalarından sigorta işlemlerine kadar her şey burada.
-          </p>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <div key={index} className="bg-white rounded-lg p-4 text-center border border-gray-200">
-                <div className="bg-[#ffb700]/10 p-2 rounded-lg w-fit mx-auto mb-2">
-                  <Icon className="w-6 h-6 text-[#ffb700]" />
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <div key={index} className="bg-white/10 rounded-xl p-3 text-center">
+                  <Icon className="w-4 h-4 text-white/70 mx-auto mb-1" />
+                  <p className="text-white font-bold text-sm">{stat.title}</p>
+                  <p className="text-white/50 text-[10px]">{stat.subtitle}</p>
                 </div>
-                <div className="text-xl font-bold text-gray-900">{stat.title}</div>
-                <div className="text-sm text-gray-600">{stat.subtitle}</div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Search Bar */}
-        <div className="mb-6">
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              );
+            })}
+          </div>
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 w-4 h-4" />
             <input
               type="text"
               placeholder="Hizmet ara..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/10 rounded-xl text-white placeholder-white/40 text-sm focus:outline-none focus:bg-white/15"
             />
           </div>
         </div>
+      </div>
+
+      <div className="page-content -mt-5">
 
         {/* Success Message */}
         {successMessage && (

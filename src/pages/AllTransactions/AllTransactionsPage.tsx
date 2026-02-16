@@ -100,17 +100,17 @@ export const AllTransactionsPage = () => {
 
   // Tüm işlemleri yeniden yükleyen fonksiyon
   const fetchAllTransactions = async () => {
-    if (!user?.id) return;
+    if (!user?.uid) return;
     
     try {
-      const accountsData = await getBankAccounts(user.id);
+      const accountsData = await getBankAccounts(user.uid);
       setBankAccounts(accountsData);
 
       const allTxs: TransactionWithAccount[] = [];
       
       for (const account of accountsData) {
         try {
-          const accountTxs = await getTransactions(user.id, account.id);
+          const accountTxs = await getTransactions(user.uid, account.id);
           const txsWithAccount = accountTxs.map((tx: BankTransaction) => ({
             ...tx,
             bankName: account.bankName,
@@ -131,7 +131,7 @@ export const AllTransactionsPage = () => {
   };
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.uid) return;
 
     const fetchData = async () => {
       try {
@@ -147,7 +147,7 @@ export const AllTransactionsPage = () => {
     };
 
     fetchData();
-  }, [user?.id]);
+  }, [user?.uid]);
 
   // Filtreleme fonksiyonu
   const filteredTransactions = allTransactions.filter(tx => {
@@ -246,7 +246,7 @@ export const AllTransactionsPage = () => {
 
   // İşlem ekleme fonksiyonu
   const handleTextInput = async (accountId: string, text: string, bankType: 'yapikredi' | 'garanti' | 'akbank' | 'teb') => {
-    if (!user?.id || !text.trim()) return;
+    if (!user?.uid || !text.trim()) return;
     
     setUploadProgress({
       accountId,
@@ -257,7 +257,7 @@ export const AllTransactionsPage = () => {
 
     try {
       // Parse and add transactions using the service function
-      const transactions = await addTransactionsFromText(user.id, accountId, text, bankType);
+      const transactions = await addTransactionsFromText(user.uid, accountId, text, bankType);
       
       if (transactions.length === 0) {
         setUploadProgress({
@@ -304,7 +304,7 @@ export const AllTransactionsPage = () => {
   };
 
   const handleSaveEdit = async (accountId: string) => {
-    if (!user?.id) return;
+    if (!user?.uid) return;
     
     // IBAN validasyonu
     if (editForm.iban.trim() && !validateIban(editForm.iban.trim())) {
@@ -314,7 +314,7 @@ export const AllTransactionsPage = () => {
 
     try {
       // Veritabanında güncelle
-      await updateBankAccount(user.id, accountId, {
+      await updateBankAccount(user.uid, accountId, {
         bankName: editForm.bankName.trim(),
         accountName: editForm.accountName.trim(),
         iban: editForm.iban.trim(),
@@ -347,7 +347,7 @@ export const AllTransactionsPage = () => {
 
   // Hesap silme fonksiyonu
   const handleDeleteAccount = async (accountId: string) => {
-    if (!user?.id) return;
+    if (!user?.uid) return;
     
     if (!window.confirm('Bu hesabı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve hesaba ait tüm işlemler de silinecektir.')) {
       return;
@@ -355,7 +355,7 @@ export const AllTransactionsPage = () => {
 
     try {
       // Hesabı ve ilgili işlemleri sil
-      await deleteBankAccount(user.id, accountId);
+      await deleteBankAccount(user.uid, accountId);
       
       // Local state'i güncelle
       setBankAccounts(prev => prev.filter(acc => acc.id !== accountId));
@@ -383,7 +383,7 @@ export const AllTransactionsPage = () => {
   };
 
   const handleAddAccount = async () => {
-    if (!user?.id || !newAccount.accountName.trim() || !newAccount.iban.trim()) {
+    if (!user?.uid || !newAccount.accountName.trim() || !newAccount.iban.trim()) {
       return;
     }
 
@@ -392,7 +392,7 @@ export const AllTransactionsPage = () => {
                        newAccount.bankType === 'garanti' ? 'Garanti Bankası' : 
                        newAccount.bankType === 'akbank' ? 'Akbank' : 'TEB';
       
-      await createBankAccount(user.id, {
+      await createBankAccount(user.uid, {
         bankName,
         accountName: newAccount.accountName,
         iban: newAccount.iban,
@@ -400,7 +400,7 @@ export const AllTransactionsPage = () => {
       });
 
       // Hesapları yeniden yükle
-      const accounts = await getBankAccounts(user.id);
+      const accounts = await getBankAccounts(user.uid);
       setBankAccounts(accounts);
 
       setShowAddAccountModal(false);
@@ -416,8 +416,11 @@ export const AllTransactionsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner />
+      <div className="page-container bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">İşlemler yükleniyor...</p>
+        </div>
       </div>
     );
   }
@@ -427,73 +430,48 @@ export const AllTransactionsPage = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10 border-b">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+      <div className="bank-gradient-blue px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <Wallet className="w-6 h-6 text-blue-600" />
-              <h1 className="text-xl font-semibold text-gray-900">Hesaplarım & İşlemler</h1>
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <Wallet className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Hesaplarım & İşlemler</h1>
+                <p className="text-white/60 text-xs">{allTransactions.length} işlem</p>
+              </div>
             </div>
             <button
               onClick={() => setShowAddAccountModal(true)}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-lg w-full sm:w-auto justify-center"
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Hesap Ekle</span>
+              <Plus className="w-5 h-5 text-white" />
             </button>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <ArrowUpRight className="w-4 h-4 text-emerald-300 mx-auto mb-1" />
+              <p className="text-white font-bold text-xs">{totalIncome.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Gelir</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <ArrowDownRight className="w-4 h-4 text-red-300 mx-auto mb-1" />
+              <p className="text-white font-bold text-xs">{totalExpense.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Gider</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <Wallet className="w-4 h-4 text-white/70 mx-auto mb-1" />
+              <p className={`font-bold text-xs ${totalIncome - totalExpense >= 0 ? 'text-emerald-300' : 'text-red-300'}`}>{(totalIncome - totalExpense).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Net</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4 space-y-6">
-        
-        {/* İstatistikler */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <ArrowUpRight className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Toplam Gelir</p>
-                <p className="text-xl sm:text-2xl font-bold text-green-600">
-                  {totalIncome.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-red-100 rounded-lg">
-                <ArrowDownRight className="h-6 w-6 text-red-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Toplam Gider</p>
-                <p className="text-xl sm:text-2xl font-bold text-red-600">
-                  {totalExpense.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Wallet className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Net Durum</p>
-                <p className={`text-xl sm:text-2xl font-bold ${totalIncome - totalExpense >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {(totalIncome - totalExpense).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="page-content -mt-5 space-y-4">
 
         {/* Hesaplarım Şeridi */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">

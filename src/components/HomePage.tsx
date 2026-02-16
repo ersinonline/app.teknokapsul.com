@@ -39,11 +39,11 @@ export const HomePage = () => {
         setLoading(true);
         
         const [userExpenses, userIncomes, userSubscriptions, userCreditCards, userCashAdvanceAccounts] = await Promise.all([
-          getUserExpenses(user.id, currentYear, currentMonth),
-          getUserIncomes(user.id, currentYear, currentMonth),
-          getUserSubscriptions(user.id),
-          getCreditCards(user.id),
-          getCashAdvanceAccounts(user.id)
+          getUserExpenses(user.uid, currentYear, currentMonth),
+          getUserIncomes(user.uid, currentYear, currentMonth),
+          getUserSubscriptions(user.uid),
+          getCreditCards(user.uid),
+          getCashAdvanceAccounts(user.uid)
         ]);
         
         setExpenses(userExpenses);
@@ -53,7 +53,7 @@ export const HomePage = () => {
         setCashAdvanceAccounts(userCashAdvanceAccounts);
         
         // Portföy verilerini yükle
-        const items = await portfolioService.getPortfolioItems(user.id);
+        const items = await portfolioService.getPortfolioItems(user.uid);
         setPortfolioItems(items);
         
         const consolidatedItems = portfolioService.consolidatePortfolioBySymbol(items);
@@ -222,7 +222,7 @@ export const HomePage = () => {
         <div className="w-full">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-3 tracking-tight">
-              Hoş Geldiniz, <span className="text-[#ffb700]">{user?.firstName || 'Kullanıcı'}</span>
+              Hoş Geldiniz, <span className="text-[#ffb700]">{user?.displayName?.split(' ')[0] || 'Kullanıcı'}</span>
             </h1>
             <p className="text-white/90 text-sm sm:text-base leading-relaxed">
               TeknoKapsül ekosisteminde finansal durumunuzu takip edin ve hizmetlerimizi keşfedin

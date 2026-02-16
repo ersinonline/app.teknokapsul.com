@@ -42,7 +42,7 @@ const MyOrdersPage: React.FC = () => {
     
     try {
       setLoading(true);
-      const userOrders = await getUserOrders(user.id);
+      const userOrders = await getUserOrders(user.uid);
       const sortedOrders = userOrders.sort((a, b) => {
         const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt);
         const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt);
@@ -121,34 +121,41 @@ const MyOrdersPage: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Siparişlerinizi görüntülemek için giriş yapmalısınız.</p>
-        </div>
+      <div className="page-container bg-background flex items-center justify-center">
+        <p className="text-muted-foreground text-sm">Siparişlerinizi görüntülemek için giriş yapmalısınız.</p>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="page-container bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ffb700] mx-auto mb-4"></div>
-          <p className="text-gray-600">Siparişleriniz yükleniyor...</p>
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Siparişler yükleniyor...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Siparişlerim</h1>
-          <p className="text-gray-600">Tüm siparişlerinizi buradan takip edebilirsiniz</p>
-          <div className="w-20 h-1 bg-[#ffb700] rounded-full mt-4"></div>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <Package className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">Siparişlerim</h1>
+              <p className="text-white/60 text-xs">{orders.length} sipariş</p>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="page-content -mt-5 space-y-3 mb-6">
 
         {orders.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-12 text-center">

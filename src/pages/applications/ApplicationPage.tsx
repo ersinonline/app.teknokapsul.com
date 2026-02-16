@@ -90,10 +90,10 @@ export const ApplicationPage: React.FC = () => {
         notes: formData.notes || ''
       };
 
-      const applicationId = await applicationService.createApplication(user.id, applicationData);
+      const applicationId = await applicationService.createApplication(user.uid, applicationData);
       
       // Get the created application to show the application number
-      const applications = await applicationService.getUserApplications(user.id);
+      const applications = await applicationService.getUserApplications(user.uid);
       const createdApplication = applications.find(app => app.id === applicationId);
       
       // Navigate to teknohizmet page with application number and success message
@@ -113,12 +113,12 @@ export const ApplicationPage: React.FC = () => {
 
   if (!service) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="page-container bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Hizmet Bulunamadı</h2>
+          <h2 className="text-lg font-bold text-foreground mb-4">Hizmet Bulunamadı</h2>
           <button
             onClick={() => navigate('/teknohizmet')}
-            className="text-blue-600 hover:text-blue-800 font-medium"
+            className="text-primary text-sm font-medium"
           >
             TeknoHizmet Sayfasına Dön
           </button>
@@ -128,31 +128,26 @@ export const ApplicationPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate('/teknohizmet')}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Geri Dön
-          </button>
-          
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center mb-4">
-              <FileText className="h-8 w-8 text-blue-600 mr-3" />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{service.name}</h1>
-                <p className="text-gray-600">{service.category}</p>
-              </div>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient-green px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/teknohizmet')}
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center"
+            >
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+            <div>
+              <h1 className="text-xl font-bold text-white">{service.name}</h1>
+              <p className="text-white/60 text-xs">{service.category}</p>
             </div>
-            <p className="text-gray-700">
-              {service.name} hizmeti için başvuru formunu doldurun. Başvurunuz değerlendirildikten sonra size geri dönüş yapılacaktır.
-            </p>
           </div>
         </div>
+      </div>
+
+      <div className="page-content -mt-5 mb-6">
 
         {/* Application Form */}
         <div className="bg-white rounded-lg shadow-sm p-6">

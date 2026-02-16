@@ -108,74 +108,61 @@ const CreditCalculatorPage: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-4 py-3 flex items-center justify-between">
+      <div className="bank-gradient-blue px-4 pt-4 pb-10">
+        <div className="page-content">
           <div className="flex items-center gap-3">
-            <Calculator className="w-6 h-6 text-teal-600" />
-            <h1 className="text-lg font-semibold text-gray-900">Kredi Hesaplama</h1>
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <Calculator className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">Kredi Karşılaştırma</h1>
+              <p className="text-white/60 text-xs">En uygun krediyi bulun</p>
+            </div>
           </div>
-          <button className="flex items-center gap-2 px-3 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
-            <Plus className="w-4 h-4" />
-            <span className="text-sm font-medium">Ekle</span>
-          </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="p-4">
+      <div className="page-content -mt-5 space-y-4 mb-6">
         {/* Notification */}
         {notification && (
-          <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+          <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg text-sm ${
             notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
           }`}>
             {notification.message}
           </div>
         )}
-        
-        <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <br></br>
-            <br></br>
-            <h1 className="text-3xl font-bold text-gray-900">Kredi Karşılaştırma Platformu</h1>
-          </div>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            En uygun kredi tekliflerini karşılaştırın, faiz oranlarını analiz edin ve size en uygun krediyi bulun.
-          </p>
-        </div>
 
         {/* Tabs */}
-        <div className="w-full">
-          <div className="grid w-full grid-cols-3 bg-gray-100 rounded-lg p-1 mb-6">
+        <div className="bank-card p-1.5">
+          <div className="grid w-full grid-cols-3 gap-1">
             <button
               onClick={() => setActiveTab('ihtiyac')}
-              className={`flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                activeTab === 'ihtiyac' ? 'bg-white text-yellow-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-medium transition-colors ${
+                activeTab === 'ihtiyac' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-muted'
               }`}
             >
-              <PiggyBank className="w-4 h-4" />
-              İhtiyaç Kredisi
+              <PiggyBank className="w-3.5 h-3.5" />
+              İhtiyaç
             </button>
             <button
               onClick={() => setActiveTab('konut')}
-              className={`flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                activeTab === 'konut' ? 'bg-white text-yellow-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-medium transition-colors ${
+                activeTab === 'konut' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-muted'
               }`}
             >
-              <Home className="w-4 h-4" />
-              Konut Kredisi
+              <Home className="w-3.5 h-3.5" />
+              Konut
             </button>
             <button
               onClick={() => setActiveTab('tasit')}
-              className={`flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                activeTab === 'tasit' ? 'bg-white text-yellow-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-medium transition-colors ${
+                activeTab === 'tasit' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-muted'
               }`}
             >
-              <Car className="w-4 h-4" />
-              Taşıt Kredisi
+              <Car className="w-3.5 h-3.5" />
+              Taşıt
             </button>
           </div>
 
@@ -468,7 +455,6 @@ const CreditCalculatorPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
         </div>
       </div>
     </div>

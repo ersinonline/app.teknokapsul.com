@@ -28,7 +28,7 @@ export const IncomePage: React.FC = () => {
     
     try {
       setLoading(true);
-      const userIncomes = await getUserIncomes(user.id, currentYear, currentMonth);
+      const userIncomes = await getUserIncomes(user.uid, currentYear, currentMonth);
       setIncomes(userIncomes);
     } catch (error) {
       console.error('Error loading incomes:', error);
@@ -160,7 +160,7 @@ export const IncomePage: React.FC = () => {
             </div>
             <IncomeForm onSubmit={async (data) => {
               try {
-                await addIncome(user!.id, data);
+                await addIncome(user!.uid, data);
                 handleFormSubmit();
               } catch (error) {
                 console.error('Error adding income:', error);

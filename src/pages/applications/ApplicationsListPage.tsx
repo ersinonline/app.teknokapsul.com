@@ -13,14 +13,14 @@ const ApplicationsListPage: React.FC = () => {
 
   useEffect(() => {
     const fetchApplications = async () => {
-      if (!user?.id) {
+      if (!user?.uid) {
         setApplications([]);
         setLoading(false);
         return;
       }
 
       try {
-        const applicationData = await applicationService.getUserApplications(user.id);
+        const applicationData = await applicationService.getUserApplications(user.uid);
         setApplications(applicationData);
       } catch (error) {
         console.error('Error fetching applications:', error);
@@ -80,26 +80,33 @@ const ApplicationsListPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-gray-50 flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ffb700]"></div>
+      <div className="page-container bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Başvurular yükleniyor...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-10 border-b">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
           <div className="flex items-center gap-3">
-            <FileText className="w-6 h-6" style={{ color: '#ffb700' }} />
-            <h1 className="text-xl font-semibold text-gray-900">Başvurularım</h1>
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">Başvurularım</h1>
+              <p className="text-white/60 text-xs">{applications.length} başvuru</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Applications List */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
+      <div className="page-content -mt-5 space-y-3 mb-6">
 
         
         {applications.length === 0 ? (

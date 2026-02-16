@@ -110,7 +110,7 @@ export const TabletNavigation: React.FC<TabletNavigationProps> = ({ className = 
 
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600 hidden md:block truncate max-w-32">
-              {user?.fullName || user?.primaryEmailAddress?.emailAddress}
+              {user?.displayName || user?.email}
             </span>
             <button
               onClick={handleSignOut}

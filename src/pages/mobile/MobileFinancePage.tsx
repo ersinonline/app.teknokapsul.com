@@ -26,8 +26,8 @@ export const MobileFinancePage: React.FC = () => {
         
         // Fetch current month's income and expenses
         const [incomes, expenses] = await Promise.all([
-          getUserIncomes(user.id),
-          getUserExpenses(user.id)
+          getUserIncomes(user.uid),
+          getUserExpenses(user.uid)
         ]);
         
         // Filter for current month
@@ -151,76 +151,56 @@ export const MobileFinancePage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-transparent rounded-b-lg">
-        <div className="px-4 py-8">
-          <h1 className="text-3xl font-bold text-gray-900">💰 TeknoFinans</h1>
-          <p className="text-gray-600 mt-2 text-lg">Finansal araçlarınız</p>
-        </div>
-      </div>
-
-      {/* Finance Cards */}
-      <div className="px-4 py-6 -mt-4">
-        <div className="grid grid-cols-1 gap-4">
-          {financeItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.id}
-                onClick={() => navigate(item.path)}
-                className="bg-white rounded-lg p-5 border border-gray-200 active:scale-95 transition-all duration-300 cursor-pointer"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className={`w-12 h-12 ${item.bgColor} rounded-lg flex items-center justify-center`}>
-                    <Icon className={`w-6 h-6 ${item.textColor}`} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-bold text-gray-900">{item.title}</h3>
-                    <p className="text-gray-500 text-sm mt-1">{item.description}</p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="px-4 py-2">
-        <div className="bg-orange-50 rounded-lg p-6 border border-orange-200">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-2xl">📊</span>
-            <h3 className="text-xl font-bold text-gray-900">Bu Ay Özeti</h3>
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">TeknoFinans</h1>
+              <p className="text-white/60 text-xs">Finansal araçlarınız</p>
+            </div>
           </div>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-               <span className="text-gray-600">Toplam Gelir</span>
-               <span className="text-lg font-bold text-green-600">
-                 {loading ? '...' : `₺${totalIncome.toLocaleString('tr-TR')}`}
-               </span>
-             </div>
-             <div className="flex justify-between items-center">
-               <span className="text-gray-600">Toplam Gider</span>
-               <span className="text-lg font-bold text-red-600">
-                 {loading ? '...' : `₺${totalExpense.toLocaleString('tr-TR')}`}
-               </span>
-             </div>
-             <div className="border-t border-orange-200 pt-3">
-               <div className="flex justify-between items-center">
-                 <span className="text-gray-700 font-medium">Net Durum</span>
-                 <span className={`text-xl font-bold ${(totalIncome - totalExpense) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                   {loading ? '...' : `₺${(totalIncome - totalExpense).toLocaleString('tr-TR')}`}
-                 </span>
-               </div>
-             </div>
-           </div>
-           {!loading && totalIncome === 0 && totalExpense === 0 && (
-             <div className="mt-4 text-center">
-               <p className="text-xs text-gray-500">Bu ay henüz gelir veya gider kaydı bulunmuyor</p>
-             </div>
-           )}
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-white/10 rounded-xl p-2.5 text-center">
+              <p className="text-emerald-300 font-bold text-xs">{loading ? '...' : `₺${totalIncome.toLocaleString('tr-TR')}`}</p>
+              <p className="text-white/50 text-[10px]">Gelir</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-2.5 text-center">
+              <p className="text-red-300 font-bold text-xs">{loading ? '...' : `₺${totalExpense.toLocaleString('tr-TR')}`}</p>
+              <p className="text-white/50 text-[10px]">Gider</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-2.5 text-center">
+              <p className={`font-bold text-xs ${(totalIncome - totalExpense) >= 0 ? 'text-emerald-300' : 'text-red-300'}`}>{loading ? '...' : `₺${(totalIncome - totalExpense).toLocaleString('tr-TR')}`}</p>
+              <p className="text-white/50 text-[10px]">Net</p>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="page-content -mt-5 space-y-3 mb-6">
+        {financeItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              onClick={() => navigate(item.path)}
+              className="bank-card p-4 w-full flex items-center gap-3 hover:shadow-md transition-shadow text-left"
+            >
+              <div className={`w-10 h-10 rounded-xl ${item.bgColor} flex items-center justify-center flex-shrink-0`}>
+                <Icon className={`w-5 h-5 ${item.textColor}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-foreground">{item.title}</h3>
+                <p className="text-[11px] text-muted-foreground truncate">{item.description}</p>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

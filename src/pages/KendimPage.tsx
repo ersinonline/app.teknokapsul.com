@@ -22,14 +22,14 @@ const KendimPage: React.FC = () => {
 
   useEffect(() => {
     const fetchApplications = async () => {
-      if (!user?.id) {
+      if (!user?.uid) {
         setApplications([]);
         setApplicationsLoading(false);
         return;
       }
 
       try {
-        const applicationData = await applicationService.getUserApplications(user.id);
+        const applicationData = await applicationService.getUserApplications(user.uid);
         setApplications(applicationData);
       } catch (error) {
         console.error('Error fetching applications data:', error);

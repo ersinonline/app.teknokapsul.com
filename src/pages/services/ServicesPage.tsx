@@ -25,7 +25,7 @@ const Services = () => {
     const fetchApplications = async () => {
       if (user) {
         try {
-          const userApplications = await applicationService.getUserApplications(user.id);
+          const userApplications = await applicationService.getUserApplications(user.uid);
           setApplications(userApplications);
         } catch (error) {
           console.error('Error fetching applications:', error);

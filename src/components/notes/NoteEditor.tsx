@@ -49,16 +49,16 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onClose, onSave })
           title,
           content,
           tags,
-        }, user.id);
+        }, user.uid);
       } else {
         // Add new note
         await addNote({
-          userId: user.id,
+          userId: user.uid,
           title,
           content,
           tags,
           createdAt: new Date().toISOString(),
-        }, user.id);
+        }, user.uid);
       }
       onSave();
       onClose();

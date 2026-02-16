@@ -30,7 +30,7 @@ export const SupportTicketList: React.FC<SupportTicketListProps> = ({ onTicketSe
     
     try {
       setLoading(true);
-      const userTickets = await getUserSupportTickets(user.primaryEmailAddress?.emailAddress || '');
+      const userTickets = await getUserSupportTickets(user.email || '');
       setTickets(userTickets);
     } catch (err) {
       console.error('Destek talepleri yüklenirken hata:', err);

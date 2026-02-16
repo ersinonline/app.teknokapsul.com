@@ -1,361 +1,259 @@
-import React, { useState } from 'react';
-import { CreditCard } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShoppingBag, CreditCard, Package, CheckCircle, Search, Tag, Loader } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-// import { createPremiumCheckoutSession } from '../../services/stripe.service';
-
-interface CashbackOffer {
-  id: string;
-  store: string;
-  logo: string;
-  cashbackRate: number;
-  category: string;
-  description: string;
-  minSpend: number;
-  maxCashback: number;
-  validUntil: string;
-  featured: boolean;
-}
-
-interface Transaction {
-  id: string;
-  store: string;
-  amount: number;
-  cashback: number;
-  date: string;
-  status: 'pending' | 'approved' | 'paid';
-}
-
-interface UserStats {
-  totalCashback: number;
-  pendingCashback: number;
-  totalTransactions: number;
-  favoriteCategory: string;
-}
+import { getActiveDigitalCodes, createDigitalOrder, getUserDigitalOrders, DigitalCode, DigitalOrder } from '../../services/digitalCode.service';
+import { simulatePayment } from '../../services/iyzico.service';
 
 const EarnAsYouSpendPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [products, setProducts] = useState<DigitalCode[]>([]);
+  const [orders, setOrders] = useState<DigitalOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [buyingId, setBuyingId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [loading, setLoading] = useState<string | null>(null);
-  const [userStats] = useState<UserStats>({
-    totalCashback: 2450.75,
-    pendingCashback: 125.50,
-    totalTransactions: 48,
-    favoriteCategory: 'Teknoloji'
-  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [lastOrder, setLastOrder] = useState<{ productName: string; price: number; paymentId: string } | null>(null);
 
-  const cashbackOffers: CashbackOffer[] = [
-    {
-      id: '1',
-      store: 'TechnoMarket',
-      logo: '💻',
-      cashbackRate: 8,
-      category: 'Teknoloji',
-      description: 'Elektronik ürünlerde %8 cashback',
-      minSpend: 500,
-      maxCashback: 200,
-      validUntil: '2024-12-31',
-      featured: true
-    },
-    {
-      id: '2',
-      store: 'ModaPlus',
-      logo: '👗',
-      cashbackRate: 12,
-      category: 'Moda',
-      description: 'Giyim ve aksesuar alışverişlerinde %12 cashback',
-      minSpend: 200,
-      maxCashback: 150,
-      validUntil: '2024-11-30',
-      featured: true
-    },
-    {
-      id: '3',
-      store: 'YemekSepeti',
-      logo: '🍕',
-      cashbackRate: 5,
-      category: 'Yemek',
-      description: 'Online yemek siparişlerinde %5 cashback',
-      minSpend: 50,
-      maxCashback: 25,
-      validUntil: '2024-12-15',
-      featured: false
-    },
-    {
-      id: '4',
-      store: 'KitapDünyası',
-      logo: '📚',
-      cashbackRate: 15,
-      category: 'Eğitim',
-      description: 'Kitap ve eğitim materyallerinde %15 cashback',
-      minSpend: 100,
-      maxCashback: 75,
-      validUntil: '2024-12-20',
-      featured: false
-    },
-    {
-      id: '5',
-      store: 'SporMax',
-      logo: '⚽',
-      cashbackRate: 10,
-      category: 'Spor',
-      description: 'Spor malzemeleri ve fitness ekipmanlarında %10 cashback',
-      minSpend: 300,
-      maxCashback: 100,
-      validUntil: '2024-11-25',
-      featured: true
-    },
-    {
-      id: '6',
-      store: 'EvDekor',
-      logo: '🏠',
-      cashbackRate: 7,
-      category: 'Ev & Yaşam',
-      description: 'Ev dekorasyonu ve mobilya alışverişlerinde %7 cashback',
-      minSpend: 400,
-      maxCashback: 180,
-      validUntil: '2024-12-10',
-      featured: false
-    }
-  ];
+  useEffect(() => {
+    loadProducts();
+    if (user) loadOrders();
+  }, [user]);
 
-  const recentTransactions: Transaction[] = [
-    {
-      id: '1',
-      store: 'TechnoMarket',
-      amount: 1250,
-      cashback: 100,
-      date: '2024-01-15',
-      status: 'approved'
-    },
-    {
-      id: '2',
-      store: 'ModaPlus',
-      amount: 450,
-      cashback: 54,
-      date: '2024-01-12',
-      status: 'pending'
-    },
-    {
-      id: '3',
-      store: 'YemekSepeti',
-      amount: 85,
-      cashback: 4.25,
-      date: '2024-01-10',
-      status: 'paid'
-    }
-  ];
-
-  const categories = [
-    { id: 'all', name: 'Tümü', icon: '🛍️' },
-    { id: 'Teknoloji', name: 'Teknoloji', icon: '💻' },
-    { id: 'Moda', name: 'Moda', icon: '👗' },
-    { id: 'Yemek', name: 'Yemek', icon: '🍕' },
-    { id: 'Eğitim', name: 'Eğitim', icon: '📚' },
-    { id: 'Spor', name: 'Spor', icon: '⚽' },
-    { id: 'Ev & Yaşam', name: 'Ev & Yaşam', icon: '🏠' }
-  ];
-
-  const filteredOffers = cashbackOffers.filter(offer => 
-    selectedCategory === 'all' || offer.category === selectedCategory
-  );
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved': return 'text-green-600 bg-green-50';
-      case 'pending': return 'text-yellow-600 bg-yellow-50';
-      case 'paid': return 'text-blue-600 bg-blue-50';
-      default: return 'text-gray-600 bg-gray-50';
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await getActiveDigitalCodes();
+      setProducts(data);
+    } catch (error) {
+      console.error('Ürünler yüklenirken hata:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'approved': return 'Onaylandı';
-      case 'pending': return 'Beklemede';
-      case 'paid': return 'Ödendi';
-      default: return 'Bilinmiyor';
+  const loadOrders = async () => {
+    if (!user) return;
+    try {
+      const data = await getUserDigitalOrders(user.uid);
+      setOrders(data);
+    } catch (error) {
+      console.error('Siparişler yüklenirken hata:', error);
     }
   };
 
-  const truncateDescription = (description: string, maxLength: number = 50) => {
-    if (description.length <= maxLength) return description;
-    return description.substring(0, maxLength).trim() + '...';
-  };
-
-  const handleStartShopping = async (offer: CashbackOffer) => {
+  const handleBuyNow = async (product: DigitalCode) => {
     if (!user) {
       navigate('/login');
       return;
     }
 
-    // Sepet tutarını al (minimum harcama tutarı)
-    const cartAmount = offer.minSpend * 100; // Convert to cents for Stripe
-
-    setLoading(offer.id);
+    setBuyingId(product.id!);
     try {
-      // Stripe checkout session oluştur
-      const baseUrl = window.location.origin;
-      const successUrl = `${baseUrl}/other/earn-success?offer_id=${offer.id}`;
-      const cancelUrl = `${baseUrl}/other/earn-as-you-spend`;
+      // İyzico ile ödeme (şimdilik simüle)
+      const result = await simulatePayment(user.uid, product.id!, product.name, product.price);
 
-      // const session = await createPremiumCheckoutSession({
-      //   productId: 'cashback_offer',
-      //   userId: user.id,
-      //   customerEmail: user.email || '',
-      //   successUrl,
-      //   cancelUrl,
-      //   amount: cartAmount
-      // });
+      if (result.success) {
+        // Sipariş oluştur
+        await createDigitalOrder({
+          userId: user.uid,
+          productId: product.id!,
+          productName: product.name,
+          productCategory: product.category,
+          price: product.price,
+          status: 'completed',
+          paymentId: result.paymentId,
+          paymentMethod: 'iyzico'
+        });
 
-      // Stripe checkout sayfasına yönlendir
-      // if (session.url) {
-      //   window.location.href = session.url;
-      // }
+        setLastOrder({ productName: product.name, price: product.price, paymentId: result.paymentId });
+        setShowSuccessModal(true);
+        await loadOrders();
+      }
     } catch (error) {
-      console.error('Ödeme işlemi başlatılırken hata:', error);
-      alert('Ödeme işlemi başlatılırken bir hata oluştu. Lütfen tekrar deneyin.');
+      console.error('Satın alma hatası:', error);
+      alert('Ödeme işlemi sırasında bir hata oluştu.');
     } finally {
-      setLoading(null);
+      setBuyingId(null);
     }
   };
 
+  const categories = ['all', ...new Set(products.map(p => p.category))];
+
+  const filteredProducts = products.filter(p => {
+    const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          p.category.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const getOrderStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'bg-green-100 text-green-700';
+      case 'pending': return 'bg-yellow-100 text-yellow-700';
+      case 'failed': return 'bg-red-100 text-red-700';
+      case 'refunded': return 'bg-blue-100 text-blue-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getOrderStatusText = (status: string) => {
+    switch (status) {
+      case 'completed': return 'Tamamlandı';
+      case 'pending': return 'Beklemede';
+      case 'failed': return 'Başarısız';
+      case 'refunded': return 'İade Edildi';
+      default: return status;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="page-container bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Ürünler yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black">
-        <div className="w-full px-4 sm:px-6 py-6 sm:py-8">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-0">
-            <div className="w-full lg:w-auto">
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2">Harcadıkça Kazan</h1>
-              <p className="text-yellow-900">Alışverişlerinizden cashback kazanın!</p>
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <ShoppingBag className="w-5 h-5 text-white" />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full lg:w-auto">
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 sm:p-4 text-center shadow-sm">
-                <div className="text-xl sm:text-2xl font-bold text-gray-900">{userStats.totalCashback.toLocaleString()} ₺</div>
-                <p className="text-xs sm:text-sm text-gray-700">Toplam Kazanç</p>
-              </div>
-              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 sm:p-4 text-center shadow-sm">
-                <div className="text-xl sm:text-2xl font-bold text-gray-900">{userStats.pendingCashback.toLocaleString()} ₺</div>
-                <p className="text-xs sm:text-sm text-gray-700">Bekleyen Cashback</p>
-              </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">Dijital Kodlar</h1>
+              <p className="text-white/60 text-xs">Anında dijital ürün satın alın</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <p className="text-white font-bold text-sm">{products.length}</p>
+              <p className="text-white/50 text-[10px]">Ürün</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <p className="text-white font-bold text-sm">{orders.length}</p>
+              <p className="text-white/50 text-[10px]">Siparişim</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="w-full px-4 sm:px-6 py-4 sm:py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Kategoriler */}
-            <div className="bg-white rounded-xl p-3 sm:p-4 shadow-sm border">
-              <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Kategoriler</h3>
-              <div className="space-y-1 sm:space-y-2">
-                {categories.map(category => (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-lg text-left transition-colors ${
-                      selectedCategory === category.id
-                        ? 'bg-yellow-50 text-yellow-800 border border-yellow-200 shadow-sm'
-                        : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <span className="text-base sm:text-lg">{category.icon}</span>
-                    <span className="text-xs sm:text-sm font-medium">{category.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* İstatistikler */}
-            <div className="bg-white rounded-xl p-3 sm:p-4 shadow-sm border">
-              <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">İstatistikler</h3>
-              <div className="space-y-2 sm:space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs sm:text-sm text-gray-600">Toplam İşlem</span>
-                  <span className="font-semibold text-sm sm:text-base">{userStats.totalTransactions}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs sm:text-sm text-gray-600">Favori Kategori</span>
-                  <span className="font-semibold text-yellow-600 text-sm sm:text-base">{userStats.favoriteCategory}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs sm:text-sm text-gray-600">Ortalama Cashback</span>
-                  <span className="font-semibold text-sm sm:text-base">{(userStats.totalCashback / userStats.totalTransactions).toFixed(1)} ₺</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Son İşlemler */}
-            <div className="bg-white rounded-xl p-3 sm:p-4 shadow-sm border">
-              <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Son İşlemler</h3>
-              <div className="space-y-2 sm:space-y-3">
-                {recentTransactions.map(transaction => (
-                  <div key={transaction.id} className="p-2 sm:p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center justify-between mb-1 sm:mb-2">
-                      <span className="text-xs sm:text-sm font-medium truncate">{transaction.store}</span>
-                      <span className={`text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${getStatusColor(transaction.status)}`}>
-                        {getStatusText(transaction.status)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-600">{transaction.amount} ₺</span>
-                      <span className="text-xs font-medium text-yellow-600">+{transaction.cashback} ₺</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+      <div className="page-content -mt-5 space-y-4 mb-6">
+        {/* Tabs */}
+        <div className="bank-card p-1.5">
+          <div className="grid grid-cols-2 gap-1">
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`py-2.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                activeTab === 'products' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              Ürünler
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`py-2.5 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                activeTab === 'orders' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              <Package className="w-3.5 h-3.5" />
+              Siparişlerim ({orders.length})
+            </button>
           </div>
+        </div>
 
-          {/* Ana İçerik */}
-          <div className="lg:col-span-3">
-            {/* Öne Çıkan Teklifler */}
-            <div className="mb-6 sm:mb-8">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Öne Çıkan Teklifler</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {cashbackOffers.filter(offer => offer.featured).map(offer => (
-                  <div key={offer.id} className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="p-4 sm:p-6">
-                      <div className="flex items-center justify-between mb-3 sm:mb-4">
-                        <div className="text-3xl sm:text-4xl">{offer.logo}</div>
-                        <div className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs sm:text-sm font-medium">
-                          %{offer.cashbackRate} Cashback
+        {activeTab === 'products' ? (
+          <>
+            {/* Search */}
+            <div className="bank-card p-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Ürün ara..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-muted rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            {/* Categories */}
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    selectedCategory === cat
+                      ? 'bg-primary text-white'
+                      : 'bg-card border border-border text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  {cat === 'all' ? 'Tümü' : cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Products Grid */}
+            {filteredProducts.length === 0 ? (
+              <div className="bank-card p-8 text-center">
+                <ShoppingBag className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-muted-foreground text-sm">
+                  {searchTerm ? 'Aramanızla eşleşen ürün bulunamadı.' : 'Henüz ürün eklenmemiş.'}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {filteredProducts.map(product => (
+                  <div key={product.id} className="bank-card overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Tag className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                            <span className="text-[10px] text-primary font-medium uppercase tracking-wide">{product.category}</span>
+                          </div>
+                          <h3 className="font-semibold text-foreground text-sm leading-tight">{product.name}</h3>
+                          {product.description && (
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.description}</p>
+                          )}
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-3">
+                          <p className="text-lg font-bold text-primary">{product.price.toLocaleString('tr-TR')} ₺</p>
+                          {product.stock > 0 && (
+                            <p className="text-[10px] text-green-600">Stokta: {product.stock}</p>
+                          )}
                         </div>
                       </div>
-                      
-                      <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">{offer.store}</h3>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">{truncateDescription(offer.description, 40)}</p>
-                      
-                      <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
-                        <div className="flex items-center justify-between text-xs sm:text-sm">
-                          <span className="text-gray-600">Min. Harcama:</span>
-                          <span className="font-medium">{offer.minSpend} ₺</span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs sm:text-sm">
-                          <span className="text-gray-600">Max. Cashback:</span>
-                          <span className="font-medium">{offer.maxCashback} ₺</span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs sm:text-sm">
-                          <span className="text-gray-600">Geçerlilik:</span>
-                          <span className="font-medium">{new Date(offer.validUntil).toLocaleDateString('tr-TR')}</span>
-                        </div>
-                      </div>
-                      
-                      <button 
-                        onClick={() => handleStartShopping(offer)}
-                        disabled={loading === offer.id}
-                        className="w-full py-2.5 sm:py-3 bg-yellow-500 text-black rounded-lg hover:bg-yellow-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm sm:text-base shadow-sm"
+
+                      <button
+                        onClick={() => handleBuyNow(product)}
+                        disabled={buyingId === product.id || product.stock <= 0}
+                        className="w-full py-2.5 bg-primary text-white rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {loading === offer.id ? (
-                          <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                        {buyingId === product.id ? (
+                          <>
+                            <Loader className="w-3.5 h-3.5 animate-spin" />
+                            Ödeme yapılıyor...
+                          </>
+                        ) : product.stock <= 0 ? (
+                          'Stokta Yok'
                         ) : (
                           <>
-                            <CreditCard className="w-3 h-3 sm:w-4 sm:h-4" />
-                            Stripe ile Öde
+                            <CreditCard className="w-3.5 h-3.5" />
+                            Hemen Satın Al
                           </>
                         )}
                       </button>
@@ -363,75 +261,88 @@ const EarnAsYouSpendPage: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Tüm Teklifler */}
-            <div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Tüm Cashback Teklifleri</h2>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs sm:text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-full">{filteredOffers.length} teklif</span>
-                </div>
+            )}
+          </>
+        ) : (
+          /* Orders Tab */
+          <>
+            {orders.length === 0 ? (
+              <div className="bank-card p-8 text-center">
+                <Package className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-muted-foreground text-sm mb-3">Henüz siparişiniz yok.</p>
+                <button
+                  onClick={() => setActiveTab('products')}
+                  className="px-4 py-2 bg-primary text-white rounded-xl text-xs font-medium"
+                >
+                  Ürünlere Göz At
+                </button>
               </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                {filteredOffers.map(offer => (
-                  <div key={offer.id} className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="p-4 sm:p-6">
-                      <div className="flex items-center justify-between mb-3 sm:mb-4">
-                        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                          <div className="text-2xl sm:text-3xl flex-shrink-0">{offer.logo}</div>
-                          <div className="min-w-0 flex-1">
-                            <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{offer.store}</h3>
-                            <p className="text-xs sm:text-sm text-gray-600 truncate">{offer.category}</p>
-                          </div>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <div className="text-xl sm:text-2xl font-bold text-yellow-600">%{offer.cashbackRate}</div>
-                          <p className="text-xs text-gray-500">cashback</p>
-                        </div>
+            ) : (
+              <div className="space-y-3">
+                {orders.map(order => (
+                  <div key={order.id} className="bank-card p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-foreground text-sm">{order.productName}</h4>
+                        <p className="text-xs text-muted-foreground">{order.productCategory}</p>
                       </div>
-                      
-                      <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">{truncateDescription(offer.description, 60)}</p>
-                      
-                      <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-3 sm:mb-4">
-                        <div className="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-100">
-                          <div className="text-xs sm:text-sm font-medium text-gray-900">{offer.minSpend} ₺</div>
-                          <div className="text-xs text-gray-500">Min. Harcama</div>
-                        </div>
-                        <div className="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-100">
-                          <div className="text-xs sm:text-sm font-medium text-gray-900">{offer.maxCashback} ₺</div>
-                          <div className="text-xs text-gray-500">Max. Cashback</div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-                        <span className="text-xs text-gray-500 order-2 sm:order-1">
-                          {new Date(offer.validUntil).toLocaleDateString('tr-TR')} tarihine kadar
-                        </span>
-                        <button 
-                          onClick={() => handleStartShopping(offer)}
-                          disabled={loading === offer.id}
-                          className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-yellow-500 text-black rounded-lg hover:bg-yellow-600 transition-colors text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 font-medium shadow-sm order-1 sm:order-2"
-                        >
-                          {loading === offer.id ? (
-                            <div className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <>
-                              <CreditCard className="w-3 h-3" />
-                              Öde
-                            </>
-                          )}
-                        </button>
-                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getOrderStatusColor(order.status)}`}>
+                        {getOrderStatusText(order.status)}
+                      </span>
                     </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">
+                        {order.createdAt?.seconds
+                          ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                          : 'Tarih yok'}
+                      </span>
+                      <span className="font-bold text-foreground">{order.price.toLocaleString('tr-TR')} ₺</span>
+                    </div>
+                    {order.code && (
+                      <div className="mt-2 p-2 bg-green-50 rounded-lg border border-green-200">
+                        <p className="text-[10px] text-green-600 font-medium mb-0.5">Dijital Kodunuz:</p>
+                        <p className="text-sm font-mono font-bold text-green-800 select-all">{order.code}</p>
+                      </div>
+                    )}
+                    {order.paymentId && (
+                      <p className="text-[10px] text-muted-foreground mt-1">Ödeme ID: {order.paymentId}</p>
+                    )}
                   </div>
                 ))}
               </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && lastOrder && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            </div>
+            <h3 className="text-lg font-bold text-foreground mb-2">Satın Alma Başarılı!</h3>
+            <p className="text-sm text-muted-foreground mb-1">{lastOrder.productName}</p>
+            <p className="text-xl font-bold text-primary mb-4">{lastOrder.price.toLocaleString('tr-TR')} ₺</p>
+            <p className="text-xs text-muted-foreground mb-4">Ödeme ID: {lastOrder.paymentId}</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setShowSuccessModal(false); setActiveTab('orders'); }}
+                className="flex-1 py-2.5 bg-primary text-white rounded-xl text-sm font-medium"
+              >
+                Siparişlerime Git
+              </button>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="flex-1 py-2.5 bg-muted text-foreground rounded-xl text-sm font-medium"
+              >
+                Devam Et
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

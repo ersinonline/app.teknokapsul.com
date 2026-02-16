@@ -32,7 +32,7 @@ class MobileAuthService {
     try {
       // Firebase custom token ile giriş yap
       const userCredential = await signInWithCustomToken(auth, token);
-      console.log('Mobil token ile giriş başarılı:', userCredential.user.id);
+      console.log('Mobil token ile giriş başarılı:', userCredential.user.uid);
       
       // Başarılı giriş sonrası token'ı localStorage'a kaydet
       const idToken = await userCredential.user.getIdToken();
@@ -191,7 +191,7 @@ class MobileAuthService {
         return null;
       }
       
-      console.log('👤 Mevcut kullanıcı UID:', user.id);
+      console.log('👤 Mevcut kullanıcı UID:', user.uid);
       console.log('📧 Mevcut kullanıcı email:', user.email);
       
       const idToken = await user.getIdToken();

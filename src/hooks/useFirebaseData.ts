@@ -78,7 +78,7 @@ export const useFirebaseData = <T extends DataType>(
   const { user } = useAuth();
 
   const fetchData = async () => {
-    if (!user?.id) {
+    if (!user?.uid) {
       setData([]);
       setLoading(false);
       return;
@@ -106,20 +106,20 @@ export const useFirebaseData = <T extends DataType>(
           case 'budget':
           case 'warranties':
           case 'subscriptions':
-            collectionRef = collection(db, 'teknokapsul', user.id, collectionName);
+            collectionRef = collection(db, 'teknokapsul', user.uid, collectionName);
             q = query(collectionRef);
             break;
           case 'expenses':
             collectionRef = collection(db, collectionName);
-            q = query(collectionRef, where('userId', '==', user.id));
+            q = query(collectionRef, where('userId', '==', user.uid));
             break;
           case 'payments':
-            collectionRef = collection(db, 'teknokapsul', user.id, collectionName);
+            collectionRef = collection(db, 'teknokapsul', user.uid, collectionName);
             q = query(collectionRef);
             break;
           default:
             collectionRef = collection(db, collectionName);
-            q = query(collectionRef, where('userId', '==', user.id));
+            q = query(collectionRef, where('userId', '==', user.uid));
             break;
         }
 

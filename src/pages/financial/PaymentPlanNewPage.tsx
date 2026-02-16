@@ -612,10 +612,10 @@ const PaymentPlanNewPage: React.FC = () => {
         additionalExpenses: additionalExpensesToSave,
         createdAt: new Date(),
         sharedWith: shareEmail.trim() || null,
-        userId: user.id
+        userId: user.uid
       };
       
-      const docRef = await addDoc(collection(db, `teknokapsul/${user.id}/paymentPlans`), planData);
+      const docRef = await addDoc(collection(db, `teknokapsul/${user.uid}/paymentPlans`), planData);
       
       const newPlan = {
         id: docRef.id,
@@ -689,30 +689,29 @@ const PaymentPlanNewPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="max-w-6xl mx-auto p-4 sm:p-6">
-        {/* Header */}
-        <div className="text-center mb-4 sm:mb-6 md:mb-8">
-          <div className="relative flex items-center justify-center mb-3">
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/payment-plan')}
-              className="absolute left-0 sm:left-2 p-2 text-gray-600 hover:text-gray-800 transition-colors touch-manipulation"
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center"
             >
-              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+              <ArrowLeft className="w-5 h-5 text-white" />
             </button>
-            <div className="flex items-center">
-              <div className="bg-[#ffb700] p-2 sm:p-3 rounded-full mr-2 sm:mr-3">
-                {planType === 'vehicle' ? <Car className="w-6 h-6 sm:w-8 sm:h-8 text-white" /> : <Home className="w-6 h-6 sm:w-8 sm:h-8 text-white" />}
+            <div className="flex items-center gap-2">
+              {planType === 'vehicle' ? <Car className="w-5 h-5 text-white" /> : <Home className="w-5 h-5 text-white" />}
+              <div>
+                <h1 className="text-xl font-bold text-white">Yeni Ödeme Planı</h1>
+                <p className="text-white/60 text-xs">{planType === 'vehicle' ? 'Araç' : 'Ev'} alımı için plan oluşturun</p>
               </div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
-                Yeni Ödeme Planı
-              </h1>
             </div>
           </div>
-          <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-2 sm:px-4">
-            {planType === 'vehicle' ? 'Araç alımınız' : 'Ev alımınız'} için detaylı ödeme planı oluşturun.
-          </p>
         </div>
+      </div>
+
+      <div className="page-content -mt-5 space-y-4 mb-6">
 
         {/* Step Indicator */}
         {renderStepIndicator()}

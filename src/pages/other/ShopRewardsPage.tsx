@@ -56,7 +56,7 @@ export const ShopRewardsPage: React.FC = () => {
     const loadUserPoints = async () => {
       if (user) {
         try {
-          const points = await getUserPoints(user.id);
+          const points = await getUserPoints(user.uid);
           setUserPoints(points);
         } catch (error) {
           console.error('Puanlar yüklenirken hata:', error);
@@ -67,7 +67,7 @@ export const ShopRewardsPage: React.FC = () => {
     const loadRecentOrders = async () => {
       if (user) {
         try {
-          const orders = await getUserOrders(user.id);
+          const orders = await getUserOrders(user.uid);
           // Son 3 siparişi al
           const sortedOrders = orders.sort((a, b) => {
             const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt);

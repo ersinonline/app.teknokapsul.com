@@ -81,7 +81,7 @@ export const BudgetPage = () => {
     icon: '📦'
   });
 
-  const userBudgetPlans = budgetPlans.filter(plan => plan.userId === user?.id);
+  const userBudgetPlans = budgetPlans.filter(plan => plan.userId === user?.uid);
   const currentPlan = userBudgetPlans.find(plan => 
     plan.month === currentDate.getMonth() + 1 && 
     plan.year === currentDate.getFullYear()
@@ -93,8 +93,8 @@ export const BudgetPage = () => {
       
       try {
         const [userExpenses, userIncomes] = await Promise.all([
-          getUserExpenses(user.id, currentDate.getFullYear(), currentDate.getMonth() + 1),
-          getUserIncomes(user.id, currentDate.getFullYear(), currentDate.getMonth() + 1)
+          getUserExpenses(user.uid, currentDate.getFullYear(), currentDate.getMonth() + 1),
+          getUserIncomes(user.uid, currentDate.getFullYear(), currentDate.getMonth() + 1)
         ]);
         
         setExpenses(userExpenses);
@@ -115,7 +115,7 @@ export const BudgetPage = () => {
       const planData = {
         ...formData,
         totalBudget: parseFloat(formData.totalBudget),
-        userId: user.id,
+        userId: user.uid,
         period: 'monthly',
         categories: DEFAULT_CATEGORIES.map((cat, index) => ({
           id: `cat_${Date.now()}_${index}`,
@@ -124,7 +124,7 @@ export const BudgetPage = () => {
           spentAmount: 0,
           color: CATEGORY_COLORS[index % CATEGORY_COLORS.length],
           icon: cat.icon,
-          userId: user.id,
+          userId: user.uid,
           month: formData.month,
           year: formData.year
         })),
@@ -132,7 +132,7 @@ export const BudgetPage = () => {
       };
 
       // Firebase'e kaydet
-      await addDoc(collection(db, 'teknokapsul', user.id, 'budget'), planData);
+      await addDoc(collection(db, 'teknokapsul', user.uid, 'budget'), planData);
       
       setIsModalOpen(false);
       setEditingPlan(null);
@@ -155,7 +155,7 @@ export const BudgetPage = () => {
         spentAmount: 0,
         color: CATEGORY_COLORS[Object.keys(selectedPlan.categories).length % CATEGORY_COLORS.length],
         icon: categoryFormData.icon,
-        userId: user!.id,
+        userId: user!.uid,
         month: selectedPlan.month,
         year: selectedPlan.year
       };

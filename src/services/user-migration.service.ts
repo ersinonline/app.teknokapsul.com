@@ -1,6 +1,6 @@
 import { doc, getDoc, setDoc, collection, getDocs, query, where, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { useUser } from '@clerk/clerk-react';
+
 
 export interface UserMigrationMapping {
   clerkUserId: string;
@@ -380,33 +380,27 @@ class UserMigrationService {
 export const userMigrationService = new UserMigrationService();
 
 /**
- * React Hook - Kullanıcı giriş yaptığında otomatik migration kontrolü yapar
+ * Kullanıcı giriş yaptığında otomatik migration kontrolü yapar
  */
-export const useAutoMigration = () => {
-  const { user, isLoaded } = useUser();
+export const checkAndMigrateUser = async (user: { uid: string; email: string | null; displayName: string | null }) => {
+  if (!user) return null;
 
-  const checkAndMigrate = async () => {
-    if (!isLoaded || !user) return null;
-
-    try {
-      const result = await userMigrationService.autoMigrateUser(
-        user.id,
-        user.primaryEmailAddress?.emailAddress || '',
-        user.fullName || undefined
-      );
-      
-      if (result.success) {
-        console.log('Migration başarılı:', result.message);
-      } else {
-        console.warn('Migration başarısız:', result.message);
-      }
-      
-      return result;
-    } catch (error) {
-      console.error('Auto migration error:', error);
-      return null;
+  try {
+    const result = await userMigrationService.autoMigrateUser(
+      user.uid,
+      user.email || '',
+      user.displayName || undefined
+    );
+    
+    if (result.success) {
+      console.log('Migration başarılı:', result.message);
+    } else {
+      console.warn('Migration başarısız:', result.message);
     }
-  };
-
-  return { checkAndMigrate };
+    
+    return result;
+  } catch (error) {
+    console.error('Auto migration error:', error);
+    return null;
+  }
 };

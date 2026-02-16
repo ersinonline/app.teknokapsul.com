@@ -39,7 +39,7 @@ export const WarrantyTrackingPage = () => {
     if (!user) return;
     if (window.confirm('Bu garanti kaydını silmek istediğinizden emin misiniz?')) {
       try {
-        await deleteDoc(doc(db, 'teknokapsul', user.id, 'warranties', warrantyId));
+        await deleteDoc(doc(db, 'teknokapsul', user.uid, 'warranties', warrantyId));
         await reload();
       } catch (error) {
         console.error('Error deleting warranty:', error);

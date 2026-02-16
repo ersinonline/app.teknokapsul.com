@@ -62,7 +62,7 @@ const CheckoutPage: React.FC = () => {
     if (!user) return;
     
     try {
-      const addresses = await getSavedAddresses(user.id);
+      const addresses = await getSavedAddresses(user.uid);
       setSavedAddresses(addresses);
       
       // Default adresi otomatik seç
@@ -102,7 +102,7 @@ const CheckoutPage: React.FC = () => {
     if (!user) return;
     
     try {
-      await saveAddress(user.id, {
+      await saveAddress(user.uid, {
         fullName: shippingAddress.fullName,
         email: shippingAddress.email,
         phone: shippingAddress.phone,
@@ -188,7 +188,7 @@ const CheckoutPage: React.FC = () => {
 
       // Stripe checkout session oluştur
       // const session = await createPremiumCheckoutSession({
-      //   userId: user.id,
+      //   userId: user.uid,
       //   productId: 'order_payment', // Sipariş ödemesi için özel product ID
       //   customerEmail: user.email || shippingAddress.email,
       //   amount: amountInCents,
@@ -207,26 +207,26 @@ const CheckoutPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-transparent">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5 text-white" />
             </button>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Ödeme ve Teslimat</h1>
-              <p className="text-sm text-gray-600">Sipariş bilgilerinizi tamamlayın</p>
+              <h1 className="text-xl font-bold text-white">Ödeme ve Teslimat</h1>
+              <p className="text-white/60 text-xs">Sipariş bilgilerinizi tamamlayın</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="page-content -mt-5 mb-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sol Taraf - Formlar */}
           <div className="lg:col-span-2 space-y-6">

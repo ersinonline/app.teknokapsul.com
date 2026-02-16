@@ -29,8 +29,8 @@ export const SupportTicketReplies: React.FC<SupportTicketRepliesProps> = ({
         ticket.id,
         replyMessage.trim(),
         isAdmin,
-        user.fullName || user.primaryEmailAddress?.emailAddress || 'Kullanıcı',
-        user.primaryEmailAddress?.emailAddress || ''
+        user.displayName || user.email || 'Kullanıcı',
+        user.email || ''
       );
       setReplyMessage('');
       onReplyAdded();

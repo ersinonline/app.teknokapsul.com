@@ -71,7 +71,7 @@ export const EnhancedAIAssistant: React.FC = () => {
     // Hoş geldin mesajı göster
     setMessages([{
       id: 'welcome',
-      text: `Merhaba ${user?.firstName || 'Kullanıcı'}! Ben TeknoBOT, size finansal konularda yardımcı olacağım. Portföy analizi, başvuru işlemleri, destek talepleri ve daha fazlası için buradayım!`,
+      text: `Merhaba ${user?.displayName?.split(' ')[0] || 'Kullanıcı'}! Ben TeknoBOT, size finansal konularda yardımcı olacağım. Portföy analizi, başvuru işlemleri, destek talepleri ve daha fazlası için buradayım!`,
       sender: 'ai',
       timestamp: new Date()
     }]);
@@ -82,7 +82,7 @@ export const EnhancedAIAssistant: React.FC = () => {
   const clearChatHistory = () => {
     setMessages([{
       id: 'welcome',
-      text: `Merhaba ${user?.firstName || 'Kullanıcı'}! Ben TeknoBOT, size finansal konularda yardımcı olacağım. Portföy analizi, başvuru işlemleri, destek talepleri ve daha fazlası için buradayım!`,
+      text: `Merhaba ${user?.displayName?.split(' ')[0] || 'Kullanıcı'}! Ben TeknoBOT, size finansal konularda yardımcı olacağım. Portföy analizi, başvuru işlemleri, destek talepleri ve daha fazlası için buradayım!`,
       sender: 'ai',
       timestamp: new Date()
     }]);
@@ -92,7 +92,7 @@ export const EnhancedAIAssistant: React.FC = () => {
   const loadPortfolioData = async () => {
     if (!user) return;
     try {
-      const items = await portfolioService.getPortfolioItems(user.id);
+      const items = await portfolioService.getPortfolioItems(user.uid);
       setPortfolioItems(items);
     } catch (error) {
       console.error('Error loading portfolio data:', error);
@@ -132,7 +132,7 @@ export const EnhancedAIAssistant: React.FC = () => {
     
     if (user && isStatusQuery) {
       try {
-        return await queryUserStatus(user.id, userMessage);
+        return await queryUserStatus(user.uid, userMessage);
       } catch (error) {
         console.error('Durum sorgulama hatası:', error);
         return 'Üzgünüm, şu anda verilerinizi sorgulayamıyorum. Lütfen daha sonra tekrar deneyin.';
@@ -282,7 +282,7 @@ export const EnhancedAIAssistant: React.FC = () => {
         throw new Error('Kullanıcı oturumu bulunamadı');
       }
 
-      await applicationService.createApplication(user.id, {
+      await applicationService.createApplication(user.uid, {
         serviceType: formData.applicationType,
         serviceName: formData.applicationType,
         serviceCategory: formData.applicationType,
@@ -331,8 +331,8 @@ export const EnhancedAIAssistant: React.FC = () => {
         category: formData.category,
         priority: formData.priority,
         description: formData.description,
-        email: user.primaryEmailAddress?.emailAddress || '',
-        name: user.fullName || 'Kullanıcı'
+        email: user.email || '',
+        name: user.displayName || 'Kullanıcı'
       });
 
       const successMessage: Message = {
@@ -368,7 +368,7 @@ export const EnhancedAIAssistant: React.FC = () => {
     const [formData, setFormData] = useState({
       firstName: '',
       lastName: '',
-      email: user?.primaryEmailAddress?.emailAddress || '',
+      email: user?.email || '',
       phone: '',
       applicationType: '',
       message: ''

@@ -1,21 +1,29 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useAuth as useClerkAuth, useUser } from '@clerk/clerk-react';
+import { User, onAuthStateChanged, signOut as firebaseSignOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 import { AuthContextType } from '../types/auth';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
-import { useSessionPersistence } from '../hooks/useSessionPersistence';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const googleProvider = new GoogleAuthProvider();
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { isLoaded, isSignedIn, signOut: clerkSignOut } = useClerkAuth();
-  const { user: clerkUser } = useUser();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [forceUpdate, setForceUpdate] = useState(0);
-  
-  // Session persistence hook'unu kullan
-  const { isSessionPersistent } = useSessionPersistence();
+
+  // Firebase Auth state listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Mobil cihaz algılama
   useEffect(() => {
@@ -25,128 +33,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                            window.innerWidth < 768;
       setIsMobile(isMobileDevice);
     };
-
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Mobil cihazlarda auth state'ini zorla güncelleme ve oturum sürekliliği
-  useEffect(() => {
-    if (isMobile) {
-      const handleVisibilityChange = () => {
-        if (!document.hidden) {
-          // Sayfa görünür olduğunda state'i güncelle
-          setForceUpdate(prev => prev + 1);
-        }
-      };
-
-      const handleFocus = () => {
-        // Sayfa focus aldığında state'i güncelle
-        setForceUpdate(prev => prev + 1);
-      };
-
-      const handlePageShow = () => {
-        // Sayfa gösterildiğinde state'i güncelle (back/forward navigation)
-        setForceUpdate(prev => prev + 1);
-      };
-
-      // Storage event listener - diğer sekmelerden oturum değişikliklerini dinle
-      const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === '__clerk_db_jwt' || e.key?.startsWith('__clerk')) {
-          setForceUpdate(prev => prev + 1);
-        }
-      };
-
-      // Periyodik oturum kontrolü (her 30 saniyede bir)
-      const sessionCheckInterval = setInterval(() => {
-        setForceUpdate(prev => prev + 1);
-      }, 30000);
-
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      window.addEventListener('focus', handleFocus);
-      window.addEventListener('pageshow', handlePageShow);
-      window.addEventListener('storage', handleStorageChange);
-
-      return () => {
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-        window.removeEventListener('focus', handleFocus);
-        window.removeEventListener('pageshow', handlePageShow);
-        window.removeEventListener('storage', handleStorageChange);
-        clearInterval(sessionCheckInterval);
-      };
-    }
-  }, [isMobile]);
-
   const signOut = async () => {
     try {
-      // Local storage'ı temizle
-      localStorage.removeItem('clerk_session_active');
-      localStorage.removeItem('clerk_session_timestamp');
-      
-      // Clerk signOut'u çağır
-      await clerkSignOut();
-      
-      // State'i zorla güncelle
-      setForceUpdate(prev => prev + 1);
-      
-      // Kısa bir gecikme sonrası login sayfasına yönlendir
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 100);
-    } catch (error) {
-      console.error('Sign-out error:', error);
-      // Hata durumunda da yönlendirme yap
+      await firebaseSignOut(auth);
+      window.location.href = '/login';
+    } catch (err) {
+      console.error('Sign-out error:', err);
       window.location.href = '/login';
     }
   };
 
-  // Clerk için basitleştirilmiş token doğrulama
-  const verifyToken = async () => {
-    return {
-      success: !!isSignedIn,
-      tokenValid: !!isSignedIn,
-      error: null as string | null
-    };
+  const signInWithGoogle = async () => {
+    try {
+      setError(null);
+      await signInWithPopup(auth, googleProvider);
+    } catch (err: any) {
+      console.error('Google sign-in error:', err);
+      setError(err.message || 'Giriş yapılırken bir hata oluştu.');
+    }
   };
 
-  // Clerk için basitleştirilmiş oturum kontrolü
-  const checkSession = async () => {
-    return {
-      success: !!isLoaded,
-      sessionValid: !!isSignedIn,
-      error: null as string | null
-    };
-  };
-
-  // Clerk için token yenileme (otomatik olarak yapılır)
-  const refreshToken = async () => {
-    return {
-      success: !!isSignedIn,
-      tokenValid: !!isSignedIn,
-      error: null as string | null
-    };
-  };
-
-  const value = {
-    user: clerkUser || null,
-    loading: !isLoaded,
-    error: null,
-    tokenValid: isSignedIn || false,
-    sessionChecked: isLoaded,
+  const value: AuthContextType = {
+    user,
+    loading,
+    error,
+    tokenValid: !!user,
+    sessionChecked: !loading,
     signOut,
-    verifyToken,
-    checkSession,
-    refreshToken,
+    signInWithGoogle,
     isWebView: isMobile && /webview|wv/i.test(navigator.userAgent),
     isMobile,
-    forceUpdate, // Mobil cihazlarda state güncellemesi için
-    isSessionPersistent // Session persistence durumu
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {isLoaded ? children : <LoadingSpinner />}
+      {!loading ? children : <LoadingSpinner />}
     </AuthContext.Provider>
   );
 };

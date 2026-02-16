@@ -27,13 +27,13 @@ const ProfessionalHomePage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user?.id) { setLoading(false); return; }
+      if (!user?.uid) { setLoading(false); return; }
       try {
         const now = new Date();
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
 
-        const expensesRef = collection(db, 'teknokapsul', user.id, 'expenses');
+        const expensesRef = collection(db, 'teknokapsul', user.uid, 'expenses');
         const expQ = query(expensesRef, where('isActive', '==', true), orderBy('date', 'desc'), limit(50));
         const expSnap = await getDocs(expQ);
         const expenses = expSnap.docs.map(d => d.data());
@@ -42,7 +42,7 @@ const ProfessionalHomePage: React.FC = () => {
           return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
         });
 
-        const incomesRef = collection(db, 'teknokapsul', user.id, 'incomes');
+        const incomesRef = collection(db, 'teknokapsul', user.uid, 'incomes');
         const incQ = query(incomesRef, where('isActive', '==', true), orderBy('date', 'desc'), limit(50));
         const incSnap = await getDocs(incQ);
         const incomes = incSnap.docs.map(d => d.data());
@@ -105,7 +105,7 @@ const ProfessionalHomePage: React.FC = () => {
             <div>
               <p className="text-white/70 text-sm">{greeting}</p>
               <h1 className="text-white text-xl font-bold mt-0.5">
-                {user?.firstName || 'Kullanıcı'}
+                {user?.displayName?.split(' ')[0] || 'Kullanıcı'}
               </h1>
             </div>
             <div className="flex items-center gap-2">

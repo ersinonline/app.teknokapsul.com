@@ -23,48 +23,45 @@ export const ServicesListPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Hizmet Başvuruları</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            İhtiyacınız olan hizmetler için kolayca başvuru yapın. Başvurunuz değerlendirildikten sonra size geri dönüş yapılacaktır.
-          </p>
-        </div>
-
-        {/* Search and Filter */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient-green px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <Search className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">Hizmet Başvuruları</h1>
+              <p className="text-white/60 text-xs">Kolayca başvuru yapın</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
               <input
                 type="text"
                 placeholder="Hizmet ara..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/10 rounded-xl text-white placeholder-white/40 text-sm focus:outline-none focus:bg-white/15"
               />
             </div>
-            
-            {/* Category Filter */}
-            <div className="md:w-64">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">Tüm Kategoriler</option>
-                {SERVICE_CATEGORIES.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-3 py-2.5 bg-white/10 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:bg-white/15 [&>option]:text-gray-900"
+            >
+              <option value="all">Tümü</option>
+              {SERVICE_CATEGORIES.map(category => (
+                <option key={category.id} value={category.id}>{category.name}</option>
+              ))}
+            </select>
           </div>
         </div>
+      </div>
+
+      <div className="page-content -mt-5 space-y-4 mb-6">
 
         {/* Services Grid */}
         <div className="space-y-8">

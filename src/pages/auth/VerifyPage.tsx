@@ -1,84 +1,26 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { verifyMagicLink, checkMagicLink } from '../../services/auth.service';
 import { Package } from 'lucide-react';
-import { useClerk } from '@clerk/clerk-react';
 
 export const VerifyPage = () => {
   const { user, loading } = useAuth();
   const [verifying, setVerifying] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const clerk = useClerk();
 
-  // Her zaman ana sayfaya yönlendir
-  const getDefaultRedirect = () => {
-    return '/';
-  };
+  const getDefaultRedirect = () => '/';
 
   useEffect(() => {
-    const handleMagicLink = async () => {
-      try {
-        // Clerk magic link handling
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('__clerk_ticket');
-        
-        if (token) {
-          // Clerk magic link doğrulama
-          try {
-            await clerk.handleEmailLinkVerification({ 
-              redirectUrl: window.location.href,
-              redirectUrlComplete: getDefaultRedirect()
-            });
-            
-            // Başarılı doğrulama sonrası yönlendirme
-            setTimeout(() => {
-              window.location.href = getDefaultRedirect();
-            }, 1000);
-            return;
-          } catch (clerkError) {
-            console.error('Clerk magic link error:', clerkError);
-          }
-        }
-
-        // Fallback: Eski Firebase magic link handling
-        if (checkMagicLink()) {
-          await verifyMagicLink();
-          setTimeout(() => {
-            window.location.href = getDefaultRedirect();
-          }, 1000);
-        } else {
-          setError('Geçersiz veya süresi dolmuş link.');
-        }
-      } catch (err: any) {
-        if (err.message === 'Email not found') {
-          // Prompt user for email
-          const email = prompt('Lütfen e-posta adresinizi girin:');
-          if (email) {
-            try {
-              await verifyMagicLink(email);
-              setTimeout(() => {
-                window.location.href = getDefaultRedirect();
-              }, 1000);
-            } catch (verifyErr: any) {
-              setError('Doğrulama başarısız. Lütfen tekrar deneyin.');
-            }
-          } else {
-            setError('E-posta adresi gerekli.');
-          }
-        } else {
-          setError('Doğrulama başarısız. Lütfen tekrar deneyin.');
-        }
-      } finally {
+    if (!loading) {
+      if (user) {
+        navigate(getDefaultRedirect(), { replace: true });
+      } else {
+        setError('Giriş yapılmamış. Lütfen giriş yapın.');
         setVerifying(false);
       }
-    };
-
-    if (!loading && !user) {
-      handleMagicLink();
     }
-  }, [loading, user, navigate, clerk]);
+  }, [loading, user, navigate]);
 
   if (loading || verifying) {
     return (

@@ -1,0 +1,26 @@
+{
+  "name": "functions",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "echo \"no lint\"",
+    "serve": "npm run build && node lib/index.js"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "firebase-admin": "^13.0.2",
+    "firebase-functions": "^7.0.5",
+    "iyzipay": "^2.0.64"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/node": "^24.10.1",
+    "typescript": "~5.9.3"
+  }
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, ChevronRight, Zap, Shield, Truck } from 'lucide-react';
+import { Home, ChevronRight, Zap, Shield, Truck, Building2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { Subscription } from '../types/subscription';
@@ -40,7 +40,7 @@ const EvimPage: React.FC = () => {
     if (!user) return;
     
     try {
-      const cargos = await getUserCargoTrackings(user.id);
+      const cargos = await getUserCargoTrackings(user.uid);
       setCargoList(cargos);
     } catch (error) {
       console.error('Error loading cargo data:', error);
@@ -55,7 +55,7 @@ const EvimPage: React.FC = () => {
     
     try {
       const q = query(
-        collection(db, 'teknokapsul', user.id, 'warranties'),
+        collection(db, 'teknokapsul', user.uid, 'warranties'),
         orderBy('createdAt', 'desc')
       );
       const querySnapshot = await getDocs(q);
@@ -154,6 +154,20 @@ const EvimPage: React.FC = () => {
       route: '/cargo-tracking',
       count: pendingCargos.length,
       loading: cargoLoading,
+      items: []
+    },
+    {
+      id: 'ekira',
+      title: 'eKira',
+      description: 'Kira sözleşmeleri ve tahsilat yönetimi',
+      icon: Building2,
+      color: 'bg-emerald-500',
+      bgColor: 'bg-emerald-50',
+      textColor: 'text-emerald-700',
+      borderColor: 'border-emerald-200',
+      route: '/ekira',
+      count: 0,
+      loading: false,
       items: []
     }
   ];

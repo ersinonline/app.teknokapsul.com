@@ -27,7 +27,7 @@ export const NotificationsPage: React.FC = () => {
   useEffect(() => {
     if (!user) return;
 
-    const notificationsRef = collection(db, 'teknokapsul', user.id, 'notifications');
+    const notificationsRef = collection(db, 'teknokapsul', user.uid, 'notifications');
     const q = query(notificationsRef, orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -45,10 +45,10 @@ export const NotificationsPage: React.FC = () => {
   }, [user]);
 
   const markAsRead = async (notificationId: string | undefined) => {
-    if (!user?.id || !notificationId) return;
+    if (!user?.uid || !notificationId) return;
     
     try {
-      const notificationRef = doc(db, 'teknokapsul', user.id, 'notifications', notificationId);
+      const notificationRef = doc(db, 'teknokapsul', user.uid, 'notifications', notificationId);
       await updateDoc(notificationRef, { read: true });
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -56,10 +56,10 @@ export const NotificationsPage: React.FC = () => {
   };
 
   const deleteNotification = async (notificationId: string | undefined) => {
-    if (!user?.id || !notificationId) return;
+    if (!user?.uid || !notificationId) return;
     
     try {
-      const notificationRef = doc(db, 'teknokapsul', user.id, 'notifications', notificationId);
+      const notificationRef = doc(db, 'teknokapsul', user.uid, 'notifications', notificationId);
       await deleteDoc(notificationRef);
     } catch (error) {
       console.error('Error deleting notification:', error);
@@ -67,14 +67,14 @@ export const NotificationsPage: React.FC = () => {
   };
 
   const markAllAsRead = async () => {
-    if (!user?.id) return;
+    if (!user?.uid) return;
     
     const unreadNotifications = notifications.filter(n => !n.read && n.id);
     
     try {
       const promises = unreadNotifications.map(notification => {
         if (!notification.id) return Promise.resolve();
-        const notificationRef = doc(db, 'teknokapsul', user.id, 'notifications', notification.id);
+        const notificationRef = doc(db, 'teknokapsul', user.uid, 'notifications', notification.id);
         return updateDoc(notificationRef, { read: true });
       });
       

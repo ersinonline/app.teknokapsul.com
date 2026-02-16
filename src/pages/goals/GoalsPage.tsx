@@ -106,7 +106,7 @@ export const GoalsPage = () => {
     currency: 'TL' as Goal['currency']
   });
 
-  const userGoals = goals.filter(goal => goal.userId === user?.id);
+  const userGoals = goals.filter(goal => goal.userId === user?.uid);
   const activeGoals = userGoals.filter(goal => goal.status !== 'completed');
   const completedGoals = userGoals.filter(goal => goal.status === 'completed');
 
@@ -119,7 +119,7 @@ export const GoalsPage = () => {
         ...formData,
         targetAmount: parseFloat(formData.targetAmount),
         currentAmount: 0,
-        userId: user.id,
+        userId: user.uid,
         status: 'active' as Goal['status'],
         deadline: new Date(formData.targetDate),
         createdAt: new Date()
@@ -127,10 +127,10 @@ export const GoalsPage = () => {
 
       if (editingGoal) {
         // Güncelleme işlemi
-        await updateDoc(doc(db, 'teknokapsul', user.id, 'goals', editingGoal.id), goalData);
+        await updateDoc(doc(db, 'teknokapsul', user.uid, 'goals', editingGoal.id), goalData);
       } else {
         // Yeni hedef ekleme
-        await addDoc(collection(db, 'teknokapsul', user.id, 'goals'), goalData);
+        await addDoc(collection(db, 'teknokapsul', user.uid, 'goals'), goalData);
       }
       
       setIsModalOpen(false);
@@ -160,7 +160,7 @@ export const GoalsPage = () => {
     if (!user || !window.confirm('Bu hedefi pasife almak istediğinizden emin misiniz?')) return;
 
     try {
-      await updateDoc(doc(db, 'teknokapsul', user.id, 'goals', goalId), {
+      await updateDoc(doc(db, 'teknokapsul', user.uid, 'goals', goalId), {
         status: 'paused',
         updatedAt: new Date()
       });
@@ -203,7 +203,7 @@ export const GoalsPage = () => {
       const newCurrentAmount = selectedGoal.currentAmount + depositAmount;
       const newStatus = newCurrentAmount >= selectedGoal.targetAmount ? 'completed' : 'active';
 
-      await updateDoc(doc(db, 'teknokapsul', user.id, 'goals', selectedGoal.id), {
+      await updateDoc(doc(db, 'teknokapsul', user.uid, 'goals', selectedGoal.id), {
         currentAmount: newCurrentAmount,
         status: newStatus,
         updatedAt: new Date()

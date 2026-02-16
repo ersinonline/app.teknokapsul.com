@@ -9,7 +9,8 @@ import {
   Zap,
   Shield,
   Smartphone,
-  CreditCard
+  CreditCard,
+  ShoppingBag
 } from 'lucide-react';
 
 const TeknoKapsulPage: React.FC = () => {
@@ -81,6 +82,17 @@ const TeknoKapsulPage: React.FC = () => {
       bgColor: 'bg-red-50',
       textColor: 'text-red-700',
       borderColor: 'border-red-200'
+    },
+    {
+      id: 'digital-codes',
+      title: 'Dijital Kodlar',
+      description: 'Dijital ürün ve kod satın alın',
+      icon: ShoppingBag,
+      path: '/dijital-kodlar',
+      color: 'bg-violet-500',
+      bgColor: 'bg-violet-50',
+      textColor: 'text-violet-700',
+      borderColor: 'border-violet-200'
     }
   ];
 
@@ -124,120 +136,63 @@ const TeknoKapsulPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-4 sm:p-6">
-        {/* Hero Section */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">TeknoKapsül</h1>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient-purple px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <Package className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">TeknoKapsül</h1>
+              <p className="text-white/60 text-xs">Araçlar ve hizmetler</p>
+            </div>
           </div>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-            Aboneliklerinizi, kargolarınızı, belgelerinizi ve daha fazlasını tek yerden yönetin. Teknolojik araçlarınız.
-          </p>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Hızlı İşlemler</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
-                <button
-                  key={index}
-                  onClick={action.action}
-                  className="bg-white p-4 rounded-lg border border-gray-200 hover:border-[#ffb700] hover:shadow-md transition-all duration-200 text-left group"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-[#ffb700]/10 p-2 rounded-lg group-hover:bg-[#ffb700]/20 transition-colors">
-                        <Icon className="w-5 h-5 text-[#ffb700]" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900">{action.title}</h3>
-                        <p className="text-sm text-gray-500">{action.description}</p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#ffb700] transition-colors" />
-                  </div>
+                <button key={index} onClick={action.action} className="bg-white/10 rounded-xl p-3 text-center hover:bg-white/20 transition-colors">
+                  <Icon className="w-4 h-4 text-white/70 mx-auto mb-1" />
+                  <p className="text-white text-[10px] font-medium">{action.title.split(' ').slice(0, 2).join(' ')}</p>
                 </button>
               );
             })}
           </div>
         </div>
+      </div>
 
-        {/* Features Grid */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Hizmetler</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {kapsulFeatures.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={feature.id}
-                  onClick={() => navigate(feature.path)}
-                  className={`bg-white rounded-xl p-4 border ${feature.borderColor} hover:shadow-lg transition-all duration-300 cursor-pointer group hover:scale-105`}
-                >
-                  <div className="flex items-start space-x-3">
-                    <div className={`${feature.bgColor} p-2 rounded-lg group-hover:scale-110 transition-transform duration-200`}>
-                      <Icon className={`w-5 h-5 ${feature.textColor}`} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base font-semibold text-gray-900 mb-1">{feature.title}</h3>
-                      <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-end">
-                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#ffb700] transition-colors" />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Features Info */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <div key={index} className="bg-white rounded-xl p-6 border border-gray-200 text-center">
-                <div className="bg-[#ffb700]/10 p-3 rounded-full w-fit mx-auto mb-4">
-                  <Icon className="w-8 h-8 text-[#ffb700]" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600 text-sm">{feature.description}</p>
+      <div className="page-content -mt-5 space-y-3 mb-6">
+        {kapsulFeatures.map((feature) => {
+          const Icon = feature.icon;
+          return (
+            <button
+              key={feature.id}
+              onClick={() => navigate(feature.path)}
+              className="bank-card p-4 w-full flex items-center gap-3 hover:shadow-md transition-shadow text-left"
+            >
+              <div className={`w-10 h-10 rounded-xl ${feature.bgColor} flex items-center justify-center flex-shrink-0`}>
+                <Icon className={`w-5 h-5 ${feature.textColor}`} />
               </div>
-            );
-          })}
-        </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-foreground">{feature.title}</h3>
+                <p className="text-[11px] text-muted-foreground truncate">{feature.description}</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            </button>
+          );
+        })}
 
-        {/* Info Section */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 border border-blue-200">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="text-3xl">⚡</span>
-              <h3 className="text-2xl font-bold text-gray-900">Hızlı Erişim</h3>
-            </div>
-            <p className="text-gray-600 text-lg mb-6 max-w-2xl mx-auto">
-              TeknoKapsül ile tüm teknoloji ve finans araçlarınıza tek yerden erişin. 
-              Garanti takibinden kargo takibine, kredi hesaplamadan finansal analizlere kadar her şey burada.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <button 
-                onClick={() => navigate('/tekno-kapsul/notes')}
-                className="bg-[#ffb700] hover:bg-[#e6a500] text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
-              >
-                Notlarıma Git <ArrowRight className="w-4 h-4" />
-              </button>
-              <button 
-                onClick={() => navigate('/tekno-kapsul/ai-assistant')}
-                className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
-              >
-                AI Asistan <Bot className="w-4 h-4" />
-              </button>
-            </div>
+        {/* Quick Links */}
+        <div className="bank-card p-4">
+          <div className="flex gap-2">
+            <button onClick={() => navigate('/tekno-kapsul/notes')} className="flex-1 bg-primary text-white px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5">
+              Notlarım <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+            <button onClick={() => navigate('/tekno-kapsul/ai-assistant')} className="flex-1 bg-muted text-foreground px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5">
+              AI Asistan <Bot className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </div>

@@ -231,9 +231,9 @@ export const FinancialDataPage = () => {
     try {
       setLoading(true);
       const [creditCardsData, cashAdvanceData, loansData] = await Promise.all([
-        getCreditCards(user.id),
-        getCashAdvanceAccounts(user.id),
-        getLoans(user.id)
+        getCreditCards(user.uid),
+        getCashAdvanceAccounts(user.uid),
+        getLoans(user.uid)
       ]);
       
       setCreditCards(creditCardsData);
@@ -249,7 +249,7 @@ export const FinancialDataPage = () => {
   const handleDeleteCreditCard = async (id: string) => {
     if (window.confirm('Bu kredi kartını silmek istediğinizden emin misiniz?')) {
       try {
-        await deleteCreditCard(user!.id, id);
+        await deleteCreditCard(user!.uid, id);
         setCreditCards(prev => prev.filter(card => card.id !== id));
       } catch (error) {
         console.error('Error deleting credit card:', error);
@@ -260,7 +260,7 @@ export const FinancialDataPage = () => {
   const handleDeleteCashAdvance = async (id: string) => {
     if (window.confirm('Bu avans hesabını silmek istediğinizden emin misiniz?')) {
       try {
-        await deleteCashAdvanceAccount(user!.id, id);
+        await deleteCashAdvanceAccount(user!.uid, id);
         setCashAdvanceAccounts(prev => prev.filter(account => account.id !== id));
       } catch (error) {
         console.error('Error deleting cash advance account:', error);
@@ -271,7 +271,7 @@ export const FinancialDataPage = () => {
   const handleDeleteLoan = async (id: string) => {
     if (window.confirm('Bu krediyi silmek istediğinizden emin misiniz?')) {
       try {
-        await deleteLoan(user!.id, id);
+        await deleteLoan(user!.uid, id);
         setLoans(prev => prev.filter(loan => loan.id !== id));
       } catch (error) {
         console.error('Error deleting loan:', error);
@@ -282,10 +282,10 @@ export const FinancialDataPage = () => {
   const handleAddCreditCard = async (formData: any) => {
     try {
       if (editingCreditCard) {
-        await updateCreditCard(user!.id, editingCreditCard.id, formData);
+        await updateCreditCard(user!.uid, editingCreditCard.id, formData);
         setEditingCreditCard(null);
       } else {
-        await addCreditCard(user!.id, formData);
+        await addCreditCard(user!.uid, formData);
       }
       
       // Aidat tarihi varsa takvime otomatik etkinlik ekle
@@ -297,8 +297,8 @@ export const FinancialDataPage = () => {
              date: formData.annualFeeDate.toISOString(),
              type: 'payment',
              createdAt: new Date().toISOString(),
-             userId: user!.id
-           }, user!.id);
+             userId: user!.uid
+           }, user!.uid);
         } catch (calendarError) {
           console.error('Error adding calendar event:', calendarError);
           // Takvim hatası kredi kartı kaydını etkilemesin
@@ -316,10 +316,10 @@ export const FinancialDataPage = () => {
   const handleAddCashAdvance = async (formData: any) => {
     try {
       if (editingCashAdvance) {
-        await updateCashAdvanceAccount(user!.id, editingCashAdvance.id, formData);
+        await updateCashAdvanceAccount(user!.uid, editingCashAdvance.id, formData);
         setEditingCashAdvance(null);
       } else {
-        await addCashAdvanceAccount(user!.id, formData);
+        await addCashAdvanceAccount(user!.uid, formData);
       }
       setShowCashAdvanceForm(false);
       loadData();
@@ -332,10 +332,10 @@ export const FinancialDataPage = () => {
   const handleAddLoan = async (formData: any) => {
     try {
       if (editingLoan) {
-        await updateLoan(user!.id, editingLoan.id, formData);
+        await updateLoan(user!.uid, editingLoan.id, formData);
         setEditingLoan(null);
       } else {
-        await addLoan(user!.id, formData);
+        await addLoan(user!.uid, formData);
       }
       setShowLoanForm(false);
       loadData();
@@ -355,8 +355,11 @@ export const FinancialDataPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="page-container bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Finansal veriler yükleniyor...</p>
+        </div>
       </div>
     );
   }
@@ -452,14 +455,19 @@ export const FinancialDataPage = () => {
   const groupedLoans = groupLoansByBank(loans);
 
   return (
-    <div className="bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          <div className="flex items-center justify-between">
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <DollarSign className="w-6 h-6" style={{ color: '#ffb700' }} />
-              <h1 className="text-lg font-semibold text-gray-900">Finansal Verilerim</h1>
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <DollarSign className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Finansal Verilerim</h1>
+                <p className="text-white/60 text-xs">{creditCards.length + cashAdvanceAccounts.length + loans.length} kayıt</p>
+              </div>
             </div>
             <button
               onClick={() => {
@@ -467,46 +475,39 @@ export const FinancialDataPage = () => {
                 else if (activeTab === 'cashAdvance') setShowCashAdvanceForm(true);
                 else if (activeTab === 'loans') setShowLoanForm(true);
               }}
-              className="flex items-center gap-2 text-white px-3 py-2 rounded-lg transition-colors"
-              style={{ backgroundColor: '#ffb700' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6a500'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffb700'}
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              <span className="text-sm">Ekle</span>
+              <Plus className="w-5 h-5 text-white" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
+      <div className="page-content -mt-5">
 
-      {/* Tabs - Mobile Responsive */}
-      <div className="border-b border-gray-200 mb-4 sm:mb-6">
-          <nav className="-mb-px flex overflow-x-auto sm:space-x-8 scrollbar-hide">
+      {/* Tabs */}
+      <div className="bank-card p-1.5 mb-4">
+        <div className="flex gap-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`flex items-center space-x-1 sm:space-x-2 py-2 px-1 sm:px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap flex-shrink-0 sm:flex-none justify-center sm:justify-start ${
-                  activeTab === tab.id
-                    ? 'border-yellow-500 text-yellow-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+                  activeTab === tab.id ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-muted'
                 }`}
               >
-                <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Icon className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden text-xs">{tab.label.split(' ')[0]}</span>
-                <span className="bg-gray-100 text-gray-600 py-0.5 px-0.5 sm:px-2 rounded-full text-xs">
+                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+                <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${activeTab === tab.id ? 'bg-white/20' : 'bg-muted'}`}>
                   {tab.count}
                 </span>
               </button>
             );
           })}
-        </nav>
+        </div>
       </div>
 
       {/* Content */}

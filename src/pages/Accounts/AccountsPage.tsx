@@ -36,12 +36,12 @@ export const AccountsPage = () => {
 
   useEffect(() => {
     const fetchAll = async () => {
-      if (!user?.id) return;
+      if (!user?.uid) return;
       setLoading(true);
       try {
         const [credData, bankData] = await Promise.all([
-          getPlatformCredentialsByUserId(user.id),
-          getBankAccounts(user.id),
+          getPlatformCredentialsByUserId(user.uid),
+          getBankAccounts(user.uid),
         ]);
         setCredentials(credData);
         setBankAccounts(bankData);
@@ -72,7 +72,7 @@ export const AccountsPage = () => {
   }, [form]);
 
   const handleCreateAccount = async () => {
-    if (!user?.id || !canCreate) return;
+    if (!user?.uid || !canCreate) return;
     
     // IBAN validasyonu
     if (form.iban.trim() && !validateIban(form.iban.trim())) {
@@ -82,7 +82,7 @@ export const AccountsPage = () => {
     
     setCreating(true);
     try {
-      const created = await createBankAccount(user.id, {
+      const created = await createBankAccount(user.uid, {
         bankName: form.bankName.trim(),
         accountName: form.accountName.trim(),
         iban: form.iban.trim(),
@@ -99,7 +99,7 @@ export const AccountsPage = () => {
   };
 
   const handleTextInput = async (accountId: string, text: string, bankType: 'yapikredi' | 'garanti' = 'yapikredi') => {
-    if (!user?.id || !text.trim()) return;
+    if (!user?.uid || !text.trim()) return;
     
     setUploadProgress({
       accountId,
@@ -110,7 +110,7 @@ export const AccountsPage = () => {
 
     try {
       // Parse and add transactions using the service function
-      const transactions = await addTransactionsFromText(user.id, accountId, text, bankType);
+      const transactions = await addTransactionsFromText(user.uid, accountId, text, bankType);
       
       if (transactions.length === 0) {
         setUploadProgress({
@@ -124,7 +124,7 @@ export const AccountsPage = () => {
       }
 
       // Update local state
-      const txs = await getTransactions(user.id, accountId);
+      const txs = await getTransactions(user.uid, accountId);
       setTxByAccount((prev) => ({ ...prev, [accountId]: txs }));
       
       setUploadProgress({
@@ -148,11 +148,11 @@ export const AccountsPage = () => {
   };
 
   const handleShowTransactions = async (accountId: string) => {
-    if (!user?.id) return;
+    if (!user?.uid) return;
     
     setLoadingTx(prev => ({ ...prev, [accountId]: true }));
     try {
-      const txs = await getTransactions(user.id, accountId);
+      const txs = await getTransactions(user.uid, accountId);
       setTxByAccount((prev) => ({ ...prev, [accountId]: txs }));
     } catch (e) {
       setError('İşlemler yüklenirken hata oluştu.');
@@ -171,7 +171,7 @@ export const AccountsPage = () => {
   };
 
   const handleSaveEdit = async (accountId: string) => {
-    if (!user?.id) return;
+    if (!user?.uid) return;
     
     // IBAN validasyonu
     if (editForm.iban.trim() && !validateIban(editForm.iban.trim())) {
@@ -181,7 +181,7 @@ export const AccountsPage = () => {
 
     try {
       // Veritabanında güncelle
-      await updateBankAccount(user.id, accountId, {
+      await updateBankAccount(user.uid, accountId, {
         bankName: editForm.bankName.trim(),
         accountName: editForm.accountName.trim(),
         iban: editForm.iban.trim(),
@@ -216,30 +216,31 @@ export const AccountsPage = () => {
   if (error) return <ErrorMessage message={error} />;
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="bg-white shadow-sm sticky top-0 z-10 border-b mb-8">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-100 rounded-lg">
-                  <Wallet className="w-6 h-6 text-amber-600" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-semibold text-gray-900">Hesaplarım</h1>
-                  <p className="text-sm text-gray-600">Banka hesaplarınızı yönetin ve işlemlerinizi takip edin</p>
-                </div>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <Wallet className="w-5 h-5 text-white" />
               </div>
-              {copySuccess && (
-                <div className="bg-green-50 text-green-800 px-4 py-2 rounded-lg text-sm flex items-center gap-2 border border-green-200">
-                  <CheckCircle className="h-4 w-4" />
-                  {copySuccess}
-                </div>
-              )}
+              <div>
+                <h1 className="text-xl font-bold text-white">Hesaplarım</h1>
+                <p className="text-white/60 text-xs">{bankAccounts.length} hesap</p>
+              </div>
             </div>
+            {copySuccess && (
+              <div className="bg-white/15 text-white px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5">
+                <CheckCircle className="h-3.5 w-3.5" />
+                {copySuccess}
+              </div>
+            )}
           </div>
         </div>
+      </div>
+
+      <div className="page-content -mt-5">
 
         {/* Hesap Özeti Kartları */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

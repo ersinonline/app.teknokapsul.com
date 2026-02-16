@@ -87,7 +87,7 @@ const PaymentPlanDetailPage: React.FC = () => {
         
         // Önce kullanıcının kendi planlarından ara (eğer giriş yapmışsa)
         if (user) {
-          const userDocRef = doc(db, `teknokapsul/${user.id}/paymentPlans`, id);
+          const userDocRef = doc(db, `teknokapsul/${user.uid}/paymentPlans`, id);
           const userDocSnap = await getDoc(userDocRef);
           
           if (userDocSnap.exists()) {
@@ -294,7 +294,7 @@ const PaymentPlanDetailPage: React.FC = () => {
       await setDoc(sharedPlanRef, {
         ...plan,
         sharedAt: new Date(),
-        sharedBy: user?.id || 'anonymous'
+        sharedBy: user?.uid || 'anonymous'
       });
 
       const shareUrl = `${window.location.origin}/payment-plan/${id}`;
@@ -682,10 +682,10 @@ const PaymentPlanDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center pb-20">
+      <div className="page-container bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ffb700] mx-auto mb-4"></div>
-          <p className="text-gray-600">Plan yükleniyor...</p>
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Plan yükleniyor...</p>
         </div>
       </div>
     );
@@ -693,14 +693,14 @@ const PaymentPlanDetailPage: React.FC = () => {
 
   if (error || !plan) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center pb-20">
-        <div className="text-center">
-          <div className="bg-red-100 p-4 rounded-lg mb-4">
-            <p className="text-red-800">{error || 'Plan bulunamadı'}</p>
+      <div className="page-container bg-background flex items-center justify-center">
+        <div className="text-center px-4">
+          <div className="bg-red-50 p-4 rounded-xl mb-4">
+            <p className="text-red-600 text-sm">{error || 'Plan bulunamadı'}</p>
           </div>
           <button
             onClick={() => navigate('/payment-plan')}
-            className="bg-[#ffb700] text-white px-6 py-3 rounded-lg hover:bg-[#e6a500] transition-colors"
+            className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-medium"
           >
             Geri Dön
           </button>
@@ -718,24 +718,29 @@ const PaymentPlanDetailPage: React.FC = () => {
   const totalMonthlyIncome = (plan.monthlyIncomes || []).reduce((sum, income) => sum + income.amount, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="max-w-6xl mx-auto p-3 sm:p-4 lg:p-6">
-        {/* Header */}
-        <div className="mb-4 sm:mb-6 lg:mb-8">
-          {/* Back Button Row */}
-          <div className="flex items-center mb-4">
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/payment-plan')}
-              className="p-2 text-gray-600 hover:text-gray-800 transition-colors touch-manipulation active:bg-gray-100 rounded-lg"
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center"
             >
-              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+              <ArrowLeft className="w-5 h-5 text-white" />
             </button>
-            <span className="ml-2 text-sm text-gray-500">Geri</span>
+            <div>
+              <h1 className="text-xl font-bold text-white">{plan.name}</h1>
+              <p className="text-white/60 text-xs">{plan.type === 'housing' ? 'Konut' : 'Araç'} Ödeme Planı</p>
+            </div>
           </div>
-          
-          {/* Title Row */}
-          <div className="text-center">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-2">
+        </div>
+      </div>
+
+      <div className="page-content -mt-5 space-y-4 mb-6">
+        <div>
+          <div className="text-center mb-4">
+            <h1 className="text-xl font-bold text-foreground mb-1">
               {plan.name}
             </h1>
             <p className="text-xs sm:text-sm text-gray-500">
@@ -746,7 +751,7 @@ const PaymentPlanDetailPage: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
-          {user && user.id === plan.userId && (
+          {user && user.uid === plan.userId && (
             <button
               onClick={handleEdit}
               className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation text-sm sm:text-base"

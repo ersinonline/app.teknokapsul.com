@@ -116,7 +116,7 @@ const StockMarketPage: React.FC = () => {
           falling: fallingData.data || [],
           marketData: marketDataRes.data?.[0] || null,
           lastUpdate: new Date(),
-          userId: user.id
+          userId: user.uid
         });
       }
     } catch (error) {
@@ -151,7 +151,7 @@ const StockMarketPage: React.FC = () => {
     if (!user) return;
     
     try {
-      const docRef = doc(db, 'userFavorites', user.id);
+      const docRef = doc(db, 'userFavorites', user.uid);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
@@ -172,7 +172,7 @@ const StockMarketPage: React.FC = () => {
     setFavorites(newFavorites);
     
     try {
-      await setDoc(doc(db, 'userFavorites', user.id), {
+      await setDoc(doc(db, 'userFavorites', user.uid), {
         favorites: newFavorites,
         updatedAt: new Date()
       });
@@ -247,114 +247,94 @@ const StockMarketPage: React.FC = () => {
 
   if (loading && stocks.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
-        <div className="w-full">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
+      <div className="page-container bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Borsa verileri yükleniyor...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50">
+    <div className="page-container bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-3">
-          <div className="flex items-center justify-between">
+      <div className="bank-gradient-blue px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <Activity className="w-6 h-6" style={{ color: '#ffb700' }} />
-              <h1 className="text-lg font-semibold text-gray-900">Borsa Takibi</h1>
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <Activity className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Borsa Takibi</h1>
+                <p className="text-white/60 text-xs">{stocks.length} hisse</p>
+              </div>
             </div>
             <button
               onClick={fetchAllData}
               disabled={loading}
-              className="flex items-center gap-2 px-3 py-2 bg-[#ffb700] text-white rounded-lg hover:bg-[#e6a500] transition-colors"
+              className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              <span className="text-sm font-medium">Güncelle</span>
+              <RefreshCw className={`w-5 h-5 text-white ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
+          {/* Market Data */}
+          {marketData && (
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-white/10 rounded-xl p-2 text-center">
+                <p className="text-white/50 text-[9px] uppercase">BIST 100</p>
+                <p className="text-white font-bold text-xs">{marketData.Bist100}</p>
+                <p className={`text-[10px] ${marketData.Bist100Degisim.includes('-') ? 'text-red-300' : 'text-emerald-300'}`}>{marketData.Bist100Degisim}</p>
+              </div>
+              <div className="bg-white/10 rounded-xl p-2 text-center">
+                <p className="text-white/50 text-[9px] uppercase">USD/TRY</p>
+                <p className="text-white font-bold text-xs">{marketData.Dolar}</p>
+                <p className={`text-[10px] ${marketData.DolarDegisim.includes('-') ? 'text-red-300' : 'text-emerald-300'}`}>{marketData.DolarDegisim}</p>
+              </div>
+              <div className="bg-white/10 rounded-xl p-2 text-center">
+                <p className="text-white/50 text-[9px] uppercase">EUR/TRY</p>
+                <p className="text-white font-bold text-xs">{marketData.Euro}</p>
+                <p className={`text-[10px] ${marketData.EuroDegisim.includes('-') ? 'text-red-300' : 'text-emerald-300'}`}>{marketData.EuroDegisim}</p>
+              </div>
+              <div className="bg-white/10 rounded-xl p-2 text-center">
+                <p className="text-white/50 text-[9px] uppercase">Altın</p>
+                <p className="text-white font-bold text-xs">{marketData.Altin}</p>
+                <p className={`text-[10px] ${marketData.AltinDegisim.includes('-') ? 'text-red-300' : 'text-emerald-300'}`}>{marketData.AltinDegisim}</p>
+              </div>
+              <div className="bg-white/10 rounded-xl p-2 text-center">
+                <p className="text-white/50 text-[9px] uppercase">Petrol</p>
+                <p className="text-white font-bold text-xs">{marketData.Petrol}</p>
+                <p className={`text-[10px] ${marketData.PetrolDegisim.includes('-') ? 'text-red-300' : 'text-emerald-300'}`}>{marketData.PetrolDegisim}</p>
+              </div>
+              <div className="bg-white/10 rounded-xl p-2 text-center">
+                <p className="text-white/50 text-[9px] uppercase">Bono</p>
+                <p className="text-white font-bold text-xs">{marketData.Bono}</p>
+                <p className={`text-[10px] ${marketData.BonoDegisim.includes('-') ? 'text-red-300' : 'text-emerald-300'}`}>{marketData.BonoDegisim}</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-md mx-auto lg:max-w-7xl px-4 py-4">
-
-        {/* Market Data Box */}
-        {marketData && (
-          <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <Activity className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Otomatik Çekilen Veriler</h2>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-              <div className="text-center">
-                <p className="text-sm text-gray-600">BIST 100</p>
-                <p className="font-semibold">{marketData.Bist100}</p>
-                <p className={`text-xs ${marketData.Bist100Degisim.includes('-') ? 'text-red-600' : 'text-green-600'}`}>
-                  {marketData.Bist100Degisim}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-gray-600">USD/TRY</p>
-                <p className="font-semibold">{marketData.Dolar}</p>
-                <p className={`text-xs ${marketData.DolarDegisim.includes('-') ? 'text-red-600' : 'text-green-600'}`}>
-                  {marketData.DolarDegisim}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-gray-600">EUR/TRY</p>
-                <p className="font-semibold">{marketData.Euro}</p>
-                <p className={`text-xs ${marketData.EuroDegisim.includes('-') ? 'text-red-600' : 'text-green-600'}`}>
-                  {marketData.EuroDegisim}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-gray-600">Altın</p>
-                <p className="font-semibold">{marketData.Altin}</p>
-                <p className={`text-xs ${marketData.AltinDegisim.includes('-') ? 'text-red-600' : 'text-green-600'}`}>
-                  {marketData.AltinDegisim}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-gray-600">Petrol</p>
-                <p className="font-semibold">{marketData.Petrol}</p>
-                <p className={`text-xs ${marketData.PetrolDegisim.includes('-') ? 'text-red-600' : 'text-green-600'}`}>
-                  {marketData.PetrolDegisim}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-gray-600">Bono</p>
-                <p className="font-semibold">{marketData.Bono}</p>
-                <p className={`text-xs ${marketData.BonoDegisim.includes('-') ? 'text-red-600' : 'text-green-600'}`}>
-                  {marketData.BonoDegisim}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
+      <div className="page-content -mt-5">
         {/* Tabs */}
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-2 mb-4">
+        <div className="bank-card p-2 mb-4">
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
             {[
               { key: 'all', label: 'Tümü' },
               { key: 'bist50', label: 'BIST 50' },
               { key: 'bist30', label: 'BIST 30' },
-              { key: 'rising', label: 'Yükselenler' },
-              { key: 'falling', label: 'Düşenler' },
-              { key: 'indices', label: 'İndeksler' },
-              { key: 'favorites', label: 'Favoriler' }
+              { key: 'rising', label: 'Yükselen' },
+              { key: 'falling', label: 'Düşen' },
+              { key: 'indices', label: 'İndeks' },
+              { key: 'favorites', label: 'Favori' }
             ].map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as TabType)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  activeTab === tab.key
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  activeTab === tab.key ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-muted'
                 }`}
               >
                 {tab.label}

@@ -12,7 +12,6 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { UserButton } from '@clerk/clerk-react';
 
 interface NavigationItem {
   path: string;
@@ -73,7 +72,7 @@ export const MobileNavigation: React.FC = () => {
 
   useEffect(() => {
     if (!user) return;
-    const notificationsRef = collection(db, 'teknokapsul', user.id, 'notifications');
+    const notificationsRef = collection(db, 'teknokapsul', user.uid, 'notifications');
     const q = query(notificationsRef, where('read', '==', false));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setUnreadCount(snapshot.size);
@@ -135,15 +134,13 @@ export const MobileNavigation: React.FC = () => {
           >
             <Settings className="w-5 h-5 text-muted-foreground" />
           </button>
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: "w-8 h-8 rounded-xl",
-                userButtonPopoverCard: "rounded-2xl shadow-xl",
-                userButtonPopoverActionButton: "rounded-xl"
-              }
-            }}
-          />
+          {user?.photoURL ? (
+            <img src={user.photoURL} alt="" className="w-8 h-8 rounded-xl object-cover" />
+          ) : (
+            <div className="w-8 h-8 rounded-xl bg-[#ffb700] flex items-center justify-center text-white font-bold text-xs">
+              {user?.displayName?.[0] || 'U'}
+            </div>
+          )}
         </div>
       </div>
 
@@ -174,15 +171,13 @@ export const MobileNavigation: React.FC = () => {
                   </span>
                 )}
               </button>
-              <UserButton
-                appearance={{
-                  elements: {
-                    avatarBox: "w-8 h-8 rounded-xl",
-                    userButtonPopoverCard: "rounded-2xl shadow-xl",
-                    userButtonPopoverActionButton: "rounded-xl"
-                  }
-                }}
-              />
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="" className="w-8 h-8 rounded-xl object-cover" />
+              ) : (
+                <div className="w-8 h-8 rounded-xl bg-[#ffb700] flex items-center justify-center text-white font-bold text-xs">
+                  {user?.displayName?.[0] || 'U'}
+                </div>
+              )}
             </div>
           </div>
         </div>

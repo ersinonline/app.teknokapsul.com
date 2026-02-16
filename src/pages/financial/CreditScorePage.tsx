@@ -51,7 +51,7 @@ const CreditScorePage: React.FC = () => {
     
     try {
       setLoading(true);
-      const scoresRef = collection(db, `teknokapsul/${user.id}/creditScores`);
+      const scoresRef = collection(db, `teknokapsul/${user.uid}/creditScores`);
       const q = query(scoresRef, orderBy('date', 'asc'));
       const querySnapshot = await getDocs(q);
       
@@ -79,7 +79,7 @@ const CreditScorePage: React.FC = () => {
     
     try {
       setLoading(true);
-      const scoresRef = collection(db, `teknokapsul/${user.id}/creditScores`);
+      const scoresRef = collection(db, `teknokapsul/${user.uid}/creditScores`);
       await addDoc(scoresRef, {
         date: newScore.date,
         score: score,
@@ -106,7 +106,7 @@ const CreditScorePage: React.FC = () => {
     
     try {
       setLoading(true);
-      const scoreRef = doc(db, `teknokapsul/${user.id}/creditScores`, editingScore.id!);
+      const scoreRef = doc(db, `teknokapsul/${user.uid}/creditScores`, editingScore.id!);
       await updateDoc(scoreRef, {
         date: editingScore.date,
         score: editingScore.score
@@ -126,7 +126,7 @@ const CreditScorePage: React.FC = () => {
     
     try {
       setLoading(true);
-      const scoreRef = doc(db, `teknokapsul/${user.id}/creditScores`, id);
+      const scoreRef = doc(db, `teknokapsul/${user.uid}/creditScores`, id);
       await deleteDoc(scoreRef);
       await fetchCreditScores();
     } catch (error) {
@@ -538,7 +538,6 @@ const CreditScorePage: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
       </div>
     </div>
   );

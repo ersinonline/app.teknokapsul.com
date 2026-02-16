@@ -1,35 +1,26 @@
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { SignIn, useUser } from '@clerk/clerk-react';
-import { Shield, Zap, Users, Star } from 'lucide-react';
-import { useEffect } from 'react';
+import { Shield, Zap, Users, Star, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export const LoginPage = () => {
-  const { user, loading } = useAuth();
-  const { isSignedIn, isLoaded } = useUser();
+  const { user, loading, error, signInWithGoogle } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [signingIn, setSigningIn] = useState(false);
   
-  // Her zaman ana sayfaya yönlendir
-  const getDefaultRedirect = () => {
-    return '/';
-  };
-  
-  const from = location.state?.from || getDefaultRedirect();
+  const from = location.state?.from || '/';
 
-  // Kullanıcı giriş yaptığında otomatik yönlendirme
   useEffect(() => {
-    if (isLoaded && isSignedIn && user) {
-      // Kısa bir gecikme ile yönlendir
+    if (!loading && user) {
       const timer = setTimeout(() => {
         navigate(from, { replace: true });
       }, 100);
-      
       return () => clearTimeout(timer);
     }
-  }, [user, isSignedIn, isLoaded, from, navigate]);
+  }, [user, loading, from, navigate]);
 
-  if (loading || !isLoaded) {
+  if (loading) {
     return (
       <div className="fixed inset-0 bg-white flex items-center justify-center overflow-hidden">
         <div className="text-center">
@@ -42,17 +33,24 @@ export const LoginPage = () => {
     );
   }
 
-  // Çifte kontrol: hem AuthContext hem de Clerk'in kendi durumu
-  if (user || isSignedIn) {
+  if (user) {
     return <Navigate to={from} replace />;
   }
+
+  const handleGoogleSignIn = async () => {
+    setSigningIn(true);
+    try {
+      await signInWithGoogle();
+    } finally {
+      setSigningIn(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white overflow-y-auto">
       <div className="min-h-screen flex flex-col lg:flex-row">
         {/* Left Section - Hero/Branding - Desktop Only */}
         <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-50 to-gray-100 flex-col justify-center relative overflow-hidden">
-          {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute top-10 left-10 w-32 h-32 bg-[#ffb700] rounded-full blur-3xl"></div>
             <div className="absolute bottom-20 right-20 w-40 h-40 bg-[#ffb700] rounded-full blur-3xl"></div>
@@ -60,28 +58,22 @@ export const LoginPage = () => {
           </div>
           
           <div className="relative z-10 max-w-xl mx-auto px-12 space-y-12">
-            {/* Logo and Brand */}
             <div className="text-center lg:text-left">
               <div className="flex items-center justify-center lg:justify-start gap-4 mb-8">
                 <div className="w-14 h-14 bg-[#ffb700] rounded-2xl flex items-center justify-center shadow-lg">
                   <span className="text-white font-bold text-2xl">T</span>
                 </div>
-                <h1 className="text-4xl font-bold text-gray-900">
-                  TeknoKapsül
-                </h1>
+                <h1 className="text-4xl font-bold text-gray-900">TeknoKapsül</h1>
               </div>
             </div>
 
-            {/* Main Heading */}
             <div className="text-center lg:text-left space-y-6">
               <h2 className="text-5xl lg:text-6xl font-bold leading-tight text-gray-900">
-                Dijital
-                <br />
+                Dijital<br />
                 <span className="text-[#ffb700] relative">
                   Yaşamınız
                   <div className="absolute -bottom-2 left-0 w-full h-1 bg-[#ffb700] opacity-30 rounded-full"></div>
-                </span>
-                <br />
+                </span><br />
                 Tek Yerde
               </h2>
               <p className="text-xl text-gray-600 max-w-lg leading-relaxed">
@@ -90,7 +82,6 @@ export const LoginPage = () => {
               </p>
             </div>
 
-            {/* Features Grid */}
             <div className="grid grid-cols-2 gap-6">
               <div className="flex items-center space-x-3 p-4 bg-white/50 rounded-xl backdrop-blur-sm">
                 <Shield className="w-6 h-6 text-[#ffb700]" />
@@ -112,7 +103,7 @@ export const LoginPage = () => {
           </div>
         </div>
 
-        {/* Right Section - Clerk SignIn */}
+        {/* Right Section - Firebase Google Sign-In */}
         <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-12 min-h-screen lg:min-h-0">
           <div className="w-full max-w-md">
             {/* Mobile Branding */}
@@ -121,91 +112,53 @@ export const LoginPage = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#ffb700] rounded-2xl flex items-center justify-center mr-3 sm:mr-4 shadow-lg">
                   <span className="text-white font-bold text-lg sm:text-xl">T</span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  TeknoKapsül
-                </h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">TeknoKapsül</h1>
               </div>
               <p className="text-gray-600 text-base sm:text-lg">
                 Dijital yaşamınızı kolaylaştıran platform
               </p>
             </div>
             
-            {/* Compact Clerk SignIn Form */}
+            {/* Sign In Card */}
             <div className="w-full max-w-sm mx-auto">
-              <SignIn 
-                redirectUrl="/"
-                fallbackRedirectUrl="/"
-                appearance={{
-                  elements: {
-                    rootBox: "w-full",
-                    card: "bg-white/95 backdrop-blur-sm shadow-lg border-0 rounded-xl p-5 w-full",
-                    headerTitle: "hidden",
-                    headerSubtitle: "hidden",
-                    
-                    // Social buttons - Compact
-                    socialButtonsBlockButton: "bg-white/80 backdrop-blur-sm border border-white/20 hover:border-[#ffb700]/50 hover:bg-[#ffb700]/5 text-gray-700 w-full py-2.5 px-4 text-sm font-medium transition-all duration-200 rounded-lg shadow-sm hover:shadow-md",
-                    socialButtonsBlockButtonText: "font-medium text-gray-700",
-                    socialButtonsBlockButtonArrow: "hidden",
-                    
-                    // Form inputs - Compact
-                    formFieldInput: "bg-white/70 backdrop-blur-sm border border-gray-200/50 focus:border-[#ffb700] focus:ring-2 focus:ring-[#ffb700]/20 text-gray-900 placeholder-gray-500 w-full py-2.5 px-3 text-sm transition-all duration-200 rounded-lg font-medium shadow-inner",
-                    formFieldLabel: "text-sm font-semibold text-gray-800 mb-1.5 block",
-                    
-                    // Primary button - Compact
-                    formButtonPrimary: "bg-gradient-to-r from-[#ffb700] to-[#ffa000] hover:from-[#e6a500] hover:to-[#ff8f00] text-white font-semibold w-full py-2.5 px-4 text-sm transition-all duration-200 rounded-lg shadow-md hover:shadow-lg",
-                    
-                    // Links and actions - Compact
-                    footerActionLink: "text-[#ffb700] hover:text-[#e6a500] text-sm font-semibold transition-all duration-200",
-                    formFieldAction: "text-[#ffb700] hover:text-[#e6a500] text-xs font-medium transition-all duration-200",
-                    
-                    // Divider - Compact
-                    dividerLine: "bg-gradient-to-r from-transparent via-gray-300 to-transparent h-px",
-                    dividerText: "text-gray-600 text-xs font-medium bg-white px-3 relative",
-                    dividerRow: "my-4 relative",
-                    
-                    // Error and success states
-                    formFieldSuccessText: "text-green-600 text-xs font-medium mt-1",
-                    formFieldErrorText: "text-red-600 text-xs font-medium mt-1",
-                    alertText: "text-red-600 text-xs font-medium",
-                    formFieldHintText: "text-gray-600 text-xs mt-1",
-                    
-                    // Password toggle
-                    formFieldInputShowPasswordButton: "text-gray-500 hover:text-[#ffb700] transition-all duration-200",
-                    
-                    // OTP inputs - Compact
-                    otpCodeFieldInput: "bg-white/80 backdrop-blur-sm border border-gray-200/50 focus:border-[#ffb700] focus:ring-2 focus:ring-[#ffb700]/20 text-gray-900 text-center text-base font-semibold rounded-lg w-10 h-10 mx-1 shadow-sm transition-all duration-200",
-                    
-                    // Resend code
-                    formResendCodeLink: "text-[#ffb700] hover:text-[#e6a500] text-xs font-medium transition-all duration-200",
-                    
-                    // Identity preview
-                    identityPreviewText: "text-sm text-gray-900 font-medium",
-                    identityPreviewEditButton: "text-[#ffb700] hover:text-[#e6a500] text-xs font-medium ml-2 transition-all duration-200",
-                    
-                    // Form container - Compact
-                    form: "space-y-3",
-                    formFieldRow: "space-y-1",
-                    
-                    // Footer - Compact
-                    footer: "mt-5 pt-4 border-t border-gray-200/50",
-                    footerAction: "text-center",
-                    footerActionText: "text-gray-600 text-xs font-medium",
-                    
-                    // Loading states
-                    spinner: "border-[#ffb700] border-t-transparent",
-                    
-                    // Alternative methods
-                    alternativeMethodsBlockButton: "bg-white/60 hover:bg-white/80 border border-gray-200/50 text-gray-700 font-medium py-2 px-3 rounded-lg transition-all duration-200",
-                    
-                    // Main container - Compact spacing
-                    main: "space-y-3"
-                  },
-                  layout: {
-                    socialButtonsPlacement: "top",
-                    showOptionalFields: false
-                  }
-                }}
-              />
+              <div className="bg-white/95 backdrop-blur-sm shadow-lg rounded-2xl p-6 sm:p-8 border border-gray-100">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">Hoş Geldiniz</h2>
+                  <p className="text-sm text-gray-500">Hesabınıza giriş yapın</p>
+                </div>
+
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                    {error}
+                  </div>
+                )}
+
+                {/* Google Sign-In Button */}
+                <button
+                  onClick={handleGoogleSignIn}
+                  disabled={signingIn}
+                  className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border-2 border-gray-200 rounded-xl hover:border-[#ffb700]/50 hover:bg-[#ffb700]/5 text-gray-700 font-medium text-sm transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {signingIn ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-[#ffb700]" />
+                  ) : (
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                  )}
+                  <span>{signingIn ? 'Giriş yapılıyor...' : 'Google ile Giriş Yap'}</span>
+                </button>
+
+                <div className="mt-6 text-center">
+                  <p className="text-xs text-gray-400">
+                    Giriş yaparak <span className="text-[#ffb700] font-medium">Kullanım Koşulları</span> ve{' '}
+                    <span className="text-[#ffb700] font-medium">Gizlilik Politikası</span>'nı kabul etmiş olursunuz.
+                  </p>
+                </div>
+              </div>
             </div>
             
             {/* Footer */}

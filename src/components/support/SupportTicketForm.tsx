@@ -21,8 +21,8 @@ export const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onSuccess,
     description: '',
     category: 'general',
     priority: 'medium',
-    email: user?.primaryEmailAddress?.emailAddress || '',
-    name: user?.fullName || '',
+    email: user?.email || '',
+    name: user?.displayName || '',
     phone: ''
   });
 

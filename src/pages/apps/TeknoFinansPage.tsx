@@ -129,117 +129,55 @@ const TeknoFinansPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-4 sm:p-6">
-        {/* Hero Section */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">TeknoFinans</h1>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <Coins className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">TeknoFinans</h1>
+              <p className="text-white/60 text-xs">Finansal araçlar ve hizmetler</p>
+            </div>
           </div>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-            Finansal işlemlerinizi kolaylaştıran araçlar ve hizmetler. Para yönetimi ve analiz için her şey burada.
-          </p>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Hızlı İşlemler</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Quick Actions */}
+          <div className="grid grid-cols-3 gap-2">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
-                <button
-                  key={index}
-                  onClick={action.action}
-                  className="bg-white p-4 rounded-lg border border-gray-200 hover:border-[#ffb700] hover:shadow-md transition-all duration-200 text-left group"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-[#ffb700]/10 p-2 rounded-lg group-hover:bg-[#ffb700]/20 transition-colors">
-                        <Icon className="w-5 h-5 text-[#ffb700]" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900">{action.title}</h3>
-                        <p className="text-sm text-gray-500">{action.description}</p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#ffb700] transition-colors" />
-                  </div>
+                <button key={index} onClick={action.action} className="bg-white/10 rounded-xl p-3 text-center hover:bg-white/20 transition-colors">
+                  <Icon className="w-4 h-4 text-white/70 mx-auto mb-1" />
+                  <p className="text-white text-[10px] font-medium">{action.title.split(' ').slice(1).join(' ')}</p>
                 </button>
               );
             })}
           </div>
         </div>
+      </div>
 
-        {/* Features Grid */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Finansal Araçlar</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {financeFeatures.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={feature.id}
-                  onClick={() => navigate(feature.path)}
-                  className={`bg-white rounded-xl p-4 border ${feature.borderColor} hover:shadow-lg transition-all duration-300 cursor-pointer group hover:scale-105`}
-                >
-                  <div className="flex items-start space-x-3">
-                    <div className={`${feature.bgColor} p-2 rounded-lg group-hover:scale-110 transition-transform duration-200`}>
-                      <Icon className={`w-5 h-5 ${feature.textColor}`} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base font-semibold text-gray-900 mb-1">{feature.title}</h3>
-                      <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-end">
-                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#ffb700] transition-colors" />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-blue-500 p-2 rounded-lg">
-                <BarChart3 className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900">Finansal Analiz</h3>
-            </div>
-            <p className="text-gray-600 mb-4">
-              Gelir-gider analizleri, trend takibi ve detaylı raporlarla finansal durumunuzu tam kontrol altında tutun.
-            </p>
-            <button 
-              onClick={() => navigate('/tekno-finans/financial-data')}
-              className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-2"
+      <div className="page-content -mt-5 space-y-3 mb-6">
+        {/* Features */}
+        {financeFeatures.map((feature) => {
+          const Icon = feature.icon;
+          return (
+            <button
+              key={feature.id}
+              onClick={() => navigate(feature.path)}
+              className="bank-card p-4 w-full flex items-center gap-3 hover:shadow-md transition-shadow text-left"
             >
-              Analize Başla <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-green-500 p-2 rounded-lg">
-                <Target className="w-6 h-6 text-white" />
+              <div className={`w-10 h-10 rounded-xl ${feature.bgColor} flex items-center justify-center flex-shrink-0`}>
+                <Icon className={`w-5 h-5 ${feature.textColor}`} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Hedef Takibi</h3>
-            </div>
-            <p className="text-gray-600 mb-4">
-              Finansal hedeflerinizi belirleyin, ilerlemenizi takip edin ve başarıya ulaşmak için plan yapın.
-            </p>
-            <button 
-              onClick={() => navigate('/tekno-finans/goals')}
-              className="text-green-600 hover:text-green-800 font-medium flex items-center gap-2"
-            >
-              Hedef Belirle <ArrowRight className="w-4 h-4" />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-foreground">{feature.title}</h3>
+                <p className="text-[11px] text-muted-foreground truncate">{feature.description}</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
             </button>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </div>
   );

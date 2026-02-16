@@ -53,7 +53,7 @@ class LoginTrackingService {
       const clientInfo = await this.getClientInfo();
       
       const loginRecord: LoginRecord = {
-        userId: user.id,
+        userId: user.uid,
         timestamp: serverTimestamp(),
         loginMethod,
         success,
@@ -61,7 +61,7 @@ class LoginTrackingService {
       };
 
       // Create a new document with auto-generated ID
-      const docRef = doc(collection(db, 'teknokapsul', user.id, 'loginRecords'));
+      const docRef = doc(collection(db, 'teknokapsul', user.uid, 'loginRecords'));
       await setDoc(docRef, loginRecord);
       
       console.log('Login recorded successfully');
@@ -100,13 +100,13 @@ class LoginTrackingService {
       const clientInfo = await this.getClientInfo();
       
       const logoutRecord = {
-        userId: user.id,
+        userId: user.uid,
         timestamp: serverTimestamp(),
         action: 'logout',
         ...clientInfo
       };
 
-      const docRef = doc(collection(db, 'teknokapsul', user.id, 'loginRecords'));
+      const docRef = doc(collection(db, 'teknokapsul', user.uid, 'loginRecords'));
       await setDoc(docRef, logoutRecord);
       
       console.log('Logout recorded successfully');

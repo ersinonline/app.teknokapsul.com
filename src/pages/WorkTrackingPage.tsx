@@ -81,7 +81,7 @@ const WorkTrackingPage: React.FC = () => {
     const loadSalaryHistory = async () => {
       if (user) {
         try {
-          const salaryHistory = await workTrackingService.getSalaryHistoryForMonth(user.id, selectedYear, selectedMonth);
+          const salaryHistory = await workTrackingService.getSalaryHistoryForMonth(user.uid, selectedYear, selectedMonth);
           if (salaryHistory) {
             setPaidSalary(salaryHistory.paidSalary.toString());
             setMealAllowancePaid(salaryHistory.paidMealAllowance.toString());
@@ -89,9 +89,9 @@ const WorkTrackingPage: React.FC = () => {
           } else {
             // Eğer Firebase'da veri yoksa localStorage'dan yükle (geçiş dönemi için)
             const monthKey = `${selectedYear}_${selectedMonth}`;
-            const savedPaidSalary = localStorage.getItem(`paidSalary_${user.id}_${monthKey}`);
-            const savedMealAllowance = localStorage.getItem(`mealAllowancePaid_${user.id}_${monthKey}`);
-            const savedTransportAllowance = localStorage.getItem(`transportAllowancePaid_${user.id}_${monthKey}`);
+            const savedPaidSalary = localStorage.getItem(`paidSalary_${user.uid}_${monthKey}`);
+            const savedMealAllowance = localStorage.getItem(`mealAllowancePaid_${user.uid}_${monthKey}`);
+            const savedTransportAllowance = localStorage.getItem(`transportAllowancePaid_${user.uid}_${monthKey}`);
             
             setPaidSalary(savedPaidSalary || '');
             setMealAllowancePaid(savedMealAllowance || '');
@@ -101,9 +101,9 @@ const WorkTrackingPage: React.FC = () => {
           console.error('Maaş geçmişi yükleme hatası:', error);
           // Hata durumunda localStorage'dan yükle
           const monthKey = `${selectedYear}_${selectedMonth}`;
-          const savedPaidSalary = localStorage.getItem(`paidSalary_${user.id}_${monthKey}`);
-          const savedMealAllowance = localStorage.getItem(`mealAllowancePaid_${user.id}_${monthKey}`);
-          const savedTransportAllowance = localStorage.getItem(`transportAllowancePaid_${user.id}_${monthKey}`);
+          const savedPaidSalary = localStorage.getItem(`paidSalary_${user.uid}_${monthKey}`);
+          const savedMealAllowance = localStorage.getItem(`mealAllowancePaid_${user.uid}_${monthKey}`);
+          const savedTransportAllowance = localStorage.getItem(`transportAllowancePaid_${user.uid}_${monthKey}`);
           
           setPaidSalary(savedPaidSalary || '');
           setMealAllowancePaid(savedMealAllowance || '');
@@ -122,7 +122,7 @@ const WorkTrackingPage: React.FC = () => {
         try {
           const now = new Date();
           await workTrackingService.saveSalaryHistory({
-            userId: user.id,
+            userId: user.uid,
             year: selectedYear,
             month: selectedMonth,
             paidSalary: parseFloat(paidSalary) || 0,
@@ -140,22 +140,22 @@ const WorkTrackingPage: React.FC = () => {
           // Başarılı kayıt sonrası localStorage'dan temizle (geçiş dönemi için)
           const monthKey = `${selectedYear}_${selectedMonth}`;
           if (paidSalary) {
-            localStorage.removeItem(`paidSalary_${user.id}_${monthKey}`);
+            localStorage.removeItem(`paidSalary_${user.uid}_${monthKey}`);
           }
           if (mealAllowancePaid) {
-            localStorage.removeItem(`mealAllowancePaid_${user.id}_${monthKey}`);
+            localStorage.removeItem(`mealAllowancePaid_${user.uid}_${monthKey}`);
           }
           if (transportAllowancePaid) {
-            localStorage.removeItem(`transportAllowancePaid_${user.id}_${monthKey}`);
+            localStorage.removeItem(`transportAllowancePaid_${user.uid}_${monthKey}`);
           }
         } catch (error) {
           console.error('Maaş geçmişi kaydetme hatası:', error);
           // Hata durumunda localStorage'a kaydet (fallback)
           const monthKey = `${selectedYear}_${selectedMonth}`;
           if (paidSalary) {
-            localStorage.setItem(`paidSalary_${user.id}_${monthKey}`, paidSalary);
+            localStorage.setItem(`paidSalary_${user.uid}_${monthKey}`, paidSalary);
           } else {
-            localStorage.removeItem(`paidSalary_${user.id}_${monthKey}`);
+            localStorage.removeItem(`paidSalary_${user.uid}_${monthKey}`);
           }
         }
       }
@@ -172,7 +172,7 @@ const WorkTrackingPage: React.FC = () => {
         try {
           const now = new Date();
           await workTrackingService.saveSalaryHistory({
-            userId: user.id,
+            userId: user.uid,
             year: selectedYear,
             month: selectedMonth,
             paidSalary: parseFloat(paidSalary) || 0,
@@ -189,15 +189,15 @@ const WorkTrackingPage: React.FC = () => {
           
           // Başarılı kayıt sonrası localStorage'dan temizle
           const monthKey = `${selectedYear}_${selectedMonth}`;
-          localStorage.removeItem(`mealAllowancePaid_${user.id}_${monthKey}`);
+          localStorage.removeItem(`mealAllowancePaid_${user.uid}_${monthKey}`);
         } catch (error) {
           console.error('Yemek ücreti geçmişi kaydetme hatası:', error);
           // Hata durumunda localStorage'a kaydet (fallback)
           const monthKey = `${selectedYear}_${selectedMonth}`;
           if (mealAllowancePaid) {
-            localStorage.setItem(`mealAllowancePaid_${user.id}_${monthKey}`, mealAllowancePaid);
+            localStorage.setItem(`mealAllowancePaid_${user.uid}_${monthKey}`, mealAllowancePaid);
           } else {
-            localStorage.removeItem(`mealAllowancePaid_${user.id}_${monthKey}`);
+            localStorage.removeItem(`mealAllowancePaid_${user.uid}_${monthKey}`);
           }
         }
       }
@@ -213,7 +213,7 @@ const WorkTrackingPage: React.FC = () => {
         try {
           const now = new Date();
           await workTrackingService.saveSalaryHistory({
-            userId: user.id,
+            userId: user.uid,
             year: selectedYear,
             month: selectedMonth,
             paidSalary: parseFloat(paidSalary) || 0,
@@ -230,15 +230,15 @@ const WorkTrackingPage: React.FC = () => {
           
           // Başarılı kayıt sonrası localStorage'dan temizle
           const monthKey = `${selectedYear}_${selectedMonth}`;
-          localStorage.removeItem(`transportAllowancePaid_${user.id}_${monthKey}`);
+          localStorage.removeItem(`transportAllowancePaid_${user.uid}_${monthKey}`);
         } catch (error) {
           console.error('Ulaşım ücreti geçmişi kaydetme hatası:', error);
           // Hata durumunda localStorage'a kaydet (fallback)
           const monthKey = `${selectedYear}_${selectedMonth}`;
           if (transportAllowancePaid) {
-            localStorage.setItem(`transportAllowancePaid_${user.id}_${monthKey}`, transportAllowancePaid);
+            localStorage.setItem(`transportAllowancePaid_${user.uid}_${monthKey}`, transportAllowancePaid);
           } else {
-            localStorage.removeItem(`transportAllowancePaid_${user.id}_${monthKey}`);
+            localStorage.removeItem(`transportAllowancePaid_${user.uid}_${monthKey}`);
           }
         }
       }
@@ -254,8 +254,8 @@ const WorkTrackingPage: React.FC = () => {
     try {
       setLoading(true);
       const [entries, settings] = await Promise.all([
-        workTrackingService.getWorkEntries(user.id, selectedMonth, selectedYear),
-        workTrackingService.getWorkSettings(user.id)
+        workTrackingService.getWorkEntries(user.uid, selectedMonth, selectedYear),
+        workTrackingService.getWorkSettings(user.uid)
       ]);
       
       setWorkEntries(entries);
@@ -276,7 +276,7 @@ const WorkTrackingPage: React.FC = () => {
     if (!user) return;
     
     try {
-      const yearlyHistory = await workTrackingService.getSalaryHistoryForYear(user.id, selectedYear);
+      const yearlyHistory = await workTrackingService.getSalaryHistoryForYear(user.uid, selectedYear);
       console.log('Yearly Salary History Debug:', {
         year: selectedYear,
         historyCount: yearlyHistory.length,
@@ -302,7 +302,7 @@ const WorkTrackingPage: React.FC = () => {
     
     try {
       // Load all work entries for the selected year (without month filter)
-      const yearlyEntries = await workTrackingService.getWorkEntries(user.id, undefined, selectedYear);
+      const yearlyEntries = await workTrackingService.getWorkEntries(user.uid, undefined, selectedYear);
       setYearlyWorkEntries(yearlyEntries);
     } catch (error) {
       console.error('Yıllık iş girişleri yükleme hatası:', error);
@@ -318,9 +318,9 @@ const WorkTrackingPage: React.FC = () => {
 
     try {
       console.log('Ayarlar kaydediliyor:', settings);
-      console.log('Kullanıcı ID:', user.id);
+      console.log('Kullanıcı ID:', user.uid);
       
-      const result = await workTrackingService.saveWorkSettings(user.id, settings);
+      const result = await workTrackingService.saveWorkSettings(user.uid, settings);
       console.log('Ayarlar başarıyla kaydedildi, ID:', result);
       
       await loadData();
@@ -359,7 +359,7 @@ const WorkTrackingPage: React.FC = () => {
 
     try {
       const entry: Omit<WorkEntry, 'id'> = {
-        userId: user.id,
+        userId: user.uid,
         date: workDate,
         startTime,
         endTime,

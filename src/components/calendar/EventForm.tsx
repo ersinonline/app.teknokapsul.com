@@ -27,7 +27,7 @@ export const EventForm: React.FC<EventFormProps> = ({ onClose, onSave, selectedD
 
     try {
       const event = {
-        userId: user.id,
+        userId: user.uid,
         title: formData.title,
         description: formData.description,
         date: `${formData.date}T${formData.time}`,
@@ -35,7 +35,7 @@ export const EventForm: React.FC<EventFormProps> = ({ onClose, onSave, selectedD
         createdAt: new Date().toISOString()
       };
 
-      const eventId = await addEvent(event, user.id);
+      const eventId = await addEvent(event, user.uid);
       await scheduleEventNotification({ ...event, id: eventId });
       
       onSave();

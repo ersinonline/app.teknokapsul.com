@@ -10,6 +10,7 @@ import { SupportTicket, SUPPORT_CATEGORIES, SUPPORT_PRIORITIES, SUPPORT_STATUSES
 import { SupportTicketReplies } from '../../components/support/SupportTicketReplies';
 import { Order } from '../../services/order.service';
 import { EmailTestPanel } from '../../components/admin/EmailTestPanel';
+import { getDigitalCodes, addDigitalCode, updateDigitalCode, deleteDigitalCode, getAllDigitalOrders, DigitalCode, DigitalOrder } from '../../services/digitalCode.service';
 
 interface FormSubmission {
   id: string;
@@ -59,7 +60,7 @@ const AdminPage: React.FC = () => {
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
   const [showOrderModal, setShowOrderModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'applications' | 'support' | 'products' | 'orders' | 'email'>('applications');
+  const [activeTab, setActiveTab] = useState<'applications' | 'support' | 'products' | 'orders' | 'email' | 'digitalCodes'>('applications');
   const [isEditing, setIsEditing] = useState(false);
   const [editingTicket, setEditingTicket] = useState(false);
   const [editingProduct, setEditingProduct] = useState(false);
@@ -74,6 +75,11 @@ const AdminPage: React.FC = () => {
   const [productCategoryFilter, setProductCategoryFilter] = useState('all');
   const [bulkPriceChange, setBulkPriceChange] = useState({ type: 'increase', value: 0, unit: 'percent' });
 
+  // Digital Codes state
+  const [digitalCodes, setDigitalCodes] = useState<DigitalCode[]>([]);
+  const [digitalOrders, setDigitalOrders] = useState<DigitalOrder[]>([]);
+  const [showAddDigitalCode, setShowAddDigitalCode] = useState(false);
+  const [newDigitalCode, setNewDigitalCode] = useState({ name: '', category: '', price: 0, description: '', stock: 10, active: true });
 
   // Filtreleme fonksiyonları
   const getFilteredProducts = () => {
@@ -131,7 +137,7 @@ const AdminPage: React.FC = () => {
   };
 
   // Admin kontrolü
-  if (!user || user.emailAddresses[0]?.emailAddress !== 'clk.ersinnn@gmail.com') {
+  if (!user || user.email !== 'clk.ersinnn@gmail.com') {
     return <Navigate to="/" replace />;
   }
 
@@ -140,7 +146,8 @@ const AdminPage: React.FC = () => {
     fetchSupportTickets();
     fetchProducts();
     fetchOrders();
-
+    fetchDigitalCodes();
+    fetchDigitalOrders();
   }, []);
 
 
@@ -528,6 +535,58 @@ const AdminPage: React.FC = () => {
     }
   };
 
+  const fetchDigitalCodes = async () => {
+    try {
+      const data = await getDigitalCodes();
+      setDigitalCodes(data);
+    } catch (error) {
+      console.error('Dijital kodlar yüklenirken hata:', error);
+    }
+  };
+
+  const fetchDigitalOrders = async () => {
+    try {
+      const data = await getAllDigitalOrders();
+      setDigitalOrders(data);
+    } catch (error) {
+      console.error('Dijital siparişler yüklenirken hata:', error);
+    }
+  };
+
+  const handleAddDigitalCodeSubmit = async () => {
+    if (!newDigitalCode.name || !newDigitalCode.category || !newDigitalCode.price) {
+      alert('Lütfen tüm zorunlu alanları doldurun.');
+      return;
+    }
+    try {
+      await addDigitalCode(newDigitalCode);
+      setNewDigitalCode({ name: '', category: '', price: 0, description: '', stock: 10, active: true });
+      setShowAddDigitalCode(false);
+      await fetchDigitalCodes();
+    } catch (error) {
+      console.error('Dijital kod eklenirken hata:', error);
+    }
+  };
+
+  const handleDeleteDigitalCode = async (id: string) => {
+    if (!confirm('Bu dijital ürünü silmek istediğinizden emin misiniz?')) return;
+    try {
+      await deleteDigitalCode(id);
+      await fetchDigitalCodes();
+    } catch (error) {
+      console.error('Dijital kod silinirken hata:', error);
+    }
+  };
+
+  const handleToggleDigitalCodeActive = async (id: string, active: boolean) => {
+    try {
+      await updateDigitalCode(id, { active: !active });
+      await fetchDigitalCodes();
+    } catch (error) {
+      console.error('Dijital kod güncellenirken hata:', error);
+    }
+  };
+
   const getFormTypeText = (type: string) => {
     const types: { [key: string]: string } = {
       'application': 'Başvuru Formu',
@@ -635,24 +694,33 @@ const AdminPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="page-container bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ffb700] mx-auto mb-4"></div>
-          <p className="text-gray-600">Form başvuruları yükleniyor...</p>
+          <div className="w-10 h-10 loading-spinner mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Veriler yükleniyor...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Müşteri Hizmetleri Paneli</h1>
-          <p className="text-gray-600">Müşteri başvurularını ve destek taleplerini yönetin</p>
-          <div className="w-20 h-1 bg-[#ffb700] rounded-full mt-4"></div>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <Settings className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">Yönetim Paneli</h1>
+              <p className="text-white/60 text-xs">Başvuru ve destek yönetimi</p>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="page-content -mt-5 space-y-4 mb-6">
 
         {/* Filters - Sadece başvurular ve destek talepleri için */}
         {(activeTab === 'applications' || activeTab === 'support') && (
@@ -768,6 +836,17 @@ const AdminPage: React.FC = () => {
             >
               <ShoppingCart className="w-4 h-4 inline mr-2" />
               Sipariş Yönetimi
+            </button>
+            <button
+              onClick={() => setActiveTab('digitalCodes')}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'digitalCodes'
+                  ? 'border-[#ffb700] text-[#ffb700]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <ShoppingCart className="w-4 h-4 inline mr-2" />
+              Dijital Kodlar
             </button>
             <button
               onClick={() => setActiveTab('email')}
@@ -1177,7 +1256,7 @@ const AdminPage: React.FC = () => {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Toplam Gelir</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {orders.reduce((sum, order) => sum + order.total, 0).toLocaleString('tr-TR')} ₺
+                      {orders.reduce((sum, order) => sum + (order.total || order.grandTotal || 0), 0).toLocaleString('tr-TR')} ₺
                     </p>
                   </div>
                 </div>
@@ -1232,7 +1311,7 @@ const AdminPage: React.FC = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ₺{order.total.toLocaleString('tr-TR')}
+                          ₺{(order.total || order.grandTotal || 0).toLocaleString('tr-TR')}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
@@ -1250,7 +1329,7 @@ const AdminPage: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('tr-TR') : 'Tarih yok'}
+                          {order.createdAt ? new Date((order.createdAt.seconds || order.createdAt._seconds || 0) * 1000).toLocaleDateString('tr-TR') : 'Tarih yok'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
@@ -2391,17 +2470,258 @@ const AdminPage: React.FC = () => {
           </div>
         )}
 
-        {activeTab === 'email' ? (
-          <EmailTestPanel />
-        ) : (
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <Settings className="w-12 h-12 mx-auto" />
+        {activeTab === 'digitalCodes' && (
+          <>
+            {/* Dijital Kodlar İstatistikleri */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-purple-100 rounded-lg">
+                    <Package className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Toplam Ürün</p>
+                    <p className="text-2xl font-bold text-gray-900">{digitalCodes.length}</p>
+                  </div>
+                </div>
               </div>
-              <p className="text-gray-500">Lütfen bir sekme seçin.</p>
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-green-100 rounded-lg">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Aktif Ürün</p>
+                    <p className="text-2xl font-bold text-gray-900">{digitalCodes.filter(d => d.active).length}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <ShoppingCart className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Dijital Sipariş</p>
+                    <p className="text-2xl font-bold text-gray-900">{digitalOrders.length}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex items-center">
+                  <div className="p-3 bg-yellow-100 rounded-lg">
+                    <ShoppingCart className="w-6 h-6 text-yellow-600" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-600">Dijital Gelir</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {digitalOrders.filter(o => o.status === 'completed').reduce((sum, o) => sum + (o.price || 0), 0).toLocaleString('tr-TR')} ₺
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+
+            {/* Yeni Dijital Ürün Ekle */}
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Dijital Ürün Yönetimi</h2>
+                <button
+                  onClick={() => setShowAddDigitalCode(!showAddDigitalCode)}
+                  className="bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a600] transition-colors flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Yeni Ürün Ekle
+                </button>
+              </div>
+
+              {showAddDigitalCode && (
+                <div className="border border-gray-200 rounded-xl p-4 mb-4 bg-gray-50">
+                  <h3 className="font-medium text-gray-900 mb-3">Yeni Dijital Ürün</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Ürün Adı *</label>
+                      <input
+                        type="text"
+                        value={newDigitalCode.name}
+                        onChange={(e) => setNewDigitalCode(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="Ör: Netflix 1 Aylık"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Kategori *</label>
+                      <input
+                        type="text"
+                        value={newDigitalCode.category}
+                        onChange={(e) => setNewDigitalCode(prev => ({ ...prev, category: e.target.value }))}
+                        placeholder="Ör: Streaming, Oyun, Yazılım"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Fiyat (₺) *</label>
+                      <input
+                        type="number"
+                        value={newDigitalCode.price || ''}
+                        onChange={(e) => setNewDigitalCode(prev => ({ ...prev, price: Number(e.target.value) }))}
+                        placeholder="0.00"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
+                      <input
+                        type="text"
+                        value={newDigitalCode.description}
+                        onChange={(e) => setNewDigitalCode(prev => ({ ...prev, description: e.target.value }))}
+                        placeholder="Ürün açıklaması..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Stok Adedi</label>
+                      <input
+                        type="number"
+                        value={newDigitalCode.stock}
+                        onChange={(e) => setNewDigitalCode(prev => ({ ...prev, stock: Number(e.target.value) }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ffb700] focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleAddDigitalCodeSubmit}
+                      className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Ürün Ekle
+                    </button>
+                    <button
+                      onClick={() => setShowAddDigitalCode(false)}
+                      className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      İptal
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Dijital Ürün Listesi */}
+              {digitalCodes.length === 0 ? (
+                <div className="text-center py-8">
+                  <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">Henüz dijital ürün eklenmemiş.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ürün Adı</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fiyat</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stok</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Durum</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">İşlemler</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {digitalCodes.map(code => (
+                        <tr key={code.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            <div className="text-sm font-medium text-gray-900">{code.name}</div>
+                            {code.description && <div className="text-xs text-gray-500">{code.description}</div>}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{code.category}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900">{code.price.toLocaleString('tr-TR')} ₺</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{code.stock}</td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${code.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                              {code.active ? 'Aktif' : 'Pasif'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleToggleDigitalCodeActive(code.id!, code.active)}
+                                className={`text-xs px-2 py-1 rounded ${code.active ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
+                              >
+                                {code.active ? 'Pasifleştir' : 'Aktifleştir'}
+                              </button>
+                              <button
+                                onClick={() => handleDeleteDigitalCode(code.id!)}
+                                className="text-red-600 hover:text-red-800"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Dijital Siparişler */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Dijital Siparişler ({digitalOrders.length})</h2>
+              {digitalOrders.length === 0 ? (
+                <div className="text-center py-8">
+                  <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">Henüz dijital sipariş yok.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ürün</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fiyat</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Durum</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ödeme ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tarih</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {digitalOrders.map(order => (
+                        <tr key={order.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            <div className="text-sm font-medium text-gray-900">{order.productName}</div>
+                            <div className="text-xs text-gray-500">{order.productCategory}</div>
+                          </td>
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900">{(order.price || 0).toLocaleString('tr-TR')} ₺</td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                              order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                              order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              order.status === 'failed' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {order.status === 'completed' ? 'Tamamlandı' :
+                               order.status === 'pending' ? 'Beklemede' :
+                               order.status === 'failed' ? 'Başarısız' : order.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-xs text-gray-500 font-mono">{order.paymentId || '-'}</td>
+                          <td className="px-4 py-3 text-sm text-gray-500">
+                            {order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('tr-TR') : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {activeTab === 'email' && (
+          <EmailTestPanel />
         )}
       </div>
     </div>

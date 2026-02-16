@@ -30,7 +30,7 @@ const AIChat: React.FC = () => {
       
       // Eğer kullanıcı giriş yapmış ve durum sorgusu yapıyorsa
       if (user && isStatusQuery(prompt)) {
-        result = await queryUserStatus(user.id, prompt);
+        result = await queryUserStatus(user.uid, prompt);
       } else {
         result = await generateText(prompt);
       }

@@ -129,10 +129,10 @@ const PaymentPlanPage: React.FC = () => {
   // Load saved plans and restore state on component mount
   useEffect(() => {
     const loadSavedPlans = async () => {
-      if (!user?.id) return;
+      if (!user?.uid) return;
       
       try {
-        const plansRef = collection(db, 'teknokapsul', user.id, 'paymentPlans');
+        const plansRef = collection(db, 'teknokapsul', user.uid, 'paymentPlans');
         const q = query(plansRef, orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
         
@@ -193,11 +193,11 @@ const PaymentPlanPage: React.FC = () => {
 
   // Delete a saved plan
   const deletePlan = async (planId: string) => {
-    if (!user?.id) return;
+    if (!user?.uid) return;
     
     setIsDeleting(true);
     try {
-      await deleteDoc(doc(db, 'teknokapsul', user.id, 'paymentPlans', planId));
+      await deleteDoc(doc(db, 'teknokapsul', user.uid, 'paymentPlans', planId));
       setSavedPlans(prev => prev.filter(plan => plan.id !== planId));
       
       // If we're viewing the deleted plan, go back to form
@@ -426,7 +426,7 @@ const PaymentPlanPage: React.FC = () => {
 
   // Plan management functions
   const savePlan = async () => {
-    if (!paymentPlan?.name?.trim() || !user?.id) return;
+    if (!paymentPlan?.name?.trim() || !user?.uid) return;
     
     setIsSaving(true);
     
@@ -470,14 +470,14 @@ const PaymentPlanPage: React.FC = () => {
         totalMonthlyPayment: (selectedHousingCredit?.monthlyPayment || 0) + totalPersonalCreditMonthly,
         createdAt: new Date(),
         sharedWith: paymentPlan.shareEmail || null,
-        userId: user.id
+        userId: user.uid
       };
       
       console.log('Kaydedilecek plan verisi:', planData);
       console.log('Email adresi:', paymentPlan.shareEmail);
       
       // Save to Firebase Firestore
-      const plansRef = collection(db, 'teknokapsul', user.id, 'paymentPlans');
+      const plansRef = collection(db, 'teknokapsul', user.uid, 'paymentPlans');
       const docRef = await addDoc(plansRef, planData);
       
       const newPlan: PaymentPlan = {
@@ -934,20 +934,24 @@ const PaymentPlanPage: React.FC = () => {
   // If viewing plan details, show detail page
   if (viewMode === 'detail' && selectedPlan) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto p-4 sm:p-6">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
-            <button
-              onClick={() => {
-                setViewMode('form');
-                setSelectedPlan(null);
-              }}
-              className="flex items-center text-gray-600 hover:text-gray-800 transition-colors self-start"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Geri Dön
-            </button>
+      <div className="page-container bg-background">
+        <div className="bank-gradient px-4 pt-4 pb-10">
+          <div className="page-content">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => { setViewMode('form'); setSelectedPlan(null); }}
+                className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center"
+              >
+                <ArrowLeft className="w-5 h-5 text-white" />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-white">{selectedPlan.name}</h1>
+                <p className="text-white/60 text-xs">Plan Detayları</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="page-content -mt-5 space-y-4 mb-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={() => downloadPlanAsPDF(selectedPlan)}
@@ -976,7 +980,6 @@ const PaymentPlanPage: React.FC = () => {
                 {isDeleting ? 'Siliniyor...' : 'Sil'}
               </button>
             </div>
-          </div>
 
           {/* Plan Details */}
           <div className="bg-white rounded-xl shadow-sm border p-6">
@@ -1179,28 +1182,25 @@ const PaymentPlanPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6">
-        {/* Header */}
-        <div className="bg-white shadow-sm sticky top-0 z-10 p-4 mb-6 sm:mb-8 rounded-lg">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center">
-              <div className="bg-[#ffb700] p-3 rounded-full mr-3">
-                <Home className="w-8 h-8 text-white" />
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                {isEditing ? `${selectedPlan?.name} - Düzenleme` : 'Ödeme Planı Oluştur'}
-              </h1>
+    <div className="page-container bg-background">
+      {/* Header */}
+      <div className="bank-gradient px-4 pt-4 pb-10">
+        <div className="page-content">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <Home className="w-5 h-5 text-white" />
             </div>
-            <button className="flex items-center gap-2 px-3 py-2 bg-[#ffb700] text-white rounded-lg hover:bg-[#e6a500] transition-colors">
-              <Plus className="w-4 h-4" />
-              <span className="text-sm font-medium">Ekle</span>
-            </button>
+            <div>
+              <h1 className="text-xl font-bold text-white">
+                {isEditing ? 'Planı Düzenle' : 'Ödeme Planı Oluştur'}
+              </h1>
+              <p className="text-white/60 text-xs">Peşinat ve kredi planlaması</p>
+            </div>
           </div>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4 text-center">
-            Ev alımınız için detaylı ödeme planı oluşturun. Peşinat, konut kredisi ve ihtiyaç kredilerini planlayın.
-          </p>
         </div>
+      </div>
+
+      <div className="page-content -mt-5 space-y-4 mb-6">
 
         {/* Progress Steps */}
         <div className="mb-8">

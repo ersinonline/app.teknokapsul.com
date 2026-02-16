@@ -28,7 +28,7 @@ export const EventList: React.FC<EventListProps> = ({
   const handleDelete = async (eventId: string) => {
     if (!user) return;
     try {
-      await deleteEvent(eventId, user.id);
+      await deleteEvent(eventId, user.uid);
       onEventDelete();
     } catch (error) {
       console.error('Error deleting event:', error);
