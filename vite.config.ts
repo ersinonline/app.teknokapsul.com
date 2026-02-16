@@ -49,9 +49,6 @@ export default defineConfig(({ mode }) => ({
               'firebase/analytics'
             ],
             
-            // Authentication
-            'auth-vendor': ['@clerk/clerk-react'],
-            
             // UI libraries
             'ui-vendor': [
               'lucide-react'
