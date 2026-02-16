@@ -51,6 +51,7 @@ import MyOrdersPage from './pages/other/MyOrdersPage';
 
 import EarnAsYouSpendPage from './pages/other/EarnAsYouSpendPage';
 import DigitalPaymentResultPage from './pages/other/DigitalPaymentResultPage';
+import SubscriptionServicesPage from './pages/other/SubscriptionServicesPage';
 import CheckoutPage from './pages/other/CheckoutPage';
 import OrderSuccessPage from './pages/other/OrderSuccessPage';
 import { GoalsPage } from './pages/goals/GoalsPage';
@@ -283,6 +284,10 @@ const router = createBrowserRouter([
     element: <TeknoRoute><ShopRewardsPage /></TeknoRoute>
   },
 
+  {
+    path: '/abonelik-hizmetler',
+    element: <TeknoRoute><SubscriptionServicesPage /></TeknoRoute>
+  },
   {
     path: '/dijital-kodlar',
     element: <TeknoRoute><EarnAsYouSpendPage /></TeknoRoute>
