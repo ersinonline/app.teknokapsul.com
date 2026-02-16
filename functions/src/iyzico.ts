@@ -7,7 +7,7 @@ const Iyzipay = require("iyzipay");
 const iyzipay = new Iyzipay({
   apiKey: functions.config().iyzico?.api_key || "kgvpLKB9EUfzNV64Y40a2wV0JijXbSEK",
   secretKey: functions.config().iyzico?.secret_key || "Qb1HcmeZEnSjIygCtVASbpUpiMrXrIPb",
-  uri: functions.config().iyzico?.base_url || "https://sandbox-api.iyzipay.com",
+  uri: functions.config().iyzico?.base_url || "https://api.iyzipay.com",
 });
 
 // Promise wrapper for iyzipay SDK callbacks

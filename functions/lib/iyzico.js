@@ -10,7 +10,7 @@ const Iyzipay = require("iyzipay");
 const iyzipay = new Iyzipay({
     apiKey: ((_a = functions.config().iyzico) === null || _a === void 0 ? void 0 : _a.api_key) || "kgvpLKB9EUfzNV64Y40a2wV0JijXbSEK",
     secretKey: ((_b = functions.config().iyzico) === null || _b === void 0 ? void 0 : _b.secret_key) || "Qb1HcmeZEnSjIygCtVASbpUpiMrXrIPb",
-    uri: ((_c = functions.config().iyzico) === null || _c === void 0 ? void 0 : _c.base_url) || "https://sandbox-api.iyzipay.com",
+    uri: ((_c = functions.config().iyzico) === null || _c === void 0 ? void 0 : _c.base_url) || "https://api.iyzipay.com",
 });
 // Promise wrapper for iyzipay SDK callbacks
 function initializeCheckoutForm(request) {
