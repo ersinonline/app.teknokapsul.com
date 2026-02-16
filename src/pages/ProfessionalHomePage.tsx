@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, CreditCard, DollarSign, Star, Shield, Smartphone, ShoppingBag, Server, User } from 'lucide-react';
+import { Home, CreditCard, DollarSign, Star, Shield, Smartphone, ShoppingBag, Server, User, TrendingUp, Zap, ArrowRight } from 'lucide-react';
 
 interface SlideData {
   id: number;
@@ -292,7 +292,7 @@ const ProfessionalHomePage: React.FC = () => {
   // Mouse wheel scroll handler
   const handleWheelScroll = (e: React.WheelEvent, ref: React.RefObject<HTMLDivElement>) => {
     if (ref.current && window.innerWidth >= 768) { // Only on desktop/tablet
-      e.preventDefault();
+      // Don't prevent default - let browser handle it naturally
       const scrollAmount = e.deltaY > 0 ? 100 : -100; // Scroll right or left
       ref.current.scrollBy({
         left: scrollAmount,
@@ -341,13 +341,13 @@ const ProfessionalHomePage: React.FC = () => {
   }, [showAllBrands, showAllCampaigns]);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-0">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 pb-0">
       {/* Enhanced Hero Slideshow */}
-      <section className="relative bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 px-4 pt-6 pb-4">
+      <section className="relative bg-gradient-to-br from-[#1e293b] via-[#334155] to-[#0f172a] px-4 pt-6 pb-6">
         <div className="max-w-6xl mx-auto">
           {/* Slideshow Container */}
-          <div className="relative mb-4 rounded-2xl overflow-hidden w-full">
-            <div className="relative h-48 md:h-64 lg:h-80 bg-gradient-to-r from-blue-600 to-purple-600">
+          <div className="relative mb-4 rounded-3xl overflow-hidden w-full shadow-2xl">
+            <div className="relative h-56 md:h-72 lg:h-96 bg-gradient-to-r from-blue-600 to-purple-600">
               {slides.map((slide, index) => (
                 <div
                   key={slide.id}
@@ -360,11 +360,12 @@ const ProfessionalHomePage: React.FC = () => {
                     backgroundPosition: 'center'
                   }}
                 >
-                  <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-12 text-white">
-                    <h2 className="text-xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-4">{slide.title}</h2>
-                    <p className="text-sm md:text-base lg:text-lg opacity-90 mb-4 md:mb-6 leading-relaxed max-w-2xl">{slide.description}</p>
-                    <button className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-4 py-2 md:px-6 md:py-3 rounded-lg text-sm md:text-base font-semibold transition-all duration-300 self-start">
+                  <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-12 text-white animate-fade-in">
+                    <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-5 drop-shadow-lg">{slide.title}</h2>
+                    <p className="text-sm md:text-lg lg:text-xl opacity-95 mb-5 md:mb-8 leading-relaxed max-w-2xl drop-shadow-md">{slide.description}</p>
+                    <button className="bg-white/20 hover:bg-white/30 backdrop-blur-md px-6 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base font-semibold transition-all duration-300 self-start hover:scale-105 active:scale-95 shadow-lg flex items-center gap-2 group">
                       {slide.buttonText}
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
                 </div>
@@ -377,20 +378,20 @@ const ProfessionalHomePage: React.FC = () => {
       </section>
 
       {/* Horizontally Scrollable Quick Access Categories */}
-      <section className="bg-gray-50 px-4 py-6">
+      <section className="bg-gradient-to-b from-white to-gray-50 px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-2 md:flex md:justify-center md:gap-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-2 md:flex md:justify-center md:gap-8" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {categories.map((category) => (
               <div
                 key={category.id}
                 onClick={() => handleCategoryClick(category.route)}
-                className="bg-white rounded-xl p-4 md:p-8 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex-shrink-0 min-w-[100px] md:min-w-[140px]"
+                className="bg-white rounded-2xl p-5 md:p-10 shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer group flex-shrink-0 min-w-[110px] md:min-w-[160px] hover:scale-105 active:scale-95 border border-gray-100"
               >
                 <div className="flex flex-col items-center text-center">
-                  <div className={`mb-3 md:mb-5 p-3 md:p-5 ${category.color} rounded-full group-hover:scale-110 transition-transform duration-300`}>
+                  <div className={`mb-4 md:mb-6 p-4 md:p-6 ${category.color} rounded-2xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
                     {category.icon}
                   </div>
-                  <h3 className="text-sm md:text-base lg:text-lg font-medium text-gray-700 whitespace-nowrap">{category.title}</h3>
+                  <h3 className="text-sm md:text-lg lg:text-xl font-semibold text-gray-800 whitespace-nowrap">{category.title}</h3>
                 </div>
               </div>
             ))}
@@ -399,63 +400,70 @@ const ProfessionalHomePage: React.FC = () => {
       </section>
 
       {/* Senin İçin Derledik Section */}
-      <section className="bg-white px-4 py-6">
+      <section className="bg-white px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Senin İçin Derledik</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+          <div className="flex items-center gap-3 mb-6 md:mb-8">
+            <Zap className="w-6 h-6 md:w-7 md:h-7 text-[#ffb700]" />
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Senin İçin Derledik</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             <div 
               onClick={() => navigate('/work-tracking')}
-              className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 md:p-6 text-white relative overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300"
+              className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 md:p-7 text-white relative overflow-hidden cursor-pointer hover:scale-105 hover:shadow-2xl transition-all duration-300 border border-blue-400/20 group"
             >
               <div className="relative z-10">
-                <div className="mb-3 md:mb-4">
-                  <DollarSign className="w-6 h-6 md:w-8 md:h-8" />
+                <div className="mb-3 md:mb-5">
+                  <DollarSign className="w-7 h-7 md:w-10 md:h-10 group-hover:scale-110 transition-transform" />
                 </div>
-                <h3 className="text-sm md:text-base font-bold mb-1 md:mb-2">Maaşım+</h3>
-                <p className="text-xs md:text-sm opacity-90">Maaş işlemleriniz tek yerde!</p>
+                <h3 className="text-base md:text-lg font-bold mb-2 md:mb-3">Maaşım+</h3>
+                <p className="text-xs md:text-sm opacity-95 leading-relaxed">Maaş işlemleriniz tek yerde!</p>
               </div>
-              <div className="absolute -right-2 -bottom-2 w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-full"></div>
+              <div className="absolute -right-3 -bottom-3 w-16 h-16 md:w-20 md:h-20 bg-white/10 rounded-full group-hover:scale-125 transition-transform"></div>
             </div>
             <div 
               onClick={() => navigate('/bankam')}
-              className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 md:p-6 text-white relative overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300"
+              className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 md:p-7 text-white relative overflow-hidden cursor-pointer hover:scale-105 hover:shadow-2xl transition-all duration-300 border border-emerald-400/20 group"
             >
               <div className="relative z-10">
-                <div className="mb-3 md:mb-4">
-                  <CreditCard className="w-6 h-6 md:w-8 md:h-8" />
+                <div className="mb-3 md:mb-5">
+                  <CreditCard className="w-7 h-7 md:w-10 md:h-10 group-hover:scale-110 transition-transform" />
                 </div>
-                <h3 className="text-sm md:text-base font-bold mb-1 md:mb-2">Bankam+ Durumum</h3>
-                <p className="text-xs md:text-sm opacity-90">Gelir - gider yönetiminiz tek ekranda!</p>
+                <h3 className="text-base md:text-lg font-bold mb-2 md:mb-3">Bankam+ Durumum</h3>
+                <p className="text-xs md:text-sm opacity-95 leading-relaxed">Gelir - gider yönetiminiz tek ekranda!</p>
               </div>
-              <div className="absolute -right-2 -bottom-2 w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-full"></div>
+              <div className="absolute -right-3 -bottom-3 w-16 h-16 md:w-20 md:h-20 bg-white/10 rounded-full group-hover:scale-125 transition-transform"></div>
             </div>
             <div 
               onClick={() => navigate('/evim')}
-              className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl p-4 md:p-6 text-white relative overflow-hidden col-span-2 md:col-span-1 lg:col-span-2 cursor-pointer hover:scale-105 transition-transform duration-300"
+              className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-5 md:p-7 text-white relative overflow-hidden col-span-2 md:col-span-1 lg:col-span-2 cursor-pointer hover:scale-105 hover:shadow-2xl transition-all duration-300 border border-purple-400/20 group"
             >
               <div className="relative z-10">
-                <div className="mb-3 md:mb-4">
-                  <Star className="w-6 h-6 md:w-8 md:h-8" />
+                <div className="mb-3 md:mb-5">
+                  <Star className="w-7 h-7 md:w-10 md:h-10 group-hover:scale-110 transition-transform" />
                 </div>
-                <h3 className="text-sm md:text-base font-bold mb-1 md:mb-2">Ev ve eve dair her işlem tek yerde</h3>
-                <p className="text-xs md:text-sm opacity-90">Ev işlemlerinizi kolayca yönetin</p>
+                <h3 className="text-base md:text-lg font-bold mb-2 md:mb-3">Ev ve eve dair her işlem tek yerde</h3>
+                <p className="text-xs md:text-sm opacity-95 leading-relaxed">Ev işlemlerinizi kolayca yönetin</p>
               </div>
-              <div className="absolute -right-2 -bottom-2 w-16 h-16 md:w-20 md:h-20 bg-white/10 rounded-full"></div>
+              <div className="absolute -right-3 -bottom-3 w-20 h-20 md:w-24 md:h-24 bg-white/10 rounded-full group-hover:scale-125 transition-transform"></div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Horizontally Scrollable Benim Dünyam Markaları Section */}
-      <section className="bg-gray-50 px-4 py-6">
+      <section className="bg-gradient-to-b from-gray-50 to-white px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">Benim Dünyam Markaları</h2>
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <div className="flex items-center gap-3">
+              <TrendingUp className="w-6 h-6 md:w-7 md:h-7 text-blue-600" />
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Benim Dünyam Markaları</h2>
+            </div>
             <button 
               onClick={() => setShowAllBrands(!showAllBrands)}
-              className="text-blue-600 text-sm md:text-base font-medium"
+              className="text-blue-600 text-sm md:text-base font-semibold hover:text-blue-700 transition-colors flex items-center gap-1 group"
             >
               {showAllBrands ? 'Daha Az Göster' : 'Tümünü Gör'}
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
           <div 
@@ -466,11 +474,11 @@ const ProfessionalHomePage: React.FC = () => {
             style={!showAllBrands ? { scrollbarWidth: 'none', msOverflowStyle: 'none' } : {}}
           >
             {brands.map((brand) => (
-              <div key={brand.id} className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex-shrink-0 min-w-[80px] md:min-w-0 flex flex-col items-center border border-gray-100">
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                  <span className="text-white text-sm md:text-base font-bold">{brand.name.charAt(0)}</span>
+              <div key={brand.id} className="bg-white rounded-xl p-5 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group flex-shrink-0 min-w-[90px] md:min-w-0 flex flex-col items-center border border-gray-200 hover:border-blue-300 hover:scale-105">
+                <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg">
+                  <span className="text-white text-base md:text-lg font-bold">{brand.name.charAt(0)}</span>
                 </div>
-                <span className="text-xs md:text-sm text-gray-700 text-center font-medium whitespace-nowrap">{brand.name}</span>
+                <span className="text-xs md:text-sm text-gray-800 text-center font-semibold whitespace-nowrap">{brand.name}</span>
               </div>
             ))}
           </div>
@@ -478,15 +486,19 @@ const ProfessionalHomePage: React.FC = () => {
       </section>
 
       {/* Horizontally Scrollable Kampanyalar Section */}
-      <section className="bg-white px-4 py-6">
+      <section className="bg-white px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">Kampanyalar</h2>
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <div className="flex items-center gap-3">
+              <Star className="w-6 h-6 md:w-7 md:h-7 text-yellow-500" />
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Kampanyalar</h2>
+            </div>
             <button 
               onClick={() => setShowAllCampaigns(!showAllCampaigns)}
-              className="text-blue-600 text-sm md:text-base font-medium"
+              className="text-blue-600 text-sm md:text-base font-semibold hover:text-blue-700 transition-colors flex items-center gap-1 group"
             >
               {showAllCampaigns ? 'Daha Az Göster' : 'Tümünü Gör'}
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
           <div 
@@ -502,31 +514,31 @@ const ProfessionalHomePage: React.FC = () => {
                 <div
                   key={campaign.id}
                   onClick={() => window.open(campaign.link, '_blank')}
-                  className={`${campaign.bgColor} ${campaign.borderColor} rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer border ${showAllCampaigns ? '' : 'flex-shrink-0 min-w-[200px] max-w-[200px]'} ${showAllCampaigns ? '' : 'md:min-w-0 md:max-w-none'}`}
+                  className={`${campaign.bgColor} ${campaign.borderColor} rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer border-2 hover:scale-105 active:scale-95 ${showAllCampaigns ? '' : 'flex-shrink-0 min-w-[220px] max-w-[220px]'} ${showAllCampaigns ? '' : 'md:min-w-0 md:max-w-none'}`}
                 >
-                  <div className="p-4 md:p-6">
-                    <div className="flex items-start justify-between mb-3 md:mb-4">
-                      <div className={`${campaign.color} rounded-lg p-2 md:p-3 flex-shrink-0`}>
-                        <IconComponent className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                  <div className="p-5 md:p-7">
+                    <div className="flex items-start justify-between mb-4 md:mb-5">
+                      <div className={`${campaign.color} rounded-xl p-3 md:p-4 flex-shrink-0 shadow-md`}>
+                        <IconComponent className="w-6 h-6 md:w-7 md:h-7 text-white" />
                       </div>
-                      <div className={`${campaign.color} text-white px-2 py-1 md:px-3 md:py-2 rounded text-xs md:text-sm font-semibold`}>
+                      <div className={`${campaign.color} text-white px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold shadow-md`}>
                         {campaign.discount}
                       </div>
                     </div>
-                    <h3 className={`text-sm md:text-base font-bold ${campaign.textColor} mb-1 md:mb-2`}>
+                    <h3 className={`text-base md:text-lg font-bold ${campaign.textColor} mb-2 md:mb-3`}>
                       {campaign.title}
                     </h3>
-                    <p className={`text-xs md:text-sm ${campaign.textColor} opacity-80 mb-1 md:mb-2`}>
+                    <p className={`text-sm md:text-base ${campaign.textColor} opacity-90 mb-2 md:mb-3 font-medium`}>
                       {campaign.subtitle}
                     </p>
-                    <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4 line-clamp-2">
+                    <p className="text-gray-700 text-xs md:text-sm mb-4 md:mb-5 line-clamp-2 leading-relaxed">
                       {campaign.description}
                     </p>
-                    <div className="space-y-1 md:space-y-2">
+                    <div className="space-y-2 md:space-y-3">
                       {campaign.features.slice(0, 3).map((feature, index) => (
-                        <div key={index} className="flex items-center text-xs md:text-sm text-gray-600">
-                          <div className={`w-1 h-1 md:w-2 md:h-2 ${campaign.color} rounded-full mr-2 flex-shrink-0`}></div>
-                          <span className="line-clamp-1">{feature}</span>
+                        <div key={index} className="flex items-center text-xs md:text-sm text-gray-700">
+                          <div className={`w-2 h-2 md:w-2.5 md:h-2.5 ${campaign.color} rounded-full mr-3 flex-shrink-0 shadow-sm`}></div>
+                          <span className="line-clamp-1 font-medium">{feature}</span>
                         </div>
                       ))}
                     </div>
