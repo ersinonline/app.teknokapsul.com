@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Calculator, CreditCard, Shield, Receipt, Tv, Gamepad2, Search,
+  Calculator, CreditCard, Shield, Receipt, Search,
   ExternalLink, Star, Zap, Wifi, Smartphone, Wrench, Truck,
   Building, ArrowLeft, ChevronRight, Sparkles
 } from 'lucide-react';
@@ -16,8 +16,6 @@ const categories = [
   { id: 'debt-inquiry', label: 'Borç Sorgu', icon: CreditCard, color: 'bg-amber-50', text: 'text-amber-700' },
   { id: 'insurance', label: 'Sigorta', icon: Shield, color: 'bg-green-50', text: 'text-green-700' },
   { id: 'bill-payments', label: 'Fatura', icon: Receipt, color: 'bg-orange-50', text: 'text-orange-700' },
-  { id: 'entertainment', label: 'Eğlence', icon: Tv, color: 'bg-purple-50', text: 'text-purple-700' },
-  { id: 'game-codes', label: 'Oyun', icon: Gamepad2, color: 'bg-pink-50', text: 'text-pink-700' },
   { id: 'gsm', label: 'GSM', icon: Smartphone, color: 'bg-red-50', text: 'text-red-700' },
   { id: 'vehicle', label: 'Araç', icon: Truck, color: 'bg-slate-50', text: 'text-slate-700' },
   { id: 'internet-tv', label: 'İnternet', icon: Wifi, color: 'bg-indigo-50', text: 'text-indigo-700' },
@@ -65,22 +63,6 @@ const services = [
   { name: 'Superonline Fatura', tag: 'Fatura', cat: 'bill-payments', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/turkcell-superonline-fatura-odeme.html?bayiid=${BAYI_ID}` },
   { name: 'Turknet Fatura', tag: 'Fatura', cat: 'bill-payments', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/turknet-fatura-odeme.html?bayiid=${BAYI_ID}` },
   { name: 'Kablonet Fatura', tag: 'Fatura', cat: 'bill-payments', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.faturago.com.tr/turksat-kablonet-fatura-odeme.html?bayiid=${BAYI_ID}` },
-  // Eğlence
-  { name: 'TOD Paketleri', tag: 'Dijital', cat: 'entertainment', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/tod-paketleri-mid-1?refid=${REFID}`, pop: true },
-  { name: 'D-Smart GO', tag: 'Dijital', cat: 'entertainment', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/d-smart-go-paketleri-mid-2?refid=${REFID}` },
-  { name: 'Gain Paketleri', tag: 'Dijital', cat: 'entertainment', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/gain-paketleri-mid-11?refid=${REFID}` },
-  { name: 'S Sport Plus', tag: 'Dijital', cat: 'entertainment', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/s-sport-plus-paketleri-mid-33?refid=${REFID}` },
-  { name: 'Google Play', tag: 'Kod', cat: 'entertainment', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/google-play-paketleri-mid-4?refid=${REFID}` },
-  { name: 'Apple Store', tag: 'Kod', cat: 'entertainment', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/apple-store-paketleri-mid-5?refid=${REFID}` },
-  // Oyun Kodları
-  { name: 'League of Legends', tag: 'Oyun', cat: 'game-codes', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/league-of-legends-paketleri-mid-6?refid=${REFID}`, pop: true },
-  { name: 'PUBG Mobile', tag: 'Oyun', cat: 'game-codes', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/pubg-mobile-paketleri-mid-10?refid=${REFID}`, pop: true },
-  { name: 'Valorant Point', tag: 'Oyun', cat: 'game-codes', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/valorant-point-paketleri-mid-22?refid=${REFID}`, pop: true },
-  { name: 'Roblox', tag: 'Oyun', cat: 'game-codes', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/roblox-paketleri-mid-24?refid=${REFID}` },
-  { name: 'Brawl Stars', tag: 'Oyun', cat: 'game-codes', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/brawl-stars-paketleri-mid-41?refid=${REFID}` },
-  { name: 'Point Blank', tag: 'Oyun', cat: 'game-codes', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/point-blank-paketleri-mid-8?refid=${REFID}` },
-  { name: 'Microsoft', tag: 'Oyun', cat: 'game-codes', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/microsoft-paketleri-mid-25?refid=${REFID}` },
-  { name: 'Zula', tag: 'Oyun', cat: 'game-codes', url: `https://app.teknokapsul.info/yonlendirme.html?target=https://www.kodmarketim.com/zula-paketleri-mid-7?refid=${REFID}` },
   // GSM
   { name: 'Vodafone Numara Taşıma', tag: 'Popüler', cat: 'gsm', url: '/application/vodafone', pop: true },
   { name: 'Vodafone Yeni Hat', tag: 'Yeni', cat: 'gsm', url: '/application/vodafone' },
