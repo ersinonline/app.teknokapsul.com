@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePremium } from '../../hooks/usePremium';
-import { activatePremium, PREMIUM_CONFIG } from '../../services/premium.service';
-import { initializeCheckoutForm, simulatePayment } from '../../services/iyzico.service';
+import { PREMIUM_CONFIG } from '../../services/premium.service';
+import { initializeCheckoutForm } from '../../services/iyzico.service';
 import {
   ArrowLeft, Crown, Shield, Zap, Smartphone, Clock, CreditCard,
   CheckCircle, Star, Sparkles, BadgeCheck, Loader2, AlertCircle, Gift
@@ -12,10 +12,9 @@ import {
 const PremiumPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isPremium, subscription, daysRemaining, refundRemaining, loading: premiumLoading, refresh } = usePremium();
+  const { isPremium, subscription, daysRemaining, refundRemaining, loading: premiumLoading } = usePremium();
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState('');
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   const features = [
     {
@@ -99,44 +98,11 @@ const PremiumPage: React.FC = () => {
           }
         }
       } else {
-        // İyzico backend hazır değilse simüle et (demo mod)
-        console.log('İyzico backend hazır değil, demo mod kullanılıyor...');
-        const simResult = await simulatePayment(
-          user.uid,
-          'premium-subscription',
-          'TeknoKapsül Premium',
-          PREMIUM_CONFIG.price
-        );
-
-        if (simResult.success) {
-          await activatePremium(user.uid, simResult.paymentId);
-          setPaymentSuccess(true);
-          await refresh();
-        } else {
-          setPaymentError('Ödeme işlemi başarısız oldu. Lütfen tekrar deneyin.');
-        }
+        setPaymentError('Ödeme sistemi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.');
       }
     } catch (error: any) {
       console.error('Ödeme hatası:', error);
-      // İyzico backend yoksa demo modda devam et
-      try {
-        const simResult = await simulatePayment(
-          user.uid,
-          'premium-subscription',
-          'TeknoKapsül Premium',
-          PREMIUM_CONFIG.price
-        );
-
-        if (simResult.success) {
-          await activatePremium(user.uid, simResult.paymentId);
-          setPaymentSuccess(true);
-          await refresh();
-        } else {
-          setPaymentError('Ödeme işlemi başarısız oldu.');
-        }
-      } catch (simError) {
-        setPaymentError('Ödeme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
-      }
+      setPaymentError('Ödeme sistemi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.');
     } finally {
       setPaymentLoading(false);
     }
@@ -211,20 +177,6 @@ const PremiumPage: React.FC = () => {
             </div>
           )}
 
-          {/* Payment Success */}
-          {paymentSuccess && (
-            <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-2xl p-5 mb-6">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="w-6 h-6 text-emerald-400" />
-                <div>
-                  <p className="text-emerald-300 font-bold">Premium Aktif!</p>
-                  <p className="text-emerald-200/70 text-sm">
-                    Aboneliğiniz başarıyla başlatıldı. 30 gün boyunca tüm ayrıcalıklardan yararlanabilirsiniz.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Payment Error */}
           {paymentError && (
