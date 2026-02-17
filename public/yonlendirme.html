@@ -5,247 +5,349 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yönlendiriliyor - TeknoKapsül</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #ffb700;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #333;
+            color: #e0e0e0;
+            overflow: hidden;
         }
-        
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-            margin: 1rem;
-        }
-        
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: #ffb700;
+
+        .bg-glow {
+            position: fixed;
+            width: 300px; height: 300px;
             border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .bg-glow-1 { top: -100px; left: -100px; background: #ffb700; }
+        .bg-glow-2 { bottom: -100px; right: -100px; background: #3b82f6; }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            max-width: 420px;
+            width: 92%;
+            position: relative;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-ring {
+            width: 72px; height: 72px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #ffb700, #ff8c00);
             margin: 0 auto 1.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 8px 32px rgba(255,183,0,0.3);
+            position: relative;
+        }
+        .logo-ring::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, rgba(255,183,0,0.4), transparent);
+            z-index: -1;
+        }
+        .logo-ring span {
             color: white;
-            font-size: 2rem;
-            font-weight: bold;
-        }
-        
-        h1 {
-            color: #2d3748;
-            margin-bottom: 1rem;
             font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
         }
-        
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
+
+        h1 {
+            color: #fff;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        .subtitle {
+            color: rgba(255,255,255,0.4);
+            font-size: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .url-box {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 0.85rem 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-align: left;
+        }
+        .url-icon {
+            width: 36px; height: 36px;
             border-radius: 10px;
-            padding: 1rem;
-            margin: 1.5rem 0;
-            color: #856404;
+            background: rgba(59,130,246,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
-        
-        .warning-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .target-url {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 1rem 0;
+        .url-icon svg { width: 18px; height: 18px; color: #60a5fa; }
+        .url-text {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
             word-break: break-all;
-            font-family: monospace;
-            font-size: 0.9rem;
-            color: #495057;
+            line-height: 1.4;
+            flex: 1;
+            min-width: 0;
         }
-        
-        .countdown {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #ffb700;
-            margin: 1rem 0;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .url-domain {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.8);
+            font-weight: 600;
+            display: block;
+            margin-bottom: 2px;
         }
-        
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #e9ecef;
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 1rem 0;
+
+        .timer-ring {
+            position: relative;
+            width: 80px; height: 80px;
+            margin: 0 auto 1rem;
         }
-        
-        .progress-fill {
-            height: 100%;
-            background: #ffb700;
-            border-radius: 3px;
-            transition: width 1s linear;
+        .timer-ring svg {
+            transform: rotate(-90deg);
+            width: 80px; height: 80px;
         }
-        
+        .timer-ring circle {
+            fill: none;
+            stroke-width: 4;
+        }
+        .timer-bg { stroke: rgba(255,255,255,0.06); }
+        .timer-progress {
+            stroke: #ffb700;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear;
+            filter: drop-shadow(0 0 6px rgba(255,183,0,0.4));
+        }
+        .timer-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .redirect-label {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 1.5rem;
+        }
+
         .buttons {
             display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
-            justify-content: center;
+            gap: 0.75rem;
         }
-        
         .btn {
-            padding: 0.75rem 1.5rem;
+            flex: 1;
+            padding: 0.8rem 1rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 14px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 0.85rem;
             text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.25s ease;
         }
-        
         .btn-primary {
-            background: #ffb700;
-            color: white;
+            background: linear-gradient(135deg, #ffb700, #ff9500);
+            color: #1a1a2e;
+            box-shadow: 0 4px 20px rgba(255,183,0,0.25);
         }
-        
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 183, 0, 0.4);
+            box-shadow: 0 8px 30px rgba(255,183,0,0.35);
         }
-        
         .btn-secondary {
-            background: #6c757d;
-            color: white;
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.7);
+            border: 1px solid rgba(255,255,255,0.08);
         }
-        
         .btn-secondary:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
+            background: rgba(255,255,255,0.1);
+            color: #fff;
         }
-        
+        .btn svg { width: 16px; height: 16px; }
+
         .footer {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
             padding-top: 1rem;
-            border-top: 1px solid #e9ecef;
-            color: #6c757d;
-            font-size: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
-        
+        .footer svg { width: 14px; height: 14px; color: #22c55e; flex-shrink: 0; }
+        .footer span { font-size: 0.7rem; color: rgba(255,255,255,0.3); }
+
+        .error-state h1 { color: #f87171; }
+        .error-icon {
+            width: 72px; height: 72px;
+            border-radius: 20px;
+            background: rgba(248,113,113,0.1);
+            border: 1px solid rgba(248,113,113,0.2);
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .error-icon svg { width: 32px; height: 32px; color: #f87171; }
+
         @media (max-width: 480px) {
-            .container {
-                padding: 1.5rem;
-            }
-            
-            h1 {
-                font-size: 1.25rem;
-            }
-            
-            .countdown {
-                font-size: 2.5rem;
-            }
-            
-            .buttons {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
+            .card { padding: 2rem 1.5rem; }
+            h1 { font-size: 1.1rem; }
+            .buttons { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">TK</div>
-        
-        <h1>Dış Siteye Yönlendiriliyorsunuz</h1>
-        
-        <div class="warning">
-            <div class="warning-icon">⚠️</div>
-            <strong>Güvenlik Uyarısı:</strong><br>
-            TeknoKapsül dışındaki bir siteye yönlendiriliyorsunuz. Bu sitenin içeriğinden TeknoKapsül sorumlu değildir.
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="card" id="mainCard">
+        <div class="logo-ring"><span>TK</span></div>
+
+        <h1>Yönlendiriliyorsunuz</h1>
+        <p class="subtitle">Güvenli bağlantı ile dış siteye geçiş</p>
+
+        <div class="url-box">
+            <div class="url-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </div>
+            <div class="url-text">
+                <span class="url-domain" id="urlDomain">Yükleniyor...</span>
+                <span id="urlPath"></span>
+            </div>
         </div>
-        
-        <div class="target-url" id="targetUrl">Yükleniyor...</div>
-        
-        <div class="countdown" id="countdown">10</div>
-        
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill" style="width: 100%;"></div>
+
+        <div class="timer-ring" id="timerRing">
+            <svg viewBox="0 0 80 80">
+                <circle class="timer-bg" cx="40" cy="40" r="34"/>
+                <circle class="timer-progress" id="timerCircle" cx="40" cy="40" r="34" 
+                    stroke-dasharray="213.63" stroke-dashoffset="0"/>
+            </svg>
+            <div class="timer-text" id="countdown">5</div>
         </div>
-        
-        <p>saniye sonra otomatik olarak yönlendirileceksiniz.</p>
-        
+
+        <p class="redirect-label" id="redirectLabel">saniye sonra otomatik yönlendirileceksiniz</p>
+
         <div class="buttons">
-            <button class="btn btn-primary" onclick="redirectNow()">Şimdi Git</button>
-            <a href="https://teknokapsul.info" class="btn btn-secondary">Ana Sayfaya Dön</a>
+            <button class="btn btn-primary" id="btnGo" onclick="redirectNow()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Şimdi Git
+            </button>
+            <a href="https://app.teknokapsul.info" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                Geri Dön
+            </a>
         </div>
-        
+
         <div class="footer">
-            © <span id="currentYear"></span> TeknoKapsül Güvenlik Ekibi - Güvenli yönlendirme hizmeti: Dış bağlantıları güvenli bir şekilde açmanızı sağlar
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>TeknoKapsül Güvenli Yönlendirme &bull; &copy; <span id="currentYear"></span></span>
         </div>
     </div>
-    
+
     <script>
-        // URL parametresinden hedef adresi al
         const urlParams = new URLSearchParams(window.location.search);
         const targetUrl = urlParams.get('target');
-        
-        // Hedef URL'yi göster
-        document.getElementById('targetUrl').textContent = targetUrl || 'Geçersiz URL';
-        
-        // Geçersiz URL kontrolü
+        const CIRCUMFERENCE = 2 * Math.PI * 34; // ~213.63
+
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
         if (!targetUrl || !isValidUrl(targetUrl)) {
-            document.getElementById('countdown').textContent = '❌';
-            document.querySelector('.progress-bar').style.display = 'none';
-            document.querySelector('p').textContent = 'Geçersiz veya eksik URL parametresi!';
-            document.querySelector('.btn-primary').style.display = 'none';
+            showError();
         } else {
-            // Geri sayım başlat
-            let timeLeft = 10;
-            const countdownElement = document.getElementById('countdown');
-            const progressElement = document.getElementById('progressFill');
-            
+            showRedirect();
+        }
+
+        function showError() {
+            const card = document.getElementById('mainCard');
+            card.classList.add('error-state');
+            card.innerHTML = `
+                <div class="error-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                </div>
+                <h1>Geçersiz Bağlantı</h1>
+                <p class="subtitle">Yönlendirme URL'si eksik veya geçersiz.</p>
+                <div class="buttons" style="margin-top:1.5rem">
+                    <a href="https://app.teknokapsul.info" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        Ana Sayfaya Dön
+                    </a>
+                </div>
+                <div class="footer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>TeknoKapsül Güvenli Yönlendirme &bull; &copy; ${new Date().getFullYear()}</span>
+                </div>
+            `;
+        }
+
+        function showRedirect() {
+            try {
+                const parsed = new URL(targetUrl);
+                document.getElementById('urlDomain').textContent = parsed.hostname;
+                document.getElementById('urlPath').textContent = parsed.pathname + parsed.search;
+            } catch(e) {
+                document.getElementById('urlDomain').textContent = targetUrl;
+            }
+
+            let timeLeft = 5;
+            const circle = document.getElementById('timerCircle');
+            const countdownEl = document.getElementById('countdown');
+            circle.style.strokeDasharray = CIRCUMFERENCE;
+            circle.style.strokeDashoffset = '0';
+
             const timer = setInterval(() => {
                 timeLeft--;
-                countdownElement.textContent = timeLeft;
-                progressElement.style.width = (timeLeft / 10 * 100) + '%';
-                
+                countdownEl.textContent = timeLeft;
+                const offset = CIRCUMFERENCE * (1 - timeLeft / 5);
+                circle.style.strokeDashoffset = offset;
+
                 if (timeLeft <= 0) {
                     clearInterval(timer);
                     redirectNow();
                 }
             }, 1000);
         }
-        
 
-        
-        // Anında yönlendirme fonksiyonu
         function redirectNow() {
             if (targetUrl && isValidUrl(targetUrl)) {
                 window.location.href = targetUrl;
             }
         }
-        
-        // URL geçerlilik kontrolü
+
         function isValidUrl(string) {
             try {
                 const url = new URL(string);
@@ -254,16 +356,6 @@
                 return false;
             }
         }
-        
-        // Sayfa yüklendiğinde progress bar animasyonunu başlat ve güncel yılı ayarla
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('progressFill').style.width = '0%';
-            }, 100);
-            
-            // Güncel yılı ayarla
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
-        });
     </script>
 </body>
 </html>

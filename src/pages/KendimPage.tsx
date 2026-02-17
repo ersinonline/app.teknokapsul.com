@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Calendar, ChevronRight, StickyNote, ClipboardList, Users, ShoppingBag, Globe } from 'lucide-react';
+import { FileText, Calendar, ChevronRight, StickyNote, ClipboardList, Users, ShoppingBag, Globe, Wrench } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { useNavigate } from 'react-router-dom';
@@ -152,6 +152,20 @@ const KendimPage: React.FC = () => {
       borderColor: 'border-teal-200',
       route: '/abonelik-hizmetler',
       count: 8,
+      loading: false,
+      items: []
+    },
+    {
+      id: 'tekno-hizmet',
+      title: 'TeknoHizmet',
+      description: '200+ dijital hizmet tek yerde',
+      icon: Wrench,
+      color: 'bg-emerald-500',
+      bgColor: 'bg-emerald-50',
+      textColor: 'text-emerald-700',
+      borderColor: 'border-emerald-200',
+      route: '/tekno-hizmet',
+      count: 0,
       loading: false,
       items: []
     },
