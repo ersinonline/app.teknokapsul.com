@@ -8,7 +8,6 @@ import { getAllSupportTickets, updateSupportTicketStatus, deleteSupportTicket, u
 import { deleteApplication, updateApplication } from '../../services/application.service';
 import { SupportTicket, SUPPORT_CATEGORIES, SUPPORT_PRIORITIES, SUPPORT_STATUSES } from '../../types/support';
 import { SupportTicketReplies } from '../../components/support/SupportTicketReplies';
-import { Order } from '../../services/order.service';
 import { EmailTestPanel } from '../../components/admin/EmailTestPanel';
 import { getDigitalCodes, addDigitalCode, updateDigitalCode, deleteDigitalCode, getAllDigitalOrders, DigitalCode, DigitalOrder } from '../../services/digitalCode.service';
 
@@ -22,25 +21,6 @@ interface FormSubmission {
   userId?: string;
 }
 
-interface Product {
-  id: string;
-  urunAdi: string;
-  aciklama: string;
-  kategori: string;
-  marka: string;
-  magazaFiyati: number;
-  piyasaFiyati: number;
-  stokAdedi: number;
-  stokKodu: string;
-  barkod: string;
-  resim1: string;
-  agirlik: number;
-  kdvOrani: number;
-  magaza: string;
-  paraBirimi: string;
-}
-
-// Order interface is now imported from order.service.ts
 
 const AdminPage: React.FC = () => {
   const { user } = useAuth();
@@ -67,30 +47,7 @@ const AdminPage: React.FC = () => {
   const [digitalOrders, setDigitalOrders] = useState<DigitalOrder[]>([]);
   const [showAddDigitalCode, setShowAddDigitalCode] = useState(false);
   const [newDigitalCode, setNewDigitalCode] = useState({ name: '', category: '', price: 0, description: '', stock: 10, active: true });
-  const [showExcelUpload, setShowExcelUpload] = useState(false);
 
-
-  const getVisiblePages = () => {
-    const totalPages = getTotalPages();
-    const maxVisiblePages = 5;
-    
-    if (totalPages <= maxVisiblePages) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-    
-    let startPage = Math.max(1, currentPage - 2);
-    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-    
-    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
 
   // Admin kontrolü
   if (!user || user.email !== 'clk.ersinnn@gmail.com') {
@@ -100,6 +57,8 @@ const AdminPage: React.FC = () => {
   useEffect(() => {
     fetchSubmissions();
     fetchSupportTickets();
+    fetchProducts();
+    fetchOrders();
     fetchDigitalCodes();
     fetchDigitalOrders();
   }, []);
@@ -541,60 +500,6 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const text = event.target?.result as string;
-        const rows = text.split('\n').filter(row => row.trim());
-        
-        let successCount = 0;
-        let errorCount = 0;
-
-        for (let i = 0; i < rows.length; i++) {
-          const columns = rows[i].split(',').map(col => col.trim());
-          
-          if (columns.length >= 3) {
-            const [name, category, priceStr] = columns;
-            const price = parseFloat(priceStr);
-
-            if (name && category && !isNaN(price)) {
-              try {
-                await addDigitalCode({
-                  name,
-                  category,
-                  price,
-                  description: '',
-                  stock: 10,
-                  active: true
-                });
-                successCount++;
-              } catch (error) {
-                console.error(`Satır ${i + 1} eklenirken hata:`, error);
-                errorCount++;
-              }
-            } else {
-              errorCount++;
-            }
-          } else {
-            errorCount++;
-          }
-        }
-
-        await fetchDigitalCodes();
-        alert(`Excel yükleme tamamlandı!\n✅ Başarılı: ${successCount}\n❌ Hatalı: ${errorCount}`);
-        setShowExcelUpload(false);
-      };
-      reader.readAsText(file);
-    } catch (error) {
-      console.error('Excel yükleme hatası:', error);
-      alert('Excel dosyası yüklenirken bir hata oluştu.');
-    }
-  };
-
   const getFormTypeText = (type: string) => {
     const types: { [key: string]: string } = {
       'application': 'Başvuru Formu',
@@ -822,6 +727,28 @@ const AdminPage: React.FC = () => {
             >
               <Headphones className="w-4 h-4 inline mr-2" />
               Destek Talepleri
+            </button>
+            <button
+              onClick={() => setActiveTab('products')}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'products'
+                  ? 'border-[#ffb700] text-[#ffb700]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Package className="w-4 h-4 inline mr-2" />
+              Ürün Yönetimi
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'orders'
+                  ? 'border-[#ffb700] text-[#ffb700]'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <ShoppingCart className="w-4 h-4 inline mr-2" />
+              Sipariş Yönetimi
             </button>
             <button
               onClick={() => setActiveTab('digitalCodes')}
@@ -2512,52 +2439,14 @@ const AdminPage: React.FC = () => {
             <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Dijital Ürün Yönetimi</h2>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setShowExcelUpload(!showExcelUpload)}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-                  >
-                    <FileText className="w-4 h-4" />
-                    Excel ile Yükle
-                  </button>
-                  <button
-                    onClick={() => setShowAddDigitalCode(!showAddDigitalCode)}
-                    className="bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a600] transition-colors flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Yeni Ürün Ekle
-                  </button>
-                </div>
+                <button
+                  onClick={() => setShowAddDigitalCode(!showAddDigitalCode)}
+                  className="bg-[#ffb700] text-white px-4 py-2 rounded-lg hover:bg-[#e6a600] transition-colors flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Yeni Ürün Ekle
+                </button>
               </div>
-
-              {showExcelUpload && (
-                <div className="border border-green-200 rounded-xl p-4 mb-4 bg-green-50">
-                  <h3 className="font-medium text-gray-900 mb-3">Excel ile Toplu Ürün Yükleme</h3>
-                  <div className="mb-3">
-                    <p className="text-sm text-gray-600 mb-2">Excel dosyanızda şu sütunlar olmalı:</p>
-                    <ul className="text-sm text-gray-700 list-disc list-inside space-y-1">
-                      <li><strong>1. Sütun:</strong> Ürün Adı</li>
-                      <li><strong>2. Sütun:</strong> Kategori</li>
-                      <li><strong>3. Sütun:</strong> Fiyat (sadece sayı)</li>
-                    </ul>
-                    <p className="text-xs text-gray-500 mt-2">Örnek: Netflix 1 Aylık,Streaming,99.90</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="file"
-                      accept=".csv,.txt"
-                      onChange={handleExcelUpload}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                    <button
-                      onClick={() => setShowExcelUpload(false)}
-                      className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
-                    >
-                      İptal
-                    </button>
-                  </div>
-                </div>
-              )}
 
               {showAddDigitalCode && (
                 <div className="border border-gray-200 rounded-xl p-4 mb-4 bg-gray-50">
