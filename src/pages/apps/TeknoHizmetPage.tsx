@@ -74,6 +74,13 @@ const services = [
   { name: 'İSPARK Ödeme', tag: 'Park', cat: 'vehicle', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.ispark.istanbul/odeme', pop: true },
   { name: 'Trafik Cezası Ödeme', tag: 'Ceza', cat: 'vehicle', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.turkiye.gov.tr/trafik-cezasi-odeme' },
   { name: 'HGS Bakiye Yükleme', tag: 'Geçiş', cat: 'vehicle', url: 'https://app.teknokapsul.info/yonlendirme.html?target=https://www.hgs.com.tr/bakiye-yukleme' },
+  // İnternet & TV
+  { name: 'Türk Telekom İnternet', tag: 'Fiber', cat: 'internet-tv', url: '/application/turktelekom-internet', pop: true },
+  { name: 'Superonline İnternet', tag: 'Hızlı', cat: 'internet-tv', url: '/application/superonline', pop: true },
+  { name: 'Vodafone İnternet', tag: 'Fiber', cat: 'internet-tv', url: '/application/vodafone-internet', pop: true },
+  { name: 'Türknet İnternet', tag: 'Ekonomik', cat: 'internet-tv', url: '/application/turknet' },
+  { name: 'Millenicom İnternet', tag: 'Mobil', cat: 'internet-tv', url: '/application/millenicom' },
+  { name: 'Turkcell Superbox', tag: 'TV', cat: 'internet-tv', url: '/application/superbox' },
   // Teknik Servis
   { name: 'iPhone Tamiri', tag: 'Apple', cat: 'technical', url: '/application/apple-service', pop: true },
   { name: 'iPad Tamiri', tag: 'Apple', cat: 'technical', url: '/application/apple-service' },
