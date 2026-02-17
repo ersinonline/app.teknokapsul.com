@@ -192,16 +192,24 @@ const EvimPage: React.FC = () => {
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            {sections.map((section) => (
-              <div key={section.id} className="bg-white/10 rounded-xl p-3 text-center">
-                <p className="text-white font-bold text-lg">
-                  {section.loading ? '...' : section.count}
-                </p>
-                <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">
-                  {section.id === 'subscriptions' ? 'Abonelik' : section.id === 'warranty' ? 'Garanti' : 'Kargo'}
-                </p>
-              </div>
-            ))}
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <p className="text-white font-bold text-lg">
+                {subscriptionsLoading ? '...' : activeSubscriptions.length}
+              </p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Abonelik</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <p className="text-white font-bold text-lg">
+                {warrantyLoading ? '...' : activeWarranties.length}
+              </p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Garanti</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-3 text-center">
+              <p className="text-white font-bold text-lg">
+                {cargoLoading ? '...' : pendingCargos.length}
+              </p>
+              <p className="text-white/50 text-[10px] uppercase tracking-wider mt-0.5">Kargo</p>
+            </div>
           </div>
         </div>
       </div>

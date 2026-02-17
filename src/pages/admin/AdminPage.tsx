@@ -39,9 +39,6 @@ const AdminPage: React.FC = () => {
   const [editingTicket, setEditingTicket] = useState(false);
   const [editFormData, setEditFormData] = useState<any>({});
   const [editTicketData, setEditTicketData] = useState<any>({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(25);
-
 
   // Digital Codes state
   const [digitalCodes, setDigitalCodes] = useState<DigitalCode[]>([]);
@@ -52,28 +49,6 @@ const AdminPage: React.FC = () => {
   const [selectedDigitalCodes, setSelectedDigitalCodes] = useState<string[]>([]);
   const [digitalCodesSortOrder, setDigitalCodesSortOrder] = useState<'asc' | 'desc'>('asc');
 
-
-  const getVisiblePages = () => {
-    const totalPages = getTotalPages();
-    const maxVisiblePages = 5;
-    
-    if (totalPages <= maxVisiblePages) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-    
-    let startPage = Math.max(1, currentPage - 2);
-    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-    
-    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
 
   // Admin kontrolü
   if (!user || user.email !== 'clk.ersinnn@gmail.com') {
