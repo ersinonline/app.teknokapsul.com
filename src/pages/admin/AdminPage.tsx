@@ -89,6 +89,7 @@ const AdminPage: React.FC = () => {
   const [showAddDigitalCode, setShowAddDigitalCode] = useState(false);
   const [newDigitalCode, setNewDigitalCode] = useState({ name: '', category: '', price: 0, description: '', stock: 10, active: true });
   const [showExcelUpload, setShowExcelUpload] = useState(false);
+  const [selectedDigitalCodes, setSelectedDigitalCodes] = useState<string[]>([]);
 
 
   const getVisiblePages = () => {
@@ -562,6 +563,43 @@ const AdminPage: React.FC = () => {
     }
   };
 
+  const handleToggleDigitalCodeSelection = (id: string) => {
+    setSelectedDigitalCodes(prev => 
+      prev.includes(id) ? prev.filter(codeId => codeId !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllDigitalCodes = () => {
+    if (selectedDigitalCodes.length === digitalCodes.length) {
+      setSelectedDigitalCodes([]);
+    } else {
+      setSelectedDigitalCodes(digitalCodes.map(code => code.id!));
+    }
+  };
+
+  const handleBulkDeleteDigitalCodes = async () => {
+    if (selectedDigitalCodes.length === 0) {
+      alert('Lütfen silmek istediğiniz ürünleri seçin.');
+      return;
+    }
+
+    if (!confirm(`Seçili ${selectedDigitalCodes.length} ürünü silmek istediğinizden emin misiniz?`)) {
+      return;
+    }
+
+    try {
+      for (const id of selectedDigitalCodes) {
+        await deleteDigitalCode(id);
+      }
+      await fetchDigitalCodes();
+      setSelectedDigitalCodes([]);
+      alert(`${selectedDigitalCodes.length} ürün başarıyla silindi.`);
+    } catch (error) {
+      console.error('Toplu silme hatası:', error);
+      alert('Ürünler silinirken bir hata oluştu.');
+    }
+  };
+
   const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -594,15 +632,28 @@ const AdminPage: React.FC = () => {
 
                 if (name && category && !isNaN(price)) {
                   try {
-                    await addDigitalCode({
-                      name,
-                      category,
-                      price,
-                      description: '',
-                      stock: 10,
-                      active: true
-                    });
-                    successCount++;
+                    // Aynı isimli ürün var mı kontrol et
+                    const existingCode = digitalCodes.find(code => code.name.toLowerCase() === name.toLowerCase());
+                    
+                    if (existingCode) {
+                      // Mevcut ürünü güncelle (stok ekle)
+                      await updateDigitalCode(existingCode.id!, {
+                        stock: (existingCode.stock || 0) + 10,
+                        price: price // Fiyatı güncelle
+                      });
+                      successCount++;
+                    } else {
+                      // Yeni ürün ekle
+                      await addDigitalCode({
+                        name,
+                        category,
+                        price,
+                        description: '',
+                        stock: 10,
+                        active: true
+                      });
+                      successCount++;
+                    }
                   } catch (error) {
                     console.error(`Satır ${i + 1} eklenirken hata:`, error);
                     errorCount++;
@@ -641,15 +692,28 @@ const AdminPage: React.FC = () => {
 
               if (name && category && !isNaN(price)) {
                 try {
-                  await addDigitalCode({
-                    name,
-                    category,
-                    price,
-                    description: '',
-                    stock: 10,
-                    active: true
-                  });
-                  successCount++;
+                  // Aynı isimli ürün var mı kontrol et
+                  const existingCode = digitalCodes.find(code => code.name.toLowerCase() === name.toLowerCase());
+                  
+                  if (existingCode) {
+                    // Mevcut ürünü güncelle (stok ekle)
+                    await updateDigitalCode(existingCode.id!, {
+                      stock: (existingCode.stock || 0) + 10,
+                      price: price // Fiyatı güncelle
+                    });
+                    successCount++;
+                  } else {
+                    // Yeni ürün ekle
+                    await addDigitalCode({
+                      name,
+                      category,
+                      price,
+                      description: '',
+                      stock: 10,
+                      active: true
+                    });
+                    successCount++;
+                  }
                 } catch (error) {
                   console.error(`Satır ${i + 1} eklenirken hata:`, error);
                   errorCount++;
@@ -2592,6 +2656,15 @@ const AdminPage: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Dijital Ürün Yönetimi</h2>
                 <div className="flex gap-2">
+                  {selectedDigitalCodes.length > 0 && (
+                    <button
+                      onClick={handleBulkDeleteDigitalCodes}
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Seçilenleri Sil ({selectedDigitalCodes.length})
+                    </button>
+                  )}
                   <button
                     onClick={() => setShowExcelUpload(!showExcelUpload)}
                     className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
@@ -2723,6 +2796,14 @@ const AdminPage: React.FC = () => {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
+                        <th className="px-4 py-3 text-left">
+                          <input
+                            type="checkbox"
+                            checked={selectedDigitalCodes.length === digitalCodes.length && digitalCodes.length > 0}
+                            onChange={handleSelectAllDigitalCodes}
+                            className="w-4 h-4 text-[#ffb700] border-gray-300 rounded focus:ring-[#ffb700]"
+                          />
+                        </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ürün Adı</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fiyat</th>
@@ -2734,6 +2815,14 @@ const AdminPage: React.FC = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {digitalCodes.map(code => (
                         <tr key={code.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            <input
+                              type="checkbox"
+                              checked={selectedDigitalCodes.includes(code.id!)}
+                              onChange={() => handleToggleDigitalCodeSelection(code.id!)}
+                              className="w-4 h-4 text-[#ffb700] border-gray-300 rounded focus:ring-[#ffb700]"
+                            />
+                          </td>
                           <td className="px-4 py-3">
                             <div className="text-sm font-medium text-gray-900">{code.name}</div>
                             {code.description && <div className="text-xs text-gray-500">{code.description}</div>}
