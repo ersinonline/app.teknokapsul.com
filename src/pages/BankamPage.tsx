@@ -4,7 +4,7 @@ import {
   CreditCard, Calculator, Calendar, ChevronRight,
   ArrowUpRight, ArrowDownRight, Wallet
 } from 'lucide-react';
-import { collection, query, getDocs, where, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useFirebaseData } from '../hooks/useFirebaseData';
@@ -34,14 +34,16 @@ const BankamPage: React.FC = () => {
       if (!user?.uid) { setLoading(false); return; }
       try {
         const expensesRef = collection(db, 'teknokapsul', user.uid, 'expenses');
-        const expQ = query(expensesRef, where('isActive', '==', true), orderBy('date', 'desc'), limit(50));
-        const expSnap = await getDocs(expQ);
-        const expData = expSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Expense[];
+        const expSnap = await getDocs(expensesRef);
+        const expData = (expSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Expense[])
+          .filter(e => e.isActive !== false)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
         const incomesRef = collection(db, 'teknokapsul', user.uid, 'incomes');
-        const incQ = query(incomesRef, where('isActive', '==', true), orderBy('date', 'desc'), limit(50));
-        const incSnap = await getDocs(incQ);
-        const incData = incSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Income[];
+        const incSnap = await getDocs(incomesRef);
+        const incData = (incSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Income[])
+          .filter(i => i.isActive !== false)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
         setExpenses(expData);
         setIncomes(incData);
