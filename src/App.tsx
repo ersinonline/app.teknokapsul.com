@@ -613,7 +613,7 @@ function App() {
               console.error('❌ Mobil token ile giriş başarısız:', error?.message || error);
             }} 
           />
-          <RouterProvider router={router} />
+          <RouterProvider router={router} future={{ v7_startTransition: true }} />
           <Analytics />
           <SpeedInsights />
         </div>

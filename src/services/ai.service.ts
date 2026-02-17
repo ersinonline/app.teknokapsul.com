@@ -24,14 +24,18 @@ export interface ObjectSchemaInterface {
 }
 
 // Initialize XAI with API key
-const xaiClient = createXai({
-  apiKey: import.meta.env.VITE_XAI_API_KEY || process.env.XAI_API_KEY || ''
-});
+const XAI_API_KEY = import.meta.env.VITE_XAI_API_KEY || process.env.XAI_API_KEY || '';
+const hasApiKey = XAI_API_KEY.length > 0;
+
+const xaiClient = hasApiKey ? createXai({ apiKey: XAI_API_KEY }) : null;
 
 // Initialize model
-const model = xaiClient('grok-2-1212');
+const model = xaiClient ? xaiClient('grok-2-latest') : null;
 
 export const generateText = async (prompt: string, retryCount = 0): Promise<string> => {
+  if (!model) {
+    throw new Error('AI servisi yapılandırılmamış. VITE_XAI_API_KEY ayarlanmalı.');
+  }
   try {
     const { text } = await aiGenerateText({
       model,
@@ -63,6 +67,9 @@ export const generateStructuredOutput = async <T>(
   prompt: string,
   schema: ObjectSchemaInterface
 ): Promise<T> => {
+  if (!model) {
+    throw new Error('AI servisi yapılandırılmamış. VITE_XAI_API_KEY ayarlanmalı.');
+  }
   try {
     // Convert schema to Zod schema
     const zodSchema = z.object(
@@ -97,6 +104,9 @@ export const generateStructuredOutput = async <T>(
 };
 
 export const startChat = async (prompt: string) => {
+  if (!model) {
+    throw new Error('AI servisi yapılandırılmamış. VITE_XAI_API_KEY ayarlanmalı.');
+  }
   try {
     const result = streamText({
       model,

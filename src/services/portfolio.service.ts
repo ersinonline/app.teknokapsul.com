@@ -358,15 +358,6 @@ class PortfolioService {
           const totalReturn = totalValue - totalInvestment;
           const returnPercentage = totalInvestment > 0 ? (totalReturn / totalInvestment) * 100 : 0;
           
-          console.log(`💰 Portföy öğesi hesaplaması:`, {
-            symbol: data.symbol,
-            quantity: data.quantity,
-            purchasePrice: data.purchasePrice,
-            currentPrice: currentPrice,
-            totalValue: totalValue,
-            dbCurrentPrice: data.currentPrice
-          });
-          
           const item = {
             id: docSnap.id,
             ...data,
