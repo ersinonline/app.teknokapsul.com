@@ -62,6 +62,27 @@ const AdminPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
 
+  // Unused product/order management state (kept to prevent runtime errors)
+  const [products, setProducts] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [editProductData, setEditProductData] = useState<any>({});
+  const [editingProduct, setEditingProduct] = useState(false);
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [selectAll, setSelectAll] = useState(false);
+  const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [productCategoryFilter, setProductCategoryFilter] = useState('all');
+  const [bulkPriceChange, setBulkPriceChange] = useState({ type: 'increase', value: 0, unit: 'percent' });
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+
+  // Dummy functions for unused product/order management (kept to prevent runtime errors)
+  const getFilteredProducts = () => [];
+  const getCurrentPageProducts = () => [];
+  const getCurrentPageOrders = () => [];
+  const getTotalPages = () => 1;
+
   // Digital Codes state
   const [digitalCodes, setDigitalCodes] = useState<DigitalCode[]>([]);
   const [digitalOrders, setDigitalOrders] = useState<DigitalOrder[]>([]);
