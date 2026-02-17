@@ -90,6 +90,7 @@ const AdminPage: React.FC = () => {
   const [newDigitalCode, setNewDigitalCode] = useState({ name: '', category: '', price: 0, description: '', stock: 10, active: true });
   const [showExcelUpload, setShowExcelUpload] = useState(false);
   const [selectedDigitalCodes, setSelectedDigitalCodes] = useState<string[]>([]);
+  const [digitalCodesSortOrder, setDigitalCodesSortOrder] = useState<'asc' | 'desc'>('asc');
 
 
   const getVisiblePages = () => {
@@ -598,6 +599,22 @@ const AdminPage: React.FC = () => {
       console.error('Toplu silme hatası:', error);
       alert('Ürünler silinirken bir hata oluştu.');
     }
+  };
+
+  const toggleDigitalCodesSortOrder = () => {
+    setDigitalCodesSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
+
+  const getSortedDigitalCodes = () => {
+    return [...digitalCodes].sort((a, b) => {
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
+      if (digitalCodesSortOrder === 'asc') {
+        return nameA.localeCompare(nameB, 'tr');
+      } else {
+        return nameB.localeCompare(nameA, 'tr');
+      }
+    });
   };
 
   const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -2654,7 +2671,16 @@ const AdminPage: React.FC = () => {
             {/* Yeni Dijital Ürün Ekle */}
             <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Dijital Ürün Yönetimi</h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-semibold text-gray-900">Dijital Ürün Yönetimi</h2>
+                  <button
+                    onClick={toggleDigitalCodesSortOrder}
+                    className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1"
+                    title={`Sıralama: ${digitalCodesSortOrder === 'asc' ? 'A-Z' : 'Z-A'}`}
+                  >
+                    {digitalCodesSortOrder === 'asc' ? '↓ A-Z' : '↑ Z-A'}
+                  </button>
+                </div>
                 <div className="flex gap-2">
                   {selectedDigitalCodes.length > 0 && (
                     <button
@@ -2813,7 +2839,7 @@ const AdminPage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {digitalCodes.map(code => (
+                      {getSortedDigitalCodes().map(code => (
                         <tr key={code.id} className="hover:bg-gray-50">
                           <td className="px-4 py-3">
                             <input
