@@ -96,8 +96,8 @@ export const ApplicationPage: React.FC = () => {
       const applications = await applicationService.getUserApplications(user.uid);
       const createdApplication = applications.find(app => app.id === applicationId);
       
-      // Navigate to teknohizmet page with application number and success message
-      navigate('/teknohizmet', {
+      // Navigate to tekno-hizmet page with application number and success message
+      navigate('/tekno-hizmet', {
         state: {
           applicationNumber: createdApplication?.applicationNumber,
           successMessage: 'Başvurunuz başarıyla alındı!'
@@ -117,7 +117,7 @@ export const ApplicationPage: React.FC = () => {
         <div className="text-center">
           <h2 className="text-lg font-bold text-foreground mb-4">Hizmet Bulunamadı</h2>
           <button
-            onClick={() => navigate('/teknohizmet')}
+            onClick={() => navigate('/tekno-hizmet')}
             className="text-primary text-sm font-medium"
           >
             TeknoHizmet Sayfasına Dön
@@ -134,7 +134,7 @@ export const ApplicationPage: React.FC = () => {
         <div className="page-content">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate('/teknohizmet')}
+              onClick={() => navigate('/tekno-hizmet')}
               className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center"
             >
               <ArrowLeft className="w-5 h-5 text-white" />
