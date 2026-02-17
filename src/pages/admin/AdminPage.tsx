@@ -567,52 +567,110 @@ const AdminPage: React.FC = () => {
     if (!file) return;
 
     try {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const text = event.target?.result as string;
-        const rows = text.split('\n').filter(row => row.trim());
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+
+      if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+        // Excel dosyası için SheetJS kullan
+        const XLSX = await import('xlsx');
+        const reader = new FileReader();
         
-        let successCount = 0;
-        let errorCount = 0;
+        reader.onload = async (event) => {
+          try {
+            const data = event.target?.result;
+            const workbook = XLSX.read(data, { type: 'binary' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 }) as any[][];
+            
+            let successCount = 0;
+            let errorCount = 0;
 
-        for (let i = 0; i < rows.length; i++) {
-          const columns = rows[i].split(',').map(col => col.trim());
+            for (let i = 0; i < jsonData.length; i++) {
+              const row = jsonData[i];
+              if (row && row.length >= 3) {
+                const name = String(row[0] || '').trim();
+                const category = String(row[1] || '').trim();
+                const priceStr = String(row[2] || '').trim();
+                const price = parseFloat(priceStr);
+
+                if (name && category && !isNaN(price)) {
+                  try {
+                    await addDigitalCode({
+                      name,
+                      category,
+                      price,
+                      description: '',
+                      stock: 10,
+                      active: true
+                    });
+                    successCount++;
+                  } catch (error) {
+                    console.error(`Satır ${i + 1} eklenirken hata:`, error);
+                    errorCount++;
+                  }
+                } else {
+                  errorCount++;
+                }
+              }
+            }
+
+            await fetchDigitalCodes();
+            alert(`Excel yükleme tamamlandı!\n✅ Başarılı: ${successCount}\n❌ Hatalı: ${errorCount}`);
+            setShowExcelUpload(false);
+          } catch (error) {
+            console.error('Excel dosyası işlenirken hata:', error);
+            alert('Excel dosyası işlenirken bir hata oluştu.');
+          }
+        };
+        reader.readAsBinaryString(file);
+      } else {
+        // CSV/TXT dosyası için mevcut yöntem
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const text = event.target?.result as string;
+          const rows = text.split('\n').filter(row => row.trim());
           
-          if (columns.length >= 3) {
-            const [name, category, priceStr] = columns;
-            const price = parseFloat(priceStr);
+          let successCount = 0;
+          let errorCount = 0;
 
-            if (name && category && !isNaN(price)) {
-              try {
-                await addDigitalCode({
-                  name,
-                  category,
-                  price,
-                  description: '',
-                  stock: 10,
-                  active: true
-                });
-                successCount++;
-              } catch (error) {
-                console.error(`Satır ${i + 1} eklenirken hata:`, error);
+          for (let i = 0; i < rows.length; i++) {
+            const columns = rows[i].split(',').map(col => col.trim());
+            
+            if (columns.length >= 3) {
+              const [name, category, priceStr] = columns;
+              const price = parseFloat(priceStr);
+
+              if (name && category && !isNaN(price)) {
+                try {
+                  await addDigitalCode({
+                    name,
+                    category,
+                    price,
+                    description: '',
+                    stock: 10,
+                    active: true
+                  });
+                  successCount++;
+                } catch (error) {
+                  console.error(`Satır ${i + 1} eklenirken hata:`, error);
+                  errorCount++;
+                }
+              } else {
                 errorCount++;
               }
             } else {
               errorCount++;
             }
-          } else {
-            errorCount++;
           }
-        }
 
-        await fetchDigitalCodes();
-        alert(`Excel yükleme tamamlandı!\n✅ Başarılı: ${successCount}\n❌ Hatalı: ${errorCount}`);
-        setShowExcelUpload(false);
-      };
-      reader.readAsText(file);
+          await fetchDigitalCodes();
+          alert(`Dosya yükleme tamamlandı!\n✅ Başarılı: ${successCount}\n❌ Hatalı: ${errorCount}`);
+          setShowExcelUpload(false);
+        };
+        reader.readAsText(file);
+      }
     } catch (error) {
-      console.error('Excel yükleme hatası:', error);
-      alert('Excel dosyası yüklenirken bir hata oluştu.');
+      console.error('Dosya yükleme hatası:', error);
+      alert('Dosya yüklenirken bir hata oluştu.');
     }
   };
 
@@ -2555,18 +2613,19 @@ const AdminPage: React.FC = () => {
                 <div className="border border-green-200 rounded-xl p-4 mb-4 bg-green-50">
                   <h3 className="font-medium text-gray-900 mb-3">Excel ile Toplu Ürün Yükleme</h3>
                   <div className="mb-3">
-                    <p className="text-sm text-gray-600 mb-2">Excel dosyanızda şu sütunlar olmalı:</p>
+                    <p className="text-sm text-gray-600 mb-2">Excel/CSV dosyanızda şu sütunlar olmalı:</p>
                     <ul className="text-sm text-gray-700 list-disc list-inside space-y-1">
                       <li><strong>1. Sütun:</strong> Ürün Adı</li>
                       <li><strong>2. Sütun:</strong> Kategori</li>
                       <li><strong>3. Sütun:</strong> Fiyat (sadece sayı)</li>
                     </ul>
-                    <p className="text-xs text-gray-500 mt-2">Örnek: Netflix 1 Aylık,Streaming,99.90</p>
+                    <p className="text-xs text-gray-500 mt-2">Desteklenen formatlar: .xlsx, .xls, .csv, .txt</p>
+                    <p className="text-xs text-gray-500">CSV örneği: Netflix 1 Aylık,Streaming,99.90</p>
                   </div>
                   <div className="flex gap-2">
                     <input
                       type="file"
-                      accept=".csv,.txt"
+                      accept=".xlsx,.xls,.csv,.txt"
                       onChange={handleExcelUpload}
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
