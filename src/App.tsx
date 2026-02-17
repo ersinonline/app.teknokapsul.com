@@ -65,13 +65,7 @@ import PaymentPlansListPage from './pages/financial/PaymentPlansListPage';
 import PaymentPlanNewPage from './pages/financial/PaymentPlanNewPage';
 import PaymentPlanDetailPage from './pages/financial/PaymentPlanDetailPage';
 import PaymentPlanEditPage from './pages/financial/PaymentPlanEditPage';
-// Premium sayfaları geçici olarak kaldırıldı
-// import PremiumIntroPage from './pages/PremiumIntroPage';
-// import PremiumManagePage from './pages/PremiumManagePage';
-// import AdminPremiumPage from './pages/AdminPremiumPage';
-// import PremiumSuccessPage from './pages/PremiumSuccessPage';
-// import PremiumCancelPage from './pages/PremiumCancelPage';
-// import { PremiumProvider } from './contexts/PremiumContext';
+import PremiumPage from './pages/premium/PremiumPage';
 import { ResponsiveTestPage } from './pages/test/ResponsiveTestPage';
 import WorkTrackingPage from './pages/WorkTrackingPage';
 import PharmacyPage from './pages/PharmacyPage';
@@ -278,6 +272,10 @@ const router = createBrowserRouter([
   },
 
 
+  {
+    path: '/premium',
+    element: <TeknoRoute><PremiumPage /></TeknoRoute>
+  },
   {
     path: '/shop-rewards',
     element: <TeknoRoute><ShopRewardsPage /></TeknoRoute>

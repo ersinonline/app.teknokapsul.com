@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Calendar, ChevronRight, StickyNote, ClipboardList, Users, ShoppingBag, Wrench } from 'lucide-react';
+import { FileText, Calendar, ChevronRight, StickyNote, ClipboardList, Users, ShoppingBag, Wrench, Crown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { useNavigate } from 'react-router-dom';
@@ -123,6 +123,20 @@ const KendimPage: React.FC = () => {
       textColor: 'text-indigo-700',
       borderColor: 'border-indigo-200',
       route: '/attendance',
+      count: 0,
+      loading: false,
+      items: []
+    },
+    {
+      id: 'premium',
+      title: 'Premium Abonelik',
+      description: 'Ayrıcalıklı deneyim, komisyonsuz ödemeler',
+      icon: Crown,
+      color: 'bg-amber-500',
+      bgColor: 'bg-amber-50',
+      textColor: 'text-amber-700',
+      borderColor: 'border-amber-200',
+      route: '/premium',
       count: 0,
       loading: false,
       items: []
