@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Calendar, ChevronRight, StickyNote, ClipboardList, Users, ShoppingBag, Globe, Wrench } from 'lucide-react';
+import { FileText, Calendar, ChevronRight, StickyNote, ClipboardList, Users, ShoppingBag, Wrench } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useFirebaseData } from '../hooks/useFirebaseData';
 import { useNavigate } from 'react-router-dom';
@@ -138,20 +138,6 @@ const KendimPage: React.FC = () => {
       borderColor: 'border-violet-200',
       route: '/dijital-kodlar',
       count: 0,
-      loading: false,
-      items: []
-    },
-    {
-      id: 'subscription-services',
-      title: 'Abonelik & Hizmetler',
-      description: 'İnternet, TV, dijital hizmetler ve sigorta',
-      icon: Globe,
-      color: 'bg-teal-500',
-      bgColor: 'bg-teal-50',
-      textColor: 'text-teal-700',
-      borderColor: 'border-teal-200',
-      route: '/abonelik-hizmetler',
-      count: 8,
       loading: false,
       items: []
     },
