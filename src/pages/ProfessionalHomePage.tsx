@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { collection, query, getDocs, where, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import {
   Zap, PieChart, Home, Briefcase, TrendingUp, TrendingDown,
@@ -34,18 +34,16 @@ const ProfessionalHomePage: React.FC = () => {
         const currentYear = now.getFullYear();
 
         const expensesRef = collection(db, 'teknokapsul', user.uid, 'expenses');
-        const expQ = query(expensesRef, where('isActive', '==', true), orderBy('date', 'desc'), limit(50));
-        const expSnap = await getDocs(expQ);
-        const expenses = expSnap.docs.map(d => d.data());
+        const expSnap = await getDocs(expensesRef);
+        const expenses = expSnap.docs.map(d => d.data()).filter(e => e.isActive !== false);
         const monthExp = expenses.filter(e => {
           const d = new Date(e.date);
           return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
         });
 
         const incomesRef = collection(db, 'teknokapsul', user.uid, 'incomes');
-        const incQ = query(incomesRef, where('isActive', '==', true), orderBy('date', 'desc'), limit(50));
-        const incSnap = await getDocs(incQ);
-        const incomes = incSnap.docs.map(d => d.data());
+        const incSnap = await getDocs(incomesRef);
+        const incomes = incSnap.docs.map(d => d.data()).filter(i => i.isActive !== false);
         const monthInc = incomes.filter(i => {
           const d = new Date(i.date);
           return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
