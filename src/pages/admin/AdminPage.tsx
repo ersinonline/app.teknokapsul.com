@@ -3,7 +3,7 @@ import { collection, getDocs, query, orderBy, doc, updateDoc, addDoc, deleteDoc 
 import { db } from '../../lib/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { Eye, Calendar, User, FileText, Search, Trash2, MessageSquare, Headphones, Edit, Check, X, Package, ShoppingCart, Plus, Clock, Settings, CheckCircle, Mail } from 'lucide-react';
+import { Eye, Calendar, User, FileText, Search, Trash2, MessageSquare, Headphones, Edit, Check, X, Plus, Settings, CheckCircle, Mail, Package, ShoppingCart, Clock } from 'lucide-react';
 import { getAllSupportTickets, updateSupportTicketStatus, deleteSupportTicket, updateSupportTicket } from '../../services/support.service';
 import { deleteApplication, updateApplication } from '../../services/application.service';
 import { SupportTicket, SUPPORT_CATEGORIES, SUPPORT_PRIORITIES, SUPPORT_STATUSES } from '../../types/support';
