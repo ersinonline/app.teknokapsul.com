@@ -39,7 +39,7 @@
     "html2canvas": "^1.4.1",
     "idb": "^8.0.3",
     "imap": "^0.8.19",
-    "jspdf": "^3.0.4",
+    "jspdf": "^4.2.0",
     "lucide-react": "^0.564.0",
     "mailparser": "^3.9.3",
     "next": "^15.5.12",
